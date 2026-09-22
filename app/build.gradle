@@ -1,0 +1,64 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.objectbox)
+}
+
+android {
+    namespace 'com.minyook.sllm2'
+    compileSdkVersion 37
+
+    defaultConfig {
+        applicationId "com.minyook.sllm2"
+        minSdk 26
+        targetSdk 37
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // Keep the 2.59 GB model out of the APK. Replace this source with a signed
+        // first-party CDN manifest before shipping to production.
+        buildConfigField "String", "GEMMA4_E2B_URL", '"https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/main/gemma-4-E2B-it.litertlm?download=true"'
+        buildConfigField "long", "GEMMA4_E2B_MIN_BYTES", "2000000000L"
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+kotlin {
+    compilerOptions {
+        // KAPT defaults to the Gradle daemon JDK (25 here) unless this is explicit.
+        // Keep it aligned with Java's Android-compatible bytecode target.
+        jvmTarget = JvmTarget.JVM_11
+    }
+}
+
+dependencies {
+    implementation libs.androidx.activity.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.core.ktx
+    implementation 'androidx.drawerlayout:drawerlayout:1.2.0'
+    implementation libs.material
+    implementation libs.androidx.work.runtime.ktx
+    implementation libs.litertlm.android
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.espresso.core
+    androidTestImplementation libs.androidx.junit
+}

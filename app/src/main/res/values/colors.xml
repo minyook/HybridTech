@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <!-- HybridTech O₂ Field Guard field-console palette. -->
+    <color name="emergency_background">#B52D35</color>
+    <color name="emergency_on_background">#FFFFFFFF</color>
+    <color name="status_safe">#087F5B</color>
+    <color name="status_warning">#A96600</color>
+    <color name="status_danger">#B52D35</color>
+    <color name="status_neutral">#5E7484</color>
+    <color name="editorial_coral">#086E9F</color>
+    <color name="editorial_coral_active">#075679</color>
+    <color name="editorial_canvas">#F3F7FA</color>
+    <color name="editorial_card">#FFFFFFFF</color>
+    <color name="editorial_cream_strong">#E3F0F6</color>
+    <color name="editorial_hairline">#C8D8E2</color>
+    <color name="editorial_ink">#10283A</color>
+    <color name="editorial_body">#385264</color>
+    <color name="editorial_muted">#62798A</color>
+    <color name="editorial_dark">#0D2638</color>
+    <color name="editorial_dark_elevated">#143A52</color>
+    <color name="editorial_on_dark">#F3FAFE</color>
+    <color name="editorial_on_dark_soft">#ABC6D5</color>
+    <color name="safety_teal">#007A72</color>
+    <color name="safety_teal_soft">#D9F1EC</color>
+    <color name="safety_blue_soft">#E5F2F9</color>
+    <color name="chat_assistant_surface">#F7FBFD</color>
+    <color name="chat_worker_surface">#E2F1F8</color>
+    <color name="chat_critical_surface">#FFE9E6</color>
+    <color name="settings_canvas">#101010</color>
+    <color name="settings_card">#1B1B1B</color>
+    <color name="settings_card_elevated">#242424</color>
+    <color name="settings_text">#F5F5F5</color>
+    <color name="settings_muted">#A9A9A9</color>
+    <color name="settings_outline">#3B3B3B</color>
+    <color name="settings_accent">#34C776</color>
+    <color name="safety_orange">#086E9F</color>
+    <color name="safety_orange_dark">#075679</color>
+    <color name="surface_warm">#F3F7FA</color>
+    <color name="surface_card">#FFFFFFFF</color>
+    <color name="text_primary">#10283A</color>
+    <color name="text_secondary">#62798A</color>
+    <color name="line_subtle">#C8D8E2</color>
+    <color name="critical">#B52D35</color>
+    <color name="critical_surface">#FFE9E6</color>
+    <color name="warning">#A96600</color>
+    <color name="warning_surface">#E5F2F9</color>
+    <color name="positive">#087F5B</color>
+    <color name="positive_surface">#D9F1EC</color>
+    <!-- Chat-first HybridTech O₂ palette. Neutral surfaces keep long documents readable;
+         teal remains reserved for actions and live safety context. -->
+    <color name="chat_background">#F8FAFA</color>
+    <color name="chat_primary">#087A70</color>
+    <color name="chat_primary_soft">#DDF1ED</color>
+    <color name="chat_border">#DDE5E3</color>
+    <color name="chat_muted">#697A78</color>
+    <color name="runtime_card">#F0F8F6</color>
+    <color name="sensor_surface">#102B36</color>
+    <color name="sensor_muted">#AFC5C9</color>
+</resources>

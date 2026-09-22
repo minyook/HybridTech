@@ -1,0 +1,83 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:4247493292283779038",
+      "lastPropertyId": "10:5827381616289091931",
+      "name": "KnowledgeChunk",
+      "properties": [
+        {
+          "id": "1:3021443216777898348",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8368194338924531652",
+          "name": "documentId",
+          "indexId": "1:6646407218527045176",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:3690242010441959005",
+          "name": "documentTitle",
+          "type": 9
+        },
+        {
+          "id": "4:6661828675888565316",
+          "name": "sourceKind",
+          "type": 9
+        },
+        {
+          "id": "5:2003081766653648563",
+          "name": "pageNumber",
+          "type": 5
+        },
+        {
+          "id": "6:1350508321012849343",
+          "name": "chunkIndex",
+          "type": 5
+        },
+        {
+          "id": "7:4313132557914291919",
+          "name": "heading",
+          "type": 9
+        },
+        {
+          "id": "8:4696935781190263828",
+          "name": "body",
+          "type": 9
+        },
+        {
+          "id": "9:7563677957834304293",
+          "name": "searchableText",
+          "indexId": "2:7749924967935459406",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "10:5827381616289091931",
+          "name": "embedding",
+          "indexId": "3:5213200601429756109",
+          "type": 28,
+          "flags": 8
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "1:4247493292283779038",
+  "lastIndexId": "3:5213200601429756109",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}
