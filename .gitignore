@@ -1,5 +1,6 @@
 *.iml
 .gradle
+.gradle-codex/
 /.kotlin/
 /local.properties
 /.idea/

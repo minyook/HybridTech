@@ -1,10 +1,10 @@
 # HybridTech O₂ Field Guard
 
-> 밀폐공간 작업을 위한 **온디바이스 문서 RAG·Gemma 4 E2B 채팅·BLE 가스 모니터링** Android 앱입니다.
+> 밀폐공간 작업을 위한 **온디바이스 문서 RAG·Gemma 4 E2B 채팅·BLE 가스 모니터링** Android 앱입니다. 앱 본문은 Jetpack Compose와 Material 3로 구현했습니다.
 
 HybridTech O₂ Field Guard는 작업자가 휴대전화 안에서 안전작업 문서를 검색하고, 다운로드한 로컬 Gemma 모델로 답변을 생성하며, Bluetooth LE 가스 검출기의 수치를 확인할 수 있게 만든 Kotlin 기반 Android 앱입니다.
 
-모델 추론과 문서 검색은 모델 다운로드 이후 기기 안에서 수행됩니다. 네트워크는 **Gemma 모델을 앱에서 내려받는 과정**에만 필요합니다.
+문서 검색은 모델 없이도 기기에서 실행됩니다. Gemma 모델을 내려받은 뒤에는 답변 생성도 기기에서 실행됩니다. 모델 다운로드에는 네트워크가 필요하며, Android 음성 인식 서비스는 기기 설정에 따라 네트워크를 사용할 수 있습니다.
 
 > [!WARNING]
 > 이 저장소의 BLE 연동은 다양한 검출기의 일반적인 알림 패킷을 읽는 기반 구현입니다. 실제 현장 안전 판정이나 법정 측정기로 사용하려면 제조사별 GATT UUID, 패킷 규격, 교정·정확도·통신 단절 처리 및 현장 검증을 반드시 추가해야 합니다. 데모 시뮬레이션 값은 실제 측정값이 아닙니다.
@@ -16,6 +16,7 @@ HybridTech O₂ Field Guard는 작업자가 휴대전화 안에서 안전작업 
 | 문서 RAG | 제공 PDF 2종 87개 청크를 ObjectBox에 저장하고 오프라인 검색 | 구현됨 |
 | 로컬 생성 AI | Gemma 4 E2B LiteRT-LM 모델 다운로드·저장·CPU/GPU 폴백 생성 | 구현됨 |
 | 채팅 | Markdown 답변, 대화 이력, 새 대화, 최근 답변 이동 | 구현됨 |
+| 앱 UI | Jetpack Compose·Material 3 채팅/센서/설정/Drawer, 키보드 여백 처리 | 구현됨 |
 | 음성 입력 | 마이크 버튼, Android 음성 인식, 시스템 음성 입력 폴백, `오투야` 호출 대기 UI | 구현됨 — 기기 음성 서비스에 따라 동작 여부가 달라짐 |
 | BLE 가스 연동 | BLE 검색·연결·Notify/Indicate 수신·일반 텍스트 패킷 파싱 | 기반 구현됨 — 제조사 프로토콜 연동 필요 |
 | 가스 시뮬레이션 | 안정 범위의 임의 O₂/H₂S/CO/LEL 값, 20초 주기 갱신 | 구현됨 — 데모 전용 |
@@ -29,6 +30,14 @@ HybridTech O₂ Field Guard는 작업자가 휴대전화 안에서 안전작업 
 - **센서 연결 상태**: BLE 검출기 검색·연결·연결 해제와 현재 O₂, H₂S, CO, LEL 수치를 보여 줍니다.
 - **설정**: Gemma 모델 다운로드와 준비 상태, CPU/GPU/자동 백엔드, 기기 RAM 기반 문맥 한도, 응답 토큰 수를 관리합니다.
 - **상단 가스 바**: 마지막 수신 가스값과 출처(BLE/시뮬레이션)를 채팅 상단에서 계속 확인할 수 있습니다.
+
+### Compose 화면 구조
+
+`MainActivity`는 Compose 진입점과 Android 권한 요청을 담당합니다. `FieldGuardViewModel`은 `StateFlow`로 대화, 모델 다운로드, 추론 설정, 가스 측정값과 BLE 검색 상태를 노출하고, `HybridTechApp`은 상태를 화면에 표시하며 사용자 이벤트를 ViewModel에 전달합니다. 음성 인식과 TTS는 `VoiceConversationController`가 관리합니다.
+
+채팅은 `LazyColumn`으로 메시지를 표시하고, 하단 입력창에 `imePadding`을 적용합니다. 목록을 위로 스크롤하면 **최근 답변으로** 버튼이 나타납니다. 모델 답변은 Compose `AnnotatedString` 렌더러로 제목·목록·굵게·인라인 코드·출처를 표시합니다. 브랜드 색상은 고정이며 Android 동적 색상은 사용하지 않습니다.
+
+위젯과 가스 알림은 Android `RemoteViews`가 필요하므로 해당 XML 레이아웃만 유지합니다. Compose 전환 과정에서 문서 검색, 모델 추론, BLE 패킷 해석과 가스 서비스 구현은 변경하지 않았습니다.
 
 ## 오프라인 RAG 구조
 
@@ -61,7 +70,7 @@ PDF 텍스트 추출본(JSON)
 
 ### 검색·답변 생성 흐름
 
-1. 채팅 입력과 음성 인식 결과는 모두 `MainActivity.answerQuestion()`으로 들어갑니다.
+1. 채팅 입력과 음성 인식 결과는 모두 `FieldGuardViewModel.submitQuestion()`으로 들어갑니다.
 2. `KnowledgeRepository.retrieve()`가 질문을 384차원 로컬 해시 임베딩으로 바꿉니다.
 3. ObjectBox의 HNSW 코사인 최근접 검색 결과와 `searchableText` 단어 일치도를 합칩니다.
    - 벡터 유사도: **72%**
@@ -86,7 +95,7 @@ PDF 텍스트 추출본(JSON)
 
 앱 APK에 약 2GB 이상 모델을 포함하지 않습니다. 설정 화면의 **앱에서 다운로드**를 누르면 `WorkManager`가 고유 작업으로 다운로드를 시작합니다.
 
-- 대상 모델 파일: `gemma-4-E2B-it.litertlm`
+- 대상 모델 파일: `gemma-4-e2b-it.litertlm`
 - 저장 위치: 앱의 `noBackupFilesDir/models/`
 - 다운로드 중: 포그라운드 알림과 진행률 표시
 - 재시작 후: 파일 크기와 저장된 상태를 확인해 준비 상태를 복원
@@ -168,12 +177,14 @@ app/
 ├─ objectbox-models/                 # ObjectBox 스키마
 ├─ src/main/assets/knowledge/         # PDF 텍스트 청크 시드
 ├─ src/main/java/com/minyook/sllm2/
-│  ├─ MainActivity.kt                # 화면 전환, 채팅, 음성, BLE UI
+│  ├─ MainActivity.kt                # Compose 진입점과 Android 권한 요청
+│  ├─ ui/                            # Material 3 화면, 상태·이벤트, 음성 제어, Markdown
 │  ├─ data/                          # ObjectBox RAG, 문서 시드, 채팅 이력
 │  ├─ model/                         # Gemma 다운로드·상태·LiteRT 추론·설정
 │  └─ gas/                           # BLE, 가스 파서, 서비스, 알림, 위젯
-├─ src/main/res/                     # XML UI, 색상, 아이콘, 알림·위젯 레이아웃
-└─ src/test/                         # JVM 단위 테스트
+├─ src/main/res/                     # 색상, 아이콘, 알림·위젯 RemoteViews XML
+├─ src/test/                         # JVM 단위 테스트
+└─ src/androidTest/                  # Compose 화면 테스트
 ```
 
 ## 빌드 및 실행
@@ -183,7 +194,7 @@ app/
 - Android Studio 최신 안정판
 - Android SDK 37
 - 최소 Android API 26 (Android 8.0)
-- JDK 11 호환 빌드 설정
+- Gradle 실행용 JDK 21 이상, 앱 Java/Kotlin 바이트코드 대상 11
 
 ### Android Studio
 
@@ -200,6 +211,7 @@ Windows PowerShell에서 다음 명령을 실행합니다.
 ```powershell
 .\gradlew.bat :app:assembleDebug
 .\gradlew.bat :app:testDebugUnitTest
+.\gradlew.bat :app:compileDebugAndroidTestKotlin
 ```
 
 생성 APK 경로:
@@ -208,7 +220,7 @@ Windows PowerShell에서 다음 명령을 실행합니다.
 app/build/outputs/apk/debug/app-debug.apk
 ```
 
-현재 JVM 단위 테스트에는 가스 패킷(JSON, key-value, CSV) 파싱과 기본 앱 테스트가 포함됩니다.
+2026-09-30 기준으로 디버그 APK 빌드와 JVM 테스트 3개가 통과했고, Compose UI 테스트 소스가 컴파일됐습니다. Compose 테스트는 Drawer 이동·뒤로가기, 채팅 입력·응답 대기·최근 답변 이동, 설정 저장소 복원, BLE 권한 안내·검색 결과 표시를 다룹니다. 기기에서 실행하는 계측 테스트와 실제 BLE 수신, 음성 인식, 키보드/IME, 모델 복원, 위젯 갱신은 아직 수동 확인이 필요합니다.
 
 ## 상용화 전 우선 과제
 
