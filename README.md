@@ -31,7 +31,7 @@
 
 ## 화면으로 보는 시안
 
-아래는 보내주신 실제 화면 캡처 10장입니다. 이미지를 누르면 원본 크기로 볼 수 있습니다. 캡처 상단의 다른 앱 배지와 숫자는 시연 단말에 함께 표시된 요소로, O₂ Field Guard의 기능 설명 대상이 아닙니다. 화면의 수치·모델 상태·기록 개수는 **촬영 당시 단말 상태**입니다.
+아래는 보내주신 실제 화면 캡처 12장입니다. 이미지를 누르면 원본 크기로 볼 수 있습니다. 캡처 상단의 다른 앱 배지와 숫자는 시연 단말에 함께 표시된 요소로, O₂ Field Guard의 기능 설명 대상이 아닙니다. 화면의 수치·모델 상태·기록 개수는 **촬영 당시 단말 상태**입니다.
 
 ### 1. 홈에서 시작해 질문하기
 
@@ -42,10 +42,15 @@
 
 ### 2. 답변의 근거 확인하기
 
-| 질문과 답변 | 근거 문서 원문 |
+| 질문과 답변 | PDF 원본 |
 | --- | --- |
-| <a href="docs/screenshots/question-answer.png"><img src="docs/screenshots/question-answer.png" alt="작업허가 질문에 대한 문서 기반 답변" width="290"></a> | <a href="docs/screenshots/source-document.png"><img src="docs/screenshots/source-document.png" alt="안전작업 가이드의 문서명, 쪽수와 원문 내용" width="290"></a> |
-| 질문, 답변, 상단 가스 상태가 한 화면에 나타납니다. 답변 아래 근거를 열 수 있습니다. | 문서 제목과 쪽수, 검색된 원문을 표시합니다. 담당자가 실제 문장과 답변을 대조할 수 있습니다. |
+| <a href="docs/screenshots/question-answer.png"><img src="docs/screenshots/question-answer.png" alt="작업허가 질문에 대한 문서 기반 답변" width="290"></a> | <a href="docs/screenshots/source-document.png"><img src="docs/screenshots/source-document.png" alt="작업허가 근거를 실제 PDF 20쪽의 그림과 함께 표시한 화면" width="290"></a> |
+| 질문과 답변 아래에서 근거를 열 수 있습니다. | 공식 PDF의 해당 쪽을 그림·표까지 원래 배치로 확인하고 확대할 수 있습니다. |
+
+| 읽기 편한 보기 | 추출 텍스트 |
+| --- | --- |
+| <a href="docs/screenshots/source-document-readable.png"><img src="docs/screenshots/source-document-readable.png" alt="근거 문장을 단락과 목록으로 구분한 읽기 편한 보기" width="290"></a> | <a href="docs/screenshots/source-document-extracted.png"><img src="docs/screenshots/source-document-extracted.png" alt="검색과 답변에 사용된 PDF 추출 텍스트 보기" width="290"></a> |
+| 같은 근거를 단락과 목록으로 나누어 읽기 쉽게 표시합니다. | 검색과 답변에 실제 사용한 추출 텍스트를 확인합니다. 원본 PDF와 대조할 수 있습니다. |
 
 ### 3. 기록과 내 데이터 확인하기
 
