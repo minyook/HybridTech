@@ -656,6 +656,7 @@ private fun TossHistory(state: FieldGuardUiState, actions: FieldGuardActions) {
 @Composable
 private fun TossSource(state: FieldGuardUiState, actions: FieldGuardActions) {
     val source = state.selectedSource
+    var formattedView by remember(source?.id) { mutableStateOf(true) }
     TossScrollPage {
         TossPageTitle("답변이 어디에서\n왔는지 확인해요")
         if (source == null) {
@@ -666,15 +667,26 @@ private fun TossSource(state: FieldGuardUiState, actions: FieldGuardActions) {
                 Text("${source.pageNumber}쪽 · ${source.heading}", style = MaterialTheme.typography.bodySmall)
             }
             TossStatusPill("원문 근거", TossBlueWeak, TossBlue)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(selected = formattedView, onClick = { formattedView = true }, label = { Text("읽기 편한 보기") })
+                FilterChip(selected = !formattedView, onClick = { formattedView = false }, label = { Text("원문 그대로") })
+            }
             Surface(color = Color.White, border = BorderStroke(1.dp, TossBorder), shape = RoundedCornerShape(20.dp)) {
-                Text(source.body, modifier = Modifier.padding(18.dp), style = MaterialTheme.typography.bodyLarge)
+                if (formattedView) {
+                    MarkdownText(
+                        markdown = remember(source.body) { SourceDocumentFormatter.format(source.body) },
+                        modifier = Modifier.padding(18.dp),
+                    )
+                } else {
+                    Text(source.body, modifier = Modifier.padding(18.dp), style = MaterialTheme.typography.bodyLarge)
+                }
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TossSecondaryButton("이전 부분", { actions.onAdjacentSource(-1) }, Modifier.weight(1f))
                 TossSecondaryButton("다음 부분", { actions.onAdjacentSource(1) }, Modifier.weight(1f))
             }
             TossPanel(color = TossBlueWeak) {
-                Text("AI 요약과 원문을 함께 확인할 수 있어요. 현장 절차와 원문 기준을 우선해 주세요.", style = MaterialTheme.typography.bodyMedium)
+                Text("읽기 편한 보기는 원문 내용을 바꾸지 않고 문장과 목록을 구분해 보여줘요. 수치와 조건은 원문 그대로 보기에서 다시 확인해 주세요.", style = MaterialTheme.typography.bodyMedium)
             }
         }
     }

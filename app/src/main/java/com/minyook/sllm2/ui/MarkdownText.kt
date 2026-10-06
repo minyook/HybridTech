@@ -26,16 +26,21 @@ fun MarkdownText(markdown: String, modifier: Modifier = Modifier) {
             val line = original.trimEnd()
             when {
                 line.isBlank() -> Text("", modifier = Modifier.padding(vertical = 2.dp))
-                line.startsWith(">") -> Text(
-                    inlineMarkdown(line.removePrefix(">").trim()),
+                line.startsWith(">") || line.startsWith("※") -> Text(
+                    inlineMarkdown(if (line.startsWith(">")) line.removePrefix(">").trim() else line),
                     modifier = Modifier.fillMaxWidth().background(Color(0xFFE8F3FF)).padding(horizontal = 10.dp, vertical = 7.dp),
                     style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFF4E5968), fontStyle = androidx.compose.ui.text.font.FontStyle.Italic),
                 )
                 line.startsWith("### ") -> Text(inlineMarkdown(line.removePrefix("### ")), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 5.dp, bottom = 2.dp))
                 line.startsWith("## ") -> Text(inlineMarkdown(line.removePrefix("## ")), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = 6.dp, bottom = 3.dp))
                 line.startsWith("# ") -> Text(inlineMarkdown(line.removePrefix("# ")), style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 6.dp, bottom = 3.dp))
-                line.startsWith("- ") || line.startsWith("* ") || line.matches(Regex("^\\d+[.)]\\s+.*")) -> Text(
+                line.startsWith("- ") || line.startsWith("* ") -> Text(
                     inlineMarkdown("• " + line.replaceFirst(Regex("^(?:[-*]|\\d+[.)])\\s+"), "")),
+                    style = MaterialTheme.typography.bodyLarge.copy(textIndent = TextIndent(firstLine = 0.sp, restLine = 14.sp)),
+                    modifier = Modifier.padding(vertical = 1.dp),
+                )
+                line.matches(Regex("^\\d+[.)]\\s+.*")) || (line.isNotEmpty() && line[0] in "•□○●❶❷❸❹❺❻❼❽❾❿①②③④⑤⑥⑦⑧⑨⑩") -> Text(
+                    inlineMarkdown(line),
                     style = MaterialTheme.typography.bodyLarge.copy(textIndent = TextIndent(firstLine = 0.sp, restLine = 14.sp)),
                     modifier = Modifier.padding(vertical = 1.dp),
                 )
