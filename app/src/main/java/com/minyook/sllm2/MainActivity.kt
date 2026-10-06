@@ -74,6 +74,7 @@ class MainActivity : ComponentActivity() {
                     onBackend = viewModel::updateBackend,
                     onContextTokens = viewModel::updateContextTokens,
                     onResponseTokens = viewModel::updateResponseTokens,
+                    onAutomaticAnswerLength = viewModel::updateAutomaticAnswerLength,
                     onSaveSettings = viewModel::saveSettings,
                     onScanBluetooth = {
                         if (hasBluetoothPermissions()) viewModel.scanBluetooth()

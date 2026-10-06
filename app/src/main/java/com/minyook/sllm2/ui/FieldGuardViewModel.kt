@@ -354,11 +354,12 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
         history.append(chatId, ChatHistoryStore.Role.USER, asked)
 
         viewModelScope.launch(Dispatchers.IO) {
-            val sourceIds = repository.retrieve(asked, limit = 2).map { it.chunk.id }
-            val fallback = repository.answerWithoutModel(asked)
+            val sources = repository.retrieve(asked, limit = 2)
+            val sourceIds = sources.map { it.chunk.id }
+            val fallback = repository.answerWithoutModel(sources)
             val modelAnswer = if (modelPreferences.status().phase == ModelPhase.READY) {
                 try {
-                    val generated = runtime.generate(asked, repository, compactVoiceAnswer) { partialAnswer ->
+                    val generated = runtime.generate(asked, repository.contextForModel(sources), compactVoiceAnswer) { partialAnswer ->
                         updateState { state ->
                             if (state.activeChatId != chatId || state.messages.none { it.id == pending.id }) state
                             else state.copy(messages = state.messages.map { message ->
@@ -409,6 +410,8 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     fun updateResponseTokens(tokens: Int) = updateSettings { current ->
         current.copy(responseTokens = tokens.coerceIn(ContextTokenPolicy.MIN_RESPONSE_TOKENS, ContextTokenPolicy.responseLimit(current.contextTokens)))
     }
+
+    fun updateAutomaticAnswerLength(enabled: Boolean) = updateSettings { it.copy(automaticAnswerLength = enabled) }
 
     fun saveSettings() {
         val settings = _uiState.value.settings

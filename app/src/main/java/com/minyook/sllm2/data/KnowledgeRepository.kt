@@ -18,9 +18,8 @@ data class KnowledgeDocument(
  *
  * The full PDF chunks remain in ObjectBox. A question is ranked with both
  * local-vector similarity and lexical overlap, then the highest-ranked source
- * passages are passed intact to the local model. Deliberately do not apply a
- * second sentence filter here: PDF procedures and tables often carry their
- * necessary condition in a neighbouring line of the same chunk.
+ * passages are kept intact in ObjectBox and passed to the local model. This
+ * avoids cutting conditions that follow a matching phrase on the same page.
  */
 class KnowledgeRepository {
     private val box = ObjectBoxStore.store.boxFor(KnowledgeChunk::class.java)
@@ -52,12 +51,7 @@ class KnowledgeRepository {
     }
 
     /** Show the actual retrieved source passages when the local model is unavailable. */
-    fun answerWithoutModel(
-        question: String,
-        maximumSources: Int = 2,
-        bodyCharacterLimit: Int = 360,
-    ): String {
-        val sources = retrieve(question, limit = maximumSources.coerceIn(1, 4))
+    fun answerWithoutModel(sources: List<RetrievedChunk>, bodyCharacterLimit: Int = 360): String {
         if (sources.isEmpty()) {
             return "## 지식베이스 준비 중\n\n제공 문서를 기기에 정리하고 있습니다. 잠시 후 다시 질문해 주세요."
         }
@@ -71,9 +65,9 @@ class KnowledgeRepository {
         }.trim()
     }
 
-    /** The same intact evidence blocks used by the original Gemma RAG prompt. */
-    fun contextForModel(question: String): String = retrieve(question, limit = 2).joinToString("\n\n") { item ->
-        "[${item.chunk.documentTitle} ${item.chunk.pageNumber}쪽]\n${item.chunk.body.take(700)}"
+    /** Full selected pages retain document and page labels for source verification. */
+    fun contextForModel(sources: List<RetrievedChunk>): String = sources.joinToString("\n\n") { item ->
+        "[${item.chunk.documentTitle} ${item.chunk.pageNumber}쪽]\n${item.chunk.body}"
     }
 
     fun documentCount(): Int = box.count().toInt()

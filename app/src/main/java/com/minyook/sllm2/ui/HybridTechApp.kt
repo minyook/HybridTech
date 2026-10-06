@@ -102,6 +102,7 @@ data class FieldGuardActions(
     val onDisconnectDevice: () -> Unit,
     val onVoiceClick: () -> Unit,
     val onVoiceLongClick: () -> Unit,
+    val onAutomaticAnswerLength: (Boolean) -> Unit = {},
     val onStopVoice: () -> Unit = {},
     val onCompleteOnboarding: () -> Unit = {},
     val onOpenSource: (Long) -> Unit = {},
@@ -487,7 +488,7 @@ private fun RuntimeStatusCard(state: FieldGuardUiState, safeLimit: Int) {
                 style = MaterialTheme.typography.titleMedium,
             )
             if (phase == ModelPhase.DOWNLOADING) LinearProgressIndicator(progress = { (state.modelProgress ?: 0) / 100f }, modifier = Modifier.fillMaxWidth().padding(top = 12.dp))
-            Text("RAM ${state.deviceProfile?.totalRamGb ?: "—"}GB · 저장 공간 ${state.deviceProfile?.availableStorageGb ?: "—"}GB\n문서 문맥 ${state.settings.contextTokens.tokenText()} / 이 기기 안전 한도 ${safeLimit.tokenText()} · 답변 ${state.settings.responseTokens.tokenText()}", color = Color(0xFFB8C7C5), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 10.dp))
+            Text("RAM ${state.deviceProfile?.totalRamGb ?: "—"}GB · 저장 공간 ${state.deviceProfile?.availableStorageGb ?: "—"}GB\n문서 문맥 ${state.settings.contextTokens.tokenText()} / 이 기기 안전 한도 ${safeLimit.tokenText()} · 답변 ${if (state.settings.automaticAnswerLength) "자동" else state.settings.responseTokens.tokenText()}", color = Color(0xFFB8C7C5), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 10.dp))
         }
     }
 }
@@ -527,9 +528,14 @@ private fun InferenceSettingsCard(state: FieldGuardUiState, contextLimit: Int, a
             step = 1_024,
             onChange = actions.onContextTokens,
         )
-        SliderSetting(
-            label = "최대 출력 길이",
-            description = "4096 토큰도 최대치일 뿐, 질문에 필요한 답변만 생성합니다.",
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text("답변 길이 자동", color = Color.White, style = MaterialTheme.typography.titleMedium)
+            androidx.compose.material3.Switch(checked = state.settings.automaticAnswerLength, onCheckedChange = actions.onAutomaticAnswerLength)
+        }
+        Text("모델이 답을 마칠 때까지 생성합니다.", color = Color(0xFFB8C7C5), style = MaterialTheme.typography.bodyMedium)
+        if (!state.settings.automaticAnswerLength) SliderSetting(
+            label = "수동 최대 출력 길이",
+            description = "상한에 도달하면 답변이 중간에 멈출 수 있습니다.",
             value = state.settings.responseTokens,
             min = ContextTokenPolicy.MIN_RESPONSE_TOKENS,
             max = ContextTokenPolicy.responseLimit(state.settings.contextTokens),

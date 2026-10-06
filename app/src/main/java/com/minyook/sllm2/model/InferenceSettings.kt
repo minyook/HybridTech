@@ -13,6 +13,7 @@ data class InferenceSettings(
     val backend: InferenceBackend = InferenceBackend.AUTO,
     val contextTokens: Int = 4_096,
     val responseTokens: Int = 512,
+    val automaticAnswerLength: Boolean = true,
 )
 
 /**
@@ -57,6 +58,7 @@ class InferenceSettingsPreferences(context: Context) {
                 preferences.getInt(KEY_CONTEXT_TOKENS, 4_096)
                     .coerceIn(ContextTokenPolicy.MIN_CONTEXT_TOKENS, ContextTokenPolicy.deviceLimit(appContext)),
             )),
+        automaticAnswerLength = preferences.getBoolean(KEY_AUTOMATIC_ANSWER_LENGTH, true),
     )
 
     fun save(settings: InferenceSettings) {
@@ -64,6 +66,7 @@ class InferenceSettingsPreferences(context: Context) {
             .putString(KEY_BACKEND, settings.backend.name)
             .putInt(KEY_CONTEXT_TOKENS, settings.contextTokens)
             .putInt(KEY_RESPONSE_TOKENS, settings.responseTokens)
+            .putBoolean(KEY_AUTOMATIC_ANSWER_LENGTH, settings.automaticAnswerLength)
             .apply()
     }
 
@@ -71,5 +74,6 @@ class InferenceSettingsPreferences(context: Context) {
         const val KEY_BACKEND = "backend"
         const val KEY_CONTEXT_TOKENS = "context_tokens"
         const val KEY_RESPONSE_TOKENS = "response_tokens"
+        const val KEY_AUTOMATIC_ANSWER_LENGTH = "automatic_answer_length"
     }
 }

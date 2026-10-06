@@ -597,7 +597,8 @@ private fun TossChatMessage(message: ChatMessageUi, onOpenSource: (Long) -> Unit
                 } else if (message.fromWorker) {
                     Text(message.text, style = MaterialTheme.typography.bodyLarge)
                 } else {
-                    MarkdownText(message.text)
+                    if (message.pending) Text(message.text, style = MaterialTheme.typography.bodyLarge)
+                    else MarkdownText(message.text)
                     if (message.pending) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             CircularProgressIndicator(Modifier.size(14.dp), strokeWidth = 2.dp)
@@ -939,15 +940,22 @@ private fun TossInference(state: FieldGuardUiState, actions: FieldGuardActions) 
             )
             Text("이 기기 RAM 기준 안전 한도 안에서 선택해요.", style = MaterialTheme.typography.bodySmall)
             HorizontalDivider(color = TossBorder)
-            Text("최대 답변 길이", style = MaterialTheme.typography.titleMedium)
-            Text("${settings.responseTokens} 토큰", color = TossBlue, style = MaterialTheme.typography.titleLarge)
-            Slider(
-                value = settings.responseTokens.toFloat(),
-                onValueChange = { actions.onResponseTokens((it / 128f).roundToInt() * 128) },
-                valueRange = ContextTokenPolicy.MIN_RESPONSE_TOKENS.toFloat()..ContextTokenPolicy.responseLimit(settings.contextTokens).toFloat(),
-                enabled = ContextTokenPolicy.responseLimit(settings.contextTokens) > ContextTokenPolicy.MIN_RESPONSE_TOKENS,
-            )
-            Text("질문에 필요한 분량만 생성해요.", style = MaterialTheme.typography.bodySmall)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text("답변 길이 자동", style = MaterialTheme.typography.titleMedium)
+                Switch(checked = settings.automaticAnswerLength, onCheckedChange = actions.onAutomaticAnswerLength)
+            }
+            Text("모델이 답을 마칠 때까지 생성해요. 기기의 문맥 한도는 적용됩니다.", style = MaterialTheme.typography.bodySmall)
+            if (!settings.automaticAnswerLength) {
+                Text("수동 최대 답변 길이", style = MaterialTheme.typography.titleMedium)
+                Text("${settings.responseTokens} 토큰", color = TossBlue, style = MaterialTheme.typography.titleLarge)
+                Slider(
+                    value = settings.responseTokens.toFloat(),
+                    onValueChange = { actions.onResponseTokens((it / 128f).roundToInt() * 128) },
+                    valueRange = ContextTokenPolicy.MIN_RESPONSE_TOKENS.toFloat()..ContextTokenPolicy.responseLimit(settings.contextTokens).toFloat(),
+                    enabled = ContextTokenPolicy.responseLimit(settings.contextTokens) > ContextTokenPolicy.MIN_RESPONSE_TOKENS,
+                )
+                Text("수동 상한에 도달하면 문장 중간에 멈출 수 있어요.", style = MaterialTheme.typography.bodySmall)
+            }
         }
         TossPanel(color = TossBlueWeak) { Text("바꾼 설정은 다음 질문부터 적용돼요.", style = MaterialTheme.typography.bodyMedium) }
         TossPrimaryButton(if (state.settingsSaved) "저장했어요" else "설정 저장", actions.onSaveSettings)
