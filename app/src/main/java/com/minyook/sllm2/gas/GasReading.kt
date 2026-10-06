@@ -18,6 +18,9 @@ data class GasReading(
 ) {
     val hasValues: Boolean
         get() = oxygenPercent != null || h2sPpm != null || carbonMonoxidePpm != null || lelPercent != null
+
+    fun isFresh(nowMillis: Long = System.currentTimeMillis()): Boolean =
+        hasValues && receivedAtMillis > 0L && nowMillis >= receivedAtMillis && nowMillis - receivedAtMillis < 60_000L
 }
 
 /**

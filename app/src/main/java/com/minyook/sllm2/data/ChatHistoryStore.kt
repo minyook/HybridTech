@@ -13,7 +13,7 @@ import java.util.UUID
 class ChatHistoryStore(context: Context) {
     private val preferences = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
 
-    data class Turn(val role: Role, val text: String)
+    data class Turn(val role: Role, val text: String, val sourceIds: List<Long> = emptyList())
     enum class Role { USER, ASSISTANT }
     data class Session(
         val id: String,
@@ -41,16 +41,21 @@ class ChatHistoryStore(context: Context) {
     fun find(id: String): Session? = read().firstOrNull { it.id == id }
 
     @Synchronized
-    fun append(id: String, role: Role, text: String) {
+    fun append(id: String, role: Role, text: String, sourceIds: List<Long> = emptyList()) {
         val updated = read().map { session ->
             if (session.id == id) {
                 session.copy(
                     updatedAtMillis = System.currentTimeMillis(),
-                    turns = (session.turns + Turn(role, text)).takeLast(MAX_TURNS),
+                    turns = (session.turns + Turn(role, text, sourceIds)).takeLast(MAX_TURNS),
                 )
             } else session
         }
         save(updated)
+    }
+
+    @Synchronized
+    fun clear() {
+        preferences.edit().remove(KEY_SESSIONS).apply()
     }
 
     private fun read(): List<Session> = runCatching {
@@ -69,7 +74,10 @@ class ChatHistoryStore(context: Context) {
                                 val turn = turns.getJSONObject(turnIndex)
                                 val role = runCatching { Role.valueOf(turn.getString("role")) }
                                     .getOrDefault(Role.ASSISTANT)
-                                add(Turn(role, turn.optString("text")))
+                                val sourceIds = turn.optJSONArray("sourceIds") ?: JSONArray()
+                                add(Turn(role, turn.optString("text"), buildList {
+                                    for (sourceIndex in 0 until sourceIds.length()) add(sourceIds.optLong(sourceIndex))
+                                }.filter { it > 0L }))
                             }
                         },
                     ),
@@ -94,6 +102,7 @@ class ChatHistoryStore(context: Context) {
                                 put(JSONObject().apply {
                                     put("role", turn.role.name)
                                     put("text", turn.text)
+                                    put("sourceIds", JSONArray().apply { turn.sourceIds.forEach { put(it) } })
                                 })
                             }
                         })

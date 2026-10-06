@@ -26,14 +26,17 @@ class GasWidgetProvider : AppWidgetProvider() {
 
         private fun views(context: Context): RemoteViews {
             val reading = GasReadingStore.current(context)
+            val fresh = reading.isFresh()
             return RemoteViews(context.packageName, R.layout.widget_gas_reading).apply {
-                setTextViewText(R.id.widget_o2, format(reading.oxygenPercent, "%"))
-                setTextViewText(R.id.widget_h2s, format(reading.h2sPpm, "ppm"))
-                setTextViewText(R.id.widget_co, format(reading.carbonMonoxidePpm, "ppm"))
-                setTextViewText(R.id.widget_lel, format(reading.lelPercent, "%LEL"))
+                setTextViewText(R.id.widget_o2, format(reading.oxygenPercent.takeIf { fresh }, "%"))
+                setTextViewText(R.id.widget_h2s, format(reading.h2sPpm.takeIf { fresh }, "ppm"))
+                setTextViewText(R.id.widget_co, format(reading.carbonMonoxidePpm.takeIf { fresh }, "ppm"))
+                setTextViewText(R.id.widget_lel, format(reading.lelPercent.takeIf { fresh }, "%LEL"))
                 setTextViewText(
                     R.id.widget_status,
-                    if (reading.source == GasReadingSource.SIMULATION) {
+                    if (reading.hasValues && !fresh) {
+                        "새 측정값 없음 · 이전 수치는 현재값이 아닙니다"
+                    } else if (reading.source == GasReadingSource.SIMULATION) {
                         "데모 시뮬레이션 · 실제 측정값 아님"
                     } else if (reading.receivedAtMillis > 0L) {
                         "${reading.deviceName ?: "BLE 측정기"} · ${DateFormat.getTimeInstance(DateFormat.SHORT, Locale.KOREA).format(Date(reading.receivedAtMillis))}"

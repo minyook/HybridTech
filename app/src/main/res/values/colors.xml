@@ -2,6 +2,11 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="toss_blue">#3182F6</color>
+    <color name="toss_ink">#191F28</color>
+    <color name="toss_muted">#6B7684</color>
+    <color name="toss_line">#E5E8EB</color>
+    <color name="toss_surface">#F2F4F6</color>
     <!-- HybridTech O₂ Field Guard field-console palette. -->
     <color name="emergency_background">#B52D35</color>
     <color name="emergency_on_background">#FFFFFFFF</color>

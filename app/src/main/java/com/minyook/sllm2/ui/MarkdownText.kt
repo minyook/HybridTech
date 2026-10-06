@@ -28,8 +28,8 @@ fun MarkdownText(markdown: String, modifier: Modifier = Modifier) {
                 line.isBlank() -> Text("", modifier = Modifier.padding(vertical = 2.dp))
                 line.startsWith(">") -> Text(
                     inlineMarkdown(line.removePrefix(">").trim()),
-                    modifier = Modifier.fillMaxWidth().background(Color(0xFFEAF3F7)).padding(horizontal = 10.dp, vertical = 7.dp),
-                    style = MaterialTheme.typography.bodyMedium.copy(color = HybridMuted, fontStyle = androidx.compose.ui.text.font.FontStyle.Italic),
+                    modifier = Modifier.fillMaxWidth().background(Color(0xFFE8F3FF)).padding(horizontal = 10.dp, vertical = 7.dp),
+                    style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFF4E5968), fontStyle = androidx.compose.ui.text.font.FontStyle.Italic),
                 )
                 line.startsWith("### ") -> Text(inlineMarkdown(line.removePrefix("### ")), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 5.dp, bottom = 2.dp))
                 line.startsWith("## ") -> Text(inlineMarkdown(line.removePrefix("## ")), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = 6.dp, bottom = 3.dp))
@@ -59,7 +59,7 @@ private fun inlineMarkdown(source: String): AnnotatedString = buildAnnotatedStri
             }
             else -> {
                 append(value.removePrefix("`").removeSuffix("`"))
-                addStyle(SpanStyle(fontFamily = FontFamily.Monospace, background = Color(0xFFE4EEF2)), start, length)
+                addStyle(SpanStyle(fontFamily = FontFamily.Monospace, background = Color(0xFFF2F4F6)), start, length)
             }
         }
         cursor = match.range.last + 1

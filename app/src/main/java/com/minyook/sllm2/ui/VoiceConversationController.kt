@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -42,6 +43,8 @@ class VoiceConversationController(
     private var fallbackInFlight = false
     private var pendingWakeWordPermission = false
     private var inForeground = true
+    private val restartHandler = Handler(context.mainLooper)
+    private var pendingRestart: Runnable? = null
 
     init {
         if (_state.value.available) configureRecognizer()
@@ -63,7 +66,15 @@ class VoiceConversationController(
         startListening(wakeWordOnly = false)
     }
 
+    fun restartQuestion() {
+        cancelPendingRestart()
+        val wasListening = _state.value.listening
+        stopListening()
+        if (wasListening) scheduleRestart { startQuestion() } else startQuestion()
+    }
+
     fun toggleWakeWord() {
+        cancelPendingRestart()
         if (!_state.value.available) {
             onError("이 기기에서는 음성 인식을 사용할 수 없습니다.")
             return
@@ -79,8 +90,11 @@ class VoiceConversationController(
             requestMicrophonePermission()
             return
         }
+        val wasListening = _state.value.listening
+        stopListening()
         _state.value = _state.value.copy(wakeWordEnabled = true)
-        startListening(wakeWordOnly = true)
+        if (wasListening) scheduleRestart { if (_state.value.wakeWordEnabled) startListening(wakeWordOnly = true) }
+        else startListening(wakeWordOnly = true)
     }
 
     fun onMicrophonePermissionResult(granted: Boolean) {
@@ -112,10 +126,18 @@ class VoiceConversationController(
 
     fun onPause() {
         inForeground = false
+        cancelPendingRestart()
         stopListening()
     }
 
+    fun stopQuestion() {
+        cancelPendingRestart()
+        stopListening()
+        _state.value = _state.value.copy(wakeWordEnabled = false, awaitingWakeWord = false)
+    }
+
     fun destroy() {
+        cancelPendingRestart()
         stopListening()
         recognizer?.destroy()
         recognizer = null
@@ -125,14 +147,7 @@ class VoiceConversationController(
 
     fun speak(markdown: String) {
         if (!ttsReady) return
-        val plain = markdown
-            .replace(Regex("(?m)^#{1,6}\\s*"), "")
-            .replace("**", "")
-            .replace("`", "")
-            .replace(Regex("(?m)^>\\s*출처:.*$"), "")
-            .replace(Regex("\\n{2,}"), ". ")
-            .trim()
-            .take(3_500)
+        val plain = VoiceResponseFormatter.forSpeech(markdown)
         if (plain.isNotBlank()) textToSpeech?.speak(plain, TextToSpeech.QUEUE_FLUSH, null, ANSWER_UTTERANCE)
     }
 
@@ -212,6 +227,21 @@ class VoiceConversationController(
         _state.value = _state.value.copy(listening = false, awaitingWakeWord = false)
     }
 
+    private fun scheduleRestart(action: () -> Unit) {
+        cancelPendingRestart()
+        val restart = Runnable {
+            pendingRestart = null
+            if (inForeground) action()
+        }
+        pendingRestart = restart
+        restartHandler.postDelayed(restart, RETRY_DELAY_MS)
+    }
+
+    private fun cancelPendingRestart() {
+        pendingRestart?.let(restartHandler::removeCallbacks)
+        pendingRestart = null
+    }
+
     private fun consumeResult(spoken: String) {
         val clean = spoken.trim()
         if (clean.isBlank()) {
@@ -262,5 +292,25 @@ class VoiceConversationController(
         const val RETRY_DELAY_MS = 550L
         const val ANSWER_UTTERANCE = "voice_answer"
         val WAKE_WORD = Regex("(?i)(오\\s*투\\s*야|o\\s*2\\s*야)")
+    }
+}
+
+/** Keeps spoken replies short while the full answer and source links remain visible in chat. */
+internal object VoiceResponseFormatter {
+    private val urgentAction = Regex("작업.{0,4}중지|대피|119")
+
+    fun forSpeech(markdown: String): String {
+        val plain = markdown.lineSequence()
+            .map(String::trim)
+            .filter { it.isNotBlank() && !it.startsWith("#") && !it.startsWith("|") && !it.startsWith("> 출처:") && !it.startsWith("출처:") }
+            .map { it.removePrefix("- ").removePrefix("> ").replace("**", "").replace("`", "") }
+            .joinToString(" ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+        val sentences = plain.split(Regex("(?<=[.!?。])\\s+"))
+            .filter(String::isNotBlank)
+        val essential = sentences.take(2)
+        val urgent = sentences.drop(2).firstOrNull { urgentAction.containsMatchIn(it) }
+        return (essential + listOfNotNull(urgent)).joinToString(" ")
     }
 }

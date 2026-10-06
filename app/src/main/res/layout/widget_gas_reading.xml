@@ -9,8 +9,8 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="HYBRIDTECH O₂ · LIVE GAS"
-        android:textColor="@color/editorial_on_dark_soft"
+        android:text="O₂ Field Guard · 가스 측정"
+        android:textColor="@color/toss_muted"
         android:textSize="11sp"
         android:textStyle="bold" />
 
@@ -22,23 +22,23 @@
         android:orientation="horizontal">
 
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="O₂" android:textColor="@color/editorial_on_dark_soft" android:textSize="10sp" />
-            <TextView android:id="@+id/widget_o2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="monospace" android:text="—" android:textColor="@color/editorial_on_dark" android:textSize="18sp" android:textStyle="bold" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="O₂" android:textColor="@color/toss_muted" android:textSize="10sp" />
+            <TextView android:id="@+id/widget_o2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="monospace" android:text="—" android:textColor="@color/toss_ink" android:textSize="18sp" android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="H₂S" android:textColor="@color/editorial_on_dark_soft" android:textSize="10sp" />
-            <TextView android:id="@+id/widget_h2s" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="monospace" android:text="—" android:textColor="@color/editorial_on_dark" android:textSize="18sp" android:textStyle="bold" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="H₂S" android:textColor="@color/toss_muted" android:textSize="10sp" />
+            <TextView android:id="@+id/widget_h2s" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="monospace" android:text="—" android:textColor="@color/toss_ink" android:textSize="18sp" android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CO" android:textColor="@color/editorial_on_dark_soft" android:textSize="10sp" />
-            <TextView android:id="@+id/widget_co" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="monospace" android:text="—" android:textColor="@color/editorial_on_dark" android:textSize="18sp" android:textStyle="bold" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CO" android:textColor="@color/toss_muted" android:textSize="10sp" />
+            <TextView android:id="@+id/widget_co" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="monospace" android:text="—" android:textColor="@color/toss_ink" android:textSize="18sp" android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="LEL" android:textColor="@color/editorial_on_dark_soft" android:textSize="10sp" />
-            <TextView android:id="@+id/widget_lel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="monospace" android:text="—" android:textColor="@color/editorial_on_dark" android:textSize="18sp" android:textStyle="bold" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="LEL" android:textColor="@color/toss_muted" android:textSize="10sp" />
+            <TextView android:id="@+id/widget_lel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="monospace" android:text="—" android:textColor="@color/toss_ink" android:textSize="18sp" android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
 
@@ -48,6 +48,6 @@
         android:layout_height="wrap_content"
         android:maxLines="1"
         android:text="센서 연결 대기 · 실제 측정값만 표시"
-        android:textColor="@color/editorial_on_dark_soft"
+        android:textColor="@color/toss_muted"
         android:textSize="10sp" />
 </LinearLayout>

@@ -1,7 +1,6 @@
 package com.minyook.sllm2
 
 import android.Manifest
-import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -13,11 +12,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.minyook.sllm2.ui.AppDestination
 import com.minyook.sllm2.ui.FieldGuardActions
 import com.minyook.sllm2.ui.FieldGuardViewModel
-import com.minyook.sllm2.ui.HybridTechApp
+import com.minyook.sllm2.ui.TossFieldGuardApp
 import com.minyook.sllm2.ui.VoiceConversationController
 
 /** Compose-only activity shell. RAG, model, BLE and voice work live behind observable state. */
@@ -29,7 +31,7 @@ class MainActivity : ComponentActivity() {
     private val microphonePermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         voiceController.onMicrophonePermissionResult(granted)
     }
-    private val bluetoothPermissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
+    private val bluetoothPermissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ ->
         if (hasBluetoothPermissions()) viewModel.scanBluetooth() else viewModel.bluetoothPermissionDenied()
     }
     private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -37,7 +39,7 @@ class MainActivity : ComponentActivity() {
         notificationPermissionContinuation = null
     }
     private val systemVoiceInput = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val spoken = if (result.resultCode == Activity.RESULT_OK) {
+        val spoken = if (result.resultCode == RESULT_OK) {
             result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull().orEmpty()
         } else ""
         voiceController.onSystemRecognizerResult(spoken)
@@ -46,6 +48,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        hideSystemNavigationBar()
         voiceController = VoiceConversationController(
             context = this,
             hasMicrophonePermission = { hasPermission(Manifest.permission.RECORD_AUDIO) },
@@ -57,7 +60,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             val voice by voiceController.state.collectAsStateWithLifecycle()
-            HybridTechApp(
+            TossFieldGuardApp(
                 state = state,
                 voice = voice,
                 actions = FieldGuardActions(
@@ -80,8 +83,17 @@ class MainActivity : ComponentActivity() {
                         requestNotificationPermission { granted -> viewModel.connectDevice(address, granted) }
                     },
                     onDisconnectDevice = viewModel::disconnectDevice,
-                    onVoiceClick = voiceController::startQuestion,
+                    onVoiceClick = voiceController::restartQuestion,
                     onVoiceLongClick = voiceController::toggleWakeWord,
+                    onStopVoice = voiceController::stopQuestion,
+                    onCompleteOnboarding = viewModel::completeOnboarding,
+                    onOpenSource = viewModel::openSource,
+                    onOpenDocument = viewModel::openDocument,
+                    onAdjacentSource = viewModel::adjacentSource,
+                    onLibraryQuery = viewModel::changeLibraryQuery,
+                    onToggleChecklist = viewModel::toggleChecklist,
+                    onSaveChecklist = viewModel::saveChecklist,
+                    onClearChatHistory = viewModel::clearChatHistory,
                 ),
             )
         }
@@ -95,7 +107,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        voiceController.onResume(viewModel.uiState.value.destination == AppDestination.CHAT)
+        hideSystemNavigationBar()
+        voiceController.onResume(viewModel.uiState.value.destination in setOf(AppDestination.CHAT, AppDestination.VOICE))
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) hideSystemNavigationBar()
     }
 
     override fun onDestroy() {
@@ -122,4 +140,11 @@ class MainActivity : ComponentActivity() {
 
     private fun hasPermission(permission: String): Boolean =
         ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+
+    private fun hideSystemNavigationBar() {
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            hide(WindowInsetsCompat.Type.navigationBars())
+        }
+    }
 }

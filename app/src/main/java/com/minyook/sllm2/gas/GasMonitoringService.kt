@@ -7,6 +7,8 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import android.os.Handler
+import android.os.Looper
 import androidx.core.app.NotificationCompat
 import android.widget.RemoteViews
 import com.minyook.sllm2.MainActivity
@@ -18,19 +20,37 @@ import java.util.Locale
 /** Keeps a user-requested BLE connection alive and visualizes its last valid measurement in the notification shade. */
 class GasMonitoringService : Service() {
     private lateinit var client: BleGasClient
+    private val handler = Handler(Looper.getMainLooper())
+    private var staleNotified = false
+    private val freshnessWatch = object : Runnable {
+        override fun run() {
+            val reading = GasReadingStore.current(applicationContext)
+            if (reading.hasValues && !reading.isFresh() && !staleNotified) {
+                staleNotified = true
+                updateNotification("측정값 수신 중단 · 현재값 없음")
+                GasWidgetProvider.updateAll(applicationContext)
+            }
+            handler.postDelayed(this, 15_000L)
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()
         createChannel()
+        handler.postDelayed(freshnessWatch, 15_000L)
         client = BleGasClient(applicationContext, object : BleGasClient.Listener {
             override fun onScanResult(device: android.bluetooth.BluetoothDevice, rssi: Int) = Unit
 
             override fun onConnectionStatus(message: String) {
+                if (message.contains("끊겼") || message.contains("연결 오류")) {
+                    GasReadingStore.clear(applicationContext)
+                }
                 sendStatus(message)
                 updateNotification(message)
             }
 
             override fun onReading(reading: GasReading) {
+                staleNotified = false
                 GasReadingStore.update(applicationContext, reading)
                 updateNotification("실시간 측정 중 · ${reading.deviceName ?: "BLE 측정기"}")
             }
@@ -61,6 +81,7 @@ class GasMonitoringService : Service() {
     }
 
     override fun onDestroy() {
+        handler.removeCallbacks(freshnessWatch)
         if (::client.isInitialized) client.close()
         super.onDestroy()
     }
@@ -97,13 +118,16 @@ class GasMonitoringService : Service() {
     private fun gasPanel(reading: GasReading, status: String): RemoteViews =
         RemoteViews(packageName, R.layout.notification_gas_monitoring).apply {
             setTextViewText(R.id.notification_gas_status, status)
-            setTextViewText(R.id.notification_o2, format(reading.oxygenPercent, "%"))
-            setTextViewText(R.id.notification_h2s, format(reading.h2sPpm, "ppm"))
-            setTextViewText(R.id.notification_co, format(reading.carbonMonoxidePpm, "ppm"))
-            setTextViewText(R.id.notification_lel, format(reading.lelPercent, "%LEL"))
+            val fresh = reading.isFresh()
+            setTextViewText(R.id.notification_o2, format(reading.oxygenPercent.takeIf { fresh }, "%"))
+            setTextViewText(R.id.notification_h2s, format(reading.h2sPpm.takeIf { fresh }, "ppm"))
+            setTextViewText(R.id.notification_co, format(reading.carbonMonoxidePpm.takeIf { fresh }, "ppm"))
+            setTextViewText(R.id.notification_lel, format(reading.lelPercent.takeIf { fresh }, "%LEL"))
             setTextViewText(
                 R.id.notification_updated_at,
-                if (reading.receivedAtMillis > 0L) {
+                if (reading.hasValues && !fresh) {
+                    "새 측정값 없음 · 이전 수치는 현재값이 아닙니다"
+                } else if (reading.receivedAtMillis > 0L) {
                     "최근 수신 ${DateFormat.getTimeInstance(DateFormat.SHORT, Locale.KOREA).format(Date(reading.receivedAtMillis))}"
                 } else {
                     "아직 측정값을 받지 못했습니다"

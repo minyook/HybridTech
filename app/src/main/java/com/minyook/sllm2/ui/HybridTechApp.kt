@@ -102,6 +102,15 @@ data class FieldGuardActions(
     val onDisconnectDevice: () -> Unit,
     val onVoiceClick: () -> Unit,
     val onVoiceLongClick: () -> Unit,
+    val onStopVoice: () -> Unit = {},
+    val onCompleteOnboarding: () -> Unit = {},
+    val onOpenSource: (Long) -> Unit = {},
+    val onOpenDocument: (String) -> Unit = {},
+    val onAdjacentSource: (Int) -> Unit = {},
+    val onLibraryQuery: (String) -> Unit = {},
+    val onToggleChecklist: (Int) -> Unit = {},
+    val onSaveChecklist: () -> Unit = {},
+    val onClearChatHistory: () -> Unit = {},
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -144,11 +153,13 @@ fun HybridTechApp(
                 AppDestination.CHAT -> "O₂ Field Guard"
                 AppDestination.SENSOR -> "센서 연결 상태"
                 AppDestination.SETTINGS -> "설정"
+                else -> "O₂ Field Guard"
             }
             val subtitle = when (state.destination) {
                 AppDestination.CHAT -> state.knowledgeStatus
                 AppDestination.SENSOR -> "Bluetooth LE 가스 검출기"
                 AppDestination.SETTINGS -> "온디바이스 모델 및 추론"
+                else -> state.knowledgeStatus
             }
             Scaffold(
                 containerColor = if (state.destination == AppDestination.SETTINGS) Color(0xFF101010) else HybridChatCanvas,
@@ -173,6 +184,7 @@ fun HybridTechApp(
                     AppDestination.CHAT -> ChatScreen(state, voice, actions, padding)
                     AppDestination.SENSOR -> SensorScreen(state, actions, padding)
                     AppDestination.SETTINGS -> SettingsScreen(state, actions, padding)
+                    else -> ChatScreen(state, voice, actions, padding)
                 }
             }
         }

@@ -7,6 +7,12 @@ data class RetrievedChunk(
     val score: Double,
 )
 
+data class KnowledgeDocument(
+    val id: String,
+    val title: String,
+    val chunkCount: Int,
+)
+
 /**
  * Original local RAG retrieval path.
  *
@@ -71,6 +77,17 @@ class KnowledgeRepository {
     }
 
     fun documentCount(): Int = box.count().toInt()
+
+    fun documents(): List<KnowledgeDocument> = box.all
+        .groupBy { it.documentId }
+        .map { (id, chunks) -> KnowledgeDocument(id, chunks.first().documentTitle, chunks.size) }
+        .sortedByDescending { it.chunkCount }
+
+    fun chunk(id: Long): KnowledgeChunk? = box.get(id)
+
+    fun chunksForDocument(documentId: String): List<KnowledgeChunk> = box.all
+        .filter { it.documentId == documentId }
+        .sortedWith(compareBy(KnowledgeChunk::pageNumber, KnowledgeChunk::chunkIndex))
 
     private fun lexicalScore(text: String, terms: Set<String>): Double {
         if (terms.isEmpty()) return 0.0
