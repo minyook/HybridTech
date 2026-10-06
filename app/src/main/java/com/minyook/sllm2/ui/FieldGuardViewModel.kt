@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.SystemClock
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.Observer
@@ -68,6 +69,7 @@ data class ChatMessageUi(
     val text: String,
     val fromWorker: Boolean,
     val pending: Boolean = false,
+    val startedAtElapsedRealtime: Long = 0L,
     val sourceIds: List<Long> = emptyList(),
 )
 
@@ -340,7 +342,12 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
             return
         }
         val chatId = _uiState.value.activeChatId ?: history.create(asked).id
-        val pending = ChatMessageUi(text = "", fromWorker = false, pending = true)
+        val pending = ChatMessageUi(
+            text = "",
+            fromWorker = false,
+            pending = true,
+            startedAtElapsedRealtime = SystemClock.elapsedRealtime(),
+        )
         updateState {
             it.copy(
                 activeChatId = chatId,

@@ -341,6 +341,7 @@ private fun QuickPrompts(onPreset: (String) -> Unit) {
 
 @Composable
 private fun ChatBubble(message: ChatMessageUi) {
+    val elapsed = if (message.pending) answerElapsedTime(message.startedAtElapsedRealtime) else null
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = if (message.fromWorker) Arrangement.End else Arrangement.Start) {
         Card(
             modifier = Modifier.widthIn(max = 520.dp),
@@ -349,10 +350,17 @@ private fun ChatBubble(message: ChatMessageUi) {
             border = if (message.fromWorker) null else BorderStroke(1.dp, HybridHairline),
         ) {
             if (message.pending) {
-                Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                    CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                    Spacer(Modifier.width(10.dp))
-                    Text("제공 문서에서 근거를 찾는 중입니다…", color = HybridMuted, style = MaterialTheme.typography.bodyMedium)
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (message.text.isNotBlank()) Text(message.text, style = MaterialTheme.typography.bodyLarge)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(10.dp))
+                        Text(
+                            if (message.text.isBlank()) "근거 검색 중 · $elapsed" else "답변 작성 중 · $elapsed",
+                            color = HybridMuted,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
                 }
             } else if (message.fromWorker) {
                 Text(message.text, modifier = Modifier.padding(14.dp), style = MaterialTheme.typography.bodyLarge)

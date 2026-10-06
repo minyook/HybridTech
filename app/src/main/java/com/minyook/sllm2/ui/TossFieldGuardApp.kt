@@ -582,6 +582,7 @@ private fun TossSendIcon() {
 
 @Composable
 private fun TossChatMessage(message: ChatMessageUi, onOpenSource: (Long) -> Unit) {
+    val elapsed = if (message.pending) answerElapsedTime(message.startedAtElapsedRealtime) else null
     Row(Modifier.fillMaxWidth(), horizontalArrangement = if (message.fromWorker) Arrangement.End else Arrangement.Start) {
         Surface(
             modifier = Modifier.fillMaxWidth(if (message.fromWorker) 0.83f else 1f),
@@ -592,7 +593,7 @@ private fun TossChatMessage(message: ChatMessageUi, onOpenSource: (Long) -> Unit
                 if (message.pending && message.text.isBlank()) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                        Text("제공 문서에서 근거를 찾고 있어요.", style = MaterialTheme.typography.bodyMedium)
+                        Text("근거 검색 중 · $elapsed", style = MaterialTheme.typography.bodyMedium)
                     }
                 } else if (message.fromWorker) {
                     Text(message.text, style = MaterialTheme.typography.bodyLarge)
@@ -602,7 +603,7 @@ private fun TossChatMessage(message: ChatMessageUi, onOpenSource: (Long) -> Unit
                     if (message.pending) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             CircularProgressIndicator(Modifier.size(14.dp), strokeWidth = 2.dp)
-                            Text("답변 작성 중…", style = MaterialTheme.typography.bodySmall)
+                            Text("답변 작성 중 · $elapsed", style = MaterialTheme.typography.bodySmall)
                         }
                     }
                     if (!message.pending && message.sourceIds.isNotEmpty()) {
