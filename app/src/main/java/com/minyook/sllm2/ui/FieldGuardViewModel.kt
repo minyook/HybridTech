@@ -20,6 +20,7 @@ import com.minyook.sllm2.data.ChatHistoryStore
 import com.minyook.sllm2.data.KnowledgeRepository
 import com.minyook.sllm2.data.KnowledgeSeeder
 import com.minyook.sllm2.data.KnowledgeChunk
+import com.minyook.sllm2.data.QuestionAnswerVerifier
 import com.minyook.sllm2.gas.BleGasClient
 import com.minyook.sllm2.gas.GasMonitoringService
 import com.minyook.sllm2.gas.GasReading
@@ -361,10 +362,10 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
         history.append(chatId, ChatHistoryStore.Role.USER, asked)
 
         viewModelScope.launch(Dispatchers.IO) {
-            val sources = repository.retrieve(asked, limit = 2)
+            val sources = repository.retrieveForQuestion(asked)
             val sourceIds = sources.map { it.chunk.id }
             val fallback = repository.answerWithoutModel(sources)
-            val modelAnswer = if (modelPreferences.status().phase == ModelPhase.READY) {
+            val candidateAnswer = if (modelPreferences.status().phase == ModelPhase.READY) {
                 try {
                     val generated = runtime.generate(asked, repository.contextForModel(sources), compactVoiceAnswer) { partialAnswer ->
                         updateState { state ->
@@ -381,10 +382,17 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
                     null
                 }
             } else null
-            val response = modelAnswer ?: if (modelPreferences.status().phase == ModelPhase.READY) {
+            val evidenceConflict = candidateAnswer != null &&
+                QuestionAnswerVerifier.contradictsSources(asked, candidateAnswer, sources)
+            val modelAnswer = candidateAnswer.takeUnless { evidenceConflict }
+            val response = modelAnswer ?: if (evidenceConflict) {
+                "$fallback\n\n> 생성된 답변이 검색된 문서 근거와 맞지 않아 원문을 표시합니다."
+            } else if (modelPreferences.status().phase == ModelPhase.READY) {
                 "$fallback\n\n> 생성 모델 응답을 받지 못해 문서 근거를 우선 보여드립니다."
             } else fallback
-            val spokenResponse = if (modelAnswer != null) response else if (sourceIds.isEmpty()) {
+            val spokenResponse = if (evidenceConflict) {
+                "생성된 답변이 문서 근거와 맞지 않아 화면에 원문을 표시했습니다."
+            } else if (modelAnswer != null) response else if (sourceIds.isEmpty()) {
                 "제공 문서를 준비하고 있어요. 잠시 후 다시 질문해 주세요."
             } else {
                 "로컬 AI 답변을 사용할 수 없어요. 관련 문서 근거를 화면에 표시했으니 확인해 주세요."

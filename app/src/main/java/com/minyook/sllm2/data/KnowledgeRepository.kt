@@ -24,6 +24,32 @@ data class KnowledgeDocument(
 class KnowledgeRepository {
     private val box = ObjectBoxStore.store.boxFor(KnowledgeChunk::class.java)
 
+    /** Reserve one primary source for each subject before adding any continuation page. */
+    fun retrieveForQuestion(question: String): List<RetrievedChunk> {
+        if (question.isBlank() || box.count() == 0L) return emptyList()
+        val aspects = QuestionEvidencePlanner.aspects(question)
+        if (aspects.size == 1 && !question.contains("심폐소생술")) return retrieve(question, limit = 2)
+        val chunks = box.all
+        val ranked = aspects.map { aspect ->
+            QuestionEvidencePlanner.rank(aspect, chunks)
+                .takeIf { it.firstOrNull()?.score?.let { score -> score >= 5.0 } == true }
+                ?: retrieve(aspect, limit = 2)
+        }
+        val primary = ranked.mapNotNull { candidates -> candidates.firstOrNull() }
+            .distinctBy { it.chunk.id }
+        if (aspects.size > 1) return primary
+
+        val first = primary.firstOrNull() ?: return emptyList()
+        val continuation = ranked.first().firstOrNull { candidate ->
+            candidate.chunk.documentId == first.chunk.documentId &&
+                candidate.chunk.pageNumber == first.chunk.pageNumber + 1 &&
+                candidate.score >= first.score * 0.4
+        }
+        return (listOf(first) + listOfNotNull(continuation) + ranked.first())
+            .distinctBy { it.chunk.id }
+            .take(2)
+    }
+
     fun retrieve(question: String, limit: Int = 4): List<RetrievedChunk> {
         if (question.isBlank() || box.count() == 0L) return emptyList()
         val safeLimit = limit.coerceAtLeast(1)
@@ -51,7 +77,7 @@ class KnowledgeRepository {
     }
 
     /** Show the actual retrieved source passages when the local model is unavailable. */
-    fun answerWithoutModel(sources: List<RetrievedChunk>, bodyCharacterLimit: Int = 360): String {
+    fun answerWithoutModel(sources: List<RetrievedChunk>): String {
         if (sources.isEmpty()) {
             return "## 지식베이스 준비 중\n\n제공 문서를 기기에 정리하고 있습니다. 잠시 후 다시 질문해 주세요."
         }
@@ -59,7 +85,7 @@ class KnowledgeRepository {
             append("## 관련 문서 근거\n\n")
             sources.forEachIndexed { index, item ->
                 append("### ${index + 1}. ${item.chunk.heading}\n")
-                append(item.chunk.body.take(bodyCharacterLimit.coerceIn(120, 600)).trim())
+                append(item.chunk.body.trim())
                 append("\n\n> 출처: ${item.chunk.documentTitle} ${item.chunk.pageNumber}쪽\n\n")
             }
         }.trim()
