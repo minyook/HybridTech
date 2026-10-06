@@ -5,6 +5,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -653,10 +654,12 @@ private fun TossHistory(state: FieldGuardUiState, actions: FieldGuardActions) {
     }
 }
 
+private enum class SourceViewMode { PDF, FORMATTED, RAW }
+
 @Composable
 private fun TossSource(state: FieldGuardUiState, actions: FieldGuardActions) {
     val source = state.selectedSource
-    var formattedView by remember(source?.id) { mutableStateOf(true) }
+    var viewMode by remember(source?.id) { mutableStateOf(SourceViewMode.PDF) }
     TossScrollPage {
         TossPageTitle("답변이 어디에서\n왔는지 확인해요")
         if (source == null) {
@@ -666,19 +669,24 @@ private fun TossSource(state: FieldGuardUiState, actions: FieldGuardActions) {
                 Text(source.documentTitle, style = MaterialTheme.typography.titleMedium)
                 Text("${source.pageNumber}쪽 · ${source.heading}", style = MaterialTheme.typography.bodySmall)
             }
-            TossStatusPill("원문 근거", TossBlueWeak, TossBlue)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(selected = formattedView, onClick = { formattedView = true }, label = { Text("읽기 편한 보기") })
-                FilterChip(selected = !formattedView, onClick = { formattedView = false }, label = { Text("원문 그대로") })
+            TossStatusPill("문서 근거", TossBlueWeak, TossBlue)
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(selected = viewMode == SourceViewMode.PDF, onClick = { viewMode = SourceViewMode.PDF }, label = { Text("PDF 원본") })
+                FilterChip(selected = viewMode == SourceViewMode.FORMATTED, onClick = { viewMode = SourceViewMode.FORMATTED }, label = { Text("읽기 편한 보기") })
+                FilterChip(selected = viewMode == SourceViewMode.RAW, onClick = { viewMode = SourceViewMode.RAW }, label = { Text("추출 텍스트") })
             }
-            Surface(color = Color.White, border = BorderStroke(1.dp, TossBorder), shape = RoundedCornerShape(20.dp)) {
-                if (formattedView) {
-                    MarkdownText(
-                        markdown = remember(source.body) { SourceDocumentFormatter.format(source.body) },
-                        modifier = Modifier.padding(18.dp),
-                    )
-                } else {
-                    Text(source.body, modifier = Modifier.padding(18.dp), style = MaterialTheme.typography.bodyLarge)
+            if (viewMode == SourceViewMode.PDF) {
+                SourcePdfPage(source)
+            } else {
+                Surface(color = Color.White, border = BorderStroke(1.dp, TossBorder), shape = RoundedCornerShape(20.dp)) {
+                    if (viewMode == SourceViewMode.FORMATTED) {
+                        MarkdownText(
+                            markdown = remember(source.body) { SourceDocumentFormatter.format(source.body) },
+                            modifier = Modifier.padding(18.dp),
+                        )
+                    } else {
+                        Text(source.body, modifier = Modifier.padding(18.dp), style = MaterialTheme.typography.bodyLarge)
+                    }
                 }
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -686,7 +694,7 @@ private fun TossSource(state: FieldGuardUiState, actions: FieldGuardActions) {
                 TossSecondaryButton("다음 부분", { actions.onAdjacentSource(1) }, Modifier.weight(1f))
             }
             TossPanel(color = TossBlueWeak) {
-                Text("읽기 편한 보기는 원문 내용을 바꾸지 않고 문장과 목록을 구분해 보여줘요. 수치와 조건은 원문 그대로 보기에서 다시 확인해 주세요.", style = MaterialTheme.typography.bodyMedium)
+                Text("PDF 원본에서 그림과 표를 확인할 수 있어요. 추출 텍스트는 검색과 답변에 사용된 내용을 보여줍니다.", style = MaterialTheme.typography.bodyMedium)
             }
         }
     }
