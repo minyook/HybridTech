@@ -57,7 +57,7 @@ internal fun SourcePdfPage(source: SourceUi) {
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("고용노동부 공식 PDF · ${source.pageNumber}/${specification.pageCount}쪽", style = MaterialTheme.typography.bodySmall)
-        Text("처음 열 때 원본을 내려받아 기기에 보관합니다. 이후에는 오프라인에서도 볼 수 있어요.", style = MaterialTheme.typography.bodySmall)
+        Text("공식 PDF 원본이 앱에 포함되어 있어 인터넷 없이도 볼 수 있어요.", style = MaterialTheme.typography.bodySmall)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { zoomPercent = (zoomPercent - 25).coerceAtLeast(75) }, enabled = zoomPercent > 75) {
                 Text("축소")
@@ -87,7 +87,7 @@ internal fun SourcePdfPage(source: SourceUi) {
                 }
                 is PdfViewState.Failed -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("PDF를 열지 못했어요: ${current.reason}", style = MaterialTheme.typography.bodyMedium)
-                    Text("인터넷 연결을 확인하거나 위의 추출 텍스트 보기를 이용해 주세요.", style = MaterialTheme.typography.bodySmall)
+                    Text("저장 공간을 확인하거나 위의 추출 텍스트 보기를 이용해 주세요.", style = MaterialTheme.typography.bodySmall)
                     OutlinedButton(onClick = { retry++ }) { Text("다시 시도") }
                 }
                 is PdfViewState.Ready -> Surface(

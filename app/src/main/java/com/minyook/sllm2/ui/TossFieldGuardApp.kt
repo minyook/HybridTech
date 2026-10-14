@@ -712,6 +712,7 @@ private fun TossVoice(voice: VoiceUiState, actions: FieldGuardActions) {
         }
         Spacer(Modifier.height(26.dp))
         TossPanel { Text(if (voice.listening) "질문을 듣고 있어요. 말을 마치면 자동으로 문서 검색이 시작돼요." else "마이크를 누르고 질문을 말씀해 주세요.", style = MaterialTheme.typography.bodyMedium) }
+        voice.error?.let { Text(it, color = TossRed, style = MaterialTheme.typography.bodySmall) }
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text("‘오투야’ 호출 대기", style = MaterialTheme.typography.titleMedium)
@@ -720,7 +721,7 @@ private fun TossVoice(voice: VoiceUiState, actions: FieldGuardActions) {
             Switch(checked = voice.wakeWordEnabled, onCheckedChange = { actions.onVoiceLongClick() })
         }
         TossSecondaryButton(if (voice.listening) "듣기 중단" else "음성 질문 시작", if (voice.listening) actions.onStopVoice else actions.onVoiceClick)
-        Text("음성 인식의 오프라인 동작은 기기 음성 서비스에 따라 달라져요.", style = MaterialTheme.typography.bodySmall)
+        Text("기기에 로컬 한국어 음성 인식기가 있어야 작동해요. 사용할 수 없으면 네트워크 음성 입력으로 전환하지 않아요.", style = MaterialTheme.typography.bodySmall)
     }
 }
 

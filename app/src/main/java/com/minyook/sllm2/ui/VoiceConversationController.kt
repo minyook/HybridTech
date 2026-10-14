@@ -19,6 +19,7 @@ data class VoiceUiState(
     val listening: Boolean = false,
     val wakeWordEnabled: Boolean = false,
     val awaitingWakeWord: Boolean = false,
+    val error: String? = null,
 )
 
 /**
@@ -29,18 +30,16 @@ class VoiceConversationController(
     private val context: Context,
     private val hasMicrophonePermission: () -> Boolean,
     private val requestMicrophonePermission: () -> Unit,
-    private val launchSystemRecognizer: (Intent) -> Unit,
     private val onQuestion: (String) -> Unit,
     private val onError: (String) -> Unit,
 ) {
-    private val _state = MutableStateFlow(VoiceUiState(available = SpeechRecognizer.isRecognitionAvailable(context)))
+    private val _state = MutableStateFlow(VoiceUiState(available = hasLocalRecognizer(context)))
     val state: StateFlow<VoiceUiState> = _state
 
     private var recognizer: SpeechRecognizer? = null
     private var textToSpeech: TextToSpeech? = null
     private var ttsReady = false
     private var suppressNextError = false
-    private var fallbackInFlight = false
     private var pendingWakeWordPermission = false
     private var inForeground = true
     private val restartHandler = Handler(context.mainLooper)
@@ -53,7 +52,7 @@ class VoiceConversationController(
 
     fun startQuestion() {
         if (!_state.value.available) {
-            onError("이 기기에서는 음성 인식을 사용할 수 없습니다.")
+            reportError("이 기기에는 로컬 음성 인식기가 없습니다. Google 음성 입력은 열지 않습니다.")
             return
         }
         if (!hasMicrophonePermission()) {
@@ -61,8 +60,7 @@ class VoiceConversationController(
             requestMicrophonePermission()
             return
         }
-        _state.value = _state.value.copy(wakeWordEnabled = false)
-        fallbackInFlight = false
+        _state.value = _state.value.copy(wakeWordEnabled = false, error = null)
         startListening(wakeWordOnly = false)
     }
 
@@ -76,7 +74,7 @@ class VoiceConversationController(
     fun toggleWakeWord() {
         cancelPendingRestart()
         if (!_state.value.available) {
-            onError("이 기기에서는 음성 인식을 사용할 수 없습니다.")
+            reportError("이 기기에는 로컬 음성 인식기가 없어 호출 대기를 켤 수 없습니다.")
             return
         }
         val enable = !_state.value.wakeWordEnabled
@@ -100,7 +98,7 @@ class VoiceConversationController(
     fun onMicrophonePermissionResult(granted: Boolean) {
         if (!granted) {
             pendingWakeWordPermission = false
-            onError("음성 질문에는 마이크 권한이 필요합니다.")
+            reportError("음성 질문에는 마이크 권한이 필요합니다.")
             return
         }
         if (pendingWakeWordPermission) {
@@ -110,11 +108,6 @@ class VoiceConversationController(
         } else {
             startQuestion()
         }
-    }
-
-    fun onSystemRecognizerResult(spoken: String) {
-        fallbackInFlight = false
-        if (spoken.isBlank()) onError("음성 입력이 취소되었거나 인식되지 않았습니다.") else consumeResult(spoken)
     }
 
     fun onResume(chatVisible: Boolean) {
@@ -152,10 +145,9 @@ class VoiceConversationController(
     }
 
     private fun configureRecognizer() {
-        recognizer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SpeechRecognizer.isOnDeviceRecognitionAvailable(context)) {
-            SpeechRecognizer.createOnDeviceSpeechRecognizer(context)
-        } else {
-            SpeechRecognizer.createSpeechRecognizer(context)
+        recognizer = runCatching { SpeechRecognizer.createOnDeviceSpeechRecognizer(context) }.getOrElse {
+            _state.value = _state.value.copy(available = false)
+            return
         }.apply {
             setRecognitionListener(object : RecognitionListener {
                 override fun onReadyForSpeech(params: Bundle?) = Unit
@@ -173,19 +165,25 @@ class VoiceConversationController(
 
                 override fun onError(error: Int) {
                     _state.value = _state.value.copy(listening = false)
-                    if (!inForeground) return
                     if (suppressNextError) {
                         suppressNextError = false
                         return
                     }
-                    if (_state.value.wakeWordEnabled && _state.value.awaitingWakeWord && inForeground) {
+                    if (!inForeground) return
+                    if (error == SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED ||
+                        error == SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE ||
+                        error == SpeechRecognizer.ERROR_NETWORK ||
+                        error == SpeechRecognizer.ERROR_NETWORK_TIMEOUT
+                    ) {
+                        _state.value = _state.value.copy(wakeWordEnabled = false, awaitingWakeWord = false)
+                        reportError(errorMessage(error))
+                    } else if (_state.value.wakeWordEnabled && _state.value.awaitingWakeWord && inForeground) {
                         // The platform recognizer ends after a short silence. Re-arm only while visible.
                         android.os.Handler(context.mainLooper).postDelayed({
                             if (inForeground && _state.value.wakeWordEnabled && hasMicrophonePermission()) startListening(wakeWordOnly = true)
                         }, RETRY_DELAY_MS)
                     } else {
-                        onError(errorMessage(error))
-                        launchFallback()
+                        reportError(errorMessage(error))
                     }
                 }
             })
@@ -209,13 +207,13 @@ class VoiceConversationController(
     private fun startListening(wakeWordOnly: Boolean) {
         if (_state.value.listening || !hasMicrophonePermission()) return
         val activeRecognizer = recognizer ?: return
-        _state.value = _state.value.copy(listening = true, awaitingWakeWord = wakeWordOnly)
+        suppressNextError = false
+        _state.value = _state.value.copy(listening = true, awaitingWakeWord = wakeWordOnly, error = null)
         val intent = recognizerIntent(wakeWordOnly)
         runCatching { activeRecognizer.startListening(intent) }
             .onFailure {
                 _state.value = _state.value.copy(listening = false)
-                onError("음성 인식을 시작하지 못했습니다. 다시 눌러 주세요.")
-                launchFallback()
+                reportError("로컬 음성 인식을 시작하지 못했습니다. 기기 음성 서비스 설정을 확인해 주세요.")
             }
     }
 
@@ -245,7 +243,7 @@ class VoiceConversationController(
     private fun consumeResult(spoken: String) {
         val clean = spoken.trim()
         if (clean.isBlank()) {
-            if (_state.value.wakeWordEnabled) startListening(wakeWordOnly = true) else onError("음성을 인식하지 못했습니다. 다시 말씀해 주세요.")
+            if (_state.value.wakeWordEnabled) startListening(wakeWordOnly = true) else reportError("음성을 인식하지 못했습니다. 다시 말씀해 주세요.")
             return
         }
         if (_state.value.awaitingWakeWord) {
@@ -261,20 +259,11 @@ class VoiceConversationController(
         }
     }
 
-    private fun launchFallback() {
-        if (fallbackInFlight) return
-        fallbackInFlight = true
-        runCatching { launchSystemRecognizer(recognizerIntent(wakeWordOnly = false)) }
-            .onFailure {
-                fallbackInFlight = false
-                onError("시스템 음성 인식기를 열 수 없습니다.")
-            }
-    }
-
     private fun recognizerIntent(wakeWordOnly: Boolean) = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.KOREAN.toLanguageTag())
         putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false)
+        putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
         putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
         putExtra(RecognizerIntent.EXTRA_PROMPT, if (wakeWordOnly) "오투야" else "질문을 말씀하세요")
     }
@@ -282,13 +271,22 @@ class VoiceConversationController(
     private fun errorMessage(error: Int): String = when (error) {
         SpeechRecognizer.ERROR_AUDIO -> "마이크 입력을 확인해 주세요."
         SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "마이크 권한이 필요합니다."
-        SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "음성 인식 연결이 없습니다. 한국어 오프라인 음성팩을 설치하거나 네트워크를 확인해 주세요."
+        SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT,
+        SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED, SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE ->
+            "로컬 한국어 음성 데이터가 없습니다. 기기 음성 인식 설정에서 설치해 주세요. Google 음성 입력은 열지 않습니다."
         SpeechRecognizer.ERROR_NO_MATCH, SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "음성을 인식하지 못했습니다. 다시 말씀해 주세요."
         SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "음성 인식기가 준비 중입니다. 잠시 후 다시 눌러 주세요."
         else -> "음성 인식에 실패했습니다. 다시 눌러 주세요."
     }
 
+    private fun reportError(message: String) {
+        _state.value = _state.value.copy(listening = false, error = message)
+        onError(message)
+    }
+
     private companion object {
+        fun hasLocalRecognizer(context: Context): Boolean =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SpeechRecognizer.isOnDeviceRecognitionAvailable(context)
         const val RETRY_DELAY_MS = 550L
         const val ANSWER_UTTERANCE = "voice_answer"
         val WAKE_WORD = Regex("(?i)(오\\s*투\\s*야|o\\s*2\\s*야)")

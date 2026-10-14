@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.speech.RecognizerIntent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -38,13 +37,6 @@ class MainActivity : ComponentActivity() {
         notificationPermissionContinuation?.invoke(granted)
         notificationPermissionContinuation = null
     }
-    private val systemVoiceInput = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val spoken = if (result.resultCode == RESULT_OK) {
-            result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull().orEmpty()
-        } else ""
-        voiceController.onSystemRecognizerResult(spoken)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -53,7 +45,6 @@ class MainActivity : ComponentActivity() {
             context = this,
             hasMicrophonePermission = { hasPermission(Manifest.permission.RECORD_AUDIO) },
             requestMicrophonePermission = { microphonePermission.launch(Manifest.permission.RECORD_AUDIO) },
-            launchSystemRecognizer = { systemVoiceInput.launch(it) },
             onQuestion = { spoken -> viewModel.submitVoiceQuestion(spoken, voiceController::speak) },
             onError = viewModel::showInputError,
         )

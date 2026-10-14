@@ -2,6 +2,8 @@
 
 작성일: 2026-10-07
 
+2026-10-14 갱신: 공식 PDF 번들·해시/쪽수 검사, 로컬 음성 인식 전용 경로를 반영합니다. 별도 반응형 웹/PWA는 [웹 현행 설계서](webapp/TARGET_ARCHITECTURE.md)와 [웹 README](../web/README.md)에서 설명하며 Android 기능과 구분합니다.
+
 대상: 이 저장소의 **현재 Android 앱 구현**. 웹앱 설계나 향후 기능 제안이 아니다.
 확인 기준: 현재 작업 트리의 Kotlin, Compose, Manifest, Gradle, 기본 문서 자산. 실제 측정기·모든 단말에서의 동작을 실기기로 검증했다는 뜻은 아니다.
 
@@ -125,6 +127,8 @@ Compose의 밝은 화면, 둥근 카드, 짧은 한국어 문구가 기본이다
 ### 음성
 
 [VoiceConversationController](../app/src/main/java/com/minyook/sllm2/ui/VoiceConversationController.kt)는 Android 12 이상에서 기기 내 `SpeechRecognizer`가 있을 때 한국어 오프라인 선호 인식을 사용한다. 호출어 `오투야`/`o2야`는 앱 전경에서만 대기한다. 인식된 질문은 텍스트 질문과 같은 검색·답변 흐름으로 들어간다. 같은 파일의 `VoiceResponseFormatter`가 고른 짧은 문장만 `TextToSpeech`로 읽고 전체 답변은 화면에 남긴다. 지원 단말·언어 팩에 따라 음성 기능은 사용할 수 없을 수 있다.
+
+기기 내 인식기·한국어 데이터가 없거나 로컬 인식이 실패하면 오류를 화면에 표시한다. 시스템 음성 입력 화면이나 네트워크 음성 인식기로 자동 전환하지 않는다. Manifest에 `android.speech.RecognitionService` 조회를 선언한다.
 
 ### 점검
 
