@@ -1,0 +1,16 @@
+/* Keep the entire illustration inside the mobile card, without scaling an
+   off-canvas desktop box. Its fixed local bounds also leave the CTA clear. */
+@media(max-width:640px){
+  .hero-art{position:absolute;right:18px;bottom:21px;width:104px;height:104px;transform:none;margin:0;opacity:1}
+  .hero-art .orbit{width:84px;height:84px;border:1px solid #dfebfc;box-shadow:0 0 0 8px #f5f9ff,0 0 0 9px #edf4ff}
+  .hero-art .shield-mark{width:60px;height:69px;border-radius:18px;transform:rotate(-8deg)}
+  .hero-art .shield-mark svg{width:40px;height:40px}
+  .hero-art .art-tag{display:none}
+  .hero-art i{width:7px;height:7px;right:3px;top:2px}
+}
+@media(max-width:360px){
+  .hero-art{right:14px;bottom:24px;width:79px;height:79px;opacity:1}
+  .hero-art .orbit{width:61px;height:61px;box-shadow:0 0 0 7px #f5f9ff,0 0 0 8px #edf4ff}
+  .hero-art .shield-mark{width:44px;height:52px;border-radius:14px}
+  .hero-art .shield-mark svg{width:29px;height:29px}
+}

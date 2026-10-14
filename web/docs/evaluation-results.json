@@ -1,0 +1,644 @@
+{
+  "date": "2026-10-14",
+  "kind": "local retrieval regression; not generated-answer or real-device validation",
+  "total": 30,
+  "passed": 29,
+  "results": [
+    {
+      "question": "사업장 밀폐공간 확인",
+      "pages": [
+        [
+          18
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 18
+        },
+        {
+          "documentId": "confined_space_checklist_2026",
+          "page": 2
+        },
+        {
+          "documentId": "confined_space_checklist_2026",
+          "page": 1
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "관계 근로자 외 출입 금지",
+      "pages": [
+        [
+          19
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 19
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 57
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 62
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "밀폐공간 작업 허가절차 마련",
+      "pages": [
+        [
+          20
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 20
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 21
+        },
+        {
+          "documentId": "confined_space_checklist_2026",
+          "page": 2
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "작업허가 사항 게시",
+      "pages": [
+        [
+          22,
+          23
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 22
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 23
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 65
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "적정 공기 산소농도 기준",
+      "pages": [
+        [
+          24
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 24
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 59
+        },
+        {
+          "documentId": "confined_space_checklist_2026",
+          "page": 2
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "산소 유해가스 측정 시기",
+      "pages": [
+        [
+          25
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 24
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 63
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "센서 무선통신 측정",
+      "pages": [
+        [
+          26
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 26
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "산소측정법 알려줘",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 38
+        },
+        {
+          "documentId": "confined_space_checklist_2026",
+          "page": 2
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "작업 전 환기 시기",
+      "pages": [
+        [
+          28
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 63
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "환기팬 용량 정압",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "용접 작업 조치",
+      "pages": [
+        [
+          30
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 75
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 59
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 30
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "가스배관 해체 작업",
+      "pages": [
+        [
+          31
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 31
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 77
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 75
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "소화설비 조치",
+      "pages": [
+        [
+          32
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 32
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 61
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 77
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "출입문 임의잠김 방지",
+      "pages": [
+        [
+          33
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 63
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 33
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 60
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "관리감독자 점검 직무",
+      "pages": [
+        [
+          34
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 34
+        },
+        {
+          "documentId": "confined_space_checklist_2026",
+          "page": 2
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "감시인 연락 설비",
+      "pages": [
+        [
+          35
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 35
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 39
+        },
+        {
+          "documentId": "confined_space_checklist_2026",
+          "page": 2
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "긴급구조훈련 주기",
+      "pages": [
+        [
+          39
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 39
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 66
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 40
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "심폐소생술 방법 알려줘",
+      "pages": [
+        [
+          45,
+          46
+        ]
+      ],
+      "category": "single",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 38
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 39
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "심폐소생술과 산소측정법 알려줘",
+      "pages": [
+        [
+          45,
+          46
+        ],
+        [
+          27
+        ]
+      ],
+      "category": "compound",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "밀폐공간 작업 허가절차 마련 및 환기팬 용량",
+      "pages": [
+        [
+          20
+        ],
+        [
+          29
+        ]
+      ],
+      "category": "compound",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 20
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "출입 금지 그리고 감시인 연락 설비",
+      "pages": [
+        [
+          19
+        ],
+        [
+          35
+        ]
+      ],
+      "category": "compound",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 19
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 35
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "용접 조치 및 가스배관 해체",
+      "pages": [
+        [
+          30
+        ],
+        [
+          31
+        ]
+      ],
+      "category": "compound",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 30
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 31
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "산소측정법, 환기팬 정압",
+      "pages": [
+        [
+          27
+        ],
+        [
+          29
+        ]
+      ],
+      "category": "compound",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "소화설비 조치 및 출입문 임의잠김 방지",
+      "pages": [
+        [
+          32
+        ],
+        [
+          33
+        ]
+      ],
+      "category": "compound",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 32
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 63
+        }
+      ],
+      "passed": false
+    },
+    {
+      "question": "관리감독자 점검 및 긴급구조훈련",
+      "pages": [
+        [
+          34
+        ],
+        [
+          39
+        ]
+      ],
+      "category": "compound",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 34
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 39
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "환기 시기 그리고 심폐소생술 방법 알려줘",
+      "pages": [
+        [
+          28
+        ],
+        [
+          45,
+          46
+        ]
+      ],
+      "category": "compound",
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45
+        }
+      ],
+      "passed": true
+    },
+    {
+      "question": "오늘 서울 날씨 알려줘",
+      "pages": [],
+      "category": "out-of-scope",
+      "retrieved": [],
+      "passed": true
+    },
+    {
+      "question": "비트코인 투자 전망",
+      "pages": [],
+      "category": "out-of-scope",
+      "retrieved": [],
+      "passed": true
+    },
+    {
+      "question": "파스타 레시피 추천",
+      "pages": [],
+      "category": "out-of-scope",
+      "retrieved": [],
+      "passed": true
+    },
+    {
+      "question": "아이폰 배터리 교체 가격",
+      "pages": [],
+      "category": "out-of-scope",
+      "retrieved": [],
+      "passed": true
+    }
+  ]
+}

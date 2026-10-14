@@ -1,5 +1,7 @@
 # 완전 오프라인 밀폐공간 안전 RAG 설계
 
+> 이 문서는 Android 검색·모델 경로의 상세 설계입니다. 2026-10-14 추가한 별도 웹/PWA의 자동 AI·Worker·토큰·스크롤·저장 구조는 [웹 현행 설계서](webapp/TARGET_ARCHITECTURE.md), 현재 Android 동작은 [Android 현행 설계서](ANDROID_APP_SPEC.md)를 기준으로 확인하세요.
+
 ## 이번 구현의 범위
 
 이 앱은 네트워크를 사용하지 않아도 제공된 안전 문서를 검색하고, Gemma 4 E2B 모델 설치가 끝난 뒤에는 기기 내부에서만 답변을 생성한다. APK에는 대형 모델을 넣지 않는다. 첫 사용자가 직접 내려받은 모델은 앱 전용 `noBackupFilesDir/models`에 보관하며, DB와 모델 상태는 프로세스 종료와 재부팅 뒤에도 유지된다.

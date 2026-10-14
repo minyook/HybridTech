@@ -1,0 +1,62 @@
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+const fixture=vi.hoisted(()=>({settings:{contextTokens:8192,maxOutputTokens:512},installed:true,runtime:true}));
+vi.mock('../src/ai/preferences',()=>({loadAISettings:async()=>({...fixture.settings})}));
+vi.mock('../src/ai/model',()=>({installedModel:async()=>fixture.installed?{blob:new Blob(['model']),metadata:{sha256:'verified'}}:undefined}));
+vi.mock('../src/offline/assets',()=>({assetUrl:(path:string)=>`https://local.invalid/${path}`,preparedGroups:async()=>({runtime:fixture.runtime})}));
+import { aiIsReady, generate, getAIStatus, prepareAI, releaseModel } from '../src/ai/runtime';
+import type { AIReply, AIRequest } from '../src/ai/protocol';
+
+class FakeWorker {
+  static instances:FakeWorker[]=[];
+  onmessage?:((event:{data:AIReply})=>void);onerror?:((event:Event)=>void);
+  messages:AIRequest[]=[];terminated=false;
+  constructor(public url:string){FakeWorker.instances.push(this);}
+  postMessage(message:AIRequest){this.messages.push(message);}
+  terminate(){this.terminated=true;}
+  reply(message:AIReply){this.onmessage?.({data:message});}
+}
+beforeEach(async()=>{
+  await releaseModel();FakeWorker.instances=[];fixture.settings={contextTokens:8192,maxOutputTokens:512};fixture.installed=true;fixture.runtime=true;
+  vi.stubGlobal('Worker',FakeWorker);vi.stubGlobal('navigator',{gpu:{}});vi.stubGlobal('isSecureContext',true);
+});
+afterEach(async()=>{await releaseModel();vi.unstubAllGlobals();});
+async function ready(){const promise=prepareAI();await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(1));const worker=FakeWorker.instances[0];worker.reply({id:worker.messages[0].id,type:'done'});await promise;return worker;}
+
+it('중복된 자동 준비 요청은 한 번만 초기화하고 화면에 단계를 전달한다',async()=>{
+  const first=prepareAI();const second=prepareAI();await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(1));const worker=FakeWorker.instances[0];
+  expect(worker.messages).toHaveLength(1);expect(worker.url).toBe('https://local.invalid/ai-worker.js');
+  worker.reply({id:worker.messages[0].id,type:'progress',message:'GPU 준비 중'});expect(getAIStatus().message).toBe('GPU 준비 중');
+  worker.reply({id:worker.messages[0].id,type:'done'});await Promise.all([first,second]);expect(aiIsReady()).toBe(true);
+});
+it('모델이 없으면 다운로드하거나 실행한 것처럼 표시하지 않는다',async()=>{
+  fixture.installed=false;expect(await prepareAI()).toBe(false);expect(aiIsReady()).toBe(false);expect(FakeWorker.instances).toHaveLength(0);
+});
+it('자동 준비 중 들어온 질문은 완료를 기다렸다가 같은 엔진으로 생성한다',async()=>{
+  const loading=prepareAI();const onText=vi.fn();const generating=generate('질문',[],onText,new AbortController().signal);
+  await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(1));const worker=FakeWorker.instances[0];worker.reply({id:worker.messages[0].id,type:'done'});await loading;
+  await vi.waitFor(()=>expect(worker.messages).toHaveLength(2));const message=worker.messages[1];expect(message).toMatchObject({type:'generate',settings:{maxOutputTokens:512}});
+  worker.reply({id:message.id,type:'text',answer:'답변'});worker.reply({id:message.id,type:'done',result:{answer:'답변',usage:{maxOutputTokens:512,contextTokens:8192,totalTokens:123}}});
+  expect((await generating).answer).toBe('답변');expect(onText).toHaveBeenCalledWith('답변');expect(aiIsReady()).toBe(true);
+});
+it('답변 중단 시 워커를 종료하고 다음 질문에서 새로 준비할 수 있다',async()=>{
+  const worker=await ready();const controller=new AbortController();const generating=generate('질문',[],vi.fn(),controller.signal);const rejected=expect(generating).rejects.toThrow('중단');
+  await vi.waitFor(()=>expect(worker.messages).toHaveLength(2));controller.abort();await rejected;expect(worker.terminated).toBe(true);expect(aiIsReady()).toBe(false);
+  const loading=prepareAI();await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(2));const next=FakeWorker.instances[1];next.reply({id:next.messages[0].id,type:'done'});expect(await loading).toBe(true);
+});
+it('출력 한도만 바꾸면 엔진을 재사용하고 문맥 크기를 바꾸면 새 엔진에 적용한다',async()=>{
+  const worker=await ready();fixture.settings.maxOutputTokens=1024;await prepareAI();expect(FakeWorker.instances).toHaveLength(1);
+  fixture.settings.contextTokens=4096;const loading=prepareAI();await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(2));expect(worker.terminated).toBe(true);
+  const next=FakeWorker.instances[1];expect(next.messages[0]).toMatchObject({type:'initialize',settings:{contextTokens:4096,maxOutputTokens:1024}});next.reply({id:next.messages[0].id,type:'done'});await loading;
+});
+it('초기화 실패 뒤에도 질문에서 다시 자동 준비할 수 있다',async()=>{
+  const promise=prepareAI();const rejected=expect(promise).rejects.toThrow('GPU 오류');await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(1));const worker=FakeWorker.instances[0];worker.reply({id:worker.messages[0].id,type:'error',message:'GPU 오류'});await rejected;
+  expect(getAIStatus().phase).toBe('error');const retry=prepareAI();await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(2));const next=FakeWorker.instances[1];next.reply({id:next.messages[0].id,type:'done'});expect(await retry).toBe(true);
+});
+it('준비 중 문맥 설정을 바꿔도 질문은 새 문맥 엔진이 준비될 때까지 기다린다',async()=>{
+  const loading=prepareAI();const generating=generate('질문',[],vi.fn(),new AbortController().signal);
+  await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(1));const first=FakeWorker.instances[0];fixture.settings.contextTokens=4096;
+  first.reply({id:first.messages[0].id,type:'done'});await loading;
+  await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(2));const next=FakeWorker.instances[1];expect(next.messages[0]).toMatchObject({type:'initialize',settings:{contextTokens:4096}});
+  next.reply({id:next.messages[0].id,type:'done'});await vi.waitFor(()=>expect(next.messages).toHaveLength(2));const message=next.messages[1];
+  next.reply({id:message.id,type:'done',result:{answer:'새 설정 답변',usage:{contextTokens:4096,maxOutputTokens:512}}});expect((await generating).answer).toBe('새 설정 답변');
+});
