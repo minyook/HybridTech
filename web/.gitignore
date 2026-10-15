@@ -10,3 +10,4 @@ public/icons/*.png
 *.tsbuildinfo
 test-results/
 .qa/
+.local/

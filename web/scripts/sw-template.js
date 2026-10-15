@@ -19,6 +19,8 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
+  // Authentication and shared work records must always come from the server.
+  if (new URL(request.url).pathname.startsWith('/api/')) return;
   event.respondWith((async () => {
     const shell = await caches.open(SHELL);
     if (request.mode === 'navigate') return (await shell.match(new URL('./index.html',self.registration.scope), { ignoreVary: true })) || fetch(request);

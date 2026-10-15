@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Checklist } from '../types';
-import { allWorkOrders, applyWorkAction, getSetting, saveNewWorkOrder, setSetting } from '../storage/db';
+import { allWorkOrders, getSetting, setSetting } from '../storage/db';
 import { aiIsReady } from '../ai/runtime';
-import { approvalProblems, blankInspection, createWork, inspectionItems, statusLabels, type Actor, type Inspection, type Role, type WorkAction, type WorkOrder } from '../workflow/work';
+import { approvalProblems, blankInspection, inspectionItems, statusLabels, type Inspection, type Role, type WorkAction, type WorkOrder } from '../workflow/work';
+import { getWorkOrders, lockSupervisor, refreshWorkSession, requestWorkOrder, updateWorkOrder, useWorkSession } from '../workflow/access';
+import SupervisorAccess from './SupervisorAccess';
 import { formatDate, go, Icon, Notice, PageHead } from '../ui';
 
-interface LocalViews { workerId:string;supervisorId:string;workerName:string;supervisorName:string;view:Role }
 const steps = ['작업 지시 요청','감독관 점검','점검 완료·승인','현장 투입 확인','AI 문서 지원','실시간 모니터링','위험 신고·대피','탈출·퇴장 확인'];
 function toLocal(value:string) { if(!value)return '';const date=new Date(value);return Number.isFinite(date.getTime())?new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,16):''; }
 function toISO(value:string) { if(!value)return '';const date=new Date(value);return Number.isFinite(date.getTime())?date.toISOString():''; }
@@ -20,59 +21,65 @@ function stage(order:WorkOrder|undefined,index:number) {
   if(index===6)return order.status==='alarm'?'current':order.events.some(event=>event.action==='report-danger')?'done':'pending';
   return order.events.some(event=>event.action==='evacuate'||event.action==='exit')?'done':order.status==='alarm'?'current':'pending';
 }
-export default function WorkChecklist({notify,legacyRecords}:{notify:(message:string)=>void;legacyRecords:Checklist[]}) {
-  const [views,setViews]=useState<LocalViews>();const [orders,setOrders]=useState<WorkOrder[]>([]);const [selected,setSelected]=useState('');
+export default function WorkChecklist({notify,legacyRecords,view='worker'}:{notify:(message:string)=>void;legacyRecords:Checklist[];view?:Role}) {
+  const access=useWorkSession();const role=view;const [workerName,setWorkerName]=useState('');const [profileLoaded,setProfileLoaded]=useState(false);
+  const [legacyOrders,setLegacyOrders]=useState<WorkOrder[]>([]);const [orders,setOrders]=useState<WorkOrder[]>([]);const [selected,setSelected]=useState('');
   const [loading,setLoading]=useState(true);const [error,setError]=useState('');const [busy,setBusy]=useState(false);const [newRequest,setNewRequest]=useState(false);
   const [request,setRequest]=useState({site:'',location:'',task:''});const [inspection,setInspection]=useState<Inspection>(blankInspection());
   const [memo,setMemo]=useState('');const [exitLocation,setExitLocation]=useState('');const [acknowledged,setAcknowledged]=useState(false);
   const broadcast=useRef<BroadcastChannel|undefined>(undefined);
-  const role=views?.view??'worker';
-  const visibleOrders=role==='supervisor'?orders:orders.filter(order=>order.worker.id===views?.workerId);
+  const visibleOrders=role==='supervisor'?orders:orders.filter(order=>order.worker.id===access.session?.workerId);
   const order=visibleOrders.find(order=>order.id===selected)??visibleOrders[0];
-  const actor:Actor={id:role==='worker'?views?.workerId??'':views?.supervisorId??'',role,name:role==='worker'?views?.workerName??'':views?.supervisorName??''};
-  async function refresh(){setOrders(await allWorkOrders());}
+  const actorName=role==='worker'?workerName:access.session?.supervisor?.name??'';
+  async function refresh(){setOrders(await getWorkOrders(role));}
   useEffect(()=>{
     let active=true;
-    Promise.all([getSetting<LocalViews>('work-views'),allWorkOrders()]).then(([saved,items])=>{
+    Promise.all([getSetting<string>('work-worker-name'),getSetting<{workerName?:string}>('work-views'),allWorkOrders()]).then(([name,saved,items])=>{
       if(!active)return;
-      setViews(saved??{workerId:crypto.randomUUID(),supervisorId:crypto.randomUUID(),workerName:'',supervisorName:'',view:'worker'});setOrders(items);
-    }).catch(error=>{if(active)setError(error.message);}).finally(()=>{if(active)setLoading(false);});
-    const update=()=>{void refresh().catch(()=>notify('작업 기록을 새로 읽지 못했어요.'));};
-    if('BroadcastChannel'in window){broadcast.current=new BroadcastChannel('fieldguard-work');broadcast.current.onmessage=update;}
-    window.addEventListener('focus',update);
-    return()=>{active=false;broadcast.current?.close();window.removeEventListener('focus',update);};
+      setWorkerName(name??saved?.workerName??'');setLegacyOrders(items);
+    }).catch(error=>{if(active)setError(error.message);}).finally(()=>{if(active)setProfileLoaded(true);});
+    return()=>{active=false;};
   },[]);
   useEffect(()=>{
-    if(!views)return;
-    const timer=setTimeout(()=>{void setSetting('work-views',views).catch(()=>notify('현재 화면 설정을 저장하지 못했어요.'));},200);
+    if(!profileLoaded)return;
+    const timer=setTimeout(()=>{void setSetting('work-worker-name',workerName).catch(()=>notify('이름을 저장하지 못했어요.'));},200);
     return()=>clearTimeout(timer);
-  },[views]);
+  },[workerName,profileLoaded]);
+  useEffect(()=>{
+    if(!access.session||(role==='supervisor'&&!access.session.supervisor)){setOrders([]);setLoading(false);return;}
+    let active=true;setLoading(true);
+    const update=async()=>{try{const items=await getWorkOrders(role);if(active){setOrders(items);setError('');}}catch(error){if(active)setError(error instanceof Error?error.message:'작업 기록을 읽지 못했어요.');}finally{if(active)setLoading(false);}};
+    void update();
+    if('BroadcastChannel'in window){broadcast.current=new BroadcastChannel('fieldguard-work');broadcast.current.onmessage=()=>{void update();};}
+    window.addEventListener('focus',update);const interval=setInterval(update,15_000);
+    return()=>{active=false;broadcast.current?.close();window.removeEventListener('focus',update);clearInterval(interval);};
+  },[access.session?.workerId,access.session?.supervisor?.id,role]);
   useEffect(()=>{setInspection(order?structuredClone(order.inspection):blankInspection());setMemo('');setExitLocation('');setAcknowledged(false);setError('');},[order?.id,order?.revision]);
   async function requestWork(){
-    if(busy||!views)return;setBusy(true);setError('');
-    try{const created=createWork(actor,request);await saveNewWorkOrder(created);await refresh();setSelected(created.id);setNewRequest(false);setRequest({site:'',location:'',task:''});broadcast.current?.postMessage('updated');notify('작업 요청을 저장했어요. 감독관 화면에서 점검할 수 있어요.');}
+    if(busy||!access.session)return;setBusy(true);setError('');
+    try{const created=await requestWorkOrder(workerName,request);await refresh();setSelected(created.id);setNewRequest(false);setRequest({site:'',location:'',task:''});broadcast.current?.postMessage('updated');notify('작업 요청을 전송했어요. 인증된 감독관이 점검할 수 있어요.');}
     catch(error){setError(error instanceof Error?error.message:'작업 요청을 저장하지 못했어요.');}finally{setBusy(false);}
   }
   async function act(action:WorkAction){
     if(!order||busy)return;setBusy(true);setError('');
-    try{await applyWorkAction(order.id,actor,action,order.revision);await refresh();broadcast.current?.postMessage('updated');notify(action.type==='approve'?'점검 완료와 투입 승인을 기록했어요.':'작업 상태를 이 기기에 저장했어요.');}
-    catch(error){await refresh().catch(()=>{});setError(error instanceof Error?error.message:'작업 상태를 저장하지 못했어요.');}finally{setBusy(false);}
+    try{await updateWorkOrder(order.id,role,actorName,action,order.revision);await refresh();broadcast.current?.postMessage('updated');notify(action.type==='approve'?'점검 완료와 투입 승인을 기록했어요.':'작업 상태를 서버에 기록했어요.');}
+    catch(error){await refreshWorkSession().catch(()=>{});await refresh().catch(()=>{});setError(error instanceof Error?error.message:'작업 상태를 저장하지 못했어요.');}finally{setBusy(false);}
   }
-  const profileName=(name:string)=>{if(views)setViews({...views,[role==='worker'?'workerName':'supervisorName']:name});};
-  const switchView=(view:Role)=>{if(views&&!busy){setViews({...views,view});setNewRequest(false);setError('');}};
   const inspecting=role==='supervisor'&&order&&['requested','reviewing'].includes(order.status);
   const changed=order&&JSON.stringify(inspection)!==JSON.stringify(order.inspection);
   const problems=approvalProblems(inspection);
   const inWork=order&&['entered','supporting'].includes(order.status);
   const approvedInspection=order?.events.filter(event=>event.action==='approve').at(-1)?.inspection??order?.inspection;
-  if(loading)return <div className="loading-screen" role="status"><span className="spinner"/>작업 기록을 불러오고 있어요…</div>;
+  if(role==='supervisor'&&!access.session?.supervisor)return <SupervisorAccess/>;
+  if(access.loading||loading)return <div className="loading-screen" role="status"><span className="spinner"/>작업 기록을 불러오고 있어요…</div>;
+  if(!access.session)return <><PageHead eyebrow="FIELD WORKFLOW" title="작업 서버 연결을 확인해 주세요" description="점검 요청과 승인은 연결된 서버에서 담당자 권한을 확인한 뒤 처리해요."/><Notice kind="warning">{access.error||'서버에 연결해야 작업 기록을 확인할 수 있어요.'}</Notice><button className="btn primary" onClick={()=>{void refreshWorkSession().catch(()=>{});}}>다시 연결하기</button></>;
   return <>
-    <PageHead eyebrow="FIELD WORKFLOW" title={role==='supervisor'?'점검부터 승인까지 확인해요':'작업 요청부터 현장 투입까지'} description="작업 요청 → 감독관 점검 → 승인 → 투입 확인 → 지원·대피 기록" action={role==='worker'&&<button className="btn primary" disabled={busy} onClick={()=>setNewRequest(true)}><Icon name="plus"/>새 작업 요청</button>}/>
-    <div className="work-view-bar"><div><span className="badge">로컬 시나리오</span><p>현재 브라우저의 같은 작업 기록으로 두 화면의 흐름을 확인해요.</p></div><div className="segmented" aria-label="작업 흐름 화면 선택"><button className={role==='worker'?'selected':''} aria-pressed={role==='worker'} disabled={busy} onClick={()=>switchView('worker')}>작업자 화면</button><button className={role==='supervisor'?'selected':''} aria-pressed={role==='supervisor'} disabled={busy} onClick={()=>switchView('supervisor')}>감독관 화면</button></div></div>
+    <PageHead eyebrow="FIELD WORKFLOW" title={role==='supervisor'?'점검부터 승인까지 확인해요':'작업 요청부터 현장 투입까지'} description="작업 요청 → 감독관 점검 → 승인 → 투입 확인 → 지원·대피 기록" action={role==='worker'?<button className="btn primary" disabled={busy} onClick={()=>setNewRequest(true)}><Icon name="plus"/>새 작업 요청</button>:<button className="btn secondary" disabled={busy} onClick={async()=>{setBusy(true);try{await lockSupervisor();go('/checklist');}catch(error){setError(error instanceof Error?error.message:'잠금을 완료하지 못했어요.');}finally{setBusy(false);}}}>감독관 화면 잠그기</button>}/>
+    <div className="work-view-bar"><div><span className={`badge ${role==='supervisor'?'green':'blue'}`}>{role==='supervisor'?'감독관 인증됨':'작업자'}</span><p>{role==='supervisor'?`${actorName} 감독관 · 인증된 감독관만 점검과 승인을 기록할 수 있어요.`:'내 작업을 요청하고 승인 결과와 투입·퇴장을 확인해요.'}</p></div>{role==='supervisor'&&<button className="text-button" onClick={()=>go('/checklist')}>내 작업 요청 보기 →</button>}</div>
     <div className="work-steps" aria-label="작업 시나리오 진행 단계">{steps.map((label,index)=><div key={label} className={`work-step ${stage(order,index)}`}><span>{stage(order,index)==='done'?'✓':index+1}</span><strong>{label}</strong>{index===5&&<small>Android 연계 필요</small>}</div>)}</div>
-    <div className="work-layout"><aside className="work-sidebar"><section className="card local-person"><span className="eyebrow">{role==='worker'?'WORKER':'SUPERVISOR'}</span><h2>{role==='worker'?'작업자':'감독관'} 기록</h2><label className="field">현재 기록자 이름<input maxLength={60} value={actor.name} placeholder="기록에 남길 이름" disabled={busy} onChange={event=>profileName(event.target.value)}/></label><p className="caption">이름과 화면 선택은 실제 계정 권한을 부여하지 않아요. 다른 기기의 요청·승인 연결에는 계정과 서버 동기화가 필요해요.</p></section><div className="section-heading"><h2>{role==='supervisor'?'점검 요청 목록':'내 작업 요청'}</h2><span>{visibleOrders.length}건</span></div><div className="work-orders">{visibleOrders.map(item=><button className={`work-order-link ${order?.id===item.id&&!newRequest?'selected':''}`} key={item.id} disabled={busy} onClick={()=>{setSelected(item.id);setNewRequest(false);}}><span className={`badge ${item.status==='alarm'?'danger':item.status==='closed'?'green':'blue'}`}>{statusLabels[item.status]}</span><strong>{item.site}</strong><p>{item.location} · {item.worker.name}</p><small>{formatDate(item.updatedAt)}</small></button>)}</div>{!visibleOrders.length&&<p className="caption">아직 작업 요청이 없어요.</p>}</aside>
+    <div className="work-layout"><aside className="work-sidebar"><section className="card local-person"><span className="eyebrow">{role==='worker'?'WORKER':'SUPERVISOR'}</span><h2>{role==='worker'?'작업자':'감독관'} 기록</h2><label className="field">현재 기록자 이름<input maxLength={60} value={actorName} placeholder="기록에 남길 이름" disabled={busy||role==='supervisor'} onChange={event=>setWorkerName(event.target.value)}/></label><p className="caption">작업자 이름을 바꿔도 권한은 바뀌지 않아요. 감독관 이름과 권한은 서버에서 확인해요.</p></section><div className="section-heading"><h2>{role==='supervisor'?'점검 요청 목록':'내 작업 요청'}</h2><span>{visibleOrders.length}건</span></div><div className="work-orders">{visibleOrders.map(item=><button className={`work-order-link ${order?.id===item.id&&!newRequest?'selected':''}`} key={item.id} disabled={busy} onClick={()=>{setSelected(item.id);setNewRequest(false);}}><span className={`badge ${item.status==='alarm'?'danger':item.status==='closed'?'green':'blue'}`}>{statusLabels[item.status]}</span><strong>{item.site}</strong><p>{item.location} · {item.worker.name}</p><small>{formatDate(item.updatedAt)}</small></button>)}</div>{!visibleOrders.length&&<p className="caption">아직 작업 요청이 없어요.</p>}</aside>
     <div className="work-detail">{error&&<div className="notice warning" role="alert">{error}</div>}
-      {role==='worker'&&(newRequest||!order)?<section className="card"><span className="eyebrow">STEP 01</span><h2>감독관에게 점검을 요청해요</h2><p>작업 내용과 위치를 남기면 감독관 화면의 요청 목록에 표시돼요.</p><label className="field">현장명<input maxLength={100} value={request.site} placeholder="예: 지하 설비 보수 현장" onChange={event=>setRequest({...request,site:event.target.value})}/></label><label className="field">작업 위치<input maxLength={150} value={request.location} placeholder="예: 1번 맨홀 / 집수정" onChange={event=>setRequest({...request,location:event.target.value})}/></label><label className="field">작업 지시·내용<textarea rows={4} maxLength={2000} value={request.task} placeholder="어떤 작업을 진행하는지 입력해 주세요" onChange={event=>setRequest({...request,task:event.target.value})}/></label><button className="btn primary full" disabled={busy||!views} onClick={requestWork}><Icon name="arrow"/>작업 점검 요청</button></section>:!order?<section className="card empty-state"><Icon name="check"/><h2>점검 요청을 기다리고 있어요</h2><p>작업자 화면에서 요청한 작업이 여기에 표시돼요.</p></section>:<>
+      {role==='worker'&&(newRequest||!order)?<section className="card"><span className="eyebrow">STEP 01</span><h2>감독관에게 점검을 요청해요</h2><p>작업 내용과 위치를 남기면 인증된 감독관에게 점검을 요청해요.</p><label className="field">현장명<input maxLength={100} value={request.site} placeholder="예: 지하 설비 보수 현장" onChange={event=>setRequest({...request,site:event.target.value})}/></label><label className="field">작업 위치<input maxLength={150} value={request.location} placeholder="예: 1번 맨홀 / 집수정" onChange={event=>setRequest({...request,location:event.target.value})}/></label><label className="field">작업 지시·내용<textarea rows={4} maxLength={2000} value={request.task} placeholder="어떤 작업을 진행하는지 입력해 주세요" onChange={event=>setRequest({...request,task:event.target.value})}/></label><button className="btn primary full" disabled={busy||!access.session} onClick={requestWork}><Icon name="arrow"/>작업 점검 요청</button></section>:!order?<section className="card empty-state"><Icon name="check"/><h2>점검 요청을 기다리고 있어요</h2><p>작업자 화면에서 요청한 작업이 여기에 표시돼요.</p></section>:<>
       <section className={`card work-summary ${order.status==='alarm'?'alarm':''}`}><div><span className={`badge ${order.status==='alarm'?'danger':'blue'}`}>{statusLabels[order.status]}</span><small>#{order.id.slice(0,8).toUpperCase()}</small></div><h2>{order.site}</h2><p className="work-location"><Icon name="shield"/>{order.location} · 작업자 {order.worker.name}</p><p className="work-instruction">{order.task}</p>{order.reason&&<Notice kind={order.status==='alarm'?'warning':''}>{order.reason}</Notice>}{order.approvedAt&&<p className="caption">감독관 {order.approvedBy?.name} · {formatDate(order.approvedAt)} 승인 기록 · 투입 확인 유효기한 {formatDate(order.inspection.validUntil)}</p>}</section>
       {order.approvedAt&&approvedInspection&&<details className="card approved-inspection" open={order.status==='approved'}><summary>승인 당시 점검 내용·측정 기록</summary><div className="approved-items">{inspectionItems.map(item=><span key={item.key}>✓ {item.title}</span>)}</div><span className="badge">승인 당시 수동 입력 기록</span><div className="saved-gas-values">{([['o2','O₂','%'],['h2s','H₂S','ppm'],['co','CO','ppm'],['co2','CO₂','%']] as const).map(([key,label,unit])=><div key={key}><span>{label}</span><strong>{approvedInspection.gas[key]??'—'}<small>{unit}</small></strong></div>)}</div><dl><dt>장비·출처</dt><dd>{approvedInspection.device}</dd><dt>측정 시각</dt><dd>{formatDate(approvedInspection.measuredAt)}</dd><dt>감시인</dt><dd>{approvedInspection.watcher}</dd><dt>연락 방법</dt><dd>{approvedInspection.contact}</dd><dt>점검 메모</dt><dd>{approvedInspection.note||'메모 없음'}</dd></dl></details>}
       {inspecting&&<section className="card inspection-card"><div className="check-progress"><div><span className="eyebrow">STEP 02 · SUPERVISOR</span><h2>감독관 작업 전 점검</h2></div><strong>{inspection.checked.length}<span> / 5</span></strong></div><progress value={inspection.checked.length} max={5} aria-label="감독관 점검 진행률"/><div className="check-items">{inspectionItems.map(item=><label key={item.key} className={inspection.checked.includes(item.key)?'checked':''}><input type="checkbox" checked={inspection.checked.includes(item.key)} onChange={()=>setInspection({...inspection,checked:inspection.checked.includes(item.key)?inspection.checked.filter(key=>key!==item.key):[...inspection.checked,item.key]})}/><span><strong>{item.title}</strong><small>{item.detail}</small></span></label>)}</div>
@@ -85,9 +92,10 @@ export default function WorkChecklist({notify,legacyRecords}:{notify:(message:st
       {inWork&&<section className="card monitoring-card"><div className="card-top"><h2>작업 중 모니터링 연계</h2><span className="badge">Android 연결 필요</span></div><div className="metric-grid">{['O₂ %','H₂S ppm','CO ppm','CO₂ %'].map(label=><div className="metric" key={label}><strong>—</strong><span>{label}</span></div>)}</div><p className="caption">실제 가스 측정과 경보는 Android 앱·측정기에서 확인해 주세요. 웹의 위험 신고는 사용자가 직접 확인한 상황을 남기는 기록이에요.</p><label className="field">직접 확인한 위험 상황<textarea rows={2} maxLength={1000} placeholder="위험 상황이나 현장 경보 내용을 입력해 주세요" value={memo} onChange={event=>setMemo(event.target.value)}/></label><button className="btn danger full" disabled={busy||!memo.trim()} onClick={()=>act({type:'report-danger',reason:memo})}>위험 신고 · 대피 시작 기록</button>{role==='worker'&&<><label className="field">작업 종료 후 퇴장 위치<input maxLength={200} placeholder="실제 퇴장한 뒤 위치를 기록해 주세요" value={exitLocation} onChange={event=>setExitLocation(event.target.value)}/></label><button className="btn secondary full" disabled={busy||!exitLocation.trim()} onClick={()=>act({type:'exit',location:exitLocation})}>정상 작업 종료 · 퇴장 확인</button></>}</section>}
       {order.status==='alarm'&&<section className="card evacuation-card"><span className="badge danger">수동 위험 신고 · 대피 중</span><h2>현장 비상 절차에 따라 대피해 주세요</h2><p>실제 경보와 현장 담당자의 지시에 따라 움직이고, 탈출 후 위치를 기록해 주세요.</p>{role==='worker'?<><label className="field">탈출 후 집결 위치<input maxLength={200} value={exitLocation} onChange={event=>setExitLocation(event.target.value)} placeholder="실제 도착한 집결 위치"/></label><button className="btn primary full" disabled={busy||!exitLocation.trim()} onClick={()=>act({type:'evacuate',location:exitLocation})}>긴급 탈출 완료 기록</button></>:<p className="caption">작업자의 탈출 확인 기록을 기다리고 있어요.</p>}</section>}
       {['evacuated','exited','closed'].includes(order.status)&&<section className="card"><span className="badge green">{order.status==='evacuated'?'탈출 확인 기록':order.status==='exited'?'퇴장 확인 기록':'종료 확인 기록'}</span><h2 className="spaced-title">{order.exitLocation}</h2><p>작업자가 기록한 위치를 확인해 주세요.</p>{role==='supervisor'&&order.status!=='closed'&&<><label className="field">감독관 종료 메모<textarea rows={2} maxLength={2000} value={memo} onChange={event=>setMemo(event.target.value)}/></label><button className="btn primary full" disabled={busy} onClick={()=>act({type:'close',note:memo})}>퇴장 기록 확인 · 작업 종료</button></>}{role==='worker'&&order.status!=='closed'&&<p className="caption">감독관의 종료 확인을 기다리고 있어요.</p>}</section>}
-      <section className="card work-timeline"><h2>작업 흐름 기록</h2><ol>{[...order.events].reverse().map(event=><li key={event.id}><span className="timeline-dot"/><div><strong>{event.message}</strong><p>{event.actor.role==='worker'?'작업자':'감독관'} {event.actor.name} · {formatDate(event.at)}</p></div></li>)}</ol><p className="caption">현재 기기에 저장된 기록이에요. 외부 관리자 알림과 기기 간 동기화는 연결 전이에요.</p></section>
+      <section className="card work-timeline"><h2>작업 흐름 기록</h2><ol>{[...order.events].reverse().map(event=><li key={event.id}><span className="timeline-dot"/><div><strong>{event.message}</strong><p>{event.actor.role==='worker'?'작업자':'감독관'} {event.actor.name} · {formatDate(event.at)}</p></div></li>)}</ol><p className="caption">서버에 저장된 작업 기록이에요. 다른 기기의 변경 내용은 주기적으로 확인해요. 별도 푸시 알림은 제공하지 않아요.</p></section>
       </>}
     </div></div>
+    {role==='worker'&&legacyOrders.length>0&&<details className="legacy-checklists"><summary>이전 로컬 테스트 기록 {legacyOrders.length}건 · 읽기 전용</summary><div className="card rows">{legacyOrders.map(record=><div className="list-row" key={record.id}><Icon name="history"/><div><strong>{record.site} · {statusLabels[record.status]}</strong><p>{record.worker.name} · {record.location} · {formatDate(record.updatedAt)}</p><small>권한 인증 도입 이전에 이 기기에 저장한 테스트 기록이에요. 현재 승인으로 사용할 수 없어요.</small></div></div>)}</div></details>}
     {legacyRecords.length>0&&<details className="legacy-checklists"><summary>기존 점검 기록 {legacyRecords.length}건</summary><div className="card rows">{legacyRecords.slice(0,10).map(record=><div className="list-row" key={record.id}><Icon name="check"/><div><strong>{record.site||'기존 현장 점검'} · {record.checked.length}/5 확인</strong><p>{formatDate(record.createdAt)} · {record.note}</p></div></div>)}</div></details>}
     <Notice>이 화면은 요청·점검·투입·퇴장 기록의 흐름을 제공해요. 실제 작업허가와 현장 안전 확인은 담당 감독관의 절차에 따라 진행해 주세요.</Notice>
   </>;

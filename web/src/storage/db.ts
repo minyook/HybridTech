@@ -1,6 +1,6 @@
 import { openDB, type IDBPDatabase } from 'idb';
 import type { Chat, Checklist, ModelRecord } from '../types';
-import { transitionWork, type Actor, type WorkAction, type WorkOrder } from '../workflow/work';
+import type { WorkOrder } from '../workflow/work';
 
 let connection:Promise<IDBPDatabase>|undefined;
 const database = () => connection ??= openDB('fieldguard-web', 2, {
@@ -38,12 +38,3 @@ export async function clearRecords() {
   await tx.objectStore('chats').clear(); await tx.objectStore('checklists').clear(); await tx.objectStore('workOrders').clear(); await tx.objectStore('settings').delete('checklist-draft'); await tx.done;
 }
 export async function allWorkOrders():Promise<WorkOrder[]> { return (await (await database()).getAll('workOrders')).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)); }
-export async function saveNewWorkOrder(order:WorkOrder) { await (await database()).add('workOrders',order); }
-export async function applyWorkAction(id:string,actor:Actor,action:WorkAction,revision:number):Promise<WorkOrder> {
-  const tx=(await database()).transaction('workOrders','readwrite');
-  try{
-    const current=await tx.store.get(id) as WorkOrder|undefined;
-    if(!current||current.revision!==revision)throw new Error('다른 화면에서 작업이 갱신되었어요. 새로 불러온 내용을 확인하고 다시 진행해 주세요.');
-    const updated=transitionWork(current,actor,action);await tx.store.put(updated);await tx.done;return updated;
-  }catch(error){try{tx.abort();}catch{/* Transaction may already have ended. */}await tx.done.catch(()=>{});throw error;}
-}

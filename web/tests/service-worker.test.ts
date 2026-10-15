@@ -13,6 +13,11 @@ function worker(shellMatch: CacheMatcher, assetMatch: CacheMatcher=async () => u
   });
   return {fetch,request(url:string,mode='cors') {let response: Promise<Response> | undefined;events.fetch({request:{url,method:'GET',mode},respondWith:(result:Promise<Response>)=>{response=result;}});return response!;}};
 }
+it('인증과 작업 API는 서비스 워커 캐시를 사용하지 않는다',()=>{
+  const runtime=worker(async()=>Response.json({supervisor:{id:'stale-grant'}}));
+  expect(runtime.request('https://field.test/api/session')).toBeUndefined();
+  expect(runtime.request('https://field.test/api/work-orders?view=supervisor')).toBeUndefined();
+});
 it('오프라인 새로고침은 같은 배포 버전의 화면을 반환한다',async () => {
   const match=vi.fn(async () => new Response('<html>cached app</html>'));
   const runtime=worker(match);
