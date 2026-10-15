@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { nativeDestination } from './workflow/native';
 
 const paths: Record<string, ReactNode> = {
   home: <><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></>,
@@ -24,7 +25,7 @@ const paths: Record<string, ReactNode> = {
 export function Icon({ name, className = '' }: { name: string; className?: string }) {
   return <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name] ?? paths.info}</svg>;
 }
-export const go = (path: string) => { location.hash = path; };
+export const go = (path: string) => { const native = nativeDestination(path); if (native) location.href = native; else location.hash = path; };
 export const formatDate = (date: string) => new Intl.DateTimeFormat('ko-KR',{month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(date));
 export const bytes = (value: number) => value >= 1024**3 ? `${(value/1024**3).toFixed(2)} GB` : `${(value/1024**2).toFixed(1)} MB`;
 export function PageHead({ eyebrow, title, description, action }: { eyebrow?: string; title: string; description?: string; action?: ReactNode }) {

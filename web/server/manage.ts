@@ -1,13 +1,12 @@
 import { createWorkStore } from './store.ts';
 
-const [command, ...args] = process.argv.slice(2);
+const [command] = process.argv.slice(2);
 const store = createWorkStore();
 try {
-  if (command === 'issue' && args[0] === '--name' && args[1]?.trim()) {
-    const invite = store.issueInvite(args[1].trim());
-    console.log(`감독관: ${invite.name}\n등록 코드 (1회용): ${invite.code}\n코드 만료: ${invite.expiresAt}\n회수 ID: ${invite.id}\n사이트 설정 → 감독관 인증에서 입력해 주세요. 인증은 8시간 동안 유지돼요.`);
-  } else if (command === 'revoke' && args[0]) {
-    store.revokeInvite(args[0]); console.log('등록 코드와 이 코드로 부여한 감독관 권한을 회수했어요.');
-  } else if (command === 'list') console.table(store.listInvites());
-  else { console.log('발급: npm run supervisor -- issue --name "감독관 이름"\n목록: npm run supervisor -- list\n회수: npm run supervisor -- revoke <회수 ID>'); process.exitCode = 1; }
+  if (command === 'today' || command === 'rotate') {
+    const daily = command === 'rotate' ? store.rotateDailyCode() : store.todayCode();
+    console.log(`한국 날짜: ${daily.day}\n오늘의 감독관 암호코드: ${daily.code ?? '사용 중지됨 · rotate로 새 코드 발급'}\n만료: 다음 날 00:00 (한국 시간)\n감독관에게만 전달해 주세요. 여러 감독관이 오늘 같은 코드를 사용할 수 있어요.`);
+  } else if (command === 'revoke') {
+    store.revokeDailyCode(); console.log('오늘의 코드와 이 코드로 인증한 모든 감독관 권한을 중지했어요. rotate로 새 코드를 발급할 수 있어요.');
+  } else { console.log('오늘 코드: npm run supervisor -- today\n즉시 교체: npm run supervisor -- rotate\n오늘 코드 중지: npm run supervisor -- revoke'); process.exitCode = 1; }
 } finally { store.close(); }

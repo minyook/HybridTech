@@ -49,7 +49,7 @@ import java.util.UUID
 
 enum class AppDestination {
     HOME, CHAT, HISTORY, SOURCE, VOICE, SENSOR, SENSOR_DISCONNECTED,
-    CHECKLIST, LIBRARY, MODEL, INFERENCE, DATA, SETTINGS, SYSTEM,
+    CHECKLIST, LIBRARY, MODEL, INFERENCE, DATA, SETTINGS, SYSTEM, LOCAL_CHECKLIST, WORK_SERVER, SUPERVISOR,
 }
 
 data class SourceUi(
@@ -114,6 +114,7 @@ data class FieldGuardUiState(
     val checklistSaved: Boolean = false,
     val sensorConnectionLost: Boolean = false,
     val lastGasReading: GasReading = GasReading(),
+    val workServerUrl: String = "",
 )
 
 /**
@@ -137,6 +138,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
             onboardingComplete = uiPreferences.getBoolean("onboarding_complete", false),
             checklistChecked = (0..4).filterTo(mutableSetOf()) { uiPreferences.getBoolean("check_$it", false) },
             checklistSaved = uiPreferences.getBoolean("checklist_saved", false),
+            workServerUrl = uiPreferences.getString("work_server_url", "") ?: "",
             modelStatus = modelPreferences.status(),
             deviceProfile = DeviceProfile.read(appContext),
             settings = inferencePreferences.load(),
@@ -235,6 +237,12 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     fun completeOnboarding() {
         uiPreferences.edit().putBoolean("onboarding_complete", true).apply()
         updateState { it.copy(onboardingComplete = true, destination = AppDestination.HOME) }
+    }
+
+    fun saveWorkServer(value: String) {
+        val address = canonicalWorkServerUrl(value, com.minyook.sllm2.BuildConfig.DEBUG)
+        uiPreferences.edit().putString("work_server_url", address).apply()
+        updateState { it.copy(workServerUrl = address, destination = AppDestination.CHECKLIST) }
     }
 
     fun newChat() = updateState {

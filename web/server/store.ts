@@ -1,13 +1,12 @@
 import { DatabaseSync } from 'node:sqlite';
-import { createHash, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
-import { mkdirSync } from 'node:fs';
+import { createHash, createHmac, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createWork, inspectionItems, transitionWork, type Actor, type Inspection, type WorkAction, type WorkOrder } from '../src/workflow/work.ts';
 
 export const defaultDatabasePath = fileURLToPath(new URL('../.local/workflow.sqlite', import.meta.url));
 const SESSION_MS = 30 * 24 * 60 * 60 * 1000;
-const GRANT_MS = 8 * 60 * 60 * 1000;
 const digest = (value: string) => createHash('sha256').update(value).digest('hex');
 const secret = () => randomBytes(32).toString('base64url');
 export class ApiError extends Error {
@@ -20,7 +19,11 @@ export interface WorkSession {
   supervisor?: { id: string; name: string; expiresAt: string };
 }
 interface SessionRow { token: string; worker_id: string; csrf: string; expires: number; invite_id: string | null; supervisor_name: string | null; grant_expires: number | null }
-interface InviteRow { id: string; name: string; expires: number; used: number | null; revoked: number | null }
+interface DailyCodeRow { day: string; generation: string; expires: number; revoked: number | null }
+export function koreanDay(time: number) {
+  const day = new Date(time + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  return { day, expires: Date.parse(`${day}T15:00:00.000Z`) };
+}
 function text(value: unknown, maximum: number, required = true): string {
   if (typeof value !== 'string' || value.length > maximum || (required && !value.trim())) throw new ApiError(400, '입력 내용을 확인해 주세요.');
   return value.trim();
@@ -57,10 +60,20 @@ function actionValue(value: unknown): WorkAction {
 
 export function createWorkStore(filename = defaultDatabasePath, now = () => Date.now()) {
   if (filename !== ':memory:') mkdirSync(dirname(filename), { recursive: true });
+  let dailyKey: Buffer;
+  if (filename === ':memory:') dailyKey = randomBytes(32);
+  else {
+    const keyPath = `${filename}.daily-key`;
+    try { writeFileSync(keyPath, randomBytes(32), { flag: 'wx', mode: 0o600 }); }
+    catch (error) { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }
+    dailyKey = readFileSync(keyPath);
+    if (dailyKey.length !== 32) throw new Error('감독관 코드 키 파일을 확인해 주세요.');
+  }
   const db = new DatabaseSync(filename);
   db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
     CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, worker_id TEXT NOT NULL, csrf TEXT NOT NULL, expires INTEGER NOT NULL, invite_id TEXT, supervisor_name TEXT, grant_expires INTEGER);
     CREATE TABLE IF NOT EXISTS invites (id TEXT PRIMARY KEY, hash TEXT UNIQUE NOT NULL, name TEXT NOT NULL, expires INTEGER NOT NULL, used INTEGER, revoked INTEGER);
+    CREATE TABLE IF NOT EXISTS daily_codes (day TEXT PRIMARY KEY, generation TEXT NOT NULL, expires INTEGER NOT NULL, revoked INTEGER);
     CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, worker_id TEXT NOT NULL, revision INTEGER NOT NULL, updated_at TEXT NOT NULL, body TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS attempts (identity TEXT PRIMARY KEY, failures INTEGER NOT NULL, reset_at INTEGER NOT NULL);`);
   function transaction<T>(action: () => T): T {
@@ -72,11 +85,28 @@ export function createWorkStore(filename = defaultDatabasePath, now = () => Date
     if (!row || row.expires <= now()) throw new ApiError(401, '접속 정보를 다시 확인해 주세요.');
     return row;
   }
+  function codeFor(row: Pick<DailyCodeRow, 'day' | 'generation'>) {
+    const value = createHmac('sha256', dailyKey).update(`fieldguard-supervisor:${row.day}:${row.generation}`).digest('hex');
+    return (BigInt(`0x${value}`) % 1_000_000n).toString().padStart(6, '0');
+  }
+  function today() {
+    const window = koreanDay(now());
+    let row = db.prepare('SELECT * FROM daily_codes WHERE day = ?').get(window.day) as unknown as DailyCodeRow | undefined;
+    if (!row) {
+      const previousDay = koreanDay(now() - 24 * 60 * 60 * 1000).day;
+      const previous = db.prepare('SELECT * FROM daily_codes WHERE day = ?').get(previousDay) as unknown as DailyCodeRow | undefined;
+      let generation: string;
+      do { generation = secret(); } while (previous && codeFor({ day: window.day, generation }) === codeFor(previous));
+      db.prepare('INSERT OR IGNORE INTO daily_codes VALUES (?, ?, ?, NULL)').run(window.day, generation, window.expires);
+      row = db.prepare('SELECT * FROM daily_codes WHERE day = ?').get(window.day) as unknown as DailyCodeRow;
+    }
+    return row;
+  }
   function supervisor(row: SessionRow) {
     if (!row.invite_id || !row.grant_expires || row.grant_expires <= now()) return undefined;
-    const invite = db.prepare('SELECT * FROM invites WHERE id = ?').get(row.invite_id) as unknown as InviteRow | undefined;
-    if (!invite || invite.revoked !== null) return undefined;
-    return { id: invite.id, name: row.supervisor_name!, expiresAt: new Date(row.grant_expires).toISOString() };
+    const daily = today();
+    if (daily.revoked !== null || row.invite_id !== `daily:${daily.day}:${daily.generation}`) return undefined;
+    return { id: `${row.invite_id}:${row.worker_id}`, name: row.supervisor_name!, expiresAt: new Date(row.grant_expires).toISOString() };
   }
   function publicSession(row: SessionRow): WorkSession { return { workerId: row.worker_id, csrf: row.csrf, supervisor: supervisor(row) }; }
   function requireSupervisor(row: SessionRow) {
@@ -84,10 +114,10 @@ export function createWorkStore(filename = defaultDatabasePath, now = () => Date
     if (!grant) throw new ApiError(403, '감독관 인증이 필요해요.');
     return grant;
   }
-  function rotate(row: SessionRow, grant?: { id: string; name: string }) {
+  function rotate(row: SessionRow, grant?: { id: string; name: string; expires: number }) {
     const token = secret(); const csrf = secret();
     db.prepare('DELETE FROM sessions WHERE token = ?').run(row.token);
-    db.prepare('INSERT INTO sessions VALUES (?, ?, ?, ?, ?, ?, ?)').run(digest(token), row.worker_id, csrf, now() + SESSION_MS, grant?.id ?? null, grant?.name ?? null, grant ? now() + GRANT_MS : null);
+    db.prepare('INSERT INTO sessions VALUES (?, ?, ?, ?, ?, ?, ?)').run(digest(token), row.worker_id, csrf, now() + SESSION_MS, grant?.id ?? null, grant?.name ?? null, grant?.expires ?? null);
     return { token, session: publicSession(requireSession(token)) };
   }
   function attemptKey(identity: string) { return digest(`attempt:${identity}`); }
@@ -103,31 +133,33 @@ export function createWorkStore(filename = defaultDatabasePath, now = () => Date
       const expected = requireSession(token).csrf;
       if (!csrf || Buffer.byteLength(csrf) !== Buffer.byteLength(expected) || !timingSafeEqual(Buffer.from(csrf), Buffer.from(expected))) throw new ApiError(403, '이 화면에서 다시 요청해 주세요.');
     },
-    issueInvite(name: string, hours = 24) {
-      const id = randomUUID(); const code = secret(); const expires = now() + hours * 60 * 60 * 1000;
-      db.prepare('INSERT INTO invites VALUES (?, ?, ?, ?, NULL, NULL)').run(id, digest(code), text(name, 60), expires);
-      return { id, code, name, expiresAt: new Date(expires).toISOString() };
+    todayCode() { const row = today(); return { day: row.day, code: row.revoked === null ? codeFor(row) : undefined, expiresAt: new Date(row.expires).toISOString(), revoked: row.revoked !== null }; },
+    rotateDailyCode() {
+      const row = today(); let generation: string;
+      do { generation = secret(); } while (codeFor({ day: row.day, generation }) === codeFor(row));
+      db.prepare('UPDATE daily_codes SET generation = ?, revoked = NULL WHERE day = ?').run(generation, row.day);
+      const updated = today(); return { day: updated.day, code: codeFor(updated), expiresAt: new Date(updated.expires).toISOString() };
     },
-    listInvites() { return db.prepare('SELECT id, name, expires, used, revoked FROM invites ORDER BY expires DESC').all(); },
-    revokeInvite(id: string) { db.prepare('UPDATE invites SET revoked = ? WHERE id = ?').run(now(), id); },
+    revokeDailyCode() { const row = today(); db.prepare('UPDATE daily_codes SET revoked = ? WHERE day = ?').run(now(), row.day); },
     unlock(token: string | undefined, code: unknown, remoteIdentity: string) {
       const row = requireSession(token);
-      const keys = [attemptKey(remoteIdentity), attemptKey(row.worker_id)];
-      for (const key of keys) {
+      const keys = [{ key: attemptKey(`${koreanDay(now()).day}:${remoteIdentity}`), maximum: 30 }, { key: attemptKey(`${koreanDay(now()).day}:${row.worker_id}`), maximum: 5 }];
+      for (const { key, maximum } of keys) {
         const limit = db.prepare('SELECT failures, reset_at FROM attempts WHERE identity = ?').get(key) as { failures: number; reset_at: number } | undefined;
-        if (limit && limit.failures >= 5 && limit.reset_at > now()) throw new ApiError(429, '인증 시도가 많아요. 15분 후 다시 시도해 주세요.');
+        if (limit && limit.failures >= maximum && limit.reset_at > now()) throw new ApiError(429, '인증 시도가 많아요. 15분 후 다시 시도해 주세요.');
       }
-      const normalized = typeof code === 'string' && code.length <= 200 ? code.trim() : '';
-      const invite = db.prepare('SELECT * FROM invites WHERE hash = ?').get(digest(normalized)) as unknown as InviteRow | undefined;
-      if (!invite || invite.used !== null || invite.revoked !== null || invite.expires <= now()) {
-        for (const key of keys) db.prepare(`INSERT INTO attempts VALUES (?, 1, ?) ON CONFLICT(identity) DO UPDATE SET failures = CASE WHEN reset_at <= ? THEN 1 ELSE failures + 1 END, reset_at = CASE WHEN reset_at <= ? THEN excluded.reset_at ELSE reset_at END`).run(key, now() + 15 * 60 * 1000, now(), now());
-        throw new ApiError(403, '등록 코드를 확인해 주세요. 만료되거나 사용한 코드는 사용할 수 없어요.');
+      const normalized = typeof code === 'string' ? code.trim() : '';
+      const daily = today(); const expected = codeFor(daily);
+      if (!/^\d{6}$/.test(normalized) || daily.revoked !== null || daily.expires <= now() || !timingSafeEqual(Buffer.from(normalized), Buffer.from(expected))) {
+        for (const { key } of keys) db.prepare(`INSERT INTO attempts VALUES (?, 1, ?) ON CONFLICT(identity) DO UPDATE SET failures = CASE WHEN reset_at <= ? THEN 1 ELSE failures + 1 END, reset_at = CASE WHEN reset_at <= ? THEN excluded.reset_at ELSE reset_at END`).run(key, now() + 15 * 60 * 1000, now(), now());
+        throw new ApiError(403, '오늘의 6자리 암호코드를 확인해 주세요. 날짜가 바뀌거나 교체된 코드는 사용할 수 없어요.');
       }
       return transaction(() => {
-        const result = db.prepare('UPDATE invites SET used = ? WHERE id = ? AND used IS NULL AND revoked IS NULL AND expires > ?').run(now(), invite.id, now());
-        if (result.changes !== 1) throw new ApiError(403, '등록 코드를 다시 발급받아 주세요.');
-        for (const key of keys) db.prepare('DELETE FROM attempts WHERE identity = ?').run(key);
-        return rotate(row, invite);
+        // Recheck after acquiring the write lock: an administrator may rotate the code.
+        const current = today();
+        if (current.generation !== daily.generation || current.revoked !== null || current.expires <= now()) throw new ApiError(403, '오늘의 암호코드를 다시 확인해 주세요.');
+        db.prepare('DELETE FROM attempts WHERE identity = ?').run(keys[1].key);
+        return rotate(row, { id: `daily:${daily.day}:${daily.generation}`, name: `감독관 · 기기 ${row.worker_id.slice(0, 4).toUpperCase()}`, expires: daily.expires });
       });
     },
     lock(token: string | undefined) { return transaction(() => rotate(requireSession(token))); },

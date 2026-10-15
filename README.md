@@ -1,14 +1,33 @@
 # HybridTech · O₂ Field Guard
 
-밀폐공간 안전작업 문서를 검색하고 기기 내 AI로 질문에 답하는 프로젝트입니다. **기존 Android 설치형 앱은 Kotlin·Jetpack Compose로 유지**하며, **PC·태블릿·iPhone용 반응형 웹/PWA는 `web/`에서 별도로 실행**합니다. 문서 검색과 답변 생성은 기기 안에서 처리하고, BLE 가스 측정·경보·위젯은 Android 앱에서 제공합니다.
+밀폐공간 안전 문서를 근거로 질문에 답하고, 작업 요청부터 감독관 점검·승인, 현장 투입과 퇴장까지 기록하는 프로젝트입니다. **Android는 설치형 앱으로 유지하고, PC·갤럭시 탭·iPhone은 반응형 웹/PWA도 함께 사용합니다.** 질문과 문서 검색은 기기 안에서 처리하며, 작업 요청·승인만 공통 작업 서버를 사용합니다.
 
-질문을 받으면 관련 문서의 쪽을 먼저 찾고 그 내용을 근거로 Gemma 4 E2B가 답합니다. 답변에서 사용한 쪽은 추출 텍스트뿐 아니라 실제 PDF 화면으로도 확인할 수 있습니다. 가스 측정은 별도 BLE 경로로 다루며, 값의 출처와 마지막 수신 시각을 표시합니다.
+최종 갱신: **2026-10-15**. 이 README는 저장소 첫 화면에서 프로젝트 구조, 실행 주소, 실제 소스 경로, 감독관 코드, 테스트 방법을 확인할 수 있도록 정리한 안내입니다.
 
-이 문서는 현재 코드에서 동작하는 부분, 그렇게 구현한 이유, 아직 검증해야 할 부분을 기록한 개발 문서입니다.
+## 먼저 알아둘 구성
 
-## 빠른 시작과 문서 안내
+| 구성 | 구현과 역할 | 실행·진입 경로 |
+|---|---|---|
+| Android 설치형 앱 | Kotlin·Compose 화면, 기기 내 RAG/Gemma, 원본 PDF, 음성, BLE 측정·경보·위젯 | `app/` → Android Studio에서 실행 |
+| 반응형 웹/PWA | React·TypeScript 화면, 기기 내 Gemma, 원문 PDF, 대화 기록, 작업 요청·점검 | `web/` → 개발 5174 / 미리보기 4173 |
+| 공통 작업 서버 | 기기별 세션, 당일 6자리 감독관 코드, 요청 소유권·승인 권한 검사, 작업 기록 | `web/server/` → Vite 개발·미리보기와 함께 실행 |
+| 공통 작업 화면 | 작업자 요청·감독관 점검·승인·투입·대피·종료 | `web/src/features/WorkChecklist.tsx`; 앱은 이 화면을 제한된 WebView로 사용 |
 
-웹 개발 화면은 **`http://localhost:5174/`**입니다. 아래 명령은 저장소의 `web` 폴더에서 실행합니다.
+**웹 디자인을 공통 기준으로 사용합니다.** 홈 문구·파랑/회색 색상·흰색 카드·문서 표지·메뉴 명칭을 앱에도 적용했습니다. 작은 화면은 `홈 / 질문 / 문서 / 설정`, 넓은 앱 화면은 웹처럼 사이드바를 사용합니다. 앱의 가스 측정·음성·위젯은 Android 기능으로 이어지며, 웹에서 측정값을 만들어 표시하지 않습니다.
+
+## 앱 디자인 화면
+
+아래 파일은 `WorkspaceDesignTest`가 실제 Compose 화면을 렌더링해 저장하는 검증 자료입니다. 테스트 문서와 가상 상태를 사용하며 모델 다운로드·BLE·실제 작업을 시작하지 않습니다. 촬영 기기와 최종 결과는 [검증 기록](web/docs/validation.md)에 기록합니다.
+
+| 홈 | 설정 |
+|---|---|
+| ![웹 기준 Android 홈](docs/screenshots/android-workspace-home.png) | ![웹 기준 Android 설정](docs/screenshots/android-workspace-settings.png) |
+
+[문서 보관함 화면](docs/screenshots/android-workspace-library.png) · [앱 내 공통 감독관 화면](docs/screenshots/android-workspace-supervisor.png)
+
+## 빠른 실행: 웹
+
+필요 환경은 **Node.js 24.15 이상**입니다. PowerShell에서는 `npm.cmd`를 사용합니다. 아래 명령은 저장소 루트 기준입니다.
 
 ```powershell
 cd web
@@ -16,377 +35,238 @@ npm.cmd ci
 npm.cmd run dev
 ```
 
-`5174`가 사용 중이면 다른 포트로 넘어가지 않고 오류를 표시합니다. `docs/webapp-ui/`는 과거 정적 시안이며 실행하는 앱은 `web/`입니다. PWA·오프라인 시험은 `npm.cmd run build` 후 `npm.cmd run preview`로 `http://localhost:4173/`에서 합니다. Android 빌드 방법은 아래 [빌드 및 실행](#빌드-및-실행)에 있습니다.
-
-| 문서 | 내용 |
-| --- | --- |
-| [웹 README](web/README.md) | 설치·실행·모델 자동 준비·토큰·PWA·배포 절차 |
-| [웹 현행 설계서](docs/webapp/TARGET_ARCHITECTURE.md) | 실제 브라우저 구성, AI Worker, 검색, 저장, 스크롤, 운영 경계 |
-| [작업 요청·감독관 흐름](web/docs/workflow.md) | 상태 전환, 서버 권한 검사, 감독관 코드 발급·잠금·회수 |
-| [검증 기록](web/docs/validation.md) | 자동 테스트, 실제 브라우저 확인, 화면, 남은 실기기 시험 |
-| [Android 현행 설계서](docs/ANDROID_APP_SPEC.md) | Android 화면·데이터·BLE·음성·추론 구조 |
-| [Android 오프라인 RAG](docs/OFFLINE_RAG_ARCHITECTURE.md) | 기존 Android 검색·모델 경로 상세 |
-| [웹 유지보수 기준](docs/webapp/BUILD_PROMPT.md) | 향후 수정 시 지켜야 할 현재 구현·검증 기준 |
-
-현재 검증: 웹 **100개 테스트 통과**, TypeScript·프로덕션 빌드 성공. Windows 내장 Chromium에서 실제 모델 다운로드·검증·자동 초기화·생성·토큰 사용량을 확인했습니다. iPhone 실기기 설치·메모리·발열·재부팅 후 유지 시험과 실제 측정기 연동 검증은 남아 있습니다.
-
-Android는 기존 PDF 번들·로컬 음성 경로를 보존하고 `:app:testDebugUnitTest :app:assembleDebug` 검증을 통과했습니다. PDF 계측 테스트의 연결 단말 실행은 이번 작업에서 수행하지 않았습니다.
-
-웹 작업자는 본인 요청만 확인하며 감독관 전환 버튼은 제공하지 않습니다. 감독관은 서버 PC의 `web/`에서 `npm.cmd run supervisor -- issue --name "감독관 이름"`으로 발급한 일회용 코드를 설정의 ‘감독관 인증’에 입력합니다. 코드 등록은 24시간 이내 1회, 권한은 8시간 유지하며 잠금·관리자 회수를 지원합니다. 새 작업 기록과 권한은 서버 SQLite에 저장하므로 점검에는 서버 연결이 필요합니다. 같은 서버에 연결한 PC·탭에서 요청·승인을 공유하며 문서·PDF·기기 내 AI는 기존대로 오프라인으로 사용할 수 있습니다. 현재는 기기별 인증이며 개인 계정 로그인·현장 배정·푸시는 연결 전입니다. Node.js 24.15 이상을 사용하고 `.local/` DB와 코드는 Git에 넣지 않습니다.
-
-> [!IMPORTANT]
-> 현재는 **개발 중인 프로토타입**입니다. 화면의 `데모 · 실측 아님` 수치는 시뮬레이션이며 실제 작업 가능 여부를 판단하는 측정값이 아닙니다. BLE 수신 기반은 구현했지만 특정 제조사의 측정기 프로토콜과 현장 정확도는 검증 전입니다.
-
-## Android에서 구현한 범위
-
-| 영역 | 현재 동작 |
-| --- | --- |
-| 문서 질문 | 안전작업 문서 2종을 기기에서 검색하고, 문서명·쪽수와 함께 답변 근거를 남깁니다. |
-| 기기 내 답변 | Gemma 4 E2B를 한 번 내려받으면 검색된 근거를 사용해 기기에서 답변을 생성합니다. 모델이 없거나 실패하면 검색된 원문을 표시합니다. |
-| 근거 확인 | PDF 원본, 읽기 편한 보기, 검색에 사용한 추출 텍스트를 같은 쪽에서 전환합니다. PDF 원본도 앱에 포함되어 오프라인으로 열립니다. |
-| 가스 상태 | BLE 수신 기반과 데모 시뮬레이션을 분리했습니다. 수신되지 않았거나 오래된 값을 현재값으로 표시하지 않습니다. |
-| 로컬 기록 | 대화, 작업 전 점검 상태, 마지막 가스값을 앱 저장소에 보관합니다. |
-
-## Android 앱 화면
-
-직접 실행한 앱 화면을 캡처했습니다. 이미지를 누르면 원본 크기로 볼 수 있습니다. 수치·모델 상태·기록 개수는 **촬영 당시 단말 상태**이며, 상단의 다른 앱 배지와 숫자는 O₂ Field Guard 화면이 아닙니다.
-
-### 1. 홈에서 시작해 질문하기
-
-| 홈: 오늘 확인할 항목 | 질문: 현장 질문 입력 |
-| --- | --- |
-| <a href="docs/screenshots/home.png"><img src="docs/screenshots/home.png" alt="홈 화면의 문서 준비, 센서 상태, 질문과 점검 진입점" width="290"></a> | <a href="docs/screenshots/question-start.png"><img src="docs/screenshots/question-start.png" alt="질문 화면의 예시 질문과 입력창" width="290"></a> |
-| 문서 준비 상태와 센서 연결 대기를 먼저 보여주고, 질문·점검·문서 보관함으로 이동합니다. | 텍스트나 마이크로 질문할 수 있습니다. 공기 기준·구조 절차·작업허가 점검 같은 빠른 질문도 제공합니다. |
-
-### 2. 답변의 근거 확인하기
-
-| 질문과 답변 | PDF 원본 |
-| --- | --- |
-| <a href="docs/screenshots/question-answer.png"><img src="docs/screenshots/question-answer.png" alt="작업허가 질문에 대한 문서 기반 답변" width="290"></a> | <a href="docs/screenshots/source-document.png"><img src="docs/screenshots/source-document.png" alt="작업허가 근거를 실제 PDF 20쪽의 그림과 함께 표시한 화면" width="290"></a> |
-| 질문과 답변 아래에서 근거를 열 수 있습니다. | 공식 PDF의 해당 쪽을 그림·표까지 원래 배치로 확인하고 확대할 수 있습니다. |
-
-| 읽기 편한 보기 | 추출 텍스트 |
-| --- | --- |
-| <a href="docs/screenshots/source-document-readable.png"><img src="docs/screenshots/source-document-readable.png" alt="근거 문장을 단락과 목록으로 구분한 읽기 편한 보기" width="290"></a> | <a href="docs/screenshots/source-document-extracted.png"><img src="docs/screenshots/source-document-extracted.png" alt="검색과 답변에 사용된 PDF 추출 텍스트 보기" width="290"></a> |
-| 같은 근거를 단락과 목록으로 나누어 읽기 쉽게 표시합니다. | 검색과 답변에 실제 사용한 추출 텍스트를 확인합니다. 원본 PDF와 대조할 수 있습니다. |
-
-### 3. 기록과 내 데이터 확인하기
-
-| 대화 기록 | 내 데이터 |
-| --- | --- |
-| <a href="docs/screenshots/conversation-history.png"><img src="docs/screenshots/conversation-history.png" alt="기기에 보관된 대화 목록" width="290"></a> | <a href="docs/screenshots/my-data.png"><img src="docs/screenshots/my-data.png" alt="대화 기록, 문서 색인, 마지막 가스값 저장 범위" width="290"></a> |
-| 이전 질문을 다시 열거나 새 대화를 시작합니다. | 대화, 문서 색인, 마지막 가스값의 저장 범위를 안내합니다. 현재 질문·답변 전송 서버는 없습니다. |
-
-### 4. 측정값과 출처 구분하기
-
-| 가스 측정 탭 | 질문 화면 상단 가스 상태 |
-| --- | --- |
-| <a href="docs/screenshots/gas-measurement.png"><img src="docs/screenshots/gas-measurement.png" alt="데모값과 BLE 기기 검색을 분리해 표시하는 측정 화면" width="290"></a> | <a href="docs/screenshots/chat-gas-status.png"><img src="docs/screenshots/chat-gas-status.png" alt="새 측정값이 없을 때 현재값으로 쓰지 말라는 질문 화면 상태 카드" width="290"></a> |
-| O₂·H₂S·CO·LEL과 BLE 기기 검색을 보여줍니다. 예시 수치는 `데모 · 실제 측정값 아님`으로 표시됩니다. | 새 수신이 없으면 숫자를 `—`로 가리고 사용 금지를 안내합니다. 문서 질문 중에도 측정 상태를 볼 수 있습니다. |
-
-### 5. 모델과 추론 방식 살펴보기
-
-| 설정 | 로컬 AI 모델 |
-| --- | --- |
-| <a href="docs/screenshots/settings.png"><img src="docs/screenshots/settings.png" alt="모델, 추론, 내 데이터, 위젯과 알림 설정 진입 화면" width="290"></a> | <a href="docs/screenshots/local-model.png"><img src="docs/screenshots/local-model.png" alt="Gemma 4 E2B 준비 상태와 설치 조건을 보여주는 화면" width="290"></a> |
-| 모델·추론 설정·내 데이터·위젯과 알림을 분리해 제공합니다. | 캡처한 기기에는 모델이 설치되어 있습니다. 다른 기기에서는 최초 다운로드와 충분한 저장 공간이 필요합니다. |
-
-## 개발하면서 정한 방식
-
-처음에는 화면보다 **답변의 출처를 다시 찾을 수 있는 구조**를 먼저 만들었습니다. 안전작업 가이드와 자율점검표에서 추출한 텍스트를 쪽 단위 87개 조각으로 정리하고, 문서명과 쪽수를 함께 저장했습니다. 검색용 텍스트와 SHA-256으로 검증한 공식 PDF 원본 두 개를 앱에 포함해 해당 쪽을 오프라인으로 열 수 있게 했습니다.
-
-검색은 ObjectBox의 벡터 검색에 단어 일치 점수를 더했습니다. 현재 쓰는 384차원 해시 임베딩은 가볍고 오프라인에서 즉시 쓸 수 있지만, 표현이 달라지면 정확도가 떨어질 수 있습니다. 실제로 **심폐소생술과 산소 측정법을 한꺼번에 묻는 질문에서 심폐소생술 근거가 빠지는 문제**가 있었습니다. 지금은 복합 질문을 주제별로 나누어 각 주제의 근거를 먼저 확보합니다. 심폐소생술만 묻는 경우에는 내용이 이어지는 다음 쪽도 확인합니다.
-
-답변 생성은 검색 다음 단계입니다. 찾은 원문과 질문을 Gemma 4 E2B에 전달하고, 모델이 준비되지 않았거나 생성에 실패해도 검색된 근거를 읽을 수 있게 했습니다. 답변 길이를 임의로 짧게 제한하면 필요한 내용이 중간에 끊겨 기본값에서는 모델의 종료 신호까지 생성합니다. 생성 중에는 텍스트와 경과 시간을 표시하고, 로그에는 첫 출력까지와 이후 생성에 걸린 시간을 나누어 기록합니다.
-
-가스 측정 쪽은 BLE Notify/Indicate 수신, 패킷 해석, 마지막 수신 시각·출처 저장을 따로 구현했습니다. 실제 장비가 없는 개발 단계에서 화면 흐름을 확인하기 위한 시뮬레이션도 있지만, BLE 수신값과 같은 값으로 취급하지 않습니다. 60초 이상 새 값이 들어오지 않으면 현재 측정값으로 표시하지 않습니다.
-
-UI는 Jetpack Compose로 만들고 질문, 모델, BLE 상태를 `StateFlow`로 연결했습니다. 모델 파일은 앱 설치 파일에 넣지 않고 WorkManager로 내려받으며, 선택한 백엔드가 초기화에 실패하면 다른 백엔드를 시도합니다.
-
-구현 세부 사항과 파일 위치는 아래 [오프라인 RAG 구조](#오프라인-rag-구조), [BLE 연동](#ble-가스-검출기와-백그라운드-모니터링), [프로젝트 구조](#프로젝트-구조)에 적었습니다.
-
-## 구현 상태
-
-| 영역 | 구현 내용 | 상태 |
-| --- | --- | --- |
-| 문서 RAG | 제공 문서 2종의 텍스트 87개 조각을 ObjectBox에 저장하고 오프라인 검색 | 구현됨 |
-| 근거 문서 보기 | 실제 PDF 해당 쪽, 읽기 편한 텍스트, 추출 텍스트 전환과 PDF 확대 | 구현됨 — 첫 열람부터 인터넷 없이 사용 가능 |
-| 로컬 생성 AI | Gemma 4 E2B LiteRT-LM 모델 다운로드·저장·CPU/GPU 폴백 생성 | 구현됨 |
-| 채팅 | Markdown 답변, 대화 이력, 새 대화, 최근 답변 이동 | 구현됨 |
-| 앱 UI | 카드 중심 Compose 화면, 하단 탭과 키보드 여백 처리 | 구현됨 |
-| 음성 입력 | 마이크 버튼, 기기 내 Android 음성 인식, `오투야` 호출 대기 UI | 기반 구현됨 — 기기별 로컬 한국어 인식 지원 검증 필요 |
-| BLE 가스 연동 | BLE 검색·연결·Notify/Indicate 수신·일반 텍스트 패킷 파싱 | 기반 구현됨 — 제조사 프로토콜 연동 필요 |
-| 가스 시뮬레이션 | 안정 범위의 임의 O₂/H₂S/CO/LEL 값, 20초 주기 갱신 | 구현됨 — 데모 전용 |
-| 백그라운드 표시 | 포그라운드 서비스 알림 카드와 홈 화면 앱 위젯 | 구현됨 |
-| 설정 | 모델 관리, 추론 백엔드, 문맥 한도, 자동 답변 길이와 수동 상한, 설정 영속화 | 구현됨 |
-
-## 핵심 화면
-
-- **온보딩·홈**: 로컬 처리 범위를 안내하고 질문, 가스 측정, 작업 전 점검, 문서 보관함으로 이동합니다.
-- **현장 채팅·음성 질문**: 질문 입력, 빠른 질문, 음성 입력, Markdown 답변, 최근 답변으로 이동 버튼을 제공합니다. 음성 답변은 핵심 내용 위주로 짧게 읽고 전체 답변과 근거는 화면에 남깁니다.
-- **근거 원문**: 답변에 사용된 문서 조각과 쪽수를 열고 같은 문서의 이전·다음 부분을 볼 수 있습니다. PDF 원본 화면에서 표와 그림도 확인할 수 있습니다.
-- **대화 기록**: 최근 20개 세션과 세션별 최대 80개 발화(질문·답변)를 기기에 보관합니다. 대화 내용은 `SharedPreferences`에만 저장됩니다.
-- **센서·연결 끊김**: BLE 검출기 검색·연결·연결 해제와 최근 수신값을 보여 줍니다. 연결이 끊기거나 60초 이상 수신되지 않은 값은 현재값으로 표시하지 않습니다.
-- **작업 전 점검·문서 보관함**: 5개 점검 항목을 기기에 보관하고, 기본 제공 문서의 원문 조각을 오프라인으로 검색합니다.
-- **설정·데이터·위젯 안내**: 모델 다운로드와 추론 방식, 기록 삭제, 위젯과 알림 상태를 확인합니다.
-- **상단 가스 카드**: 유효한 최근 가스값과 출처(BLE/시뮬레이션)를 채팅 상단에서 확인할 수 있습니다.
-
-### Compose 화면 구조
-
-`MainActivity`는 Compose 진입점과 Android 권한 요청을 담당합니다. `FieldGuardViewModel`은 `StateFlow`로 대화, 모델 다운로드, 추론 설정, 가스 측정값과 BLE 검색 상태를 노출하고, `TossFieldGuardApp`은 상태를 화면에 표시하며 사용자 이벤트를 ViewModel에 전달합니다. 음성 인식과 TTS는 `VoiceConversationController`가 관리합니다.
-
-온보딩 이후에는 상세 화면을 포함한 모든 앱 화면에 하단 탭을 표시합니다. 키보드 입력 중에는 채팅 입력창을 가리지 않도록 탭을 잠시 숨깁니다.
-
-채팅은 `LazyColumn`으로 메시지를 표시하고, 하단 입력창에 `imePadding`을 적용합니다. 목록을 위로 스크롤하면 **최근 답변으로** 버튼이 나타납니다. 모델 답변은 Compose `AnnotatedString` 렌더러로 제목·목록·굵게·인라인 코드·출처를 표시합니다. 브랜드 색상은 고정이며 Android 동적 색상은 사용하지 않습니다.
-
-위젯과 가스 알림은 Android `RemoteViews`가 필요하므로 앱과 같은 색상 체계의 XML 레이아웃으로 맞췄습니다. 문서 검색, 모델 추론, BLE 패킷 해석과 다운로드 경로는 별도 계층으로 유지합니다.
-
-## 오프라인 RAG 구조
-
-Gemma가 PDF를 직접 여는 방식이 아니라, 앱이 먼저 관련 문서 조각을 검색하고 그 근거를 Gemma 프롬프트에 넣는 구조입니다.
-
-```text
-PDF 텍스트 추출본(JSON)
-  └─ 2개 문서 / 87개 청크
-       └─ ObjectBox 저장
-            ├─ 본문·제목·페이지·검색 텍스트
-            └─ 384차원 로컬 검색 벡터
-
-사용자 질문(텍스트 또는 음성 인식 텍스트)
-  └─ 동일한 384차원 벡터 생성
-       └─ ObjectBox HNSW 최근접 벡터 검색
-            + 단어 일치 점수 재정렬
-                 └─ 질문 주제별 PDF 근거 선택
-                      └─ [근거 + 질문]을 Gemma 4 E2B에 전달
-                           └─ Markdown 답변
-```
-
-### 포함 문서
-
-| 문서 | 청크 수 | 용도 |
-| --- | ---: | --- |
-| `밀폐공간 질식재해예방 안전작업 가이드 (2022)` | 84 | 환기, 측정, 보호구, 작업·구조 안전 기준 등의 상세 근거 |
-| `밀폐공간 질식사고 위험작업 자율점검표` | 3 | 현장 점검 항목과 사전 확인 근거 |
-
-문서 원본에서 추출한 데이터는 [`app/src/main/assets/knowledge/seed_chunks_v1.json`](app/src/main/assets/knowledge/seed_chunks_v1.json)에 포함됩니다. 앱 첫 실행 시 `KnowledgeSeeder`가 이 데이터를 ObjectBox에 적재합니다. 시드 버전이 같고 청크 수가 유지되면 재적재하지 않습니다.
-
-### 검색·답변 생성 흐름
-
-1. 채팅 입력과 음성 인식 결과는 모두 `FieldGuardViewModel.submitQuestion()`으로 들어갑니다.
-2. 채팅은 `KnowledgeRepository.retrieveForQuestion()`으로 근거를 고릅니다. 일반 질문은 `retrieve()`에서 질문을 384차원 로컬 해시 임베딩으로 바꿉니다.
-3. 일반 검색에서는 ObjectBox의 HNSW 코사인 최근접 검색 결과와 `searchableText` 단어 일치도를 합칩니다.
-   - 벡터 유사도: **72%**
-   - 단어 일치도: **28%**
-4. 일반 질문은 상위 근거 최대 2개를 사용합니다. 복합 질문은 주제별 근거를 먼저 확보합니다. 심폐소생술만 묻는 경우에는 연속된 다음 쪽도 확인합니다. 선택한 원문 조각을 문서명·쪽수와 함께 Gemma에 전달합니다. 페이지 중간의 조건이나 수치가 잘리지 않도록 조각 본문 전체를 사용하며, 근거 화면에서도 같은 원문을 볼 수 있습니다.
-   - 근거 화면의 **PDF 원본**은 공식 첨부파일의 실제 쪽을 표시합니다. **읽기 편한 보기**는 문장과 목록을 구분하고, **추출 텍스트**는 검색에 사용된 내용을 보여줍니다. 화면 전환은 모델에 전달하는 근거를 바꾸지 않습니다.
-5. Gemma는 “검색 문서만 근거로, 수치·단위·이상/미만을 정확히” 답하도록 프롬프트를 받습니다.
-6. 기본값은 앱에서 별도 출력 토큰 상한을 지정하지 않고 모델이 답변을 마칠 때까지 생성합니다. 생성 중에는 약 200ms 간격으로 텍스트를 표시하고, 완료 후 Markdown 형식과 참조 문서 링크를 표시해 기록에 저장합니다.
-7. 모델이 준비되지 않았거나 생성이 실패하면, 같은 검색 결과를 문서 근거와 페이지 출처로 바로 표시합니다.
-
-현재 임베딩은 앱 용량과 초기 실행 부담을 낮추기 위한 `OfflineHashEmbedding`입니다. 즉, 생성 모델인 Gemma 4 E2B와 별도의 대형 문장 임베딩 모델은 아직 탑재하지 않았습니다. 표현이 크게 달라지는 질문의 의미 검색 정확도를 더 높여야 한다면, 향후 임베딩 전용 온디바이스 모델로 교체하는 것이 다음 개선 지점입니다.
-
-### PDF 원본 화면
-
-근거 화면은 문서 ID와 쪽수를 공식 PDF에 연결합니다. 예를 들어 심폐소생술 근거 45쪽을 열면 안전작업 가이드 PDF의 실제 45번째 쪽을 렌더링합니다. 검색용 텍스트와 PDF 원본 두 개를 앱에 포함하므로 첫 열람부터 오프라인으로 작동합니다. 앱은 원본을 전용 저장소에 복사할 때 SHA-256을, 열 때 전체 쪽수를 확인합니다. PDF에 문제가 있으면 추출 텍스트 보기로 전환할 수 있습니다.
-
-원본은 [고용노동부 보령지청의 2022년 안전작업 가이드](https://www.moel.go.kr/local/boryeong/info/dataroom/view.do?bbs_seq=20230600030)와 [고용노동부 안산지청의 2026년 자율점검표](https://www.moel.go.kr/local/ansan/news/notice/noticeView.do?bbs_seq=20260401450) 첨부파일입니다. PDF 바이너리를 APK에 포함하고 공식 출처와 판본 해시를 코드에 기록했습니다.
-
-### RAG 관련 주요 파일
-
-| 파일 | 역할 |
-| --- | --- |
-| [`KnowledgeRepository.kt`](app/src/main/java/com/minyook/sllm2/data/KnowledgeRepository.kt) | ObjectBox 벡터·키워드 하이브리드 검색, 모델 폴백 근거 생성 |
-| [`KnowledgeSeeder.kt`](app/src/main/java/com/minyook/sllm2/data/KnowledgeSeeder.kt) | 번들 PDF 청크를 최초 1회 DB에 적재 |
-| [`KnowledgeChunk.kt`](app/src/main/java/com/minyook/sllm2/data/KnowledgeChunk.kt) | ObjectBox 엔터티와 HNSW 벡터 인덱스 정의 |
-| [`OfflineHashEmbedding.kt`](app/src/main/java/com/minyook/sllm2/data/OfflineHashEmbedding.kt) | 질문·문서 공통 384차원 로컬 임베딩 |
-| [`LocalModelRuntime.kt`](app/src/main/java/com/minyook/sllm2/model/LocalModelRuntime.kt) | 검색 근거를 포함한 Gemma 프롬프트 구성과 로컬 생성 |
-
-## Gemma 4 E2B 모델 관리
-
-앱 APK에 약 2GB 이상 모델을 포함하지 않습니다. 설정 화면의 **앱에서 다운로드**를 누르면 `WorkManager`가 고유 작업으로 다운로드를 시작합니다.
-
-- 대상 모델 파일: `gemma-4-e2b-it.litertlm`
-- 저장 위치: 앱의 `noBackupFilesDir/models/`
-- 다운로드 중: 포그라운드 알림과 진행률 표시
-- 재시작 후: 파일 크기와 저장된 상태를 확인해 준비 상태를 복원
-- 추론 엔진: LiteRT-LM
-- 백엔드: 자동(GPU 우선), GPU 우선(실패 시 CPU), CPU 안전 모드
-- 엔진 생성 실패: 다른 백엔드로 순차 폴백
-
-### 기기 성능 기반 토큰 설정
-
-모바일 기기는 모델·Android·GPU 드라이버의 메모리를 함께 사용합니다. 앱은 총 RAM과 저메모리 상태를 보고 문맥 상한을 정합니다.
-
-| 기기 RAM | 앱 문맥 상한 |
-| --- | ---: |
-| 6GB 미만 또는 저메모리 기기 | 2,048 토큰 |
-| 6GB 이상 ~ 8GB 미만 | 4,096 토큰 |
-| 8GB 이상 ~ 12GB 미만 | 8,192 토큰 |
-| 12GB 이상 ~ 16GB 미만 | 16,384 토큰 |
-| 16GB 이상 ~ 24GB 미만 | 24,576 토큰 |
-| 24GB 이상 | 32,768 토큰 |
-
-**답변 길이 자동**이 기본값입니다. 이때 앱은 별도의 출력 토큰 상한을 전달하지 않고 모델의 종료 신호까지 생성합니다. 다만 모델과 기기의 문맥 크기는 유한하므로 모든 길이를 무제한으로 보장하지는 않습니다. 수동 길이 설정을 켠 경우에만 선택한 상한을 적용하며, 긴 답변은 그 상한에서 끊길 수 있습니다.
-
-### 실제 기기에서 답변 속도 확인
-
-Android Studio Logcat에서 `FieldGuardInference`를 검색하거나 `adb logcat -s FieldGuardInference:I`로 측정값을 볼 수 있습니다. `backend`는 실제 사용한 CPU/GPU, `initMs`는 모델 준비, `firstChunkMs`는 첫 출력까지, `streamMs`는 첫 출력부터 마지막 출력까지, `tailMs`는 마지막 출력 뒤 완료 처리까지 걸린 시간입니다. `outputLimit=model-default`는 자동 길이 설정을 뜻하며 질문·답변 원문은 로그에 남기지 않습니다. 같은 질문을 여러 번 실행해 CPU/GPU 방식별 속도와 답변 완결성을 비교해야 합니다.
-
-## BLE 가스 검출기와 백그라운드 모니터링
-
-### BLE 연결 흐름
-
-1. 센서 연결 화면에서 Bluetooth 권한을 요청하고 주변 BLE 기기를 검색합니다.
-2. 사용자가 기기를 선택하면 GATT 연결 후 Notify 또는 Indicate 가능한 특성(characteristic)을 구독합니다.
-3. 수신 데이터는 `GasPacketParser`가 아래 형식으로 해석합니다.
-
-```text
-JSON:      {"o2":20.9,"h2s":0.0,"co":0.0,"lel":0.0}
-Key-value: O2=20.9,H2S=0.0,CO=0.0,LEL=0.0
-CSV:       20.9,0.0,0.0,0.0
-```
-
-4. 파싱된 값은 앱 내부 저장소에 마지막 수신 시각·기기명·출처와 함께 보관됩니다.
-5. `GasMonitoringService`가 포그라운드 서비스로 유지되며, 알림 패널과 앱 UI를 갱신합니다.
-
-지원 채널은 O₂(%), H₂S(ppm), CO(ppm), LEL(%)입니다. 현재는 UUID나 제조사 바이너리 프레임을 고정하지 않은 범용 수신기이므로, 실제 장비를 붙일 때는 해당 제조사의 서비스 UUID·특성 UUID·단위·CRC·경보 상태 규격을 `BleGasClient`에 반영해야 합니다.
-
-### 데모 시뮬레이션
-
-모델 준비 이후 실제 BLE 측정이 없는 상황에서는 `GasSimulationService`가 안정 범위의 임의 가스값을 20초마다 발행할 수 있습니다. 화면·알림에는 반드시 **데모 시뮬레이션 / 실제 측정값 아님**으로 구분됩니다. 실제 BLE 수신이 시작되면 BLE 값이 우선합니다.
-
-### 알림·위젯
-
-- **알림 패널**: 포그라운드 서비스의 맞춤 카드에 O₂, H₂S, CO, LEL, 수신 시각을 표시합니다.
-- **홈 화면 위젯**: `GasWidgetProvider`가 마지막 저장 가스값을 표시합니다.
-- 알림과 위젯은 60초 이내에 수신된 값만 현재값으로 표시합니다. 수신이 멈추면 숫자를 숨기고 상태를 안내합니다.
-
-> Android의 알림/위젯 표시 방식은 제조사 런처와 OS 버전에 따라 다를 수 있습니다. Android 13 이상에서는 알림 권한이 필요합니다.
-
-## 음성 입력
-
-- 전송 버튼 옆 마이크 버튼으로 기기 내 Android `SpeechRecognizer`를 시작합니다.
-- 음성 인식 결과는 일반 텍스트 질문과 **같은 RAG 경로**로 전달됩니다.
-- 로컬 인식기가 없거나 한국어 음성 데이터가 준비되지 않았다면 앱 안에 오류를 표시합니다. Google 음성 입력 화면으로 전환하지 않습니다.
-- `오투야` 호출 대기 상태를 UI에서 켤 수 있습니다.
-
-기기 내 인식기와 한국어 음성 데이터의 제공 여부는 제조사와 OS 설정에 따라 다릅니다. 앱에 별도 음성 인식 모델을 포함하지 않았으므로 지원되지 않는 기기에서는 마이크 질문을 사용할 수 없습니다.
-
-## 권한과 로컬 데이터
-
-| 권한 | 용도 |
-| --- | --- |
-| `INTERNET` | 최초 Gemma 모델 다운로드 |
-| `POST_NOTIFICATIONS` | 모델 다운로드·가스 모니터링 알림 |
-| `RECORD_AUDIO` | 음성 질문 입력 |
-| `BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT` | BLE 검출기 검색·연결 |
-| Foreground Service | 장시간 모델 다운로드와 가스 모니터링 |
-
-앱은 문서 청크, RAG 벡터 DB, 채팅 이력, 모델 설정, 마지막 가스값을 앱 전용 저장소에 보관합니다. 현재 구현에는 사용자 질의·채팅·가스 데이터를 별도 서버로 전송하는 API가 없습니다.
-
-## 프로젝트 구조
-
-```text
-app/
-├─ objectbox-models/                 # ObjectBox 스키마
-├─ src/main/assets/knowledge/         # PDF 텍스트 청크 시드
-├─ src/main/assets/source-pdfs/       # SHA-256으로 검증한 공식 PDF 원본
-├─ src/main/java/com/minyook/sllm2/
-│  ├─ MainActivity.kt                # Compose 진입점과 Android 권한 요청
-│  ├─ ui/                            # Material 3 화면, 상태·이벤트, 음성 제어, Markdown
-│  ├─ data/                          # ObjectBox RAG, 문서 시드, 채팅 이력
-│  ├─ model/                         # Gemma 다운로드·상태·LiteRT 추론·설정
-│  └─ gas/                           # BLE, 가스 파서, 서비스, 알림, 위젯
-├─ src/main/res/                     # 색상, 아이콘, 알림·위젯 RemoteViews XML
-├─ src/test/                         # JVM 단위 테스트
-└─ src/androidTest/                  # Compose 화면 테스트
-```
-
-## 빌드 및 실행
-
-### 요구 사항
-
-- Android Studio 최신 안정판
-- Android SDK 37
-- 최소 Android API 26 (Android 8.0)
-- Gradle 데몬용 JDK 25 (`gradle/gradle-daemon-jvm.properties`에 지정, 자동 설치 가능), 앱 Java/Kotlin 바이트코드 대상 11
-
-### Android Studio
-
-1. 이 저장소를 Android Studio에서 엽니다.
-2. Gradle 동기화를 완료합니다.
-3. 실제 Android 기기 또는 에뮬레이터를 선택합니다.
-4. `app`을 실행합니다.
-5. 설정 화면에서 Gemma 모델을 다운로드하고 준비 상태가 될 때까지 기다립니다.
-
-### 명령줄
-
-Windows PowerShell에서 다음 명령을 실행합니다.
+- **개발 주소: `http://localhost:5174/`** — 수정 내용이 바로 반영됩니다.
+- **PWA·오프라인 시험: `http://localhost:4173/`** — 다음 빌드·미리보기 명령을 사용합니다.
+- 5173은 이 프로젝트의 주소가 아닙니다. 5174·4173이 이미 사용 중이면 다른 포트로 자동 변경하지 않습니다.
+- `docs/webapp-ui/`는 예전 정적 시안입니다. 현재 앱은 반드시 `web/`에서 실행합니다.
 
 ```powershell
-.\gradlew.bat :app:assembleDebug
-.\gradlew.bat :app:testDebugUnitTest
-.\gradlew.bat :app:compileDebugAndroidTestKotlin
-```
-
-생성 APK 경로:
-
-```text
-app/build/outputs/apk/debug/app-debug.apk
-```
-
-디버그 APK 빌드와 JVM 테스트, Compose UI 테스트 소스 컴파일로 기본 회귀를 확인합니다. 실제 기기에서 실행하는 계측 테스트와 BLE 수신, 음성 인식, 키보드/IME, 모델 복원, 위젯 갱신은 별도로 확인해야 합니다.
-
-## 실제 장비와 현장 적용에 필요한 정보
-
-| 필요한 정보 | 개발·검증에 쓰는 곳 |
-| --- | --- |
-| 연동할 가스 측정기의 제조사·모델·통신 규격 | 실제 BLE 패킷과 단위, 경보 및 연결 끊김 동작을 해당 장비에 맞춰 구현·시험해야 합니다. |
-| 사용 문서의 최종본과 개정 담당자 | 답변 근거로 쓰는 문서의 버전과 쪽수를 관리하고 변경 시 색인을 다시 만들어야 합니다. |
-| 시범 운영 기기와 작업 환경 | 모델 속도, 저장 공간, 음성 인식, 백그라운드 동작, 통신 상태를 대상 단말에서 확인해야 합니다. |
-| 데이터 보관·삭제 및 알림 운영 기준 | 대화·점검 기록의 보관 범위와 측정 알림 책임을 현장 운영 방식에 맞춰 정해야 합니다. |
-
-## 다음 개발 작업
-
-1. **실측 BLE 프로토콜 확정**: 제조사별 UUID, 바이너리 프레임, CRC, 단위, 경보 플래그, 통신 재연결 정책을 반영합니다.
-2. **안전 검증**: 교정된 검출기와 실제 현장 조건에서 알림 지연, 백그라운드 지속성, 통신 단절, 권한 거부, 저전력 모드를 검증합니다.
-3. **모델 배포 보안**: 현재 모델 다운로드 주소를 운영용 서명 CDN/매니페스트·SHA-256 검증·버전 롤백 정책으로 교체합니다.
-4. **RAG 평가 체계**: 대표 질문 세트와 정답 페이지를 만들고, 검색 상위 근거·수치 정확도·환각률을 자동 회귀 테스트로 관리합니다.
-5. **문장 임베딩 고도화**: 해시 임베딩을 한국어 지원 온디바이스 임베딩 모델로 교체해 동의어·구어체 검색 품질을 개선합니다.
-6. **음성 오프라인화**: 지원 기기에서 오프라인 한국어 음성팩을 검증하거나 별도 온디바이스 STT 엔진을 도입합니다.
-
-## 참고
-
-- 현재 UI·RAG·가스 시뮬레이션은 현장 작업 보조를 위한 구현입니다.
-- 실제 작업 허가, 입장 여부, 대피 판단은 사업장 안전관리 체계와 법정 기준, 검교정된 측정기를 우선해야 합니다.
-
-## 반응형 웹과 iPhone PWA
-
-기존 설치형 Android 앱과 별도로 [`web/`](web/README.md)에 React 19 + TypeScript + Vite 기반 PWA를 추가했습니다. PC는 사이드바, 모바일은 하단 메뉴를 사용하며 320px부터 반응형으로 동작합니다.
-
-| 웹 기능 | 현재 구현 |
-| --- | --- |
-| 문서 질문 | 2종·87쪽 근거를 로컬 검색하고 Gemma에 전달. 근거 부족·모델 장애 시 검색 원문 표시 |
-| Markdown | 제목·강조·목록·표·코드·인용 표시, 작은 화면의 표/코드 가로 스크롤, 생성 HTML 실행·원격 이미지 자동 요청 차단 |
-| 모델 | 코드에 고정된 공식 Gemma 4 E2B 웹 파일 약 2.01GB를 버튼 하나로 다운로드, 크기·SHA-256 검증 후 OPFS 저장 |
-| 자동 AI | 다운로드 직후·앱 재접속 시 자동 준비. 검증·초기화·생성은 Web Worker에서 실행, 준비 중 질문은 완료 후 이어서 처리 |
-| 토큰 | 최대 답변 256~4,096 / 문맥 4,096·8,192·16,384 설정. 기본 답변 1,536 / 문맥 8,192. SDK 실측 사용량 표시·보존 |
-| 답변 스크롤 | 자유 탐색 중에는 자동 이동 중단. 생성 중 마지막 줄이 보이는 곳으로 다시 내려오면 자동 따라가기 재개. 최신 답변 버튼도 제공 |
-| 원문 | PDF.js로 실제 PDF 쪽 표시, 확대·앞뒤 이동·추출 텍스트 보기 |
-| 작업 흐름 | 작업자 요청 → 감독관 5항목 점검·승인 → 투입 → AI 문서 지원 → 수동 위험 신고 → 탈출/퇴장 → 감독관 종료 |
-| 저장·오프라인 | IndexedDB 기록·설정, JSON 내보내기, Cache API 파일 검증, PWA 앱 셸 및 PDF·검색·실행 파일 오프라인 준비 |
-
-작업자는 본인 작업만 확인하고 감독관은 서버 발급 일회용 코드로 인증한 뒤 점검·승인합니다. 코드 미등록·만료·회수 상태에서 감독관 주소와 API로 접근하면 거부합니다. 같은 서버의 기기 간 작업 요청·승인은 공유하지만 개인 로그인·현장 배정·푸시·실시간 센서는 연결 전입니다. 이전 로컬 테스트 기록은 읽기 전용으로 보존합니다.
-
-아이폰에서는 HTTPS로 배포한 주소를 Safari에서 열고 **공유 → 홈 화면에 추가**로 설치합니다. 모델을 준비하면 자동으로 AI를 불러오며, 별도의 실행·메모리 해제 버튼은 없습니다. 최초 검증·GPU 준비 시간은 필요하고 진행 단계를 표시합니다. 다운로드 중단 뒤 모델은 처음부터 다시 받으며, 파일 단위 이어받기는 미구현입니다. 이미 완료된 문서·PDF·실행 파일 준비는 재사용합니다.
-
-```powershell
-cd web
 npm.cmd test
 npm.cmd run build
 npm.cmd run preview
 ```
 
-문서·AI용 정적 호스팅 게시 경로는 `web/dist`이며 HTTPS와 COOP/COEP·WASM MIME 설정이 필요합니다. 감독관 인증·새 점검은 별도 작업 API 런타임이 필요하고 `dist`만 게시하면 사용할 수 없습니다. 배포 설정·버전·해시·데이터 구조·테스트 결과는 [웹 README](web/README.md), [설계서](docs/webapp/TARGET_ARCHITECTURE.md), [검증 기록](web/docs/validation.md)에 정리했습니다. 외부 호스팅에는 아직 배포하지 않았습니다.
+개발 모드는 서비스 워커를 등록하지 않습니다. 이전 PWA가 열려 있다면 같은 주소의 탭·홈 화면 앱을 모두 닫았다가 다시 열어 새 버전을 적용합니다. `localhost`와 `127.0.0.1`, 그리고 5174와 4173의 모델·대화 저장소는 서로 다릅니다.
 
-![웹 자동 AI와 토큰 설정](web/docs/screenshots/ai-auto-token-settings.jpg)
+## 갤럭시 탭에서 웹/PWA 테스트
+
+1. 탭에서 Chrome을 업데이트하고 개발자 옵션의 USB 디버깅을 켭니다.
+2. 데이터 USB 케이블로 PC에 연결하고 디버깅 허용을 승인합니다.
+3. PC에서 위의 `npm.cmd run preview`를 켜 둡니다.
+4. 새 PowerShell에서 아래 명령을 실행하고 탭 Chrome의 `http://localhost:4173/`을 엽니다.
+
+```powershell
+$tabletAdb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
+& $tabletAdb devices
+& $tabletAdb reverse tcp:4173 tcp:4173
+```
+
+개발 서버를 테스트하려면 두 포트를 모두 5174로 바꿉니다. 테스트 중 PC 서버와 USB 연결을 유지합니다. 여러 단말이 연결된 경우 ADB 명령에 `-s <기기-ID>`를 추가합니다.
+
+설정의 **전체 오프라인 파일 준비 → Gemma 4 E2B 다운로드 받기**를 실행하면 모델 검증·AI 준비가 자동으로 이어집니다. 탭에는 PC와 별도로 약 2.01GB 모델을 저장해야 합니다. 문서·PDF의 오프라인 시험은 준비 완료 후 PC 서버도 중지하고 탭 인터넷을 끊어 진행합니다. USB 경로가 살아 있는 상태를 완전 오프라인으로 판단하지 않습니다.
+
+## 감독관: 오늘의 6자리 암호코드
+
+기본 사용자는 작업자입니다. 작업 전 점검의 **감독관 화면으로 전환** 또는 설정에서 6자리 코드 입력 화면을 엽니다. 작업자가 전환 버튼을 누르거나 주소를 직접 입력해도 **코드 확인 전에는 감독관 기록과 승인 기능을 이용할 수 없습니다.** 권한은 서버가 목록 조회와 상태 변경마다 다시 검사합니다.
+
+서버 관리자만 `web/`에서 실행합니다.
+
+```powershell
+npm.cmd run supervisor -- today
+npm.cmd run supervisor -- rotate
+npm.cmd run supervisor -- revoke
+```
+
+| 명령·규칙 | 동작 |
+|---|---|
+| `today` | 한국 날짜 기준 오늘의 6자리 숫자 코드 확인. 같은 날 재조회하면 같은 코드 |
+| `rotate` | 오늘 코드를 즉시 교체하고 기존 감독관 인증도 무효화 |
+| `revoke` | 오늘 코드와 해당 코드로 인증한 모든 기기를 사용 중지 |
+| 유효기간 | 한국 시간 다음 날 00:00까지. 자정에 코드와 감독관 권한 만료 |
+| 사용 인원 | 감독관 여러 명이 당일 같은 코드를 사용. 잠근 뒤에도 당일 코드로 재인증 가능 |
+| 잘못된 입력 | 기기별 5회 실패 후 15분 제한. 새 기기를 반복 생성하는 시도도 접속 단위 제한 |
+| 기록 | 공통 코드는 개인 신원을 증명하지 않음. 서버가 기기별 감독관 ID를 구분해 사건에 기록 |
+
+코드는 서버 관리자 CLI에서만 확인하고 감독관에게만 전달합니다. 실제 코드를 README·소스·공개 환경변수에 쓰지 않습니다. 코드 원문을 DB에 저장하지 않고 별도 서버 키로 계산합니다. 세션 토큰은 해시로 보관하며 HttpOnly·SameSite 쿠키와 CSRF 검사를 사용합니다. 이전 일회용 코드·8시간 인증 방식은 당일 6자리 방식으로 대체했습니다.
+
+개인 로그인, 감독관의 현장별 배정, 계정 복구, 푸시 알림은 아직 없습니다. 인증된 감독관은 현재 서버 프로젝트의 작업을 점검할 수 있습니다.
+
+## 작업 전 점검 흐름
+
+1. **작업자**: 이름·현장·위치·작업 내용을 입력하고 점검 요청.
+2. **감독관**: 당일 코드 인증 후 요청을 선택. 가스·보호구·통신·환기·작업자 상태 5항목과 수동 측정값·장비·시각·감시인·연락·투입 유효기한 입력.
+3. **감독관**: `점검 내용 저장` 후 `점검 완료 · 투입 승인 기록`. 누락·문서 기준 이탈로 승인할 수 없으며 보완 요청·승인 취소 가능.
+4. **작업자**: 승인 당시 내용을 확인하고 `작업자 현장 투입 확인`.
+5. **작업 중**: 기기 내 문서 지원 사용. 위험 상황은 직접 확인한 내용을 입력해 수동 신고.
+6. **작업자**: 정상 퇴장 또는 긴급 탈출 후 실제 집결 위치 기록.
+7. **감독관**: 퇴장 기록을 확인하고 작업 종료.
+
+작업자는 본인 요청만 확인합니다. 같은 서버에 연결한 PC·탭·앱은 요청과 승인 결과를 공유하고 화면 진입·복귀 및 15초 간격으로 갱신합니다. Chrome과 Android WebView는 별도 기기로 식별되므로 이름이 같아도 소유권을 합치지 않습니다. 작업 서버의 상태 변경은 SQLite 트랜잭션과 버전으로 중복 갱신을 막고, 승인 당시 점검 내용도 보존합니다.
+
+**새 작업·점검·승인·투입/퇴장 기록에는 서버 연결이 필요합니다.** 문서 검색·PDF·기기 내 AI와 기존 로컬 이력은 준비 후 오프라인으로 사용할 수 있습니다. 가스값은 수동 입력 기록이며 웹 센서 실시간 수신·가스 예측·자동 대피 경로는 구현하지 않았습니다. 실제 작업허가를 자동 발급하는 시스템이 아닙니다.
+
+## Android 설치형 앱 실행과 디자인 확인
+
+저장소 루트를 Android Studio로 열어 `app`을 실행합니다. 현재 구성은 `compileSdk/targetSdk 37`, `minSdk 26`, Kotlin·Compose·ObjectBox·LiteRT-LM입니다.
+
+```powershell
+.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug
+```
+
+이 PC에서 사용하는 JDK는 `C:\Program Files\Android\Android Studio1\jbr`, SDK는 `C:\Users\limmi\AppData\Local\Android\Sdk`입니다. 다른 PC에서는 해당 설치 경로와 `JAVA_HOME`/Android Studio Gradle JDK를 맞춰 주세요. `local.properties`와 로컬 Gradle 캐시는 Git에서 제외합니다.
+
+| 결과물 | 정확한 경로 |
+|---|---|
+| Android 디버그 APK | `app/build/outputs/apk/debug/app-debug.apk` |
+| 계측 테스트 APK | `app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk` |
+| 이 PC에서 보관한 디자인 검증용 APK | `app/build/outputs/apk/designpreview/app-designpreview.apk` (생성물, Git 제외) |
+| Android 단위 테스트 결과 | `app/build/test-results/testDebugUnitTest/` |
+| 웹 프로덕션 파일 | `web/dist/` |
+
+기존 앱과 빌드 서명이 다르면 업데이트 설치가 거부될 수 있습니다. 기존 앱·모델을 삭제하지 않고 디자인을 확인하려면 별도 패키지를 빌드합니다.
+
+```powershell
+.\gradlew.bat -PdesignPreview=true :app:assembleDebug :app:assembleDebugAndroidTest
+```
+
+디자인 빌드는 `com.minyook.sllm2.designpreview`, 앱 이름은 **Field Guard 디자인**입니다. 일반 빌드와 출력 APK 위치는 같으므로 파일의 빌드 종류를 구분해 설치합니다. 기존 설치 앱과 데이터는 보존됩니다. 앱의 **설정 → 현장 작업 서버**에 HTTPS 서버 기본 주소를 입력하면 웹과 같은 점검 화면을 사용합니다. 개발 빌드의 USB 시험에서는 `http://localhost:4173`도 허용하며 위의 ADB 포트 연결이 필요합니다.
+
+앱 전체를 웹으로 바꾸지 않았습니다. 홈·문서·질문·설정은 Compose, 작업 요청·감독관 점검은 공통 React 화면을 사용하는 제한된 WebView입니다. WebView에서 질문·모델 준비를 누르면 기존 Android 화면으로 돌아갑니다. 임의 외부 출처·파일 접근·JavaScript 네이티브 인터페이스는 열지 않습니다.
+
+## 문서·모델·Markdown·스크롤
+
+- 공식 문서 2종, 총 87쪽의 검색 데이터와 실제 PDF를 함께 사용합니다. 답변 근거는 문서 ID와 실제 쪽수를 유지합니다.
+- 웹 모델은 `web/src/ai/catalog.ts`에 고정한 **Gemma 4 E2B 웹용 `.litertlm`**, 2,008,432,640바이트입니다. 다운로드 전체 크기·SHA-256 확인 후 OPFS에 저장합니다. Android용 모델 파일과 구분합니다.
+- 다운로드 완료·웹 재접속 후 AI를 자동 준비합니다. 실행·메모리 해제 버튼은 없습니다. 파일 검증·WASM/GPU 로드·생성은 백그라운드 Worker에서 처리합니다.
+- 웹은 최초 저장 파일 전체 검사 후 검증 기록을 보관합니다. 후속 실행은 크기·수정 시각·분산 표본과 7일 유효기간을 검사하고 필요 시 전체 SHA-256을 다시 확인합니다. 표본 검사는 전체 검사와 보장 범위가 다르며 엔진 적재 시간은 여전히 필요합니다.
+- `모델 파일 저장됨`과 `AI 사용 가능`은 구분합니다. 재접속의 불러오기는 모델 재다운로드를 뜻하지 않습니다.
+- 답변/문맥 토큰 설정은 실제 SDK에 전달하고 SDK 측정 사용량만 표시합니다. 웹 기본값은 답변 1,536·문맥 8,192이며 Android는 기기 메모리에 맞춘 기존 설정을 사용합니다.
+- 웹 답변은 한국어 Markdown의 제목·굵게·목록·표·코드를 표시합니다. 생성 HTML·원격 이미지 자동 로드는 허용하지 않습니다. 비정상 문자권 혼입·깨진 문자·심한 반복은 원문 표시로 전환하며 사실 정확도 전체를 보장하는 검사는 아닙니다.
+- 답변 중에도 자유롭게 스크롤합니다. 다시 생성 중인 마지막 줄이 보이는 위치로 내려오면 자동 따라가기를 재개하고, 답변 완료 후 위치를 강제로 바꾸지 않습니다.
+
+## 파일과 디렉터리 지도
+
+아래 경로는 모두 **저장소 루트 기준**입니다. 현재 작업 폴더는 `C:\Users\limmi\AndroidStudioProjects\Sllm2`입니다.
+
+```text
+Sllm2/
+├─ README.md                         프로젝트 전체 안내: 이 문서
+├─ app/                              기존 Android 설치형 앱
+│  ├─ build.gradle                   SDK·의존성·디자인 검증용 패키지 설정
+│  └─ src/
+│     ├─ main/
+│     │  ├─ AndroidManifest.xml
+│     │  ├─ assets/knowledge/seed_chunks_v1.json
+│     │  ├─ assets/source-pdfs/       공식 PDF 원본 2종
+│     │  ├─ java/com/minyook/sllm2/   아래 Android 소스 표 참고
+│     │  └─ res/xml/work_network_security.xml
+│     ├─ test/                       JVM 단위 테스트
+│     └─ androidTest/                실제 기기 Compose·PDF 테스트
+├─ web/
+│  ├─ src/                           React 화면·로컬 AI·저장소
+│  ├─ server/                        작업 API·SQLite·감독관 코드 CLI
+│  ├─ scripts/                       원본 준비·Worker·PWA 빌드
+│  ├─ tests/                         Vitest 회귀 테스트
+│  ├─ docs/                          웹 검증·작업 흐름·화면
+│  ├─ public/                        아이콘·PWA 설정·생성된 배포 자산
+│  ├─ .local/                        작업 DB·서버 키: Git 제외
+│  └─ dist/                          생성된 배포 결과: Git 제외
+└─ docs/
+   ├─ ANDROID_APP_SPEC.md             Android 현행 설계서
+   ├─ OFFLINE_RAG_ARCHITECTURE.md     Android 검색·근거 설계
+   ├─ webapp/TARGET_ARCHITECTURE.md   웹·공통 작업 서버 현행 설계서
+   ├─ webapp/BUILD_PROMPT.md          유지보수 기준
+   ├─ webapp-ui/                     과거 정적 시안: 현재 앱 아님
+   └─ screenshots/                   Android 디자인 검증 화면
+```
+
+### Android 주요 소스
+
+기준 디렉터리: `app/src/main/java/com/minyook/sllm2/`.
+
+| 파일·폴더 | 역할 |
+|---|---|
+| `MainActivity.kt` | Compose 진입, ViewModel·음성·권한·생명주기 연결 |
+| `SllmApplication.kt` | ObjectBox·알림 초기화 |
+| `ui/TossFieldGuardApp.kt` | 공통 화면 틀·작은 화면 메뉴·채팅·문서·센서·상세 화면 |
+| `ui/FieldWorkspaceUi.kt` | 웹 기준 디자인 토큰·홈·사이드바·문서 표지·설정 카드 |
+| `ui/FieldGuardViewModel.kt` | 앱 상태·기존 RAG/모델/BLE 호출·작업 서버 주소 저장 |
+| `ui/NativeWorkPage.kt` | 공통 작업 화면 WebView·서버 설정·네이티브 질문 전환 |
+| `ui/WorkServerAddress.kt` | HTTPS/개발 localhost·동일 출처 검증 |
+| `ui/MarkdownText.kt`, `SourcePdfPage.kt` | Markdown 답변·원본 PDF 표시 |
+| `ui/VoiceConversationController.kt` | 기기 음성 인식·응답 음성 경로 |
+| `data/KnowledgeRepository.kt` | ObjectBox 검색·근거 선택 |
+| `data/QuestionEvidencePlanner.kt`, `QuestionAnswerVerifier.kt` | 복합 주제·근거 누락/충돌 검사 |
+| `data/SourcePdfCatalog.kt`, `SourcePdfRepository.kt` | 번들 PDF 판본·해시·실제 쪽 렌더링 |
+| `model/LocalModelRuntime.kt`, `ModelDownloadWorker.kt` | Android LiteRT-LM·모델 다운로드 |
+| `gas/` | BLE 수신·측정 서비스·데모 구분·위젯·알림 |
+
+현재 진입 UI는 `TossFieldGuardApp`입니다. `ui/HybridTechApp.kt`와 `HybridTechTheme.kt`는 이전 화면 구현과 공통 액션 선언을 포함하므로 현재 앱의 기준 화면과 혼동하지 않습니다.
+
+### 웹·작업 서버 주요 소스
+
+| 정확한 경로 | 역할 |
+|---|---|
+| `web/src/App.tsx` | 홈·질문·보관함·기록·탐색·권한별 메뉴·앱 내 표시 모드 |
+| `web/src/features/WorkChecklist.tsx` | 작업자·감독관 공통 작업 화면 |
+| `web/src/features/SupervisorAccess.tsx` | 6자리 숫자 입력·인증·잠금 |
+| `web/src/features/Settings.tsx`, `PdfPage.tsx` | 모델·토큰·파일 준비·원본 PDF |
+| `web/src/workflow/work.ts` | 상태 전환·승인 조건·사건 스냅샷 |
+| `web/src/workflow/access.ts`, `native.ts` | 서버 세션·API·Android 전환 |
+| `web/server/store.ts` | SQLite·요청 소유권·감독관 권한·한국 날짜/당일 코드 |
+| `web/server/api.ts`, `plugin.ts`, `manage.ts` | HTTP API·Vite 연결·코드 관리 CLI |
+| `web/src/ai/catalog.ts`, `model.ts` | 공식 모델 정보·다운로드·저장·검증 재사용 |
+| `web/src/ai/runtime.ts`, `worker-engine.ts`, `engine.worker.ts` | 자동 준비·Worker 통신·실제 SDK 추론 |
+| `web/src/ai/preferences.ts`, `output-quality.ts` | 토큰 설정·비정상 생성 검사 |
+| `web/src/chat/scroll.ts`, `useChatScroll.ts` | 수동 스크롤 보존·생성 위치 자동 재개 |
+| `web/src/rag/search.ts`, `storage/db.ts` | 로컬 검색·IndexedDB 기록/설정 |
+| `web/scripts/prepare-assets.mjs`, `build-ai-worker.mjs` | Android 자산 복사·SDK Worker 생성 |
+| `web/scripts/build-pwa.mjs`, `sw-template.js` | 버전별 셸 캐시·API 캐시 제외 |
+| `web/vite.config.ts`, `package.json` | 포트·COOP/COEP·작업 API·명령 |
+
+## 저장 위치와 배포 경계
+
+| 위치 | 저장하는 것 |
+|---|---|
+| Android `context.noBackupFilesDir/models/gemma-4-e2b-it.litertlm` | 설치된 Android 모델 (`.part`는 다운로드 중 파일) |
+| Android `context.noBackupFilesDir/source-pdfs/` | 첫 사용 시 복사·검증한 번들 PDF |
+| Android `SharedPreferences` | `field_guard_ui`: 서버 주소·온보딩·이전 체크, `inference_settings`: 추론 설정, `local_model`: 모델 상태. `local_chat_history`: 대화, `gas_reading`: 가스 기록 |
+| 브라우저 IndexedDB `fieldguard-web` v2 | 대화·토큰 설정·모델 메타데이터/검증 기록·이전 로컬 작업 |
+| 브라우저 OPFS | 검증 후 저장한 웹 모델 |
+| Cache API·PWA 셸 | 준비된 검색 데이터·PDF·런타임·앱 화면 |
+| `web/.local/workflow.sqlite` | 새 작업·사건·기기 세션 해시·당일 코드 상태 |
+| `web/.local/workflow.sqlite.daily-key` | 당일 코드 계산용 서버 비밀 키 |
+
+서버 DB와 키는 서버를 중지한 뒤 함께 백업합니다. `.local/`, 모델·쿠키·키·실제 코드, `node_modules`, `dist`, 생성 자산, APK, Gradle/테스트 임시 파일은 Git에 올리지 않습니다. 이전 로컬 작업을 서버 승인으로 가져오지 않으며 읽기 전용 이력으로 보존합니다. 기기 기록 삭제는 서버 작업·승인을 삭제하지 않습니다. JSON 내보내기는 기기 이력과 본인 서버 기록을 구분합니다.
+
+위 Android 경로는 PC 저장소의 `app/` 아래가 아니라 **단말의 앱 전용 저장소**입니다. `noBackupFilesDir`의 실제 루트는 일반적인 기본 사용자에서 `/data/user/0/<패키지명>/no_backup/`이며 운영체제·프로필에 따라 달라집니다. 디자인 검증용 패키지는 별도 루트를 사용합니다. 브라우저 모델도 PC 프로젝트 폴더가 아닌 접속 origin별 OPFS에 저장되므로 고정된 Windows 파일 경로로 접근하지 않습니다.
+
+웹 정적 출력은 `web/dist/`입니다. 문서·AI에는 HTTPS·COOP/COEP·WASM MIME 설정이 필요합니다. **감독관 인증·새 점검은 서버 API가 필요하므로 정적 파일만 게시해서는 동작하지 않습니다.** 현재 작업 API는 Vite 개발·미리보기용이며 외부 운영 배포·운영 DB 백업 자동화·개인 계정 연동은 수행하지 않았습니다. iPhone은 HTTPS 주소를 Safari에서 열고 공유 → 홈 화면에 추가로 설치합니다. 실기기 iPhone 메모리·발열·재부팅 후 저장 유지 시험은 남아 있습니다.
+
+## 검증 방법과 상세 문서
+
+```powershell
+cd web
+npm.cmd test -- --maxWorkers=1
+npm.cmd run build
+```
+
+```powershell
+.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest
+```
+
+Android UI 계측 테스트: `TossNavigationTest`, `WorkspaceDesignTest`. 원본 PDF 검증은 `data/SourcePdfRepositoryTest`입니다. 웹 검증에는 검색·Markdown·스크롤·모델 무결성·검증 재사용·토큰·날짜 경계·당일 코드 공동 사용·권한 우회 거부·동시 갱신을 포함합니다. 검색 회귀 정답 쪽 포함 결과는 29/30이며 AI 생성 답변 전체의 정확도 점수와 구분합니다. 최신 실행 수치·실기기 결과·남은 항목은 아래 검증 기록을 기준으로 합니다.
+
+2026-10-15 최종 결과: **웹 126개·Android JVM 15개·갤럭시 탭 UI 계측 10개 통과**, 웹 프로덕션 및 Android APK 빌드 성공. 앱 화면은 Galaxy Tab S9 Ultra(SM-X910, Android 16)의 실제 렌더링 캡처이며 UI 테스트는 가상 상태를 사용합니다. 새 UI·공통 WebView 검증과 실제 모델 추론·BLE 장비 검증을 구분합니다.
+
+| 문서 | 내용 |
+|---|---|
+| [Android 현행 설계서](docs/ANDROID_APP_SPEC.md) | 네이티브 화면·RAG·BLE·공통 작업 화면 연결 |
+| [웹·서버 현행 설계서](docs/webapp/TARGET_ARCHITECTURE.md) | React·Worker·저장소·인증·API 구조 |
+| [작업 흐름 설계](web/docs/workflow.md) | 당일 6자리 코드·역할·작업 상태·승인 조건 |
+| [웹 실행 안내](web/README.md) | 모델·토큰·PWA·서버 명령·배포 설정 |
+| [검증 기록](web/docs/validation.md) | 자동 검사·실제 화면·기기·측정 조건 |
+| [Android 오프라인 RAG](docs/OFFLINE_RAG_ARCHITECTURE.md) | 기존 기기 내 근거 검색·검증 |
+| [유지보수 기준](docs/webapp/BUILD_PROMPT.md) | 이후 변경에서 보존할 동작 |
+
+현재 BLE 수신 기반과 데모 구분은 구현되어 있지만 특정 제조사 프로토콜·현장 장비 정확도는 검증 전입니다. 실제 작업허가·현장 안전 판단·대피 절차는 담당자의 현장 확인을 따릅니다.

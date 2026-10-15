@@ -6,17 +6,17 @@ export default function SupervisorAccess() {
   const access = useWorkSession(); const [code, setCode] = useState(''); const [busy, setBusy] = useState(false); const [error, setError] = useState('');
   const grant = access.session?.supervisor;
   async function register() {
-    if (busy || !code.trim()) return;
+    if (busy || !/^\d{6}$/.test(code)) return;
     setBusy(true); setError('');
     try { await registerSupervisor(code); setCode(''); go('/supervisor'); }
     catch (error) { setError(error instanceof Error ? error.message : '감독관 인증을 완료하지 못했어요.'); }
     finally { setBusy(false); }
   }
-  return <><PageHead eyebrow="SUPERVISOR ACCESS" title="감독관 인증" description="발급받은 개인용 등록 코드로 감독관 권한을 확인해요."/>
+  return <><PageHead eyebrow="SUPERVISOR ACCESS" title="감독관 화면으로 전환" description="오늘 전달받은 6자리 암호코드를 입력해 주세요."/>
     <section className="card supervisor-access"><div className="tile-icon"><Icon name="shield"/></div>
-      {grant ? <><h2>{grant.name} 감독관</h2><p>인증 유효기한 {formatDate(grant.expiresAt)}</p><div className="button-row spaced"><button className="btn primary" onClick={() => go('/supervisor')}>감독관 점검 열기</button><button className="btn secondary" disabled={busy} onClick={async () => { setBusy(true); try { await lockSupervisor(); go('/checklist'); } catch (error) { setError(error instanceof Error ? error.message : '잠금을 완료하지 못했어요.'); } finally { setBusy(false); } }}>감독관 화면 잠그기</button></div></> : <>
-        <h2>감독관 등록 코드 입력</h2><p>작업자는 작업 요청과 본인의 투입·퇴장 기록을 이용해요. 점검·승인은 인증된 감독관에게만 열려요.</p>
-        <form onSubmit={event => { event.preventDefault(); void register(); }}><label className="field">감독관 등록 코드<input type="password" autoComplete="off" autoCapitalize="none" spellCheck={false} value={code} maxLength={200} disabled={busy || access.loading} onChange={event => setCode(event.target.value)} placeholder="전달받은 일회용 코드"/></label><button className="btn primary full" disabled={busy || access.loading || !code.trim()}>{busy ? '권한 확인 중…' : '감독관 인증하기'}</button></form><p className="caption">등록 코드는 서버 관리자에게 받아 주세요. 코드는 한 번만 사용할 수 있고 인증은 8시간 동안 유지돼요.</p>
+      {grant ? <><h2>{grant.name}</h2><p>인증 유효기한 {formatDate(grant.expiresAt)}</p><div className="button-row spaced"><button className="btn primary" onClick={() => go('/supervisor')}>감독관 점검 열기</button><button className="btn secondary" disabled={busy} onClick={async () => { setBusy(true); try { await lockSupervisor(); go('/checklist'); } catch (error) { setError(error instanceof Error ? error.message : '잠금을 완료하지 못했어요.'); } finally { setBusy(false); } }}>감독관 화면 잠그기</button></div></> : <>
+        <h2>오늘의 암호코드 6자리</h2><p>감독관에게 전달된 오늘의 코드를 입력하면 점검·승인 화면이 열려요.</p>
+        <form onSubmit={event => { event.preventDefault(); void register(); }}><label className="field">감독관 암호코드<input className="daily-code-input" type="password" inputMode="numeric" pattern="[0-9]{6}" autoComplete="one-time-code" spellCheck={false} value={code} maxLength={6} disabled={busy || access.loading} onChange={event => setCode(event.target.value.replace(/\D/g,'').slice(0,6))} placeholder="6자리 숫자"/></label><button className="btn primary full" disabled={busy || access.loading || code.length!==6}>{busy ? '권한 확인 중…' : '감독관 화면으로 전환'}</button></form><p className="caption">오늘 코드는 한국 시간 자정까지 사용할 수 있어요. 날짜가 바뀌면 새 코드를 입력해 주세요.</p>
       </>}
       {(error || access.error) && <p className="notice warning" role="alert">{error || access.error}</p>}
       {access.error && <button className="btn secondary" onClick={() => { void refreshWorkSession().catch(() => {}); }}>서버 연결 다시 확인</button>}

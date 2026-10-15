@@ -17,4 +17,5 @@ export interface Chat {
 export interface Checklist { id: string; checked: number[]; site: string; note: string; createdAt: string }
 export interface Asset { path: string; size: number; sha256: string; group: 'knowledge' | 'pdf' | 'runtime' }
 export interface AssetManifest { version: string; sdkVersion: string; assets: Asset[] }
-export interface ModelRecord { name: string; size: number; sha256: string; installedAt: string; backend: 'opfs' | 'idb'; storageKey: string }
+export interface ModelVerification { version:1;sha256:string;size:number;lastModified:number;sampleSha256:string;verifiedAt:number }
+export interface ModelRecord { name: string; size: number; sha256: string; installedAt: string; backend: 'opfs' | 'idb'; storageKey: string;verification?:ModelVerification }

@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -40,6 +41,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -57,6 +61,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -67,6 +72,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -90,12 +96,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val TossBlue = Color(0xFF3182F6)
-private val TossBlueWeak = Color(0xFFE8F3FF)
+private val TossBlueWeak = WorkspaceDesign.BlueWeak
 private val TossInk = Color(0xFF191F28)
 private val TossSecondary = Color(0xFF4E5968)
 private val TossMuted = Color(0xFF6B7684)
 private val TossSurface = Color(0xFFF2F4F6)
-private val TossBorder = Color(0xFFE5E8EB)
+private val TossBorder = WorkspaceDesign.Border
 private val TossGreen = Color(0xFF178265)
 private val TossGreenWeak = Color(0xFFE8F7F1)
 private val TossRed = Color(0xFFF04452)
@@ -107,7 +113,7 @@ private fun FieldGuardTossTheme(content: @Composable () -> Unit) {
         colorScheme = lightColorScheme(
             primary = TossBlue, onPrimary = Color.White,
             primaryContainer = TossBlueWeak, onPrimaryContainer = TossInk,
-            background = Color.White, onBackground = TossInk,
+            background = WorkspaceDesign.Canvas, onBackground = TossInk,
             surface = Color.White, onSurface = TossInk,
             surfaceVariant = TossSurface, onSurfaceVariant = TossSecondary,
             outline = TossBorder, error = TossRed,
@@ -134,6 +140,9 @@ fun TossFieldGuardApp(state: FieldGuardUiState, voice: VoiceUiState, actions: Fi
             return@FieldGuardTossTheme
         }
         val destination = state.destination
+        val wide = LocalConfiguration.current.screenWidthDp >= 850
+        val drawer = rememberDrawerState(DrawerValue.Closed)
+        val workspaceScope = rememberCoroutineScope()
         val parent = when (destination) {
             AppDestination.HOME -> null
             AppDestination.CHAT, AppDestination.SENSOR, AppDestination.SETTINGS -> AppDestination.HOME
@@ -141,9 +150,11 @@ fun TossFieldGuardApp(state: FieldGuardUiState, voice: VoiceUiState, actions: Fi
             AppDestination.SOURCE -> state.sourceReturnDestination
             AppDestination.SENSOR_DISCONNECTED -> AppDestination.SENSOR
             AppDestination.CHECKLIST, AppDestination.LIBRARY -> AppDestination.HOME
+            AppDestination.LOCAL_CHECKLIST, AppDestination.WORK_SERVER, AppDestination.SUPERVISOR -> AppDestination.CHECKLIST
             AppDestination.MODEL, AppDestination.INFERENCE, AppDestination.DATA, AppDestination.SYSTEM -> AppDestination.SETTINGS
         }
-        BackHandler(enabled = parent != null) {
+        BackHandler(enabled = parent != null || drawer.isOpen) {
+            if (drawer.isOpen) { workspaceScope.launch { drawer.close() }; return@BackHandler }
             if (destination == AppDestination.VOICE) actions.onStopVoice()
             parent?.let(actions.onNavigate)
         }
@@ -152,45 +163,55 @@ fun TossFieldGuardApp(state: FieldGuardUiState, voice: VoiceUiState, actions: Fi
             if (destination == AppDestination.VOICE && target != AppDestination.VOICE) actions.onStopVoice()
             actions.onNavigate(target)
         }
+        val navigateFromMenu: (AppDestination) -> Unit = { target -> workspaceScope.launch { drawer.close() }; navigateFromTab(target) }
+        ModalNavigationDrawer(drawerState = drawer, gesturesEnabled = !wide, drawerContent = {
+            if (!wide) FieldWorkspaceSidebar(destination, navigateFromMenu)
+        }) {
+        Row(Modifier.fillMaxSize().background(WorkspaceDesign.Canvas)) {
+        if (wide) FieldWorkspaceSidebar(destination, navigateFromMenu)
         Scaffold(
-            modifier = Modifier.imePadding(),
-            containerColor = Color.White,
+            modifier = Modifier.weight(1f).imePadding(),
+            containerColor = WorkspaceDesign.Canvas,
             topBar = {
                 TossTopBar(destination, parent, state, onBack = {
                     if (destination == AppDestination.VOICE) actions.onStopVoice()
                     parent?.let(actions.onNavigate)
-                }, onHistory = { actions.onNavigate(AppDestination.HISTORY) })
+                }, onHistory = { actions.onNavigate(AppDestination.HISTORY) }, onMenu = if (wide) null else ({ workspaceScope.launch { drawer.open() } }))
             },
             bottomBar = {
-                if (!imeVisible) TossBottomNavigation(destination, state.sourceReturnDestination, navigateFromTab)
+                if (!imeVisible && !wide) TossBottomNavigation(destination, state.sourceReturnDestination, navigateFromTab)
             },
         ) { padding ->
             Box(Modifier.fillMaxSize().padding(padding)) {
                 when (destination) {
-                    AppDestination.HOME -> TossHome(state, actions)
+                    AppDestination.HOME -> FieldWorkspaceHome(state, actions)
                     AppDestination.CHAT -> TossChat(state, voice, actions, imeVisible)
                     AppDestination.HISTORY -> TossHistory(state, actions)
                     AppDestination.SOURCE -> TossSource(state, actions)
                     AppDestination.VOICE -> TossVoice(voice, actions)
                     AppDestination.SENSOR -> TossSensor(state, actions)
                     AppDestination.SENSOR_DISCONNECTED -> TossSensorDisconnected(state, actions)
-                    AppDestination.CHECKLIST -> TossChecklist(state, actions)
+                    AppDestination.CHECKLIST, AppDestination.SUPERVISOR -> key(destination) { NativeWorkPage(state, actions) }
+                    AppDestination.LOCAL_CHECKLIST -> TossChecklist(state, actions)
+                    AppDestination.WORK_SERVER -> WorkServerSettings(state, actions)
                     AppDestination.LIBRARY -> TossLibrary(state, actions)
                     AppDestination.MODEL -> TossModel(state, actions)
                     AppDestination.INFERENCE -> TossInference(state, actions)
                     AppDestination.DATA -> TossData(state, actions)
-                    AppDestination.SETTINGS -> TossSettings(actions)
+                    AppDestination.SETTINGS -> TossSettings(state, actions)
                     AppDestination.SYSTEM -> TossSystem(state)
                 }
             }
+        }
+        }
         }
     }
 }
 
 @Composable
-private fun TossTopBar(destination: AppDestination, parent: AppDestination?, state: FieldGuardUiState, onBack: () -> Unit, onHistory: () -> Unit) {
+private fun TossTopBar(destination: AppDestination, parent: AppDestination?, state: FieldGuardUiState, onBack: () -> Unit, onHistory: () -> Unit, onMenu: (() -> Unit)?) {
     val title = when (destination) {
-        AppDestination.HOME -> "O₂ Field Guard"
+        AppDestination.HOME -> "홈"
         AppDestination.CHAT -> "문서 질문"
         AppDestination.HISTORY -> "대화 기록"
         AppDestination.SOURCE -> "근거 문서"
@@ -204,12 +225,17 @@ private fun TossTopBar(destination: AppDestination, parent: AppDestination?, sta
         AppDestination.DATA -> "내 데이터"
         AppDestination.SETTINGS -> "설정"
         AppDestination.SYSTEM -> "위젯과 알림"
+        AppDestination.LOCAL_CHECKLIST -> "이전 기기 점검 기록"
+        AppDestination.WORK_SERVER -> "현장 작업 서버"
+        AppDestination.SUPERVISOR -> "감독관 화면"
     }
-    Row(Modifier.fillMaxWidth().statusBarsPadding().height(56.dp).padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-        if (parent != null && destination !in setOf(AppDestination.CHAT, AppDestination.SENSOR, AppDestination.SETTINGS)) {
+    Row(Modifier.fillMaxWidth().background(Color.White).statusBarsPadding().height(60.dp).padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (parent != null && destination !in setOf(AppDestination.CHAT, AppDestination.SENSOR, AppDestination.SETTINGS, AppDestination.LIBRARY)) {
             IconButton(onClick = onBack, modifier = Modifier.size(48.dp).semantics { contentDescription = "뒤로 가기" }) {
                 TossBackIcon()
             }
+        } else if (onMenu != null) {
+            IconButton(onClick = onMenu, modifier = Modifier.size(44.dp).testTag("workspaceMenu").semantics { contentDescription = "전체 메뉴 열기" }) { Text("☰", color = TossMuted, fontSize = 20.sp) }
         } else if (destination == AppDestination.HOME) {
             Surface(color = TossBlue, shape = RoundedCornerShape(10.dp)) {
                 Text("O₂", color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 7.dp, vertical = 5.dp))
@@ -241,9 +267,9 @@ private fun TossBackIcon() {
 private fun TossBottomNavigation(destination: AppDestination, sourceReturnDestination: AppDestination, onNavigate: (AppDestination) -> Unit) {
     val selected = when (destination) {
         AppDestination.HISTORY, AppDestination.VOICE -> AppDestination.CHAT
-        AppDestination.SOURCE -> if (sourceReturnDestination == AppDestination.LIBRARY) AppDestination.HOME else AppDestination.CHAT
+        AppDestination.SOURCE -> if (sourceReturnDestination == AppDestination.LIBRARY) AppDestination.LIBRARY else AppDestination.CHAT
         AppDestination.SENSOR_DISCONNECTED -> AppDestination.SENSOR
-        AppDestination.CHECKLIST, AppDestination.LIBRARY -> AppDestination.HOME
+        AppDestination.CHECKLIST, AppDestination.LOCAL_CHECKLIST, AppDestination.WORK_SERVER, AppDestination.SUPERVISOR -> AppDestination.CHECKLIST
         AppDestination.MODEL, AppDestination.INFERENCE, AppDestination.DATA, AppDestination.SYSTEM -> AppDestination.SETTINGS
         else -> destination
     }
@@ -253,7 +279,7 @@ private fun TossBottomNavigation(destination: AppDestination, sourceReturnDestin
             listOf(
                 AppDestination.HOME to "홈",
                 AppDestination.CHAT to "질문",
-                AppDestination.SENSOR to "측정",
+                AppDestination.LIBRARY to "문서",
                 AppDestination.SETTINGS to "설정",
             ).forEach { (page, label) ->
                 Column(
@@ -271,7 +297,7 @@ private fun TossBottomNavigation(destination: AppDestination, sourceReturnDestin
 }
 
 @Composable
-private fun TossNavigationIcon(page: AppDestination, color: Color) {
+internal fun TossNavigationIcon(page: AppDestination, color: Color) {
     Canvas(Modifier.size(19.dp)) {
         val w = size.width
         val h = size.height
@@ -307,6 +333,17 @@ private fun TossNavigationIcon(page: AppDestination, color: Color) {
                 }
                 drawPath(wave, color, style = stroke)
             }
+            AppDestination.LIBRARY -> {
+                val book = Path().apply { moveTo(w*.5f,h*.2f);lineTo(w*.12f,h*.12f);lineTo(w*.12f,h*.82f);lineTo(w*.5f,h*.9f);lineTo(w*.88f,h*.82f);lineTo(w*.88f,h*.12f);close() }
+                drawPath(book,color,style=stroke);drawLine(color,Offset(w*.5f,h*.2f),Offset(w*.5f,h*.9f),strokeWidth=2.dp.toPx())
+            }
+            AppDestination.CHECKLIST, AppDestination.MODEL -> {
+                drawRoundRect(color,topLeft=Offset(w*.15f,h*.08f),size=Size(w*.7f,h*.84f),cornerRadius=CornerRadius(w*.1f),style=stroke)
+                val check=Path().apply{moveTo(w*.3f,h*.5f);lineTo(w*.46f,h*.65f);lineTo(w*.72f,h*.35f)};drawPath(check,color,style=stroke)
+            }
+            AppDestination.HISTORY -> {
+                drawCircle(color,radius=w*.38f,center=Offset(w*.5f,h*.5f),style=stroke);drawLine(color,Offset(w*.5f,h*.24f),Offset(w*.5f,h*.5f),strokeWidth=2.dp.toPx());drawLine(color,Offset(w*.5f,h*.5f),Offset(w*.68f,h*.6f),strokeWidth=2.dp.toPx())
+            }
             AppDestination.SETTINGS -> {
                 listOf(.26f to .65f, .5f to .34f, .74f to .61f).forEach { (x, dotY) ->
                     drawLine(color, Offset(w * x, h * .12f), Offset(w * x, h * .88f), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
@@ -320,16 +357,18 @@ private fun TossNavigationIcon(page: AppDestination, color: Color) {
 }
 
 @Composable
-private fun TossScrollPage(content: @Composable ColumnScope.() -> Unit) {
+internal fun TossScrollPage(content: @Composable ColumnScope.() -> Unit) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
     Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 22.dp, vertical = 18.dp),
+        Modifier.widthIn(max = 1120.dp).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 22.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         content = content,
     )
+    }
 }
 
 @Composable
-private fun TossPageTitle(title: String, description: String? = null) {
+internal fun TossPageTitle(title: String, description: String? = null) {
     Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
         Text(title, style = MaterialTheme.typography.headlineMedium)
         if (description != null) Text(description, style = MaterialTheme.typography.bodyMedium, color = TossMuted)
@@ -337,31 +376,31 @@ private fun TossPageTitle(title: String, description: String? = null) {
 }
 
 @Composable
-private fun TossPanel(modifier: Modifier = Modifier, color: Color = TossSurface, content: @Composable ColumnScope.() -> Unit) {
-    Surface(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), color = color) {
-        Column(Modifier.padding(17.dp), verticalArrangement = Arrangement.spacedBy(9.dp), content = content)
+internal fun TossPanel(modifier: Modifier = Modifier, color: Color = Color.White, content: @Composable ColumnScope.() -> Unit) {
+    Surface(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(17.dp), color = color, border = BorderStroke(1.dp, TossBorder)) {
+        Column(Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(12.dp), content = content)
     }
 }
 
 @Composable
-private fun TossStatusPill(label: String, background: Color = TossBlueWeak, foreground: Color = TossBlue) {
+internal fun TossStatusPill(label: String, background: Color = TossBlueWeak, foreground: Color = TossBlue) {
     Surface(color = background, shape = CircleShape) {
         Text(label, color = foreground, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp))
     }
 }
 
 @Composable
-private fun TossPrimaryButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
+internal fun TossPrimaryButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
     Button(
         onClick = onClick, enabled = enabled,
         modifier = modifier.fillMaxWidth().heightIn(min = 52.dp),
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(containerColor = TossBlue, contentColor = Color.White),
-    ) { Text(label, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+    ) { Text(label, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
 }
 
 @Composable
-private fun TossSecondaryButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun TossSecondaryButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Button(
         onClick = onClick,
         modifier = modifier.fillMaxWidth().heightIn(min = 48.dp),
@@ -371,7 +410,7 @@ private fun TossSecondaryButton(label: String, onClick: () -> Unit, modifier: Mo
 }
 
 @Composable
-private fun TossRow(title: String, subtitle: String? = null, onClick: () -> Unit, trailing: String = "›") {
+internal fun TossRow(title: String, subtitle: String? = null, onClick: () -> Unit, trailing: String = "›") {
     Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 11.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
@@ -405,46 +444,7 @@ private fun TossOnboarding(onStart: () -> Unit) {
 }
 
 @Composable
-private fun TossHome(state: FieldGuardUiState, actions: FieldGuardActions) {
-    val now = currentTimeTick()
-    TossScrollPage {
-        TossPageTitle("오늘 현장에서\n필요한 것")
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            TossStatusPill("문서 · 오프라인 준비됨", TossGreenWeak, TossGreen)
-            if (state.sensorConnectionLost) TossStatusPill("센서 연결 끊김", TossRedWeak, TossRed)
-            else TossStatusPill(if (state.gasReading.source == GasReadingSource.BLE && state.gasReading.isFresh(now)) "BLE 수신" else "센서 연결 대기", TossSurface, TossSecondary)
-        }
-        TossGasSummary(state.gasReading, onClick = { actions.onNavigate(AppDestination.SENSOR) })
-        TossPanel(color = TossBlueWeak) {
-            Text("문서에 바로 질문", style = MaterialTheme.typography.titleLarge)
-            Text("작업 전 측정, 환기, 구조 절차를 문서 근거로 확인해요.", style = MaterialTheme.typography.bodyMedium)
-            TossPrimaryButton("질문하기", { actions.onNavigate(AppDestination.CHAT) })
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            TossHomeTile("작업 전 점검", "5개 항목", Modifier.weight(1f)) { actions.onNavigate(AppDestination.CHECKLIST) }
-            TossHomeTile("문서 보관함", "${state.documents.size}개 문서", Modifier.weight(1f)) { actions.onNavigate(AppDestination.LIBRARY) }
-        }
-        if (state.modelStatus.phase != ModelPhase.READY) {
-            TossRow("로컬 AI 모델 준비", "문서 검색은 지금도 사용할 수 있어요.", { actions.onNavigate(AppDestination.MODEL) })
-        }
-    }
-}
-
-@Composable
-private fun TossHomeTile(title: String, subtitle: String, modifier: Modifier, onClick: () -> Unit) {
-    Surface(modifier = modifier.clickable(onClick = onClick), color = TossSurface, shape = RoundedCornerShape(22.dp)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-            Surface(color = TossBlueWeak, shape = RoundedCornerShape(11.dp)) {
-                Text(if (title == "작업 전 점검") "✓" else "▤", color = TossBlue, fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp))
-            }
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            Text(subtitle, style = MaterialTheme.typography.bodySmall)
-        }
-    }
-}
-
-@Composable
-private fun TossGasSummary(reading: GasReading, onClick: () -> Unit) {
+internal fun TossGasSummary(reading: GasReading, onClick: () -> Unit) {
     val now = currentTimeTick()
     val current = reading.isFresh(now)
     TossPanel(modifier = Modifier.clickable(onClick = onClick)) {
@@ -486,7 +486,10 @@ private fun TossChat(state: FieldGuardUiState, voice: VoiceUiState, actions: Fie
         if (state.messages.size > 1 && !showLatest) listState.animateScrollToItem(state.messages.lastIndex)
     }
     Column(Modifier.fillMaxSize()) {
-        if (!imeVisible) TossGasSummary(state.gasReading) { actions.onNavigate(AppDestination.SENSOR) }
+        if (!imeVisible) Row(Modifier.fillMaxWidth().padding(horizontal = 22.dp, vertical = 10.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            TossStatusPill("기기 내 문서 질문")
+            TextButton(onClick = { actions.onNavigate(AppDestination.SENSOR) }) { Text("가스 측정 →") }
+        }
         Box(Modifier.weight(1f)) {
             LazyColumn(
                 state = listState,
@@ -497,7 +500,7 @@ private fun TossChat(state: FieldGuardUiState, voice: VoiceUiState, actions: Fie
                 if (state.messages.size <= 1) {
                     item {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            TossPageTitle("안전 작업에 관해\n궁금한 걸 물어보세요", "제공 문서에서 근거를 찾아 답해요.")
+                            TossPageTitle("현장에서 궁금한 점을\n물어보세요", "문서에서 근거를 찾고, 같은 쪽의 원문까지 연결해요.")
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 listOf("공기 측정 기준", "구조 절차").forEach { prompt ->
                                     FilterChip(selected = false, onClick = { actions.onPreset(prompt) }, label = { Text(prompt) })
@@ -819,7 +822,7 @@ private val checklistDescriptions = listOf("현장 계획과 비교", "검교정
 @Composable
 private fun TossChecklist(state: FieldGuardUiState, actions: FieldGuardActions) {
     TossScrollPage {
-        TossPageTitle("작업 전 확인할\n내용을 모았어요")
+        TossPageTitle("이전 기기 점검 기록", "이 기록은 기기 안에 저장한 개인 점검 메모예요. 새 작업 요청·감독관 승인은 작업 전 점검에서 진행해 주세요.")
         Text("${state.checklistChecked.size} / 5 확인", style = MaterialTheme.typography.titleMedium)
         LinearProgressIndicator(progress = { state.checklistChecked.size / 5f }, color = TossBlue, trackColor = TossBorder, modifier = Modifier.fillMaxWidth().height(6.dp))
         TossPanel {
@@ -841,8 +844,9 @@ private fun TossChecklist(state: FieldGuardUiState, actions: FieldGuardActions) 
 
 @Composable
 private fun TossLibrary(state: FieldGuardUiState, actions: FieldGuardActions) {
+    val wide = LocalConfiguration.current.screenWidthDp >= 850
     TossScrollPage {
-        TossPageTitle("인터넷 없이도\n문서를 찾아요", "${state.documents.size}개 문서 · ${state.documents.sumOf { it.chunkCount }}개 근거 조각")
+        TossPageTitle("필요한 근거를\n바로 찾아요", "문서 ${state.documents.size}종 · ${state.documents.sumOf { it.chunkCount }}개 근거 · 원본 PDF")
         OutlinedTextField(
             value = state.libraryQuery, onValueChange = actions.onLibraryQuery,
             placeholder = { Text("문서에서 찾기") },
@@ -859,38 +863,20 @@ private fun TossLibrary(state: FieldGuardUiState, actions: FieldGuardActions) {
                 }
             }
         } else {
-            TossPanel(color = TossBlueWeak) { Text("질문하면 관련 부분을 먼저 찾아서 답해요.", style = MaterialTheme.typography.bodyMedium) }
-            TossPanel {
-                Text("저장된 문서", style = MaterialTheme.typography.titleMedium)
-                state.documents.forEachIndexed { index, document ->
-                    TossRow(document.title, "근거 조각 ${document.chunkCount}개", { actions.onOpenDocument(document.id) })
-                    if (index != state.documents.lastIndex) HorizontalDivider(color = TossBorder)
+            if (wide) state.documents.withIndex().chunked(2).forEach { pair ->
+                Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+                    pair.forEach { (index, document) -> FieldWorkspaceDocument(document, index, actions, Modifier.weight(1f)) }
+                    if (pair.size == 1) Spacer(Modifier.weight(1f))
                 }
-                if (state.documents.isEmpty()) Text("문서를 준비하고 있어요.", style = MaterialTheme.typography.bodyMedium)
-            }
-            Text("지금은 기본 제공 문서만 검색해요. 문서 추가는 향후 확장 기능이에요.", style = MaterialTheme.typography.bodySmall)
+            } else state.documents.forEachIndexed { index, document -> FieldWorkspaceDocument(document,index,actions) }
+            if (state.documents.isEmpty()) Text("문서를 준비하고 있어요.", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
 
 @Composable
-private fun TossSettings(actions: FieldGuardActions) {
-    TossScrollPage {
-        TossPageTitle("설정", "모델과 기기 데이터를 관리해요.")
-        TossPanel {
-            TossRow("로컬 AI 모델", "Gemma 4 E2B 설치와 상태", { actions.onNavigate(AppDestination.MODEL) })
-            HorizontalDivider(color = TossBorder)
-            TossRow("추론 설정", "실행 방식과 답변 길이", { actions.onNavigate(AppDestination.INFERENCE) })
-            HorizontalDivider(color = TossBorder)
-            TossRow("내 데이터", "기기에 저장된 기록", { actions.onNavigate(AppDestination.DATA) })
-            HorizontalDivider(color = TossBorder)
-            TossRow("위젯과 알림", "앱 밖에서 측정 상태 보기", { actions.onNavigate(AppDestination.SYSTEM) })
-        }
-        TossPanel(color = TossBlueWeak) {
-            Text("질문과 문서 검색은 기기에서 처리해요.", style = MaterialTheme.typography.bodyMedium)
-            Text("모델을 처음 받을 때만 네트워크가 필요해요.", style = MaterialTheme.typography.bodySmall)
-        }
-    }
+private fun TossSettings(state: FieldGuardUiState, actions: FieldGuardActions) {
+    FieldWorkspaceSettings(state, actions)
 }
 
 @Composable

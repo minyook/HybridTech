@@ -27,8 +27,8 @@ async function post(who:Client,path:string,payload:unknown,headers:Record<string
   return fetch(`${base}/api/${path}`,{method:'POST',headers:{Cookie:who.cookie,'Content-Type':'application/json','X-Fieldguard-Csrf':who.session.csrf,...headers},body:JSON.stringify(payload)});
 }
 async function get(who:Client,view='worker') {return fetch(`${base}/api/work-orders?view=${view}`,{headers:{Cookie:who.cookie}});}
-async function grant(who:Client,name='등록된 감독관') {
-  const invite=store.issueInvite(name);const response=await post(who,'supervisor/register',{code:invite.code});
+async function grant(who:Client) {
+  const invite=store.todayCode();const response=await post(who,'supervisor/register',{code:invite.code});
   expect(response.status).toBe(200);
   who.cookie=response.headers.get('set-cookie')!.split(';')[0];who.session=await response.json();return invite;
 }
@@ -59,24 +59,27 @@ describe('서버가 검사하는 감독관 권한',()=>{
     expect(order.worker.id).toBe(worker.session.workerId);expect(await (await get(other)).json()).toEqual([]);
     expect((await action(other,order,{type:'report-danger',reason:'가상 위험'},'worker','다른 이름')).status).toBe(403);
   });
-  it('일회용 코드로 인증하고 기존 쿠키를 교체하며 같은 코드를 재사용할 수 없다',async()=>{
+  it('당일 6자리 코드로 인증하고 다른 감독관도 같은 코드를 쓸 수 있다',async()=>{
     const who=await client();const oldCookie=who.cookie;const invite=await grant(who);
-    expect(who.session.supervisor?.name).toBe('등록된 감독관');expect(who.cookie).not.toBe(oldCookie);
-    const another=await client();expect((await post(another,'supervisor/register',{code:invite.code,role:'supervisor'})).status).toBe(403);
+    expect(invite.code).toMatch(/^\d{6}$/);expect(who.session.supervisor?.name).toContain('감독관 · 기기');expect(who.cookie).not.toBe(oldCookie);
+    const another=await client();expect((await post(another,'supervisor/register',{code:invite.code,role:'supervisor'})).status).toBe(200);
     expect((await fetch(`${base}/api/work-orders?view=supervisor`,{headers:{Cookie:oldCookie}})).status).toBe(401);
   });
-  it('두 기기가 동시에 같은 코드를 사용하면 한 번만 성공한다',async()=>{
-    const a=await client(),b=await client();const invite=store.issueInvite('단일 감독관');
+  it('두 기기가 동시에 당일 코드를 사용해도 각자 인증된다',async()=>{
+    const a=await client(),b=await client();const invite=store.todayCode();
     const results=await Promise.all([post(a,'supervisor/register',{code:invite.code}),post(b,'supervisor/register',{code:invite.code})]);
-    expect(results.map(result=>result.status).sort()).toEqual([200,403]);
+    expect(results.map(result=>result.status)).toEqual([200,200]);
   });
-  it('만료되거나 회수한 코드는 인증할 수 없다',async()=>{
-    const who=await client();const expired=store.issueInvite('만료',1),revoked=store.issueInvite('회수');store.revokeInvite(revoked.id);time+=3_600_000;
-    expect((await post(who,'supervisor/register',{code:expired.code})).status).toBe(403);
-    expect((await post(who,'supervisor/register',{code:revoked.code})).status).toBe(403);
+  it('한국 시간 자정에 어제 코드와 기존 감독관 권한이 함께 만료된다',async()=>{
+    time=Date.parse('2026-10-15T14:59:59.000Z');const who=await client();const previous=await grant(who);
+    expect(who.session.supervisor?.expiresAt).toBe('2026-10-15T15:00:00.000Z');
+    time+=1000;expect((await get(who,'supervisor')).status).toBe(403);
+    const today=store.todayCode();expect(today.day).toBe('2026-10-16');expect(today.code).not.toBe(previous.code);
+    expect((await post(who,'supervisor/register',{code:previous.code})).status).toBe(403);
+    expect((await post(who,'supervisor/register',{code:today.code})).status).toBe(200);
   });
   it('5회 잘못 입력하면 15분 동안 추가 인증을 제한한다',async()=>{
-    const who=await client();const invite=store.issueInvite('감독관');
+    const who=await client();const invite=store.todayCode();
     for(let index=0;index<5;index++)expect((await post(who,'supervisor/register',{code:'invalid'})).status).toBe(403);
     expect((await post(who,'supervisor/register',{code:invite.code})).status).toBe(429);
     time+=15*60_000;expect((await post(who,'supervisor/register',{code:invite.code})).status).toBe(200);
@@ -89,10 +92,12 @@ describe('서버가 검사하는 감독관 권한',()=>{
     expect(((await (await get(who)).json()) as WorkOrder[])[0].id).toBe(order.id);
     expect((await fetch(`${base}/api/work-orders?view=supervisor`,{headers:{Cookie:previous}})).status).toBe(401);
   });
-  it('8시간 후 또는 관리자가 회수한 직후 서버가 감독관 접근을 거부한다',async()=>{
-    const a=await client(),b=await client();const invite=await grant(a);await grant(b);store.revokeInvite(invite.id);
-    expect((await get(a,'supervisor')).status).toBe(403);expect((await get(b,'supervisor')).status).toBe(200);
-    time+=8*3_600_000;expect((await get(b,'supervisor')).status).toBe(403);
+  it('코드를 교체하거나 중지하면 기존 모든 감독관 권한을 즉시 거부한다',async()=>{
+    const a=await client(),b=await client();const previous=await grant(a);await grant(b);const next=store.rotateDailyCode();
+    expect(next.code).not.toBe(previous.code);expect((await get(a,'supervisor')).status).toBe(403);expect((await get(b,'supervisor')).status).toBe(403);
+    expect((await post(a,'supervisor/register',{code:previous.code})).status).toBe(403);await grant(a);
+    store.revokeDailyCode();expect(store.todayCode().code).toBeUndefined();expect((await get(a,'supervisor')).status).toBe(403);
+    expect((await post(b,'supervisor/register',{code:next.code})).status).toBe(403);
   });
   it('CSRF 토큰이 없거나 다른 출처에서 보낸 변경 요청은 거부한다',async()=>{
     const who=await client();
@@ -100,12 +105,12 @@ describe('서버가 검사하는 감독관 권한',()=>{
     expect((await post(who,'work-orders',{}, {Origin:'https://other.example'})).status).toBe(403);
     expect(()=>store.verifyCsrf(who.cookie.split('=')[1],'가'.repeat(who.session.csrf.length))).toThrow('다시 요청');
   });
-  it('다른 기기 요청을 점검하고 실제 등록된 감독관 이름으로 승인한다',async()=>{
+  it('다른 기기 요청을 점검하고 서버가 확인한 감독관 기기 ID로 승인한다',async()=>{
     const worker=await client(),supervisor=await client();let order=await request(worker);await grant(supervisor);
     expect(((await (await get(supervisor,'supervisor')).json()) as WorkOrder[])[0].id).toBe(order.id);
     order=await (await action(supervisor,order,{type:'save-inspection',inspection:completeInspection()})).json();
     order=await (await action(supervisor,order,{type:'approve'})).json();
-    expect(order.approvedBy?.name).toBe('등록된 감독관');expect(order.approvedBy?.id).toBe(supervisor.session.supervisor?.id);
+    expect(order.approvedBy?.name).toBe(supervisor.session.supervisor?.name);expect(order.approvedBy?.id).toBe(supervisor.session.supervisor?.id);
     expect(order.events.at(-1)?.inspection?.gas.o2).toBe(20.9);
     const response=await action(worker,order,{type:'enter',acknowledged:true},'worker','테스트 작업자');expect(response.status).toBe(200);expect((await response.json()).status).toBe('entered');
   });
@@ -120,20 +125,29 @@ describe('서버가 검사하는 감독관 권한',()=>{
     expect((await action(who,order,{type:'save-inspection',inspection:{}})).status).toBe(400);expect((await action(who,order,{type:'approve'})).status).toBe(400);
     expect(((await (await get(who,'supervisor')).json()) as WorkOrder[])[0].revision).toBe(0);
   });
-  it('서버 재시작 뒤에도 요청 소유자·사용한 코드·감독관 회수를 보존한다',()=>{
+  it('서버 재시작 뒤에도 당일 코드·요청 소유자·코드 중지를 보존한다',()=>{
     const filename=join(tmpdir(),`fieldguard-auth-${randomUUID()}.sqlite`);
     let persistent=createWorkStore(filename,()=>time);
     try {
-      const connected=persistent.connect();const invite=persistent.issueInvite('재시작 검증');
+      const connected=persistent.connect();const invite=persistent.todayCode();
       const granted=persistent.unlock(connected.token,invite.code,'test-device');
       const order=persistent.createOrder(granted.token,{name:'가상 작업자',details:{site:'가상 현장',location:'가상 위치',task:'재시작 검증'}});
       persistent.close();persistent=createWorkStore(filename,()=>time);
-      expect(persistent.listOrders(granted.token,'supervisor')[0].id).toBe(order.id);
-      const other=persistent.connect();expect(()=>persistent.unlock(other.token,invite.code,'test-device')).toThrow('사용한 코드');
-      persistent.revokeInvite(invite.id);persistent.close();persistent=createWorkStore(filename,()=>time);
+      expect(persistent.listOrders(granted.token,'supervisor')[0].id).toBe(order.id);expect(persistent.todayCode().code).toBe(invite.code);
+      const other=persistent.connect();expect(persistent.unlock(other.token,invite.code,'test-device').session.supervisor).toBeDefined();
+      persistent.revokeDailyCode();persistent.close();persistent=createWorkStore(filename,()=>time);
       expect(persistent.connect(granted.token).session.supervisor).toBeUndefined();
       expect(()=>persistent.listOrders(granted.token,'supervisor')).toThrow('감독관 인증');
       expect(persistent.listOrders(granted.token)[0].worker.id).toBe(connected.session.workerId);
-    } finally { persistent.close();for(const suffix of ['', '-wal', '-shm'])rmSync(filename+suffix,{force:true}); }
+    } finally { persistent.close();for(const suffix of ['', '-wal', '-shm','.daily-key'])rmSync(filename+suffix,{force:true}); }
+  });
+  it('잠근 뒤에도 같은 날에는 같은 6자리 코드로 다시 인증할 수 있다',async()=>{
+    const who=await client();const today=await grant(who);const locked=await post(who,'supervisor/lock',{});
+    who.cookie=locked.headers.get('set-cookie')!.split(';')[0];who.session=await locked.json();
+    expect((await post(who,'supervisor/register',{code:today.code})).status).toBe(200);
+  });
+  it('당일 코드를 다시 조회해도 바꾸지 않고 기기마다 감사 ID를 구분한다',async()=>{
+    const first=store.todayCode();expect(store.todayCode()).toEqual(first);const a=await client(),b=await client();await grant(a);await grant(b);
+    expect(a.session.supervisor?.id).not.toBe(b.session.supervisor?.id);expect(a.session.supervisor?.expiresAt).toBe(b.session.supervisor?.expiresAt);
   });
 });

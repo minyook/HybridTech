@@ -1,5 +1,5 @@
 import { openDB, type IDBPDatabase } from 'idb';
-import type { Chat, Checklist, ModelRecord } from '../types';
+import type { Chat, Checklist, ModelRecord, ModelVerification } from '../types';
 import type { WorkOrder } from '../workflow/work';
 
 let connection:Promise<IDBPDatabase>|undefined;
@@ -29,6 +29,16 @@ export async function commitModel(metadata: ModelRecord, blob?: Blob) {
   await tx.objectStore('settings').put(metadata,'model'); await tx.done;
 }
 export async function modelMetadata() { return getSetting<ModelRecord>('model'); }
+export async function rememberModelVerification(expected:ModelRecord,verification:ModelVerification) {
+  const tx=(await database()).transaction('settings','readwrite');
+  const current=await tx.store.get('model') as ModelRecord|undefined;
+  // A worker finishing an old check must not resurrect a deleted installation
+  // or attach its receipt to a replacement installed in another tab.
+  if(current&&current.storageKey===expected.storageKey&&current.sha256===expected.sha256&&current.size===expected.size&&current.backend===expected.backend&&current.installedAt===expected.installedAt) {
+    await tx.store.put({...current,verification},'model');
+  }
+  await tx.done;
+}
 export async function removeModelData() {
   const db = await database(); const tx = db.transaction(['settings','files'],'readwrite');
   await tx.objectStore('settings').delete('model'); await tx.objectStore('files').delete('model'); await tx.done;

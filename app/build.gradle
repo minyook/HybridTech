@@ -29,10 +29,18 @@ android {
 
     buildFeatures {
         buildConfig true
+        resValues true
         compose true
     }
 
     buildTypes {
+        debug {
+            if (providers.gradleProperty('designPreview').orNull == 'true') {
+                applicationIdSuffix '.designpreview'
+                versionNameSuffix '-design'
+                resValue 'string', 'app_name', 'Field Guard 디자인'
+            }
+        }
         release {
             minifyEnabled false
         }

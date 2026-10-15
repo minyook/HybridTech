@@ -4,7 +4,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.activity.ComponentActivity
+import android.view.WindowManager
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -21,13 +23,21 @@ import com.minyook.sllm2.ui.TossFieldGuardApp
 import com.minyook.sllm2.ui.VoiceUiState
 import org.junit.Assert.assertEquals
 import org.junit.Rule
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 /** Compose wiring tests use local state only; no BLE service or model download starts. */
 @RunWith(AndroidJUnit4::class)
 class TossNavigationTest {
-    @get:Rule val compose = createComposeRule()
+    @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
+    @Before fun keepTestVisible() {
+        compose.activity.runOnUiThread {
+            compose.activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            compose.activity.setShowWhenLocked(true)
+            compose.activity.setTurnScreenOn(true)
+        }
+    }
 
     @Test
     fun onboardingOpensHomeAndMainTabs() {
@@ -40,13 +50,13 @@ class TossNavigationTest {
         }
 
         compose.onNodeWithText("시작하기").performClick()
-        compose.onNodeWithText("오늘 현장에서\n필요한 것").assertIsDisplayed()
-        compose.onNodeWithText("질문", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("안전한 작업의 시작,\n근거부터 확인하세요.").assertIsDisplayed()
+        navigateWorkspace(AppDestination.CHAT)
         compose.onNodeWithTag("chatInput").assertIsDisplayed()
-        compose.onNodeWithText("측정", useUnmergedTree = true).performClick()
+        navigateWorkspace(AppDestination.SENSOR)
         compose.onNodeWithTag("scanBluetooth").assertIsDisplayed()
-        compose.onNodeWithText("설정", useUnmergedTree = true).performClick()
-        compose.onNodeWithText("로컬 AI 모델").assertIsDisplayed()
+        navigateWorkspace(AppDestination.SETTINGS)
+        compose.onNodeWithText("기기 내 Gemma").assertIsDisplayed()
     }
 
     @Test
@@ -70,7 +80,7 @@ class TossNavigationTest {
         compose.onNodeWithContentDescription("음성 질문").assertIsDisplayed()
         compose.onNodeWithContentDescription("메시지 전송").assertIsDisplayed()
         compose.onNodeWithTag("sendMessage").performClick()
-        compose.onNodeWithText("제공 문서에서 근거를 찾고 있어요.").assertIsDisplayed()
+        compose.onNodeWithText("근거 검색 중", substring = true).assertIsDisplayed()
         compose.onNodeWithTag("chatInput").assertIsDisplayed()
     }
 
@@ -85,14 +95,14 @@ class TossNavigationTest {
         ))
         compose.setContent { TossFieldGuardApp(state, VoiceUiState(available = true), actions()) }
 
-        compose.onNodeWithText("제공 문서에서 근거를 찾고 있어요.").assertIsDisplayed()
+        compose.onNodeWithText("근거 검색 중", substring = true).assertIsDisplayed()
         compose.runOnIdle {
             state = state.copy(messages = listOf(ChatMessageUi(
                 id = answerId, text = "### 산소 농도\n20.9%입니다.", fromWorker = false, pending = true,
             )))
         }
-        compose.onNodeWithText("산소 농도").assertIsDisplayed()
-        compose.onNodeWithText("답변 작성 중…").assertIsDisplayed()
+        compose.onNodeWithText("### 산소 농도\n20.9%입니다.").assertIsDisplayed()
+        compose.onNodeWithText("답변 작성 중", substring = true).assertIsDisplayed()
 
         compose.runOnIdle {
             state = state.copy(
@@ -103,6 +113,7 @@ class TossNavigationTest {
                 )),
             )
         }
+        compose.onNodeWithText("산소 농도").assertIsDisplayed()
         compose.onNodeWithText("참조한 문서").assertIsDisplayed()
         compose.onNodeWithText("근거 1 원문 보기").assertIsDisplayed()
     }
@@ -121,6 +132,7 @@ class TossNavigationTest {
             ))
         }
 
+        compose.onNodeWithText("추출 텍스트").performClick()
         compose.onNodeWithText("원문 내용").assertIsDisplayed()
         compose.onNodeWithContentDescription("뒤로 가기").assertIsDisplayed()
         compose.onNodeWithText("홈").assertIsDisplayed()
@@ -148,7 +160,7 @@ class TossNavigationTest {
 
     @Test
     fun checklistSelectionUpdatesProgress() {
-        var state by mutableStateOf(FieldGuardUiState(destination = AppDestination.CHECKLIST))
+        var state by mutableStateOf(FieldGuardUiState(destination = AppDestination.LOCAL_CHECKLIST))
         compose.setContent {
             TossFieldGuardApp(state, VoiceUiState(available = true), actions(
                 onToggleChecklist = { index -> state = state.copy(checklistChecked = state.checklistChecked + index) },
@@ -178,4 +190,10 @@ class TossNavigationTest {
         onToggleChecklist = onToggleChecklist,
         onStopVoice = onStopVoice,
     )
+
+    private fun navigateWorkspace(destination: AppDestination) {
+        val tag = "workspace-${destination.name}"
+        if (runCatching { compose.onNodeWithTag(tag).assertIsDisplayed() }.isFailure) compose.onNodeWithTag("workspaceMenu").performClick()
+        compose.onNodeWithTag(tag).performClick()
+    }
 }

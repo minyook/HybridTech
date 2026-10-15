@@ -1,5 +1,5 @@
-import { Engine, loadLiteRtLm } from '@litert-lm/core';
-import { digestBlob } from './model';
+import { Engine, loadLiteRtLm, SamplerType } from '@litert-lm/core';
+import { verifyStoredModel } from './model';
 import type { AIReply, AIRequest, GenerationResult, TokenUsage } from './protocol';
 
 // Runs exclusively in a classic Web Worker. Terminating the worker also releases
@@ -13,8 +13,10 @@ export class WorkerEngine {
     this.busy=true;
     try {
       if(request.type==='initialize') {
-        reply({id:request.id,type:'progress',message:'저장된 모델 확인 중'});
-        if(await digestBlob(request.model)!==request.sha256)throw new Error('저장된 모델 검증에 실패했어요. 모델을 다시 다운로드해 주세요.');
+        const started=performance.now();
+        reply({id:request.id,type:'progress',message:'저장된 모델의 변경 여부 확인 중 · 다시 다운로드하지 않아요'});
+        const verification=await verifyStoredModel(request.model,request.sha256,message=>reply({id:request.id,type:'progress',message}));
+        const verifiedAt=performance.now();
         reply({id:request.id,type:'progress',message:'AI 실행 파일 불러오는 중'});
         if(!this.loaded){
           // Emscripten otherwise resolves WASM beside ai-worker.js instead of
@@ -23,12 +25,21 @@ export class WorkerEngine {
           scope.Module={locateFile:filename=>new URL(filename,request.runtimeUrl).href};
           await loadLiteRtLm(request.runtimeUrl);this.loaded=true;
         }
-        reply({id:request.id,type:'progress',message:'기기에서 AI 준비 중 · 처음에는 시간이 걸릴 수 있어요'});
+        const runtimeLoadedAt=performance.now();
+        reply({id:request.id,type:'progress',message:'저장된 모델을 기기 메모리에 불러오는 중'});
         this.engine=await Engine.create({model:request.model,benchmarkEnabled:true,mainExecutorSettings:{maxNumTokens:request.settings.contextTokens}});
-        reply({id:request.id,type:'done'});
+        const completedAt=performance.now();
+        const initialization={verification,verificationMs:Math.round(verifiedAt-started),runtimeMs:Math.round(runtimeLoadedAt-verifiedAt),engineMs:Math.round(completedAt-runtimeLoadedAt),totalMs:Math.round(completedAt-started)};
+        console.info('AI initialization timing',initialization);
+        reply({id:request.id,type:'done',initialization});
       } else {
         if(!this.engine)throw new Error('AI 준비를 완료하지 못했어요. 질문을 다시 시도해 주세요.');
-        const conversation=await this.engine.createConversation({preface:{extra_context:{enable_thinking:false}},sessionConfig:{maxOutputTokens:request.settings.maxOutputTokens}});
+        const conversation=await this.engine.createConversation({
+          preface:{messages:request.systemInstruction?[{role:'system',content:request.systemInstruction}]:[],extra_context:{enable_thinking:false}},
+          // Document guidance benefits from choosing the highest-scoring token.
+          // This does not compensate for device-specific GPU numerical errors.
+          sessionConfig:{maxOutputTokens:request.settings.maxOutputTokens,samplerParams:{type:SamplerType.TOP_K,k:1,temperature:1,seed:0}},
+        });
         let answer='';let result:GenerationResult;
         try {
           const reader=conversation.sendMessageStreaming(request.prompt).getReader();
