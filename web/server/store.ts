@@ -75,6 +75,8 @@ export function createWorkStore(filename = defaultDatabasePath, now = () => Date
     CREATE TABLE IF NOT EXISTS invites (id TEXT PRIMARY KEY, hash TEXT UNIQUE NOT NULL, name TEXT NOT NULL, expires INTEGER NOT NULL, used INTEGER, revoked INTEGER);
     CREATE TABLE IF NOT EXISTS daily_codes (day TEXT PRIMARY KEY, generation TEXT NOT NULL, expires INTEGER NOT NULL, revoked INTEGER);
     CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, worker_id TEXT NOT NULL, revision INTEGER NOT NULL, updated_at TEXT NOT NULL, body TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS order_changes (sequence INTEGER PRIMARY KEY AUTOINCREMENT, worker_id TEXT NOT NULL);
+    CREATE INDEX IF NOT EXISTS order_changes_worker ON order_changes(worker_id, sequence);
     CREATE TABLE IF NOT EXISTS attempts (identity TEXT PRIMARY KEY, failures INTEGER NOT NULL, reset_at INTEGER NOT NULL);`);
   function transaction<T>(action: () => T): T {
     db.exec('BEGIN IMMEDIATE');
@@ -163,6 +165,15 @@ export function createWorkStore(filename = defaultDatabasePath, now = () => Date
       });
     },
     lock(token: string | undefined) { return transaction(() => rotate(requireSession(token))); },
+    changeVersion(token: string | undefined, view: unknown = 'worker'): number {
+      const row = requireSession(token);
+      if (view === 'supervisor') requireSupervisor(row);
+      else if (view !== 'worker') throw new ApiError(400, '화면 선택을 확인해 주세요.');
+      const result = view === 'supervisor'
+        ? db.prepare('SELECT MAX(sequence) AS version FROM order_changes').get()
+        : db.prepare('SELECT MAX(sequence) AS version FROM order_changes WHERE worker_id = ?').get(row.worker_id);
+      return Number(result?.version ?? 0);
+    },
     listOrders(token: string | undefined, view: unknown = 'worker'): WorkOrder[] {
       const row = requireSession(token);
       if (view === 'supervisor') requireSupervisor(row);
@@ -173,8 +184,11 @@ export function createWorkStore(filename = defaultDatabasePath, now = () => Date
     createOrder(token: string | undefined, payload: unknown) {
       const row = requireSession(token); const input = object(payload); const details = object(input.details);
       const order = createWork({ id: row.worker_id, role: 'worker', name: text(input.name, 60) }, { site: text(details.site, 100), location: text(details.location, 150), task: text(details.task, 2000) }, new Date(now()));
-      db.prepare('INSERT INTO orders VALUES (?, ?, ?, ?, ?)').run(order.id, row.worker_id, order.revision, order.updatedAt, JSON.stringify(order));
-      return order;
+      return transaction(() => {
+        db.prepare('INSERT INTO orders VALUES (?, ?, ?, ?, ?)').run(order.id, row.worker_id, order.revision, order.updatedAt, JSON.stringify(order));
+        db.prepare('INSERT INTO order_changes (worker_id) VALUES (?)').run(order.worker.id);
+        return order;
+      });
     },
     applyAction(token: string | undefined, id: string, payload: unknown) {
       const row = requireSession(token); const input = object(payload);
@@ -194,6 +208,7 @@ export function createWorkStore(filename = defaultDatabasePath, now = () => Date
         let updated: WorkOrder;
         try { updated = transitionWork(order, actor, action, new Date(now())); } catch (error) { throw new ApiError(400, error instanceof Error ? error.message : '작업 상태를 확인해 주세요.'); }
         db.prepare('UPDATE orders SET revision = ?, updated_at = ?, body = ? WHERE id = ?').run(updated.revision, updated.updatedAt, JSON.stringify(updated), id);
+        db.prepare('INSERT INTO order_changes (worker_id) VALUES (?)').run(order.worker.id);
         return updated;
       });
     },

@@ -39,6 +39,85 @@ async function request(who:Client):Promise<WorkOrder> {
 const completeInspection=()=>({checked:inspectionItems.map(item=>item.key),gas:{o2:20.9,h2s:0,co:0,co2:.04},device:'가상 장비',measuredAt:new Date(time-60_000).toISOString(),validUntil:new Date(time+3_600_000).toISOString(),watcher:'가상 감시인',contact:'테스트 연락',note:'가상 입력값'});
 function action(who:Client,order:WorkOrder,value:unknown,view='supervisor',name='위조 이름') {return post(who,`work-orders/${order.id}/actions`,{view,name,revision:order.revision,action:value,actor:{role:'supervisor',id:'forged'}});}
 
+async function events(who:Client,view='worker') {
+  const controller=new AbortController();
+  const response=await fetch(`${base}/api/work-events?view=${view}`,{headers:{Cookie:who.cookie},signal:controller.signal});
+  expect(response.status).toBe(200);expect(response.headers.get('content-type')).toContain('text/event-stream');
+  const reader=response.body!.getReader();const decoder=new TextDecoder();let buffer='';
+  return {
+    async next() {
+      while(true){
+        const separator=buffer.indexOf('\n\n');
+        if(separator>=0){const value=buffer.slice(0,separator);buffer=buffer.slice(separator+2);if(value.startsWith('event:'))return value;continue;}
+        const chunk=await reader.read();if(chunk.done)throw Error('이벤트 연결이 종료됨');buffer+=decoder.decode(chunk.value,{stream:true});
+      }
+    },
+    close(){controller.abort();},
+  };
+}
+
+describe('작업자 ↔ 감독관 실시간 요청·승인',()=>{
+  it('작업자가 요청하고 감독관이 직접 승인해야 투입할 수 있으며 양쪽에 변경이 전달된다',async()=>{
+    const worker=await client(),supervisor=await client();await grant(supervisor);
+    const workerEvents=await events(worker),supervisorEvents=await events(supervisor,'supervisor');
+    try {
+      await workerEvents.next();await supervisorEvents.next();
+      let order=await request(worker);
+      expect(order.status).toBe('requested');expect(order.inspection.checked).toEqual([]);expect(order.approvedAt).toBeUndefined();
+      expect((await action(worker,order,{type:'enter',acknowledged:true},'worker','테스트 작업자')).status).toBe(400);
+      expect((await action(supervisor,order,{type:'approve'})).status).toBe(400);
+      expect(await supervisorEvents.next()).toContain('event: changed');await workerEvents.next();
+      expect(((await (await get(supervisor,'supervisor')).json()) as WorkOrder[])[0].status).toBe('requested');
+      order=await (await action(supervisor,order,{type:'save-inspection',inspection:completeInspection()})).json();
+      expect((await action(worker,order,{type:'enter',acknowledged:true},'worker','테스트 작업자')).status).toBe(400);
+      await workerEvents.next();await supervisorEvents.next();
+      expect(((await (await get(worker)).json()) as WorkOrder[])[0].status).toBe('reviewing');
+      order=await (await action(supervisor,order,{type:'approve'})).json();
+      expect(await workerEvents.next()).toContain('event: changed');await supervisorEvents.next();
+      const received=((await (await get(worker)).json()) as WorkOrder[])[0];
+      expect(received.status).toBe('approved');expect(received.approvedBy?.id).toBe(supervisor.session.supervisor?.id);
+      order=await (await action(worker,received,{type:'enter',acknowledged:true},'worker','테스트 작업자')).json();
+      expect(await supervisorEvents.next()).toContain('event: changed');
+      expect(((await (await get(supervisor,'supervisor')).json()) as WorkOrder[])[0].status).toBe('entered');
+      expect(order.events.map(event=>event.action)).toEqual(['request','save-inspection','approve','enter']);
+    } finally {workerEvents.close();supervisorEvents.close();}
+  },15000);
+  it('다른 작업자의 변경 번호를 노출하지 않고 감독관 권한 없는 스트림을 거부한다',async()=>{
+    const worker=await client(),other=await client();
+    expect((await fetch(`${base}/api/work-events?view=supervisor`,{headers:{Cookie:worker.cookie}})).status).toBe(403);
+    expect((await fetch(`${base}/api/work-events`)).status).toBe(401);
+    const before=store.changeVersion(other.cookie.split('=')[1]);await request(worker);
+    expect(store.changeVersion(other.cookie.split('=')[1])).toBe(before);
+    expect(store.changeVersion(worker.cookie.split('=')[1])).toBeGreaterThan(before);
+  });
+  it('열린 감독관 연결도 코드가 회수되면 권한 만료를 알리고 닫는다',async()=>{
+    const supervisor=await client();await grant(supervisor);const stream=await events(supervisor,'supervisor');
+    try {await stream.next();store.revokeDailyCode();expect(await stream.next()).toContain('event: access-expired');}
+    finally {stream.close();}
+  });
+  it('다른 서버 프로세스에 해당하는 SQLite 연결에서 저장해도 변경을 감지한다',()=>{
+    const filename=join(tmpdir(),`fieldguard-sync-${randomUUID()}.sqlite`);
+    const first=createWorkStore(filename,()=>time),second=createWorkStore(filename,()=>time);
+    try {
+      const worker=first.connect();const before=first.changeVersion(worker.token);
+      second.createOrder(worker.token,{name:'테스트 작업자',details:{site:'별도 연결',location:'가상 위치',task:'서버 간 동기화'}});
+      expect(first.changeVersion(worker.token)).toBeGreaterThan(before);expect(first.listOrders(worker.token)).toHaveLength(1);
+    } finally {first.close();second.close();for(const suffix of ['', '-wal', '-shm','.daily-key'])rmSync(filename+suffix,{force:true});}
+  });
+  it('보완 요청·재요청·재점검·승인 취소를 거쳐도 자동으로 투입되지 않는다',async()=>{
+    const worker=await client(),supervisor=await client();await grant(supervisor);let order=await request(worker);
+    order=await (await action(supervisor,order,{type:'return',reason:'보호구 보완'})).json();
+    expect(((await (await get(worker)).json()) as WorkOrder[])[0].status).toBe('returned');
+    order=await (await action(worker,order,{type:'resubmit',note:'보완 완료'},'worker','테스트 작업자')).json();
+    expect(order.status).toBe('requested');expect(order.inspection.checked).toEqual([]);
+    order=await (await action(supervisor,order,{type:'save-inspection',inspection:completeInspection()})).json();
+    order=await (await action(supervisor,order,{type:'approve'})).json();
+    order=await (await action(supervisor,order,{type:'revoke',reason:'조건 변경'})).json();
+    expect(order.approvedAt).toBeUndefined();expect(order.status).toBe('reviewing');
+    expect((await action(worker,order,{type:'enter',acknowledged:true},'worker','테스트 작업자')).status).toBe(400);
+  });
+});
+
 describe('서버가 검사하는 감독관 권한',()=>{
   it('처음 접속한 브라우저는 작업자이며 쿠키는 HttpOnly와 SameSite를 사용한다',async()=>{
     const response=await fetch(`${base}/api/session`);const session:WorkSession=await response.json();

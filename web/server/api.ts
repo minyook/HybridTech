@@ -34,6 +34,31 @@ export function createWorkMiddleware(store: WorkStore) {
         const result = store.connect(token); if (result.token) setCookie(request, response, result.token);
         return send(200, result.session);
       }
+      if (request.method === 'GET' && url.pathname === '/api/work-events') {
+        const view = url.searchParams.get('view') ?? 'worker';
+        let version = store.changeVersion(token, view);
+        response.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+        response.setHeader('X-Accel-Buffering', 'no');
+        response.flushHeaders();
+        const event = (name: string, value: unknown) => response.write(`event: ${name}\ndata: ${JSON.stringify(value)}\n\n`);
+        // Always refresh on (re)connect: changes may have happened while disconnected.
+        event('changed', { version });
+        let ticks = 0;
+        const timer = setInterval(() => {
+          if (response.destroyed || response.writableEnded) { clearInterval(timer); return; }
+          try {
+            // SQLite also sees writes from the other dev/preview server process.
+            const current = store.changeVersion(token, view);
+            if (version !== current) { version = current; event('changed', { version }); }
+            else if (++ticks % 15 === 0) response.write(': heartbeat\n\n');
+          } catch (error) {
+            event('access-expired', { error: error instanceof ApiError ? error.message : '연결을 다시 확인해 주세요.' });
+            clearInterval(timer); response.end();
+          }
+        }, 1000);
+        response.once('close', () => clearInterval(timer));
+        return;
+      }
       if (request.method === 'GET' && url.pathname === '/api/work-orders') return send(200, store.listOrders(token, url.searchParams.get('view') ?? 'worker'));
       if (request.method !== 'POST') throw new ApiError(404, '요청 경로를 찾지 못했어요.');
       store.verifyCsrf(token, request.headers['x-fieldguard-csrf'] as string | undefined);
