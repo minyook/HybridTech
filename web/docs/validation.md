@@ -1,8 +1,18 @@
 # 웹앱 검증 기록
 
-최종 검증: **2026-10-15**. Windows Chromium과 연결된 Galaxy Tab S9 Ultra(SM-X910, Android 16)에서 확인했습니다. 아래 날짜별 기록은 변경 당시 결과이며, 현재 감독관 인증은 일일 숫자 6자리입니다. 실제 iPhone 검증 기록은 아닙니다.
+최종 검증: **2026-10-16** (Android 디자인 갱신). Windows Chromium과 연결된 Galaxy Tab S9 Ultra(SM-X910, Android 16)에서 확인했습니다. 아래 날짜별 기록은 변경 당시 결과이며, 현재 감독관 인증은 일일 숫자 6자리입니다. 실제 iPhone 검증 기록은 아닙니다.
 
-## 최종 상태: 당일 코드·앱 디자인 통일
+## 2026-10-16 앱 전체 화면을 웹 기준으로 수정
+
+- 홈만 맞췄던 이전 단계에서 질문·답변·문서 검색/필터·기록·원문·모델 다운로드·토큰 설정까지 공통 디자인을 적용했습니다. Android 전용 기능도 같은 카드·제목·버튼 테마를 사용합니다.
+- 웹 `style.css`의 색상·크기와 `ui.tsx`의 SVG 17종을 `node tools/sync-web-design.mjs`로 Android에 생성합니다. `--check`로 생성물 일치를 확인했습니다. 웹 소스는 수정하지 않았습니다.
+- Android JVM 19개(기존 15개 + Markdown 표·코드·진행 중 코드·원문 보존 4개) 통과. 디자인 검증용 APK와 테스트 APK 빌드 성공.
+- 최종 기기 계측 **17개 통과**: 디자인 10개와 탐색·입력/생성·원문 복귀·음성 이탈·이전 점검·토큰 드롭다운 선택/저장 7개를 검사했습니다. 갤럭시 탭 S9 울트라(SM-X910, Android 16)의 실제 Compose UI를 검사했습니다. 홈·설정·문서·질문 빈 화면·Markdown 답변/출처·기록·토큰·감독관 WebView와 390×844dp 제한 화면의 홈/질문을 캡처했습니다. 휴대전화 크기 검사는 실제 휴대전화 하드웨어 검증과 구분합니다.
+- 질문 키보드의 여백이 홈·설정에도 적용돼 아래쪽이 가려지는 문제를 수정했습니다. 질문 외 화면 이동 시 키보드를 숨기고 해당 여백을 적용하지 않습니다.
+- 키보드·잠금·시스템 화면에 캡처가 영향받지 않도록 디버그 전용 `WorkspacePreviewActivity`에서 가상 상태를 렌더링하고 Compose 루트 이미지를 저장합니다. 실제 모델·BLE·현장 작업을 시작하지 않습니다. 처음에는 별도 `Field Guard 디자인` 앱으로 검사했고, 기존 앱의 인증서와 원래 디버그 키가 일치함을 확인한 뒤 일반 `O₂ Field Guard` 앱에도 `adb install -r`로 업데이트했습니다. 앱 삭제·데이터 초기화·모델 재다운로드는 하지 않았습니다. 최종 17개 계측은 일반 앱 패키지에서 통과했습니다. Android WebView의 본문 표시는 실제 렌더링된 DOM과 캡처로 확인합니다.
+- 전체 코드 대응·명령·화면은 [앱·웹 공통 디자인 설계](../../docs/ANDROID_WEB_DESIGN.md)에 정리했습니다. 앱 소스·저장 위치는 루트 README에서 확인할 수 있습니다.
+
+## 2026-10-15 당일 코드·앱 디자인 1차 반영
 
 - 웹 `npm.cmd test -- --maxWorkers=1 --no-file-parallelism`: **18개 파일 126개 통과**. `npm.cmd run build`: TypeScript·Vite·PWA 성공.
 - Android `:app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest`: **JVM 15개 통과**, APK·테스트 APK 빌드 성공. `-PdesignPreview=true`에서도 빌드 성공.

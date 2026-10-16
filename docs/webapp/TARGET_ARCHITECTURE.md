@@ -1,6 +1,6 @@
 # HybridTech O₂ Field Guard 웹 현행 설계서
 
-최종 갱신: 2026-10-15. 이 문서는 `web/`의 실제 구현을 설명합니다. 10월 7일 서버 RAG 제안은 [이전 권고안](ARCHITECTURE_PROPOSAL_20261007.md)에 보존했습니다. 현재 사용자 결정은 **Android 설치형 앱 유지 + 기기 내 AI를 사용하는 반응형 웹/PWA + 웹 기준 공통 디자인**입니다.
+최종 갱신: 2026-10-16. 이 문서는 `web/`의 실제 구현을 설명합니다. 10월 7일 서버 RAG 제안은 [이전 권고안](ARCHITECTURE_PROPOSAL_20261007.md)에 보존했습니다. 현재 사용자 결정은 **Android 설치형 앱 유지 + 기기 내 AI를 사용하는 반응형 웹/PWA + 웹 기준 공통 디자인**입니다.
 
 ## 제품 구성과 경계
 
@@ -155,7 +155,9 @@ Node.js 24.15 이상에서 개발 포트 5174와 프로덕션 미리보기 4173�
 
 ## Android 공통 디자인과 작업 화면
 
-`app/src/main/java/com/minyook/sllm2/ui/FieldWorkspaceUi.kt`는 웹과 같은 홈 문구·준비 상태·문서 카드·설정 패널을 Compose로 구현합니다. 850dp 이상은 사이드바, 작은 화면은 드로어와 홈/질문/문서/설정 하단 탭을 사용합니다. 기본 배경 `#F7F9FC`, 파랑 `#3182F6`, 카드 선 `#E8EDF3`가 기준입니다.
+2026-10-16에는 질문·답변·문서·기록·원문·모델·토큰 설정까지 웹 스타일로 전면 수정했습니다. `tools/sync-web-design.mjs`로 웹 색상/크기와 아이콘을 공유하고 `WorkspaceComponents.kt`·`WorkspaceScreens.kt`가 공통 컴포넌트/화면을 구성합니다. 상세 매핑과 캡처는 [공통 디자인 설계](../ANDROID_WEB_DESIGN.md)를 참고하세요.
+
+`app/src/main/java/com/minyook/sllm2/ui/FieldWorkspaceUi.kt`는 웹과 같은 홈 문구·준비 상태·문서 카드·설정 패널을 Compose로 구현합니다. 850dp 초과은 사이드바, 작은 화면은 드로어와 홈/질문/문서/설정 하단 탭을 사용합니다. 기본 배경 `#F7F9FC`, 파랑 `#3182F6`, 카드 선 `#E8EDF3`가 기준입니다.
 
 `NativeWorkPage.kt`는 설정에 저장한 같은 서버 origin의 `/?embedded=android&nativeAiReady=<설치상태>#/checklist` 또는 `#/supervisor-access`를 엽니다. 웹 내비게이션은 숨기고 앱의 탐색 UI를 사용합니다. 포함 모드에서는 웹 AI를 준비하지 않으며 문서 질문/모델 준비는 제한된 `fieldguard://ask`·`fieldguard://settings` 경로로 앱 기능을 엽니다. 설치 상태는 실제 네이티브 엔진 실행 상태와 구분합니다. 임의 JavaScript 브리지는 없고 같은 서버 origin만 탐색합니다. 운영 HTTPS, 디버그 USB localhost를 허용하며 WebView 쿠키는 외부 브라우저와 별개입니다. 기존 기기 체크는 `LOCAL_CHECKLIST` 읽기/저장 화면으로 보존합니다.
 

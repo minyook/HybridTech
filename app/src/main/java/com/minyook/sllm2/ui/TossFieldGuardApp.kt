@@ -73,6 +73,7 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -119,13 +120,13 @@ private fun FieldGuardTossTheme(content: @Composable () -> Unit) {
             outline = TossBorder, error = TossRed,
         ),
         typography = Typography(
-            headlineMedium = androidx.compose.ui.text.TextStyle(fontSize = 28.sp, lineHeight = 36.sp, fontWeight = FontWeight.Bold, color = TossInk),
+            headlineMedium = androidx.compose.ui.text.TextStyle(fontSize = if (workspaceMobile()) 26.sp else 32.sp, lineHeight = if (workspaceMobile()) 35.sp else 43.sp, letterSpacing = (-1.2).sp, fontWeight = FontWeight.Bold, color = TossInk),
             headlineSmall = androidx.compose.ui.text.TextStyle(fontSize = 24.sp, lineHeight = 32.sp, fontWeight = FontWeight.Bold, color = TossInk),
             titleLarge = androidx.compose.ui.text.TextStyle(fontSize = 20.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold, color = TossInk),
-            titleMedium = androidx.compose.ui.text.TextStyle(fontSize = 17.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold, color = TossInk),
-            bodyLarge = androidx.compose.ui.text.TextStyle(fontSize = 16.sp, lineHeight = 24.sp, color = TossInk),
-            bodyMedium = androidx.compose.ui.text.TextStyle(fontSize = 15.sp, lineHeight = 23.sp, color = TossSecondary),
-            bodySmall = androidx.compose.ui.text.TextStyle(fontSize = 13.sp, lineHeight = 19.sp, color = TossMuted),
+            titleMedium = androidx.compose.ui.text.TextStyle(fontSize = 13.sp, lineHeight = 22.sp, fontWeight = FontWeight.SemiBold, color = TossInk),
+            bodyLarge = androidx.compose.ui.text.TextStyle(fontSize = 14.sp, lineHeight = 25.sp, color = TossInk),
+            bodyMedium = androidx.compose.ui.text.TextStyle(fontSize = 13.sp, lineHeight = 22.sp, color = TossSecondary),
+            bodySmall = androidx.compose.ui.text.TextStyle(fontSize = 11.sp, lineHeight = 19.sp, color = TossMuted),
             labelLarge = androidx.compose.ui.text.TextStyle(fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
         ),
         content = content,
@@ -140,7 +141,9 @@ fun TossFieldGuardApp(state: FieldGuardUiState, voice: VoiceUiState, actions: Fi
             return@FieldGuardTossTheme
         }
         val destination = state.destination
-        val wide = LocalConfiguration.current.screenWidthDp >= 850
+        val keyboard = LocalSoftwareKeyboardController.current
+        LaunchedEffect(destination) { if (destination != AppDestination.CHAT) keyboard?.hide() }
+        val wide = workspaceWide()
         val drawer = rememberDrawerState(DrawerValue.Closed)
         val workspaceScope = rememberCoroutineScope()
         val parent = when (destination) {
@@ -170,16 +173,16 @@ fun TossFieldGuardApp(state: FieldGuardUiState, voice: VoiceUiState, actions: Fi
         Row(Modifier.fillMaxSize().background(WorkspaceDesign.Canvas)) {
         if (wide) FieldWorkspaceSidebar(destination, navigateFromMenu)
         Scaffold(
-            modifier = Modifier.weight(1f).imePadding(),
+            modifier = Modifier.weight(1f).then(if(destination == AppDestination.CHAT) Modifier.imePadding() else Modifier),
             containerColor = WorkspaceDesign.Canvas,
             topBar = {
                 TossTopBar(destination, parent, state, onBack = {
                     if (destination == AppDestination.VOICE) actions.onStopVoice()
                     parent?.let(actions.onNavigate)
-                }, onHistory = { actions.onNavigate(AppDestination.HISTORY) }, onMenu = if (wide) null else ({ workspaceScope.launch { drawer.open() } }))
+                }, onHistory = { actions.onNavigate(AppDestination.HISTORY) }, onSettings = { actions.onNavigate(AppDestination.SETTINGS) }, onMenu = if (wide) null else ({ workspaceScope.launch { drawer.open() } }))
             },
             bottomBar = {
-                if (!imeVisible && !wide) TossBottomNavigation(destination, state.sourceReturnDestination, navigateFromTab)
+                if ((!imeVisible || destination != AppDestination.CHAT) && !wide) TossBottomNavigation(destination, state.sourceReturnDestination, navigateFromTab)
             },
         ) { padding ->
             Box(Modifier.fillMaxSize().padding(padding)) {
@@ -209,45 +212,26 @@ fun TossFieldGuardApp(state: FieldGuardUiState, voice: VoiceUiState, actions: Fi
 }
 
 @Composable
-private fun TossTopBar(destination: AppDestination, parent: AppDestination?, state: FieldGuardUiState, onBack: () -> Unit, onHistory: () -> Unit, onMenu: (() -> Unit)?) {
-    val title = when (destination) {
-        AppDestination.HOME -> "홈"
-        AppDestination.CHAT -> "문서 질문"
-        AppDestination.HISTORY -> "대화 기록"
-        AppDestination.SOURCE -> "근거 문서"
-        AppDestination.VOICE -> "음성 질문"
-        AppDestination.SENSOR -> "가스 측정"
-        AppDestination.SENSOR_DISCONNECTED -> "센서 상태"
-        AppDestination.CHECKLIST -> "작업 전 점검"
-        AppDestination.LIBRARY -> "문서 보관함"
-        AppDestination.MODEL -> "로컬 모델"
-        AppDestination.INFERENCE -> "추론 설정"
-        AppDestination.DATA -> "내 데이터"
-        AppDestination.SETTINGS -> "설정"
-        AppDestination.SYSTEM -> "위젯과 알림"
-        AppDestination.LOCAL_CHECKLIST -> "이전 기기 점검 기록"
-        AppDestination.WORK_SERVER -> "현장 작업 서버"
-        AppDestination.SUPERVISOR -> "감독관 화면"
+private fun TossTopBar(destination:AppDestination,parent:AppDestination?,state:FieldGuardUiState,onBack:()->Unit,onHistory:()->Unit,onSettings:()->Unit,onMenu:(()->Unit)?) {
+    val title=when(destination){
+        AppDestination.HOME->"홈";AppDestination.CHAT->"문서 질문";AppDestination.LIBRARY->"문서 보관함";AppDestination.HISTORY->"대화 기록"
+        AppDestination.CHECKLIST->"작업 전 점검";AppDestination.SUPERVISOR->"감독관 인증";AppDestination.SOURCE->"근거 문서"
+        AppDestination.VOICE->"음성 질문";AppDestination.SENSOR,AppDestination.SENSOR_DISCONNECTED->"가스 측정"
+        AppDestination.LOCAL_CHECKLIST->"이전 기기 점검";AppDestination.WORK_SERVER->"작업 서버"
+        else->"설정"
     }
-    Row(Modifier.fillMaxWidth().background(Color.White).statusBarsPadding().height(60.dp).padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
-        if (parent != null && destination !in setOf(AppDestination.CHAT, AppDestination.SENSOR, AppDestination.SETTINGS, AppDestination.LIBRARY)) {
-            IconButton(onClick = onBack, modifier = Modifier.size(48.dp).semantics { contentDescription = "뒤로 가기" }) {
-                TossBackIcon()
-            }
-        } else if (onMenu != null) {
-            IconButton(onClick = onMenu, modifier = Modifier.size(44.dp).testTag("workspaceMenu").semantics { contentDescription = "전체 메뉴 열기" }) { Text("☰", color = TossMuted, fontSize = 20.sp) }
-        } else if (destination == AppDestination.HOME) {
-            Surface(color = TossBlue, shape = RoundedCornerShape(10.dp)) {
-                Text("O₂", color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 7.dp, vertical = 5.dp))
-            }
-            Spacer(Modifier.width(8.dp))
+    Column(Modifier.background(Color.White)){
+        Row(Modifier.fillMaxWidth().statusBarsPadding().height(if(workspaceMobile())60.dp else WorkspaceDesign.TopbarHeight.dp).padding(horizontal=workspacePadding()),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(10.dp)){
+            if(parent!=null&&destination !in setOf(AppDestination.CHAT,AppDestination.SETTINGS,AppDestination.LIBRARY,AppDestination.HISTORY,AppDestination.CHECKLIST)){
+                IconButton(onClick=onBack,modifier=Modifier.size(36.dp).semantics{contentDescription="뒤로 가기"}){Text("←",fontSize=20.sp,color=TossMuted)}
+            }else if(onMenu!=null)IconButton(onClick=onMenu,modifier=Modifier.size(36.dp).testTag("workspaceMenu").semantics{contentDescription="전체 메뉴 열기"}){Text("☰",fontSize=20.sp,color=TossMuted)}
+            if(!workspaceMobile()){Text("워크스페이스",fontSize=12.sp,color=Color(0xFF8B95A1));Text("/",fontSize=12.sp,color=Color(0xFF8B95A1))}
+            Text(title,fontSize=12.sp,fontWeight=FontWeight.SemiBold,color=TossSecondary,modifier=Modifier.weight(1f))
+            Text("● 기기 내",fontSize=11.sp,color=TossGreen)
+            IconButton(onClick=onSettings,modifier=Modifier.size(36.dp).semantics{contentDescription="오프라인 준비 설정"}){WorkspaceIcon(WorkspaceSymbol.DOWNLOAD,Modifier.size(18.dp))}
+            if(workspaceWide())Surface(color=Color(0xFFEDF1F7),shape=RoundedCornerShape(11.dp)){Text("HT",fontSize=10.sp,fontWeight=FontWeight.ExtraBold,color=Color(0xFF657289),modifier=Modifier.padding(9.dp))}
         }
-        Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-        if (destination == AppDestination.CHAT) {
-            TextButton(onClick = onHistory) { Text("기록", color = TossSecondary) }
-        } else if (destination == AppDestination.HOME && state.modelStatus.phase == ModelPhase.READY) {
-            TossStatusPill("로컬 준비됨", TossGreenWeak, TossGreen)
-        }
+        HorizontalDivider(color=TossBorder)
     }
 }
 
@@ -297,126 +281,44 @@ private fun TossBottomNavigation(destination: AppDestination, sourceReturnDestin
 }
 
 @Composable
-internal fun TossNavigationIcon(page: AppDestination, color: Color) {
-    Canvas(Modifier.size(19.dp)) {
-        val w = size.width
-        val h = size.height
-        val stroke = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
-        when (page) {
-            AppDestination.HOME -> {
-                val roof = Path().apply {
-                    moveTo(w * .14f, h * .45f)
-                    lineTo(w * .5f, h * .14f)
-                    lineTo(w * .86f, h * .45f)
-                }
-                drawPath(roof, color, style = stroke)
-                val house = Path().apply {
-                    moveTo(w * .22f, h * .43f)
-                    lineTo(w * .22f, h * .86f)
-                    lineTo(w * .78f, h * .86f)
-                    lineTo(w * .78f, h * .43f)
-                }
-                drawPath(house, color, style = stroke)
-            }
-            AppDestination.CHAT -> {
-                drawRoundRect(color, topLeft = Offset(w * .12f, h * .13f), size = Size(w * .76f, h * .61f), cornerRadius = CornerRadius(w * .16f), style = stroke)
-                drawLine(color, Offset(w * .35f, h * .74f), Offset(w * .23f, h * .87f), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
-            }
-            AppDestination.SENSOR -> {
-                val wave = Path().apply {
-                    moveTo(w * .08f, h * .54f)
-                    lineTo(w * .28f, h * .54f)
-                    lineTo(w * .39f, h * .27f)
-                    lineTo(w * .56f, h * .76f)
-                    lineTo(w * .69f, h * .46f)
-                    lineTo(w * .92f, h * .46f)
-                }
-                drawPath(wave, color, style = stroke)
-            }
-            AppDestination.LIBRARY -> {
-                val book = Path().apply { moveTo(w*.5f,h*.2f);lineTo(w*.12f,h*.12f);lineTo(w*.12f,h*.82f);lineTo(w*.5f,h*.9f);lineTo(w*.88f,h*.82f);lineTo(w*.88f,h*.12f);close() }
-                drawPath(book,color,style=stroke);drawLine(color,Offset(w*.5f,h*.2f),Offset(w*.5f,h*.9f),strokeWidth=2.dp.toPx())
-            }
-            AppDestination.CHECKLIST, AppDestination.MODEL -> {
-                drawRoundRect(color,topLeft=Offset(w*.15f,h*.08f),size=Size(w*.7f,h*.84f),cornerRadius=CornerRadius(w*.1f),style=stroke)
-                val check=Path().apply{moveTo(w*.3f,h*.5f);lineTo(w*.46f,h*.65f);lineTo(w*.72f,h*.35f)};drawPath(check,color,style=stroke)
-            }
-            AppDestination.HISTORY -> {
-                drawCircle(color,radius=w*.38f,center=Offset(w*.5f,h*.5f),style=stroke);drawLine(color,Offset(w*.5f,h*.24f),Offset(w*.5f,h*.5f),strokeWidth=2.dp.toPx());drawLine(color,Offset(w*.5f,h*.5f),Offset(w*.68f,h*.6f),strokeWidth=2.dp.toPx())
-            }
-            AppDestination.SETTINGS -> {
-                listOf(.26f to .65f, .5f to .34f, .74f to .61f).forEach { (x, dotY) ->
-                    drawLine(color, Offset(w * x, h * .12f), Offset(w * x, h * .88f), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
-                    drawCircle(Color.White, radius = w * .12f, center = Offset(w * x, h * dotY))
-                    drawCircle(color, radius = w * .12f, center = Offset(w * x, h * dotY), style = stroke)
-                }
-            }
-            else -> Unit
-        }
-    }
+internal fun TossNavigationIcon(page:AppDestination,color:Color) {
+    WorkspaceIcon(when(page){
+        AppDestination.HOME->WorkspaceSymbol.HOME
+        AppDestination.CHAT,AppDestination.VOICE->WorkspaceSymbol.CHAT
+        AppDestination.LIBRARY,AppDestination.SOURCE->WorkspaceSymbol.BOOK
+        AppDestination.CHECKLIST,AppDestination.LOCAL_CHECKLIST,AppDestination.SUPERVISOR->WorkspaceSymbol.CHECK
+        AppDestination.HISTORY->WorkspaceSymbol.HISTORY
+        AppDestination.MODEL->WorkspaceSymbol.CPU
+        AppDestination.SENSOR,AppDestination.SENSOR_DISCONNECTED->WorkspaceSymbol.WIFI
+        else->WorkspaceSymbol.SETTINGS
+    },Modifier.size(21.dp),color)
 }
 
 @Composable
-internal fun TossScrollPage(content: @Composable ColumnScope.() -> Unit) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-    Column(
-        Modifier.widthIn(max = 1120.dp).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 22.dp, vertical = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        content = content,
-    )
-    }
-}
+internal fun TossScrollPage(content: @Composable ColumnScope.() -> Unit) { WorkspacePage(content) }
 
 @Composable
-internal fun TossPageTitle(title: String, description: String? = null) {
-    Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
-        Text(title, style = MaterialTheme.typography.headlineMedium)
-        if (description != null) Text(description, style = MaterialTheme.typography.bodyMedium, color = TossMuted)
-    }
-}
+internal fun TossPageTitle(title: String, description: String? = null) { WorkspaceHeading("FIELD WORKSPACE",title.replace("\n"," "),description) }
 
 @Composable
-internal fun TossPanel(modifier: Modifier = Modifier, color: Color = Color.White, content: @Composable ColumnScope.() -> Unit) {
-    Surface(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(17.dp), color = color, border = BorderStroke(1.dp, TossBorder)) {
-        Column(Modifier.padding(22.dp), verticalArrangement = Arrangement.spacedBy(12.dp), content = content)
-    }
-}
+internal fun TossPanel(modifier: Modifier = Modifier, color: Color = Color.White, content: @Composable ColumnScope.() -> Unit) { WorkspaceCard(modifier,color,content) }
 
 @Composable
 internal fun TossStatusPill(label: String, background: Color = TossBlueWeak, foreground: Color = TossBlue) {
-    Surface(color = background, shape = CircleShape) {
-        Text(label, color = foreground, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp))
-    }
+    Surface(color=background,shape=RoundedCornerShape(7.dp)){Text(label,color=foreground,fontSize=10.sp,fontWeight=FontWeight.SemiBold,modifier=Modifier.padding(horizontal=9.dp,vertical=6.dp))}
 }
 
 @Composable
-internal fun TossPrimaryButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
-    Button(
-        onClick = onClick, enabled = enabled,
-        modifier = modifier.fillMaxWidth().heightIn(min = 52.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = TossBlue, contentColor = Color.White),
-    ) { Text(label, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
-}
+internal fun TossPrimaryButton(label:String,onClick:()->Unit,modifier:Modifier=Modifier,enabled:Boolean=true) { WorkspaceButton(label,onClick,modifier,enabled=enabled) }
 
 @Composable
-internal fun TossSecondaryButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Button(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth().heightIn(min = 48.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = TossSurface, contentColor = TossInk),
-    ) { Text(label, fontSize = 15.sp, fontWeight = FontWeight.SemiBold) }
-}
+internal fun TossSecondaryButton(label:String,onClick:()->Unit,modifier:Modifier=Modifier) { WorkspaceButton(label,onClick,modifier,primary=false) }
 
 @Composable
-internal fun TossRow(title: String, subtitle: String? = null, onClick: () -> Unit, trailing: String = "›") {
-    Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 11.dp), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            if (subtitle != null) Text(subtitle, style = MaterialTheme.typography.bodySmall)
-        }
-        Text(trailing, color = TossMuted, fontSize = 18.sp)
+internal fun TossRow(title:String,subtitle:String?=null,onClick:()->Unit,trailing:String="›") {
+    Row(Modifier.fillMaxWidth().heightIn(min=70.dp).clickable(onClick=onClick).padding(vertical=12.dp),verticalAlignment=Alignment.CenterVertically){
+        Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(5.dp)){Text(title,fontSize=13.sp,fontWeight=FontWeight.SemiBold);if(subtitle!=null)Text(subtitle,fontSize=11.sp,color=TossMuted)}
+        WorkspaceIcon(WorkspaceSymbol.CHEVRON,Modifier.size(16.dp))
     }
 }
 
@@ -471,89 +373,10 @@ private fun TossCompactGas(label: String, value: Double?, suffix: String) {
 }
 
 @Composable
-private fun TossChat(state: FieldGuardUiState, voice: VoiceUiState, actions: FieldGuardActions, imeVisible: Boolean) {
-    val listState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
-    LaunchedEffect(state.activeChatId) {
-        if (state.messages.size > 1) listState.scrollToItem(state.messages.lastIndex)
-    }
-    val showLatest by remember(state.messages.size) {
-        derivedStateOf {
-            state.messages.size > 3 && (listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) < state.messages.lastIndex - 1
-        }
-    }
-    LaunchedEffect(state.messages.size, state.isAnswering) {
-        if (state.messages.size > 1 && !showLatest) listState.animateScrollToItem(state.messages.lastIndex)
-    }
-    Column(Modifier.fillMaxSize()) {
-        if (!imeVisible) Row(Modifier.fillMaxWidth().padding(horizontal = 22.dp, vertical = 10.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            TossStatusPill("기기 내 문서 질문")
-            TextButton(onClick = { actions.onNavigate(AppDestination.SENSOR) }) { Text("가스 측정 →") }
-        }
-        Box(Modifier.weight(1f)) {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize().testTag("conversationList"),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 18.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
-            ) {
-                if (state.messages.size <= 1) {
-                    item {
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            TossPageTitle("현장에서 궁금한 점을\n물어보세요", "문서에서 근거를 찾고, 같은 쪽의 원문까지 연결해요.")
-                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                listOf("공기 측정 기준", "구조 절차").forEach { prompt ->
-                                    FilterChip(selected = false, onClick = { actions.onPreset(prompt) }, label = { Text(prompt) })
-                                }
-                            }
-                            FilterChip(selected = false, onClick = { actions.onPreset("작업허가 전에 어떤 안전조치를 확인해야 하나요?") }, label = { Text("작업허가 점검") })
-                        }
-                    }
-                }
-                if (state.messages.size > 1 || state.activeChatId != null) {
-                    items(state.messages, key = { it.id }) { message ->
-                        TossChatMessage(message, actions.onOpenSource)
-                    }
-                }
-            }
-            if (showLatest) {
-                OutlinedButton(
-                    onClick = { scope.launch { listState.animateScrollToItem(state.messages.lastIndex) } },
-                    modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 7.dp).testTag("scrollLatest"),
-                    shape = CircleShape,
-                ) {
-                    Text("최근 답변으로", color = TossBlue)
-                }
-            }
-        }
-        if (state.inputError != null) Text(state.inputError, color = TossRed, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 18.dp))
-        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(
-                value = state.input,
-                onValueChange = actions.onInputChange,
-                placeholder = { Text(if (voice.wakeWordEnabled) "‘오투야’라고 불러 주세요" else "안전 작업에 대해 물어보세요", fontSize = 14.sp) },
-                modifier = Modifier.weight(1f).heightIn(min = 52.dp, max = 125.dp).testTag("chatInput"),
-                shape = RoundedCornerShape(16.dp), maxLines = 4, isError = state.inputError != null,
-            )
-            IconButton(
-                onClick = { actions.onNavigate(AppDestination.VOICE); actions.onVoiceClick() },
-                modifier = Modifier.size(48.dp).semantics { contentDescription = "음성 질문" },
-            ) { TossMicrophoneIcon() }
-            IconButton(
-                onClick = { if (!state.isAnswering) actions.onSubmit() },
-                enabled = !state.isAnswering,
-                modifier = Modifier.size(48.dp).testTag("sendMessage").semantics { contentDescription = "메시지 전송" },
-            ) {
-                Surface(color = if (state.isAnswering) TossBorder else TossBlue, shape = CircleShape, modifier = Modifier.size(36.dp)) {
-                    Box(contentAlignment = Alignment.Center) { TossSendIcon() }
-                }
-            }
-        }
-    }
-}
+private fun TossChat(state:FieldGuardUiState,voice:VoiceUiState,actions:FieldGuardActions,imeVisible:Boolean){WorkspaceChat(state,voice,actions,imeVisible)}
 
 @Composable
-private fun TossMicrophoneIcon() {
+internal fun TossMicrophoneIcon() {
     Canvas(Modifier.size(21.dp)) {
         val w = size.width
         val h = size.height
@@ -639,69 +462,12 @@ private fun currentTimeTick(): Long {
 }
 
 @Composable
-private fun TossHistory(state: FieldGuardUiState, actions: FieldGuardActions) {
-    TossScrollPage {
-        TossPageTitle("이전에 물어본 내용", "최근 대화는 이 기기에만 보관돼요.")
-        TossPrimaryButton("새 대화", actions.onNewChat)
-        if (state.histories.isEmpty()) {
-            TossPanel { Text("아직 저장된 대화가 없어요.", style = MaterialTheme.typography.bodyMedium) }
-        } else {
-            TossPanel {
-                state.histories.forEachIndexed { index, session ->
-                    TossRow(session.title, "${session.updatedAtMillis.localTime()} · ${session.turns.size}개 메시지", { actions.onLoadChat(session.id) })
-                    if (index != state.histories.lastIndex) HorizontalDivider(color = TossBorder)
-                }
-            }
-        }
-        TossPanel(color = TossBlueWeak) { Text("계정 없이 이 기기에서 이어서 볼 수 있어요.", style = MaterialTheme.typography.bodyMedium) }
-    }
-}
+private fun TossHistory(state:FieldGuardUiState,actions:FieldGuardActions){WorkspaceHistory(state,actions)}
 
 private enum class SourceViewMode { PDF, FORMATTED, RAW }
 
 @Composable
-private fun TossSource(state: FieldGuardUiState, actions: FieldGuardActions) {
-    val source = state.selectedSource
-    var viewMode by remember(source?.id) { mutableStateOf(SourceViewMode.PDF) }
-    TossScrollPage {
-        TossPageTitle("답변이 어디에서\n왔는지 확인해요")
-        if (source == null) {
-            TossPanel { Text("열 문서를 찾지 못했어요.", style = MaterialTheme.typography.bodyMedium) }
-        } else {
-            TossPanel {
-                Text(source.documentTitle, style = MaterialTheme.typography.titleMedium)
-                Text("${source.pageNumber}쪽 · ${source.heading}", style = MaterialTheme.typography.bodySmall)
-            }
-            TossStatusPill("문서 근거", TossBlueWeak, TossBlue)
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(selected = viewMode == SourceViewMode.PDF, onClick = { viewMode = SourceViewMode.PDF }, label = { Text("PDF 원본") })
-                FilterChip(selected = viewMode == SourceViewMode.FORMATTED, onClick = { viewMode = SourceViewMode.FORMATTED }, label = { Text("읽기 편한 보기") })
-                FilterChip(selected = viewMode == SourceViewMode.RAW, onClick = { viewMode = SourceViewMode.RAW }, label = { Text("추출 텍스트") })
-            }
-            if (viewMode == SourceViewMode.PDF) {
-                SourcePdfPage(source)
-            } else {
-                Surface(color = Color.White, border = BorderStroke(1.dp, TossBorder), shape = RoundedCornerShape(20.dp)) {
-                    if (viewMode == SourceViewMode.FORMATTED) {
-                        MarkdownText(
-                            markdown = remember(source.body) { SourceDocumentFormatter.format(source.body) },
-                            modifier = Modifier.padding(18.dp),
-                        )
-                    } else {
-                        Text(source.body, modifier = Modifier.padding(18.dp), style = MaterialTheme.typography.bodyLarge)
-                    }
-                }
-            }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TossSecondaryButton("이전 부분", { actions.onAdjacentSource(-1) }, Modifier.weight(1f))
-                TossSecondaryButton("다음 부분", { actions.onAdjacentSource(1) }, Modifier.weight(1f))
-            }
-            TossPanel(color = TossBlueWeak) {
-                Text("PDF 원본에서 그림과 표를 확인할 수 있어요. 추출 텍스트는 검색과 답변에 사용된 내용을 보여줍니다.", style = MaterialTheme.typography.bodyMedium)
-            }
-        }
-    }
-}
+private fun TossSource(state:FieldGuardUiState,actions:FieldGuardActions){WorkspaceSource(state,actions)}
 
 @Composable
 private fun TossVoice(voice: VoiceUiState, actions: FieldGuardActions) {
@@ -843,36 +609,7 @@ private fun TossChecklist(state: FieldGuardUiState, actions: FieldGuardActions) 
 }
 
 @Composable
-private fun TossLibrary(state: FieldGuardUiState, actions: FieldGuardActions) {
-    val wide = LocalConfiguration.current.screenWidthDp >= 850
-    TossScrollPage {
-        TossPageTitle("필요한 근거를\n바로 찾아요", "문서 ${state.documents.size}종 · ${state.documents.sumOf { it.chunkCount }}개 근거 · 원본 PDF")
-        OutlinedTextField(
-            value = state.libraryQuery, onValueChange = actions.onLibraryQuery,
-            placeholder = { Text("문서에서 찾기") },
-            modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), singleLine = true,
-        )
-        if (state.libraryQuery.isNotBlank()) {
-            Text("검색 결과", style = MaterialTheme.typography.titleMedium)
-            if (state.libraryResults.isEmpty()) Text("관련 부분을 찾는 중이거나 결과가 없어요.", style = MaterialTheme.typography.bodyMedium)
-            state.libraryResults.forEach { source ->
-                TossPanel(modifier = Modifier.clickable { actions.onOpenSource(source.id) }) {
-                    Text(source.heading, style = MaterialTheme.typography.titleMedium)
-                    Text("${source.documentTitle} · ${source.pageNumber}쪽", style = MaterialTheme.typography.bodySmall)
-                    Text(source.body.take(90), style = MaterialTheme.typography.bodyMedium, maxLines = 3, overflow = TextOverflow.Ellipsis)
-                }
-            }
-        } else {
-            if (wide) state.documents.withIndex().chunked(2).forEach { pair ->
-                Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-                    pair.forEach { (index, document) -> FieldWorkspaceDocument(document, index, actions, Modifier.weight(1f)) }
-                    if (pair.size == 1) Spacer(Modifier.weight(1f))
-                }
-            } else state.documents.forEachIndexed { index, document -> FieldWorkspaceDocument(document,index,actions) }
-            if (state.documents.isEmpty()) Text("문서를 준비하고 있어요.", style = MaterialTheme.typography.bodyMedium)
-        }
-    }
-}
+private fun TossLibrary(state:FieldGuardUiState,actions:FieldGuardActions){WorkspaceLibrary(state,actions)}
 
 @Composable
 private fun TossSettings(state: FieldGuardUiState, actions: FieldGuardActions) {
@@ -880,94 +617,13 @@ private fun TossSettings(state: FieldGuardUiState, actions: FieldGuardActions) {
 }
 
 @Composable
-private fun TossModel(state: FieldGuardUiState, actions: FieldGuardActions) {
-    TossScrollPage {
-        val phase = state.modelStatus.phase
-        TossPageTitle(
-            when (phase) {
-                ModelPhase.READY -> "AI 모델이\n준비됐어요"
-                ModelPhase.DOWNLOADING -> "AI 모델을\n받고 있어요"
-                ModelPhase.FAILED -> "모델을 받지\n못했어요"
-                ModelPhase.NOT_INSTALLED -> "기기에서 답할\n모델을 준비해요"
-            },
-            "설치가 끝나면 이 기기에서 문서를 참고해 답해요.",
-        )
-        TossPanel {
-            Text("Gemma 4 E2B", style = MaterialTheme.typography.titleLarge)
-            Text("온디바이스 모델 · 약 2.41GB", style = MaterialTheme.typography.bodySmall)
-            when (phase) {
-                ModelPhase.DOWNLOADING -> {
-                    Text("${state.modelProgress ?: 0}%", fontSize = 25.sp, fontWeight = FontWeight.Bold, color = TossBlue)
-                    LinearProgressIndicator(progress = { (state.modelProgress ?: 0) / 100f }, modifier = Modifier.fillMaxWidth().height(6.dp), color = TossBlue, trackColor = TossBorder)
-                    Text("앱을 닫아도 다운로드를 이어가요.", style = MaterialTheme.typography.bodySmall)
-                }
-                ModelPhase.READY -> TossStatusPill("로컬 모델 준비됨", TossGreenWeak, TossGreen)
-                ModelPhase.FAILED -> Text(state.modelStatus.failureMessage ?: "다시 다운로드해 주세요.", color = TossRed, style = MaterialTheme.typography.bodyMedium)
-                ModelPhase.NOT_INSTALLED -> Text("문서 검색은 모델 없이도 사용할 수 있어요.", style = MaterialTheme.typography.bodyMedium)
-            }
-        }
-        TossPanel {
-            TossRow("저장 공간", "남은 공간 ${state.deviceProfile?.availableStorageGb ?: "—"}GB · 설치에는 최소 4GB 필요", {})
-            HorizontalDivider(color = TossBorder)
-            TossRow("네트워크", "모델 설치할 때만 사용해요.", {})
-            HorizontalDivider(color = TossBorder)
-            TossRow("설치 후 질문", "문서 검색과 생성은 기기에서 실행해요.", {})
-        }
-        if (phase == ModelPhase.NOT_INSTALLED || phase == ModelPhase.FAILED) {
-            TossPrimaryButton(if (phase == ModelPhase.FAILED) "다시 다운로드" else "모델 다운로드", actions.onDownloadModel)
-        }
-        if (phase == ModelPhase.READY) TossSecondaryButton("추론 설정 보기", { actions.onNavigate(AppDestination.INFERENCE) })
-    }
+private fun TossModel(state:FieldGuardUiState,actions:FieldGuardActions){
+    WorkspacePage{WorkspaceHeading("ON-DEVICE AI","기기 내 Gemma","문서와 AI를 이 기기에 저장해요.");WorkspaceModelPanel(state,actions);WorkspaceButton("AI 토큰 설정",{actions.onNavigate(AppDestination.INFERENCE)},primary=false)}
 }
 
 @Composable
-private fun TossInference(state: FieldGuardUiState, actions: FieldGuardActions) {
-    val settings = state.settings
-    val contextLimit = state.deviceProfile?.let(ContextTokenPolicy::deviceLimit) ?: ContextTokenPolicy.MIN_CONTEXT_TOKENS
-    TossScrollPage {
-        TossPageTitle("이 기기에 맞게\n설정해요")
-        TossPanel {
-            Text("실행 방식", style = MaterialTheme.typography.titleMedium)
-            InferenceBackend.entries.forEach { backend ->
-                FilterChip(
-                    selected = settings.backend == backend,
-                    onClick = { actions.onBackend(backend) },
-                    label = { Text(backend.label) },
-                )
-            }
-            Text("실행되지 않으면 다른 방식으로 전환해요.", style = MaterialTheme.typography.bodySmall)
-        }
-        TossPanel {
-            Text("총 문맥 한도", style = MaterialTheme.typography.titleMedium)
-            Text("${settings.contextTokens} 토큰", color = TossBlue, style = MaterialTheme.typography.titleLarge)
-            Slider(
-                value = settings.contextTokens.toFloat(),
-                onValueChange = { actions.onContextTokens((it / 1024f).roundToInt() * 1024) },
-                valueRange = ContextTokenPolicy.MIN_CONTEXT_TOKENS.toFloat()..contextLimit.toFloat(),
-                enabled = contextLimit > ContextTokenPolicy.MIN_CONTEXT_TOKENS,
-            )
-            Text("이 기기 RAM 기준 안전 한도 안에서 선택해요.", style = MaterialTheme.typography.bodySmall)
-            HorizontalDivider(color = TossBorder)
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text("답변 길이 자동", style = MaterialTheme.typography.titleMedium)
-                Switch(checked = settings.automaticAnswerLength, onCheckedChange = actions.onAutomaticAnswerLength)
-            }
-            Text("모델이 답을 마칠 때까지 생성해요. 기기의 문맥 한도는 적용됩니다.", style = MaterialTheme.typography.bodySmall)
-            if (!settings.automaticAnswerLength) {
-                Text("수동 최대 답변 길이", style = MaterialTheme.typography.titleMedium)
-                Text("${settings.responseTokens} 토큰", color = TossBlue, style = MaterialTheme.typography.titleLarge)
-                Slider(
-                    value = settings.responseTokens.toFloat(),
-                    onValueChange = { actions.onResponseTokens((it / 128f).roundToInt() * 128) },
-                    valueRange = ContextTokenPolicy.MIN_RESPONSE_TOKENS.toFloat()..ContextTokenPolicy.responseLimit(settings.contextTokens).toFloat(),
-                    enabled = ContextTokenPolicy.responseLimit(settings.contextTokens) > ContextTokenPolicy.MIN_RESPONSE_TOKENS,
-                )
-                Text("수동 상한에 도달하면 문장 중간에 멈출 수 있어요.", style = MaterialTheme.typography.bodySmall)
-            }
-        }
-        TossPanel(color = TossBlueWeak) { Text("바꾼 설정은 다음 질문부터 적용돼요.", style = MaterialTheme.typography.bodyMedium) }
-        TossPrimaryButton(if (state.settingsSaved) "저장했어요" else "설정 저장", actions.onSaveSettings)
-    }
+private fun TossInference(state:FieldGuardUiState,actions:FieldGuardActions){
+    WorkspacePage{WorkspaceHeading("YOUR WORKSPACE","AI 토큰 설정","답변 길이와 AI가 사용할 문맥 크기를 조절해요.");WorkspaceTokenSettings(state,actions)}
 }
 
 @Composable

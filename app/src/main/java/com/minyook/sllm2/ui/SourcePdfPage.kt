@@ -59,12 +59,8 @@ internal fun SourcePdfPage(source: SourceUi) {
         Text("고용노동부 공식 PDF · ${source.pageNumber}/${specification.pageCount}쪽", style = MaterialTheme.typography.bodySmall)
         Text("공식 PDF 원본이 앱에 포함되어 있어 인터넷 없이도 볼 수 있어요.", style = MaterialTheme.typography.bodySmall)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { zoomPercent = (zoomPercent - 25).coerceAtLeast(75) }, enabled = zoomPercent > 75) {
-                Text("축소")
-            }
-            OutlinedButton(onClick = { zoomPercent = (zoomPercent + 25).coerceAtMost(200) }, enabled = zoomPercent < 200) {
-                Text("확대")
-            }
+            WorkspaceButton("축소",{ zoomPercent = (zoomPercent - 25).coerceAtLeast(75) },primary=false,enabled=zoomPercent>75)
+            WorkspaceButton("확대",{ zoomPercent = (zoomPercent + 25).coerceAtMost(200) },primary=false,enabled=zoomPercent<200)
             Text("$zoomPercent%", modifier = Modifier.padding(top = 13.dp), style = MaterialTheme.typography.bodyMedium)
         }
         BoxWithConstraints(Modifier.fillMaxWidth()) {

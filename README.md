@@ -2,7 +2,7 @@
 
 밀폐공간 안전 문서를 근거로 질문에 답하고, 작업 요청부터 감독관 점검·승인, 현장 투입과 퇴장까지 기록하는 프로젝트입니다. **Android는 설치형 앱으로 유지하고, PC·갤럭시 탭·iPhone은 반응형 웹/PWA도 함께 사용합니다.** 질문과 문서 검색은 기기 안에서 처리하며, 작업 요청·승인만 공통 작업 서버를 사용합니다.
 
-최종 갱신: **2026-10-15**. 이 README는 저장소 첫 화면에서 프로젝트 구조, 실행 주소, 실제 소스 경로, 감독관 코드, 테스트 방법을 확인할 수 있도록 정리한 안내입니다.
+최종 갱신: **2026-10-16**. 이 README는 저장소 첫 화면에서 프로젝트 구조, 실행 주소, 실제 소스 경로, 감독관 코드, 테스트 방법을 확인할 수 있도록 정리한 안내입니다.
 
 ## 먼저 알아둘 구성
 
@@ -13,7 +13,7 @@
 | 공통 작업 서버 | 기기별 세션, 당일 6자리 감독관 코드, 요청 소유권·승인 권한 검사, 작업 기록 | `web/server/` → Vite 개발·미리보기와 함께 실행 |
 | 공통 작업 화면 | 작업자 요청·감독관 점검·승인·투입·대피·종료 | `web/src/features/WorkChecklist.tsx`; 앱은 이 화면을 제한된 WebView로 사용 |
 
-**웹 디자인을 공통 기준으로 사용합니다.** 홈 문구·파랑/회색 색상·흰색 카드·문서 표지·메뉴 명칭을 앱에도 적용했습니다. 작은 화면은 `홈 / 질문 / 문서 / 설정`, 넓은 앱 화면은 웹처럼 사이드바를 사용합니다. 앱의 가스 측정·음성·위젯은 Android 기능으로 이어지며, 웹에서 측정값을 만들어 표시하지 않습니다.
+**웹 디자인을 공통 기준으로 사용합니다.** 홈·질문·답변·문서·기록·설정·원문 화면을 웹 배치와 스타일에 맞춰 전면 수정했습니다. 같은 아이콘 17개와 색상·카드 크기 기준을 웹 소스에서 Android 리소스로 동기화합니다. 작은 화면은 `홈 / 질문 / 문서 / 설정`, 넓은 앱 화면은 웹처럼 사이드바를 사용합니다. 앱의 가스 측정·음성·위젯은 Android 기능으로 이어지며, 웹에서 측정값을 만들어 표시하지 않습니다.
 
 ## 앱 디자인 화면
 
@@ -23,7 +23,9 @@
 |---|---|
 | ![웹 기준 Android 홈](docs/screenshots/android-workspace-home.png) | ![웹 기준 Android 설정](docs/screenshots/android-workspace-settings.png) |
 
-[문서 보관함 화면](docs/screenshots/android-workspace-library.png) · [앱 내 공통 감독관 화면](docs/screenshots/android-workspace-supervisor.png)
+[질문](docs/screenshots/android-workspace-chat.png) · [답변](docs/screenshots/android-workspace-answer.png) · [문서](docs/screenshots/android-workspace-library.png) · [기록](docs/screenshots/android-workspace-history.png) · [토큰 설정](docs/screenshots/android-workspace-tokens.png) · [감독관](docs/screenshots/android-workspace-supervisor.png)
+
+[휴대전화 크기 홈](docs/screenshots/android-workspace-phone-home.png) · [휴대전화 크기 질문](docs/screenshots/android-workspace-phone-chat.png). 휴대전화 이미지는 탭에서 390×844dp로 렌더링한 결과입니다. 구조·동기화 명령은 [앱·웹 공통 디자인 설계](docs/ANDROID_WEB_DESIGN.md)를 참고하세요.
 
 ## 빠른 실행: 웹
 
@@ -129,9 +131,9 @@ npm.cmd run supervisor -- revoke
 .\gradlew.bat -PdesignPreview=true :app:assembleDebug :app:assembleDebugAndroidTest
 ```
 
-디자인 빌드는 `com.minyook.sllm2.designpreview`, 앱 이름은 **Field Guard 디자인**입니다. 일반 빌드와 출력 APK 위치는 같으므로 파일의 빌드 종류를 구분해 설치합니다. 기존 설치 앱과 데이터는 보존됩니다. 앱의 **설정 → 현장 작업 서버**에 HTTPS 서버 기본 주소를 입력하면 웹과 같은 점검 화면을 사용합니다. 개발 빌드의 USB 시험에서는 `http://localhost:4173`도 허용하며 위의 ADB 포트 연결이 필요합니다.
+디자인 빌드는 `com.minyook.sllm2.designpreview`, 앱 이름은 **Field Guard 디자인**입니다. 일반 빌드와 출력 APK 위치는 같으므로 파일의 빌드 종류를 구분해 설치합니다. 기존 설치 앱과 데이터는 보존됩니다. 2026-10-16 이 PC에서는 원래 디버그 키의 서명을 대조한 뒤 일반 `O₂ Field Guard` 앱도 삭제 없이 업데이트했습니다. 일반 앱 설치 파일은 `app/build/outputs/apk/debug/app-debug.apk`입니다. 앱의 **설정 → 현장 작업 서버**에 HTTPS 서버 기본 주소를 입력하면 웹과 같은 점검 화면을 사용합니다. 개발 빌드의 USB 시험에서는 `http://localhost:4173`도 허용하며 위의 ADB 포트 연결이 필요합니다.
 
-앱 전체를 웹으로 바꾸지 않았습니다. 홈·문서·질문·설정은 Compose, 작업 요청·감독관 점검은 공통 React 화면을 사용하는 제한된 WebView입니다. WebView에서 질문·모델 준비를 누르면 기존 Android 화면으로 돌아갑니다. 임의 외부 출처·파일 접근·JavaScript 네이티브 인터페이스는 열지 않습니다.
+앱 전체를 웹으로 바꾸지 않았습니다. 홈·문서·질문·기록·설정·원문은 Compose, 작업 요청·감독관 점검은 공통 React 화면을 사용하는 제한된 WebView입니다. WebView에서 질문·모델 준비를 누르면 기존 Android 화면으로 돌아갑니다. 임의 외부 출처·파일 접근·JavaScript 네이티브 인터페이스는 열지 않습니다.
 
 ## 문서·모델·Markdown·스크롤
 
@@ -189,11 +191,13 @@ Sllm2/
 | `MainActivity.kt` | Compose 진입, ViewModel·음성·권한·생명주기 연결 |
 | `SllmApplication.kt` | ObjectBox·알림 초기화 |
 | `ui/TossFieldGuardApp.kt` | 공통 화면 틀·작은 화면 메뉴·채팅·문서·센서·상세 화면 |
-| `ui/FieldWorkspaceUi.kt` | 웹 기준 디자인 토큰·홈·사이드바·문서 표지·설정 카드 |
+| `ui/WebDesignTokens.kt`, `WorkspaceComponents.kt` | 웹에서 생성한 공통 디자인 토큰·아이콘·카드·버튼·입력·배지 |
+| `ui/FieldWorkspaceUi.kt` | 웹 기준 홈·사이드바·문서 표지·설정·토큰 선택 |
+| `ui/WorkspaceScreens.kt` | 질문·답변·출처·문서 검색/필터·기록·원문 화면 |
 | `ui/FieldGuardViewModel.kt` | 앱 상태·기존 RAG/모델/BLE 호출·작업 서버 주소 저장 |
 | `ui/NativeWorkPage.kt` | 공통 작업 화면 WebView·서버 설정·네이티브 질문 전환 |
 | `ui/WorkServerAddress.kt` | HTTPS/개발 localhost·동일 출처 검증 |
-| `ui/MarkdownText.kt`, `SourcePdfPage.kt` | Markdown 답변·원본 PDF 표시 |
+| `ui/MarkdownText.kt`, `MarkdownBlocks.kt`, `SourcePdfPage.kt` | Markdown 답변·원본 PDF 표시 |
 | `ui/VoiceConversationController.kt` | 기기 음성 인식·응답 음성 경로 |
 | `data/KnowledgeRepository.kt` | ObjectBox 검색·근거 선택 |
 | `data/QuestionEvidencePlanner.kt`, `QuestionAnswerVerifier.kt` | 복합 주제·근거 누락/충돌 검사 |
@@ -257,10 +261,11 @@ npm.cmd run build
 
 Android UI 계측 테스트: `TossNavigationTest`, `WorkspaceDesignTest`. 원본 PDF 검증은 `data/SourcePdfRepositoryTest`입니다. 웹 검증에는 검색·Markdown·스크롤·모델 무결성·검증 재사용·토큰·날짜 경계·당일 코드 공동 사용·권한 우회 거부·동시 갱신을 포함합니다. 검색 회귀 정답 쪽 포함 결과는 29/30이며 AI 생성 답변 전체의 정확도 점수와 구분합니다. 최신 실행 수치·실기기 결과·남은 항목은 아래 검증 기록을 기준으로 합니다.
 
-2026-10-15 최종 결과: **웹 126개·Android JVM 15개·갤럭시 탭 UI 계측 10개 통과**, 웹 프로덕션 및 Android APK 빌드 성공. 앱 화면은 Galaxy Tab S9 Ultra(SM-X910, Android 16)의 실제 렌더링 캡처이며 UI 테스트는 가상 상태를 사용합니다. 새 UI·공통 WebView 검증과 실제 모델 추론·BLE 장비 검증을 구분합니다.
+2026-10-16 Android 갱신 결과: **Android JVM 19개·갤럭시 탭 UI 계측 17개 통과** (웹의 마지막 검증은 126개 통과), 웹 프로덕션 및 Android APK 빌드 성공. 앱 화면은 Galaxy Tab S9 Ultra(SM-X910, Android 16)의 실제 렌더링 캡처이며 UI 테스트는 가상 상태를 사용합니다. 새 UI·공통 WebView 검증과 실제 모델 추론·BLE 장비 검증을 구분합니다.
 
 | 문서 | 내용 |
 |---|---|
+| [앱·웹 공통 디자인](docs/ANDROID_WEB_DESIGN.md) | 화면 대응·같은 아이콘/색상 생성·캡처 |
 | [Android 현행 설계서](docs/ANDROID_APP_SPEC.md) | 네이티브 화면·RAG·BLE·공통 작업 화면 연결 |
 | [웹·서버 현행 설계서](docs/webapp/TARGET_ARCHITECTURE.md) | React·Worker·저장소·인증·API 구조 |
 | [작업 흐름 설계](web/docs/workflow.md) | 당일 6자리 코드·역할·작업 상태·승인 조건 |

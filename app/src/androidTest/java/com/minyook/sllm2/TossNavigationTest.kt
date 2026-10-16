@@ -30,12 +30,14 @@ import org.junit.runner.RunWith
 /** Compose wiring tests use local state only; no BLE service or model download starts. */
 @RunWith(AndroidJUnit4::class)
 class TossNavigationTest {
-    @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
+    @get:Rule val compose = createAndroidComposeRule<WorkspacePreviewActivity>()
     @Before fun keepTestVisible() {
-        compose.activity.runOnUiThread {
+        androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().runOnMainSync {
             compose.activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             compose.activity.setShowWhenLocked(true)
             compose.activity.setTurnScreenOn(true)
+            compose.activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+            compose.activity.getSystemService(android.view.inputmethod.InputMethodManager::class.java).hideSoftInputFromWindow(compose.activity.window.decorView.windowToken,0)
         }
     }
 
@@ -80,7 +82,7 @@ class TossNavigationTest {
         compose.onNodeWithContentDescription("음성 질문").assertIsDisplayed()
         compose.onNodeWithContentDescription("메시지 전송").assertIsDisplayed()
         compose.onNodeWithTag("sendMessage").performClick()
-        compose.onNodeWithText("근거 검색 중", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("문서 근거를 확인하고 있어요").assertIsDisplayed()
         compose.onNodeWithTag("chatInput").assertIsDisplayed()
     }
 
@@ -95,14 +97,14 @@ class TossNavigationTest {
         ))
         compose.setContent { TossFieldGuardApp(state, VoiceUiState(available = true), actions()) }
 
-        compose.onNodeWithText("근거 검색 중", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("문서 근거를 확인하고 있어요").assertIsDisplayed()
         compose.runOnIdle {
             state = state.copy(messages = listOf(ChatMessageUi(
                 id = answerId, text = "### 산소 농도\n20.9%입니다.", fromWorker = false, pending = true,
             )))
         }
-        compose.onNodeWithText("### 산소 농도\n20.9%입니다.").assertIsDisplayed()
-        compose.onNodeWithText("답변 작성 중", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("산소 농도").assertIsDisplayed()
+        compose.onNodeWithText("Gemma가 답변을 작성하고 있어요").assertIsDisplayed()
 
         compose.runOnIdle {
             state = state.copy(
@@ -170,6 +172,27 @@ class TossNavigationTest {
         compose.onNodeWithText("0 / 5 확인").assertIsDisplayed()
         compose.onNodeWithText("작업 위치와 출입 경로").performClick()
         compose.onNodeWithText("1 / 5 확인").assertIsDisplayed()
+    }
+
+    @Test
+    fun tokenDropdownUsesExistingNativeSettingsAndSaveAction() {
+        var state by mutableStateOf(FieldGuardUiState(destination=AppDestination.INFERENCE))
+        var saved=false
+        compose.setContent {
+            TossFieldGuardApp(state,VoiceUiState(available=false),actions().copy(
+                onAutomaticAnswerLength={state=state.copy(settings=state.settings.copy(automaticAnswerLength=it))},
+                onResponseTokens={state=state.copy(settings=state.settings.copy(responseTokens=it))},
+                onSaveSettings={saved=true},
+            ))
+        }
+        compose.onNodeWithTag("select-최대 답변 토큰").performClick()
+        compose.onNodeWithText("512 토큰").performClick()
+        compose.onNodeWithText("토큰 설정 저장").performClick()
+        compose.runOnIdle {
+            assertEquals(512,state.settings.responseTokens)
+            org.junit.Assert.assertFalse(state.settings.automaticAnswerLength)
+            org.junit.Assert.assertTrue(saved)
+        }
     }
 
     private fun actions(

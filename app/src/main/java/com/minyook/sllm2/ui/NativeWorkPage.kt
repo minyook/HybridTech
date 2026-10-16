@@ -36,11 +36,10 @@ internal fun WorkServerSettings(state: FieldGuardUiState, actions: FieldGuardAct
     var address by remember(state.workServerUrl) { mutableStateOf(state.workServerUrl) }
     var error by remember { mutableStateOf("") }
     TossScrollPage {
-        TossPageTitle("현장 작업 서버 연결", "앱과 웹에서 같은 작업 요청·점검·승인 화면을 사용해요.")
+        WorkspaceHeading("YOUR WORKSPACE", "현장 작업 서버 연결", "앱과 웹에서 같은 작업 요청·점검·승인 화면을 사용해요.")
         TossPanel {
             Text("작업 서버 주소", style = MaterialTheme.typography.titleMedium)
-            OutlinedTextField(value = address, onValueChange = { address = it; error = "" }, singleLine = true,
-                label = { Text("서버 기본 주소") }, placeholder = { Text("https://현장서버주소") }, modifier = Modifier.fillMaxWidth().testTag("workServerUrl"))
+            WorkspaceField("서버 기본 주소",address,{ address=it;error="" },"https://현장서버주소",Modifier.testTag("workServerUrl"))
             Text("작업 기록과 감독관 인증은 입력한 서버에서 관리해요. 문서 질문과 가스 측정은 기존 앱 기능을 사용해요.", style = MaterialTheme.typography.bodySmall)
             if (BuildConfig.DEBUG) Text("PC USB 테스트: http://localhost:4173 · USB 포트 연결을 유지해 주세요.", style = MaterialTheme.typography.bodySmall)
             if (error.isNotEmpty()) Text(error, color = MaterialTheme.colorScheme.error)

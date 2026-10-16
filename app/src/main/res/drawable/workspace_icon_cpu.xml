@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from web/src/ui.tsx. Run node tools/sync-web-design.mjs. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="22dp" android:height="22dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:pathData="M9,6h6q3,0 3,3v6q0,3 -3,3h-6q-3,0 -3,-3v-6q0,-3 3,-3Z" android:fillColor="@android:color/transparent" android:strokeColor="#FF6B7684" android:strokeWidth="1.7" android:strokeLineCap="round" android:strokeLineJoin="round" />
+    <path android:pathData="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4" android:fillColor="@android:color/transparent" android:strokeColor="#FF6B7684" android:strokeWidth="1.7" android:strokeLineCap="round" android:strokeLineJoin="round" />
+    <path android:pathData="M10,10h4q0,0 0,0v4q0,0 0,0h-4q0,0 0,0v-4q0,0 0,0Z" android:fillColor="@android:color/transparent" android:strokeColor="#FF6B7684" android:strokeWidth="1.7" android:strokeLineCap="round" android:strokeLineJoin="round" />
+</vector>
