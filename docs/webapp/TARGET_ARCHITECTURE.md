@@ -116,6 +116,12 @@ OPFS 파일은 첫 실행에서 저장된 바이트 전체의 SHA-256을 확인�
 
 감독관 인증과 작업 승인은 분리됩니다. 신규 작업은 반드시 `requested`와 빈 점검으로 생성되고, 감독관이 점검을 저장한 후 승인 API를 호출해야 승인됩니다. 작업자가 승인 내용을 확인해 투입을 별도 요청해야 다음 단계로 진행합니다. 기본 목록은 종료 작업을 제외하며, 종료 이력에서는 과거 승인임을 표시합니다. 새 요청 화면의 진행 단계는 선택했던 이전 작업과 분리합니다. 관련 구현은 `WorkChecklist.tsx`, `workflow/live.ts`, `workflow/presentation.ts`, `server/api.ts`, `server/store.ts`입니다.
 
+## 브라우저별 AI 실행 조건
+
+`web/src/ai/capabilities.ts`가 보안 컨텍스트·WebGPU·Worker 기능을 확인하고 실패 원인별 안내를 생성합니다. `runtime.ts`와 `Settings.tsx`가 같은 판정을 사용하고, 미지원 시 워커 초기화와 모델 다운로드를 시작하지 않습니다. 기존의 포괄적인 ‘이 브라우저에서는 AI 사용 불가’ 문구를 원인·해결 절차와 조건 표시로 바꿨습니다.
+
+iPhone/iPad WebGPU의 정식 지원은 iOS/iPadOS 26부터입니다. 사용자 보고인 iPhone 13 Pro / iOS 18.6.2의 AI 다운로드 차단은 이 기본 지원 조건에 해당합니다. 13 Pro는 iOS 26 지원 기종이지만 업데이트 후 Gemma의 실제 메모리/GPU 실행을 별도로 시험해야 합니다. iOS 버전 문자열이나 기종 이름으로 무조건 차단하거나 실행 성공을 보장하지 않습니다. Safari 사용자 에이전트에 오래된 iOS 버전이 표시되더라도 실제 기능을 제공하면 통과합니다. 기본 검사 통과와 엔진 초기화·추론 성공은 구분합니다.
+
 ## iPhone의 같은 Wi-Fi HTTPS 시험
 
 `npm run iphone:test`는 최신 프로덕션 파일을 빌드하고 사설 IPv4에 설치 안내 HTTP 4172와 Vite HTTPS 미리보기 4174를 실행합니다. 공통 작업 API·SQLite·SSE와 COOP/COEP 헤더를 유지하고 TLS 연결에는 Secure 쿠키를 발급합니다. 기존 HTTP 4173·개발 5174와 분리합니다. `https://<PC-IP>:4173`은 TLS 서버가 아니므로 실패합니다.

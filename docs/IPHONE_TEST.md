@@ -37,6 +37,18 @@ Apple 공식 안내: [프로파일 설치](https://support.apple.com/ko-kr/10240
 
 이 프로파일에는 공개 개발용 CA 인증서 하나만 들어 있습니다. 해당 CA를 신뢰하면 이 PC가 발급한 서버 인증서를 iPhone이 신뢰합니다. PC의 개인키는 다운로드되지 않습니다. 테스트가 끝나면 설정 → 일반 → VPN 및 기기 관리에서 프로파일을 제거할 수 있습니다. PC의 Windows 인증서 저장소에는 자동 등록하지 않습니다.
 
+## iPhone AI의 별도 지원 조건
+
+현재 기기 내 Gemma는 LiteRT-LM WebGPU 경로를 사용합니다. HTTPS로 웹이 열려도 WebGPU가 없는 브라우저에서는 모델 다운로드와 AI 실행을 진행하지 않습니다.
+
+- iPhone·iPad의 정식 WebGPU 지원은 **iOS·iPadOS 26부터**입니다. iOS 18.6.2에서는 기본 Safari에서 현재 AI를 실행할 수 없습니다. 사용자 보고로 iPhone 13 Pro / iOS 18.6.2의 해당 차단 상황을 확인했으며, 실제 기기의 AI 실행 성공을 확인한 것은 아닙니다.
+- **iPhone 13 Pro는 iOS 26 지원 기종**입니다. 설정 → 일반 → 소프트웨어 업데이트에서 지원되는 최신 정식 버전으로 업데이트한 뒤 Safari와 홈 화면 앱을 완전히 닫고 다시 시험합니다.
+- 실제 판정은 운영체제 이름이나 사용자 에이전트의 숫자로 차단하지 않고 `isSecureContext`, WebGPU, Worker 기능을 확인합니다. Safari의 사용자 에이전트가 실제 iOS 버전과 다를 수 있어 표시 문자열을 실행 가능 여부로 신뢰하지 않습니다.
+- 설정은 보안 연결·AI 그래픽 기능·백그라운드 실행의 실패 원인을 구분해 표시합니다. 미지원 환경에서 약 2GB 모델을 다운로드하도록 유도하지 않습니다.
+- iOS 업데이트와 기본 기능 검사 통과만으로 실제 Gemma 실행을 보장하지 않습니다. 기기의 사용 가능한 메모리·GPU와 모델 적재·첫 답변을 별도로 시험해야 합니다. 문서·PDF·작업 요청/감독관 승인은 이 AI 기능과 분리됩니다.
+
+공식 근거: [WebKit의 Safari 26 WebGPU 지원](https://webkit.org/blog/17333/webkit-features-in-safari-26-0/#webgpu), [Apple iOS 26 지원 기종과 업데이트](https://support.apple.com/ko-kr/123705). 실행 조건 구현은 `web/src/ai/capabilities.ts`입니다.
+
 ## 시험 순서
 
 - 홈·문서 보관함·PDF를 열고 세로/가로 방향, 키보드 표시, 스크롤을 확인합니다.

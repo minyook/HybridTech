@@ -2,6 +2,14 @@
 
 최종 검증: **2026-10-19** (iPhone용 같은 Wi-Fi HTTPS 준비). Windows Chromium과 연결된 Galaxy Tab S9 Ultra(SM-X910, Android 16)에서 확인했습니다. 아래 날짜별 기록은 변경 당시 결과이며, 현재 감독관 인증은 일일 숫자 6자리입니다. 실제 iPhone 검증 기록은 아닙니다.
 
+## 2026-10-19 iOS 18.6.2의 AI 미지원 안내
+
+- 사용자가 iPhone 13 Pro / iOS 18.6.2 / 같은 HTTPS 앱 주소에서 AI 다운로드가 차단된다고 보고했습니다. 기존 판정은 보안 컨텍스트·WebGPU·Worker 중 하나라도 없으면 포괄적인 미지원 문구만 표시했습니다.
+- Apple/WebKit 공식 문서로 iPhone WebGPU의 정식 지원이 iOS 26부터이며 13 Pro가 iOS 26 지원 기종임을 확인했습니다. 따라서 사용자에게 지원되는 최신 정식 iOS로 업데이트한 뒤 재시험하도록 안내했습니다. 실제 iPhone 콘솔/AI 실행 성공을 관측한 것은 아닙니다.
+- `capabilities.ts`로 공통 실행 조건과 HTTPS/WebGPU/Worker별 원인을 분리했습니다. 설정에서 조건 표시·iOS 업데이트 안내를 제공하고, 미지원 상태에서 모델/워커를 준비하지 않습니다. 실제 기능을 기준으로 판단하며 사용자 에이전트의 버전 숫자만으로 차단하지 않습니다.
+- `npm.cmd test -- --maxWorkers=1 --no-file-parallelism`: **22개 파일 151개 통과**. 추가 8개는 HTTPS·WebGPU·Worker 원인 구분, iPhone/iPad 안내, 사용자 에이전트와 실제 기능의 분리, 런타임의 미지원 준비 차단을 검사합니다. TypeScript·Vite·PWA 빌드 성공.
+- iOS 업데이트 후 iPhone 13 Pro의 모델 다운로드·GPU 메모리 적재·첫 토큰·발열·오프라인 생성 성공은 아직 확인하지 않았습니다. [지원 조건과 시험 절차](../../docs/IPHONE_TEST.md#iphone-ai의-별도-지원-조건)에 구분했습니다.
+
 ## 2026-10-19 iPhone 보안 연결 오류와 로컬 HTTPS 준비
 
 - 기존 PC 사설 IP 4173 서버가 HTTP 200을 반환하지만 같은 포트의 HTTPS 요청은 TLS 오류(`ERR_SSL_PACKET_LENGTH_TOO_LONG`)로 실패하는 것을 재현했습니다. 일반 사설 IP의 HTTP에서는 이 앱의 최초 문서 읽기에 사용하는 Cache API·검증 API도 사용할 수 없어 전체 시험 안내를 HTTPS 기준으로 수정했습니다.
@@ -50,7 +58,7 @@
 ## 자동 검증
 
 - `npm.cmd run build`: TypeScript 검사, Vite 프로덕션 빌드, PDF 판본 해시 확인, PWA 파일 목록 생성 성공.
-- 최종 `npm.cmd test -- --maxWorkers=1 --no-file-parallelism`: 21개 파일, **143개 테스트 통과**. 아래 초기 검증과 날짜별 기록의 과거 테스트 수를 구분합니다.
+- 최종 `npm.cmd test -- --maxWorkers=1 --no-file-parallelism`: 22개 파일, **151개 테스트 통과**. 아래 초기 검증과 날짜별 기록의 과거 테스트 수를 구분합니다.
 - 검색·복합 질문·문서 밖 질문·원문 페이지 연결, IndexedDB 저장/복원/삭제, 모델 크기·해시·중단 처리, Markdown 구조·HTML/이미지 처리·수치 범위 보존, 서비스 워커 오프라인 응답 및 `Vary: Origin`, 손상된 다운로드와 캐시 복구를 검사했습니다.
 - 작업 요청·승인·투입·대피·종료의 상태 전환, 요청한 작업자 구분, 측정값 경계와 누락·유효기한, 동시 갱신 충돌, 점검 당시 데이터 보존, 고정된 공식 모델 다운로드와 브라우저 fetch 호출을 추가 검사했습니다.
 - 자동 AI 준비 중복 방지, 준비 중 질문 대기, 취소 후 다음 질문 복구, 실패 재시도, 출력 한도 변경 시 엔진 재사용, 문맥 변경 시 재초기화, 초기화 도중 설정 변경, 토큰 설정 저장/복원/범위, 실제 SDK 옵션과 측정값 전달을 검사했습니다.

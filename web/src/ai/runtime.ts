@@ -4,6 +4,7 @@ import { installedModel } from './model';
 import { loadAISettings } from './preferences';
 import { outputIssue } from './output-quality';
 import type { AIReply, AIRequest, GenerationResult, InitializationTiming } from './protocol';
+import { getAISupport } from './capabilities';
 
 export interface AIStatus { phase:'idle'|'checking'|'loading'|'ready'|'generating'|'error'|'unavailable';message:string;startedAt?:number;timing?:InitializationTiming }
 let status:AIStatus={phase:'idle',message:'모델 다운로드 후 자동으로 준비해요'};
@@ -19,7 +20,7 @@ let nextId=0;
 let preparing:Promise<boolean>|undefined;
 let generating=false;
 const pending=new Map<number,{resolve:(result?:GenerationResult)=>void;reject:(error:Error)=>void;onText?:(answer:string)=>void;timer:ReturnType<typeof setTimeout>}>();
-export function supportsAI(){return isSecureContext&&'gpu'in navigator&&typeof Worker!=='undefined';}
+export function supportsAI(){return getAISupport().available;}
 export function aiIsReady(){return Boolean(worker)&&['ready','generating'].includes(status.phase);}
 const abortError=()=>new DOMException('AI 작업을 중단했어요.','AbortError');
 function terminate(error:Error){
@@ -65,7 +66,8 @@ export function prepareAI(signal?:AbortSignal):Promise<boolean>{
   if(!preparing){
     const startedEpoch=epoch;
     const operation=(async()=>{
-      if(!supportsAI()){publish({phase:'unavailable',message:'이 브라우저에서는 AI를 실행할 수 없어요. 문서 검색은 사용할 수 있어요.'});return false;}
+      const support=getAISupport();
+      if(!support.available){publish({phase:'unavailable',message:support.title});return false;}
       const settings=await loadAISettings();
       if(startedEpoch!==epoch)throw abortError();
       if(aiIsReady()&&contextTokens===settings.contextTokens)return true;

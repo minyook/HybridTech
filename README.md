@@ -87,6 +87,8 @@ npm.cmd run iphone:test
 
 인증서·개인키는 Git에서 제외된 `web/.local/iphone-https/`에만 생성합니다. CA를 신뢰하면 이 PC가 발급한 서버 인증서를 아이폰이 신뢰하며, 시험 후 프로파일을 제거할 수 있습니다. PC에 인증서를 자동 등록하거나 외부 인터넷으로 서버를 공개하지 않습니다. 아이폰의 설치·신뢰 설정은 직접 진행해야 합니다. [정확한 설치 순서·키 경로·만료·검증 범위](docs/IPHONE_TEST.md)를 참고하세요.
 
+**아이폰 AI는 별도 조건이 있습니다.** 현재 Gemma 웹 실행은 WebGPU가 필요하고 iPhone의 정식 지원은 iOS 26부터입니다. iOS 18.6.2에서는 웹·문서·작업 화면에 접속해도 AI 다운로드/실행은 막힙니다. iPhone 13 Pro는 iOS 26 지원 기종이지만 업데이트 후 실제 모델 적재·메모리·생성을 추가로 확인해야 합니다. 설정에서 HTTPS·WebGPU·백그라운드 실행 조건을 구분해 안내합니다. [iPhone AI 지원 조건](docs/IPHONE_TEST.md#iphone-ai의-별도-지원-조건)을 참고하세요.
+
 ## 작업자 요청 ↔ 감독관 승인
 
 기본 작업 화면은 진행 중인 요청만 표시합니다. 종료된 과거 작업은 ‘종료 이력’에서 확인하며 새 요청의 승인으로 사용하지 않습니다. 감독관 코드를 입력해도 작업은 승인되지 않습니다.
@@ -250,7 +252,7 @@ Sllm2/
 | `web/src/features/WorkChecklist.tsx` | 작업자·감독관 공통 작업 화면 |
 | `web/src/features/SupervisorAccess.tsx` | 6자리 숫자 입력·인증·잠금 |
 | `web/src/features/Settings.tsx`, `PdfPage.tsx` | 모델·토큰·파일 준비·원본 PDF |
-| `web/src/workflow/work.ts` | 상태 전환·승인 조건·사건 스냅샷 |
+| `web/src/ai/capabilities.ts` | HTTPS·WebGPU·Worker 실행 조건과 iPhone 업데이트 안내 |\n| `web/src/workflow/work.ts` | 상태 전환·승인 조건·사건 스냅샷 |
 | `web/src/workflow/live.ts`, `presentation.ts` | 상대 화면 변경 수신·연결 복구·진행 중/종료 이력 구분 |
 | `web/src/workflow/access.ts`, `native.ts` | 서버 세션·API·Android 전환 |
 | `web/server/store.ts` | SQLite·요청 소유권·감독관 권한·한국 날짜/당일 코드 |
@@ -297,7 +299,7 @@ npm.cmd run build
 
 Android UI 계측 테스트: `TossNavigationTest`, `WorkspaceDesignTest`. 원본 PDF 검증은 `data/SourcePdfRepositoryTest`입니다. 웹 검증에는 검색·Markdown·스크롤·모델 무결성·검증 재사용·토큰·날짜 경계·당일 코드 공동 사용·권한 우회 거부·동시 갱신을 포함합니다. 검색 회귀 정답 쪽 포함 결과는 29/30이며 AI 생성 답변 전체의 정확도 점수와 구분합니다. 최신 실행 수치·실기기 결과·남은 항목은 아래 검증 기록을 기준으로 합니다.
 
-2026-10-16 Android 갱신 결과: **Android JVM 19개·갤럭시 탭 UI 계측 17개 통과**, Android APK 빌드 성공. 2026-10-19 iPhone HTTPS 준비 후 웹은 **21개 파일 143개 통과**, 프로덕션/PWA 빌드 성공. 개발 CA를 명시한 실제 TLS 검증·보안 쿠키·서버 응답도 확인했습니다. 실제 iPhone의 프로파일 설치·Safari·AI 시험 완료와는 구분합니다. 앱 화면은 Galaxy Tab S9 Ultra(SM-X910, Android 16)의 실제 렌더링 캡처이며 UI 테스트는 가상 상태를 사용합니다. 새 UI·공통 WebView 검증과 실제 모델 추론·BLE 장비 검증을 구분합니다.
+2026-10-16 Android 갱신 결과: **Android JVM 19개·갤럭시 탭 UI 계측 17개 통과**, Android APK 빌드 성공. 2026-10-19 iPhone HTTPS 준비 후 웹은 **22개 파일 151개 통과**, 프로덕션/PWA 빌드 성공. 개발 CA를 명시한 실제 TLS 검증·보안 쿠키·서버 응답도 확인했습니다. 실제 iPhone의 프로파일 설치·Safari·AI 시험 완료와는 구분합니다. 앱 화면은 Galaxy Tab S9 Ultra(SM-X910, Android 16)의 실제 렌더링 캡처이며 UI 테스트는 가상 상태를 사용합니다. 새 UI·공통 WebView 검증과 실제 모델 추론·BLE 장비 검증을 구분합니다.
 
 | 문서 | 내용 |
 |---|---|

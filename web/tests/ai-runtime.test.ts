@@ -31,6 +31,16 @@ it('중복된 자동 준비 요청은 한 번만 초기화하고 화면에 단�
 it('모델이 없으면 다운로드하거나 실행한 것처럼 표시하지 않는다',async()=>{
   fixture.installed=false;expect(await prepareAI()).toBe(false);expect(aiIsReady()).toBe(false);expect(FakeWorker.instances).toHaveLength(0);
 });
+it('아이폰에서 WebGPU가 없으면 모델이나 워커를 준비하지 않고 원인을 표시한다',async()=>{
+  vi.stubGlobal('navigator',{userAgent:'iPhone; CPU iPhone OS 18_6_2 like Mac OS X'});
+  expect(await prepareAI()).toBe(false);expect(FakeWorker.instances).toHaveLength(0);
+  expect(getAIStatus()).toMatchObject({phase:'unavailable',message:'이 브라우저에서 WebGPU를 사용할 수 없어요'});
+});
+it('신뢰된 보안 연결이 아니면 별도의 원인으로 AI를 차단한다',async()=>{
+  vi.stubGlobal('isSecureContext',false);
+  expect(await prepareAI()).toBe(false);expect(FakeWorker.instances).toHaveLength(0);
+  expect(getAIStatus().message).toContain('보안 연결');
+});
 it('워커의 실제 준비 시간과 검증 재사용 여부를 표시하고 해제 시 초기화한다',async()=>{
   const loading=prepareAI();await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(1));const worker=FakeWorker.instances[0];
   const initialization={verification:'cached' as const,verificationMs:20,runtimeMs:100,engineMs:800,totalMs:920};
