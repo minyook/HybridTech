@@ -15,6 +15,11 @@ it('답변 한도와 문맥 크기를 저장하고 새 조회에서 복원한다
 it('문맥을 줄이면 답변 한도를 문맥의 절반 이하로 제한한다',()=>{
   expect(normalizeAISettings({contextTokens:4096,maxOutputTokens:4096})).toEqual({contextTokens:4096,maxOutputTokens:2048});
 });
+it('복구용 2,048 문맥도 명시적으로 저장하고 답변 한도를 검증한다',async()=>{
+  expect(await saveAISettings({contextTokens:2048,maxOutputTokens:256})).toEqual({contextTokens:2048,maxOutputTokens:256});
+  expect(await loadAISettings()).toEqual({contextTokens:2048,maxOutputTokens:256});
+  expect(normalizeAISettings({contextTokens:2048,maxOutputTokens:4096}).maxOutputTokens).toBe(1024);
+});
 it('iPhone의 새 기본값은 작게 잡되 사용자가 저장한 설정은 유지한다',()=>{
   vi.stubGlobal('navigator',{userAgent:'iPhone',maxTouchPoints:5});
   try{expect(normalizeAISettings(undefined)).toEqual({contextTokens:4096,maxOutputTokens:512});expect(normalizeAISettings({contextTokens:8192,maxOutputTokens:1536})).toEqual({contextTokens:8192,maxOutputTokens:1536});}

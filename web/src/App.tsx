@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Chat, Checklist, Chunk, Source } from './types';
-import { aiIsReady, generate, prepareAI, supportsAI } from './ai/runtime';
+import { aiIsReady, generate, getAIStatus, prepareAI, supportsAI } from './ai/runtime';
 import { useAIStatus } from './ai/useAIStatus';
 import { useChatScroll } from './chat/useChatScroll';
 import { useChatViewport } from './chat/useChatViewport';
@@ -53,7 +53,15 @@ export default function App() {
   }
   useEffect(() => {
     let active = true;
-    if(!isAndroidEmbedded())void prepareAI().catch(()=>{});
+    if(!isAndroidEmbedded()){
+      const initialRoute=location.hash.slice(1)||'/';
+      void prepareAI().then(ready=>{
+        // A home-screen PWA has no address bar for the standalone recovery URL.
+        // On startup, open its own settings without touching another browser's
+        // storage. Later document browsing remains available in recovery mode.
+        if(active&&!ready&&getAIStatus().phase==='recovery'&&['/','/ask'].includes(initialRoute)&&(location.hash.slice(1)||'/')===initialRoute)go('/settings');
+      }).catch(()=>{});
+    }
     loadKnowledge().then(value => { if (active) setChunks(value); }).catch(error => { if (active) setLoadError(error.message); }).finally(() => { if (active) setLoading(false); });
     void refresh();
     getSetting<typeof draft>('checklist-draft').then(value => { if (active && value) setDraft(value); }).catch(() => notify('점검 초안을 복원하지 못했어요.')).finally(() => { if (active) setDraftLoaded(true); });
@@ -116,7 +124,7 @@ export default function App() {
     <div className="messages" ref={messagesRef}>{exchanges.map(chat=>{
       const writing=chat.id===current?.id;
       return <article className="exchange" key={chat.id}><div className="user-message">{chat.question}</div><div className="answer" aria-busy={writing||undefined}>
-        <div className="answer-label">{writing?<><span className="answer-progress"><span className="spinner"/></span><strong>{stream?'Gemma가 답변을 작성하고 있어요':['checking','loading'].includes(ai.phase)?ai.message:'문서 근거를 확인하고 있어요'}</strong></>:<><div className="mini-brand">O₂</div><strong>{chat.mode==='ai'?'Gemma 답변':'관련 문서 원문'}</strong><span>{savedIds.has(chat.id)?'기기 저장됨':'저장되지 않음'}</span></>}</div>
+        <div className="answer-label">{writing?<><span className="answer-progress"><span className="spinner"/></span><strong>{stream?'Gemma가 답변을 작성하고 있어요':['checking','loading','generating'].includes(ai.phase)?ai.message:'문서 근거를 확인하고 있어요'}</strong></>:<><div className="mini-brand">O₂</div><strong>{chat.mode==='ai'?'Gemma 답변':'관련 문서 원문'}</strong><span>{savedIds.has(chat.id)?'기기 저장됨':'저장되지 않음'}</span></>}</div>
         {chat.notice&&<Notice>{chat.notice}</Notice>}<TextContent text={writing?stream:chat.answer}/>
         {!writing&&<>{chat.tokenUsage&&<p className="token-usage">{chat.tokenUsage.inputTokens!==undefined&&`입력 ${chat.tokenUsage.inputTokens.toLocaleString()} · `}{chat.tokenUsage.outputTokens!==undefined&&`생성 ${chat.tokenUsage.outputTokens.toLocaleString()} · `}{chat.tokenUsage.totalTokens!==undefined&&`전체 ${chat.tokenUsage.totalTokens.toLocaleString()} · `}답변 한도 {chat.tokenUsage.maxOutputTokens.toLocaleString()} 토큰</p>}{renderSources(chat.citationIds.flatMap(id=>{const chunk=chunks.find(chunk=>chunk.id===id);return chunk?[{chunk,score:0}]:[];}))}</>}
       </div></article>;

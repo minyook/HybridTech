@@ -13,6 +13,11 @@ it('정상 완료는 자기 기록만 지우고 다른 화면의 진행 기록�
   guard.beginAIOperation('engine',4096);values.set(guard.AI_OPERATION_KEY,JSON.stringify({version:1,id:'other-tab',stage:'engine',contextTokens:4096,startedAt:Date.now()}));
   guard.finishAIOperation();expect(guard.unfinishedAIOperation()?.id).toBe('other-tab');
 });
+it.each(['conversation','prefill','decode'] as const)('생성 중 종료 위치 %s를 재접속 후 복원한다',async stage=>{
+  let guard=await import('../src/ai/recovery');guard.beginAIOperation('conversation',2048);guard.updateAIStage(stage);
+  vi.resetModules();guard=await import('../src/ai/recovery');expect(guard.unfinishedAIOperation()).toMatchObject({stage,contextTokens:2048});
+  expect(guard.recoveryMessage(stage)).toContain(stage==='conversation'?'대화 작업 공간':stage==='prefill'?'질문·문서 입력':'답변 토큰');
+});
 it('저장소 접근 오류는 예외를 누적하거나 앱을 종료시키지 않는다',async()=>{
   vi.stubGlobal('localStorage',{getItem:()=>{throw Error('denied');},setItem:()=>{throw Error('denied');},removeItem:()=>{throw Error('denied');}});
   const guard=await import('../src/ai/recovery');expect(()=>{guard.beginAIOperation('engine',4096);guard.updateAIStage('generation');guard.finishAIOperation();guard.resetAIRecovery();}).not.toThrow();

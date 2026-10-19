@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 const fixture=vi.hoisted(()=>({settings:{contextTokens:8192,maxOutputTokens:512},installed:true,runtime:true,backend:'idb'}));
-vi.mock('../src/ai/preferences',()=>({loadAISettings:async()=>({...fixture.settings}),REDUCED_AI_SETTINGS:{contextTokens:4096,maxOutputTokens:512},saveAISettings:async(value:typeof fixture.settings)=>{fixture.settings={...value};return {...value};}}));
+vi.mock('../src/ai/preferences',()=>({loadAISettings:async()=>({...fixture.settings}),RECOVERY_AI_SETTINGS:{contextTokens:2048,maxOutputTokens:256},saveAISettings:async(value:typeof fixture.settings)=>{fixture.settings={...value};return {...value};}}));
 vi.mock('../src/ai/model',()=>({installedModel:async()=>fixture.installed?{blob:new Blob(['model']),metadata:{sha256:'verified',backend:fixture.backend,storageKey:'stored-model',size:5}}:undefined}));
 vi.mock('../src/offline/assets',()=>({assetUrl:(path:string)=>`https://local.invalid/${path}`,preparedGroups:async()=>({runtime:fixture.runtime})}));
 import { aiIsReady, buildPrompt, generate, getAIStatus, prepareAI, releaseModel, retryAIWithReducedContext, SYSTEM_INSTRUCTION } from '../src/ai/runtime';
@@ -30,11 +30,24 @@ it('미완료 적재 기록이 있으면 재접속과 질문에서 자동 재시
   expect(await prepareAI()).toBe(false);expect(getAIStatus().phase).toBe('recovery');expect(FakeWorker.instances).toHaveLength(0);
   await expect(generate('질문',[],vi.fn(),new AbortController().signal)).rejects.toThrow('자동 재시도');expect(values.has(AI_OPERATION_KEY)).toBe(true);
   const changed=vi.fn();const retry=retryAIWithReducedContext(changed);await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(1));const worker=FakeWorker.instances[0];
-  expect(changed).toHaveBeenCalledWith({contextTokens:4096,maxOutputTokens:512});expect(worker.messages[0]).toMatchObject({type:'initialize',settings:{contextTokens:4096,maxOutputTokens:512}});worker.reply({id:worker.messages[0].id,type:'done'});await retry;
+  expect(changed).toHaveBeenCalledWith({contextTokens:2048,maxOutputTokens:256});expect(worker.messages[0]).toMatchObject({type:'initialize',settings:{contextTokens:2048,maxOutputTokens:256}});worker.reply({id:worker.messages[0].id,type:'done'});await retry;
   expect(getAIStatus().phase).toBe('ready');expect(values.has(AI_OPERATION_KEY)).toBe(false);
 });
 it('OPFS 모델은 큰 Blob 대신 저장 위치만 워커에 전달한다',async()=>{
   fixture.backend='opfs';const worker=await ready();expect(worker.messages[0]).toMatchObject({model:{backend:'opfs',storageKey:'stored-model',size:5}});
+});
+it('iPhone의 실행 프로필을 워커에 전달하고 실제 생성 단계만 중단 기록에 남긴다',async()=>{
+  const values=localStore();vi.stubGlobal('navigator',{gpu:{},userAgent:'iPhone'});
+  const worker=await ready();expect(worker.messages[0]).toMatchObject({profile:'apple-mobile'});
+  const generating=generate('질문',[],vi.fn(),new AbortController().signal);
+  await vi.waitFor(()=>expect(worker.messages).toHaveLength(2));const id=worker.messages[1].id;
+  worker.reply({id,type:'progress',stage:'prefill',message:'문서 입력 처리 중'});
+  expect(getAIStatus()).toMatchObject({phase:'generating',message:'문서 입력 처리 중'});
+  expect(JSON.parse(values.get(AI_OPERATION_KEY)!)).toMatchObject({stage:'prefill',contextTokens:8192});
+  worker.reply({id,type:'progress',stage:'decode',message:'첫 토큰 생성 중'});
+  expect(JSON.parse(values.get(AI_OPERATION_KEY)!)).toMatchObject({stage:'decode'});
+  worker.reply({id,type:'done',result:{answer:'답변',usage:{maxOutputTokens:512,contextTokens:8192}}});await generating;
+  expect(values.has(AI_OPERATION_KEY)).toBe(false);
 });
 it('준비를 기다리는 질문을 중단해도 진행 중인 초기화의 복구 기록을 지우지 않는다',async()=>{
   const values=localStore();const controller=new AbortController();const generating=generate('질문',[],vi.fn(),controller.signal);const rejected=expect(generating).rejects.toThrow();

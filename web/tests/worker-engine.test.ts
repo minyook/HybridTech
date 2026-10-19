@@ -26,6 +26,11 @@ it('OPFS 모델은 워커에서 열고 실제 파일 크기를 확인한 뒤 스
   await new WorkerEngine().handle(request,vi.fn());expect(getFileHandle).toHaveBeenCalledWith('saved-model');expect(sdk.verify).toHaveBeenCalledWith(file,'verified',expect.any(Function));
   sdk.create.mockClear();await new WorkerEngine().handle({...request,model:{backend:'opfs',storageKey:'saved-model',size:file.size+1}} as AIRequest,vi.fn());expect(sdk.create).not.toHaveBeenCalled();
 });
+it('iPhone 실행은 입력 배치 1과 작은 ringbuffer를 사용하고 데스크톱의 기본 설정은 유지한다',async()=>{
+  sdk.create.mockResolvedValue({});await new WorkerEngine().handle({...init(),profile:'apple-mobile'} as AIRequest,vi.fn());
+  expect(sdk.create.mock.calls[0][0].mainExecutorSettings).toMatchObject({maxNumTokens:4096,backendConfig:{sequence_batch_size:1,use_autosized_ringbuffers:true,wait_for_weight_uploads:true,max_top_k:1}});
+  expect(sdk.create.mock.calls[0][0].mainExecutorSettings.backendConfig.enable_external_embeddings).toBe(false);
+});
 it('모델이 손상된 경우 GPU 엔진을 만들지 않고 오류를 반환한다',async()=>{
   sdk.verify.mockRejectedValue(new Error('저장된 모델 검증에 실패했어요. 모델을 다시 다운로드해 주세요.'));const reply=vi.fn();await new WorkerEngine().handle(init(),reply);
   expect(sdk.create).not.toHaveBeenCalled();expect(reply).toHaveBeenLastCalledWith(expect.objectContaining({type:'error',message:expect.stringContaining('검증에 실패')}));
@@ -42,7 +47,8 @@ it('저장한 답변 한도가 SDK에 전달되고 측정한 사용량만 반환
   const createConversation=vi.fn(async()=>conversation);sdk.create.mockResolvedValue({createConversation});
   const engine=new WorkerEngine();await engine.handle(init(),vi.fn());const replies:AIReply[]=[];
   await engine.handle({id:2,type:'generate',prompt:'근거 질문',systemInstruction:'문서에 근거해 한국어로 답하세요.',settings},message=>replies.push(message));
-  expect(createConversation).toHaveBeenCalledWith({preface:{messages:[{role:'system',content:'문서에 근거해 한국어로 답하세요.'}],extra_context:{enable_thinking:false}},sessionConfig:{maxOutputTokens:512,samplerParams:{type:1,k:1,temperature:1,seed:0}}});
+  expect(createConversation).toHaveBeenCalledWith({preface:{messages:[{role:'system',content:'문서에 근거해 한국어로 답하세요.'}],extra_context:{enable_thinking:false}},prefillPrefaceOnInit:false,sessionConfig:{audioModalityEnabled:false,visionModalityEnabled:false,maxOutputTokens:512,samplerParams:{type:1,k:1,temperature:1,seed:0}}});
+  expect(replies.filter(message=>message.type==='progress').map(message=>message.stage)).toEqual(['conversation','prefill','decode']);
   expect(replies).toContainEqual({id:2,type:'text',answer:'## 답변\n원문 확인'});
   expect(replies).toContainEqual({id:2,type:'done',result:{answer:'## 답변\n원문 확인',usage:{inputTokens:180,outputTokens:12,totalTokens:192,maxOutputTokens:512,contextTokens:4096}}});
   expect(conversation.delete).toHaveBeenCalledOnce();

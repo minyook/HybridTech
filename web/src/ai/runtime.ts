@@ -1,10 +1,10 @@
 import type { Source } from '../types';
 import { assetUrl, preparedGroups } from '../offline/assets';
 import { installedModel } from './model';
-import { loadAISettings, REDUCED_AI_SETTINGS, saveAISettings, type AISettings } from './preferences';
+import { loadAISettings, RECOVERY_AI_SETTINGS, saveAISettings, type AISettings } from './preferences';
 import { outputIssue } from './output-quality';
 import type { AIReply, AIRequest, GenerationResult, InitializationTiming } from './protocol';
-import { getAISupport } from './capabilities';
+import { browserAIFeatures, getAISupport } from './capabilities';
 import { beginAIOperation, finishAIOperation, recoveryMessage, resetAIRecovery, unfinishedAIOperation, updateAIStage } from './recovery';
 import { acquireEngineLease } from './engine-lease';
 
@@ -38,7 +38,7 @@ function makeWorker(){
   candidate.onmessage=(event:MessageEvent<AIReply>)=>{
     if(worker!==candidate)return;
     const message=event.data;const item=pending.get(message.id);if(!item)return;
-    if(message.type==='progress'){if(message.stage)updateAIStage(message.stage);publish({phase:'loading',message:message.message,startedAt:status.startedAt});return;}
+    if(message.type==='progress'){if(message.stage)updateAIStage(message.stage);publish({phase:message.stage&&['conversation','prefill','decode','generation'].includes(message.stage)?'generating':'loading',message:message.message,startedAt:status.startedAt});return;}
     if(message.type==='text'){item.onText?.(message.answer);return;}
     if(message.type==='done'&&message.initialization)timing=message.initialization;
     clearTimeout(item.timer);pending.delete(message.id);
@@ -97,7 +97,7 @@ export function prepareAI(signal?:AbortSignal):Promise<boolean>{
       publish({phase:'loading',message:'저장된 모델을 기기 메모리에 불러오고 있어요',startedAt:Date.now()});
       try{
         const model=installed.metadata.backend==='opfs'?{backend:'opfs' as const,storageKey:installed.metadata.storageKey,size:installed.metadata.size}:installed.blob;
-        await request(candidate,{id:++nextId,type:'initialize',model,sha256:installed.metadata.sha256,runtimeUrl:assetUrl('runtime/'),settings});
+        await request(candidate,{id:++nextId,type:'initialize',model,sha256:installed.metadata.sha256,runtimeUrl:assetUrl('runtime/'),settings,profile:browserAIFeatures().appleMobile?'apple-mobile':'standard'});
         if(worker!==candidate)throw abortError();
         finishAIOperation();
         contextTokens=settings.contextTokens;publish({phase:'ready',message:'AI 사용 가능 · 바로 질문해 보세요'});return true;
@@ -138,10 +138,10 @@ export async function generate(question:string,sources:Source[],onText:(answer:s
       // flight. Never send that request to an engine with the older context.
     }while(contextTokens!==settings.contextTokens);
     candidate=worker;if(!candidate)throw new Error('AI 준비를 다시 시도해 주세요.');
-    beginAIOperation('generation',settings.contextTokens);
+    beginAIOperation('conversation',settings.contextTokens);
     executionStarted=true;
     signal.addEventListener('abort',cancel,{once:true});
-    publish({phase:'generating',message:'Gemma가 답변을 작성하고 있어요'});
+    publish({phase:'generating',message:'답변에 필요한 작업 공간을 준비하고 있어요',startedAt:Date.now()});
     const referenceText=[question,...sources.map(source=>source.chunk.body)].join('\n');
     const result=await request(candidate,{id:++nextId,type:'generate',prompt:buildPrompt(question,sources),systemInstruction:SYSTEM_INSTRUCTION,settings},answer=>{
       // Do not keep streaming visibly corrupted text while waiting for completion.
@@ -159,7 +159,7 @@ export async function generate(question:string,sources:Source[],onText:(answer:s
 export async function releaseModel(){terminate(abortError());preparing=undefined;publish({phase:'idle',message:'모델 다운로드 후 자동으로 준비해요'});}
 export async function retryAIWithReducedContext(onSettings?:(settings:AISettings)=>void){
   await releaseModel();
-  const settings=await saveAISettings(REDUCED_AI_SETTINGS);
+  const settings=await saveAISettings(RECOVERY_AI_SETTINGS);
   onSettings?.(settings);
   resetAIRecovery();
   await prepareAI();

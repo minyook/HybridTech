@@ -64,12 +64,12 @@ describe('작업자 ↔ 감독관 실시간 요청·승인',()=>{
     expect(response.headers.get('content-security-policy')).toContain("script-src 'nonce-");expect(html).toContain('registration.unregister()');expect(html).toContain('fieldguard-ai-operation');
     for(const forbidden of ['caches.delete','deleteDatabase','removeModel','Engine.create','ai-worker.js'])expect(html).not.toContain(forbidden);
   });
-  it('복구 동작은 자동 적재 차단과 해당 앱의 서비스 워커 연결 해제만 수행한다',async()=>{
+  it.each(['engine','prefill'] as const)('복구 동작은 중단 위치 %s를 보존하고 해당 앱의 서비스 워커 연결만 해제한다',async stage=>{
     const html=await(await fetch(`${base}/api/ai-recovery`)).text();const source=html.match(/<script nonce="[^"]+">([\s\S]*?)<\/script>/)![1];
-    const values=new Map([['saved-model','preserve']]);let click!:()=>Promise<void>;const unregister=()=>Promise.resolve(true);let unregisterCount=0;
+    const values=new Map([['saved-model','preserve']]);if(stage==='prefill')values.set('fieldguard-ai-operation',JSON.stringify({version:1,id:'previous',stage,contextTokens:4096,startedAt:123}));let click!:()=>Promise<void>;const unregister=()=>Promise.resolve(true);let unregisterCount=0;
     const nodes={recover:{disabled:false,addEventListener:(_type:string,callback:()=>Promise<void>)=>{click=callback;}},status:{textContent:''},app:{hidden:true}};
-    new Script(source).runInNewContext({document:{getElementById:(id:keyof typeof nodes)=>nodes[id]},URL,location:{href:'https://field.test/api/ai-recovery'},crypto:{randomUUID:()=>randomUUID()},localStorage:{setItem:(key:string,value:string)=>values.set(key,value)},navigator:{serviceWorker:{getRegistration:async()=>({scope:'https://field.test/',unregister:()=>{unregisterCount++;return unregister();}})}}});
-    await click();expect(unregisterCount).toBe(1);expect(values.get('saved-model')).toBe('preserve');expect(JSON.parse(values.get('fieldguard-ai-operation')!)).toMatchObject({stage:'engine',contextTokens:4096});expect(nodes.app.hidden).toBe(false);
+    new Script(source).runInNewContext({document:{getElementById:(id:keyof typeof nodes)=>nodes[id]},URL,location:{href:'https://field.test/api/ai-recovery'},crypto:{randomUUID:()=>randomUUID()},localStorage:{getItem:(key:string)=>values.get(key)??null,setItem:(key:string,value:string)=>values.set(key,value)},navigator:{serviceWorker:{getRegistration:async()=>({scope:'https://field.test/',unregister:()=>{unregisterCount++;return unregister();}})}}});
+    await click();expect(unregisterCount).toBe(1);expect(values.get('saved-model')).toBe('preserve');expect(JSON.parse(values.get('fieldguard-ai-operation')!)).toMatchObject({stage,contextTokens:4096});if(stage==='prefill')expect(JSON.parse(values.get('fieldguard-ai-operation')!).startedAt).toBe(123);expect(nodes.app.hidden).toBe(false);
   });
   it('작업자가 요청하고 감독관이 직접 승인해야 투입할 수 있으며 양쪽에 변경이 전달된다',async()=>{
     const worker=await client(),supervisor=await client();await grant(supervisor);
