@@ -9,6 +9,8 @@
     "dev": "vite --host 0.0.0.0",
     "build": "npm run prepare:assets && tsc -b && vite build && node scripts/build-pwa.mjs",
     "preview": "vite preview --host 0.0.0.0",
+    "preiphone:test": "npm run build",
+    "iphone:test": "node scripts/iphone-test.mjs",
     "supervisor": "node server/manage.ts",
     "test": "vitest run",
     "test:watch": "vitest"

@@ -116,6 +116,14 @@ OPFS 파일은 첫 실행에서 저장된 바이트 전체의 SHA-256을 확인�
 
 감독관 인증과 작업 승인은 분리됩니다. 신규 작업은 반드시 `requested`와 빈 점검으로 생성되고, 감독관이 점검을 저장한 후 승인 API를 호출해야 승인됩니다. 작업자가 승인 내용을 확인해 투입을 별도 요청해야 다음 단계로 진행합니다. 기본 목록은 종료 작업을 제외하며, 종료 이력에서는 과거 승인임을 표시합니다. 새 요청 화면의 진행 단계는 선택했던 이전 작업과 분리합니다. 관련 구현은 `WorkChecklist.tsx`, `workflow/live.ts`, `workflow/presentation.ts`, `server/api.ts`, `server/store.ts`입니다.
 
+## iPhone의 같은 Wi-Fi HTTPS 시험
+
+`npm run iphone:test`는 최신 프로덕션 파일을 빌드하고 사설 IPv4에 설치 안내 HTTP 4172와 Vite HTTPS 미리보기 4174를 실행합니다. 공통 작업 API·SQLite·SSE와 COOP/COEP 헤더를 유지하고 TLS 연결에는 Secure 쿠키를 발급합니다. 기존 HTTP 4173·개발 5174와 분리합니다. `https://<PC-IP>:4173`은 TLS 서버가 아니므로 실패합니다.
+
+`server/iphone-https.ts`가 OpenSSL로 개발용 CA(30일)와 사설 IP·localhost 서버 인증서(7일)를 생성·재사용합니다. 개인키는 Git 제외 `.local/iphone-https/`에 유지하고 설치 서버는 공개 CA 하나가 담긴 프로파일과 안내만 제공합니다. 파일 시스템·작업 API·개인키는 이 설치 서버의 경로에 연결하지 않습니다. IP 변경은 기존 CA로 서버 인증서만 재발급합니다. CA 불일치·만료는 중지합니다. PC/휴대전화의 신뢰 저장소를 자동 변경하지 않으며 사용자가 iPhone 설정에서 설치·신뢰해야 합니다. 외부 터널·운영 배포는 포함하지 않습니다.
+
+정확한 명령·프로파일 설치·신뢰·제거·키 경로는 [iPhone 시험 안내](../IPHONE_TEST.md)에 정리합니다. HTTPS 접속 검증과 실제 iPhone AI·메모리 시험 결과는 구분합니다.
+
 ## 저장·오프라인·업데이트
 
 | 저장 위치 | 내용 |
