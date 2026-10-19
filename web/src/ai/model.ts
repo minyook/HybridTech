@@ -1,15 +1,17 @@
 import { sha256 } from '@noble/hashes/sha2.js';
 import { commitModel, getModelBlob, modelMetadata, rememberModelVerification, removeModelData } from '../storage/db';
 import type { ModelRecord, ModelVerification } from '../types';
+import { MODEL_READ_CHUNK_BYTES } from './model-stream';
 
 export interface InstalledModel extends ModelRecord { storageKey: string }
 const asHex = (bytes: Uint8Array) => [...bytes].map(byte => byte.toString(16).padStart(2,'0')).join('');
 export async function digestBlob(blob: Blob, signal?: AbortSignal): Promise<string> {
-  const hash = sha256.create(); const reader = blob.stream().getReader();
-  try {
-    while (true) { signal?.throwIfAborted(); const { done, value } = await reader.read(); if (done) break; hash.update(value); }
-    return asHex(hash.digest());
-  } finally { await reader.cancel().catch(() => {}); }
+  const hash = sha256.create();
+  for(let offset=0;offset<blob.size;offset+=MODEL_READ_CHUNK_BYTES){
+    signal?.throwIfAborted();
+    hash.update(new Uint8Array(await blob.slice(offset,offset+MODEL_READ_CHUNK_BYTES).arrayBuffer()));
+  }
+  signal?.throwIfAborted();return asHex(hash.digest());
 }
 export const MODEL_RECHECK_INTERVAL_MS=7*24*60*60*1000;
 const SAMPLE_BYTES=64*1024;

@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-const fixture=vi.hoisted(()=>({settings:{contextTokens:8192,maxOutputTokens:512},installed:true,runtime:true}));
-vi.mock('../src/ai/preferences',()=>({loadAISettings:async()=>({...fixture.settings})}));
-vi.mock('../src/ai/model',()=>({installedModel:async()=>fixture.installed?{blob:new Blob(['model']),metadata:{sha256:'verified'}}:undefined}));
+const fixture=vi.hoisted(()=>({settings:{contextTokens:8192,maxOutputTokens:512},installed:true,runtime:true,backend:'idb'}));
+vi.mock('../src/ai/preferences',()=>({loadAISettings:async()=>({...fixture.settings}),REDUCED_AI_SETTINGS:{contextTokens:4096,maxOutputTokens:512},saveAISettings:async(value:typeof fixture.settings)=>{fixture.settings={...value};return {...value};}}));
+vi.mock('../src/ai/model',()=>({installedModel:async()=>fixture.installed?{blob:new Blob(['model']),metadata:{sha256:'verified',backend:fixture.backend,storageKey:'stored-model',size:5}}:undefined}));
 vi.mock('../src/offline/assets',()=>({assetUrl:(path:string)=>`https://local.invalid/${path}`,preparedGroups:async()=>({runtime:fixture.runtime})}));
-import { aiIsReady, buildPrompt, generate, getAIStatus, prepareAI, releaseModel, SYSTEM_INSTRUCTION } from '../src/ai/runtime';
+import { aiIsReady, buildPrompt, generate, getAIStatus, prepareAI, releaseModel, retryAIWithReducedContext, SYSTEM_INSTRUCTION } from '../src/ai/runtime';
+import { AI_OPERATION_KEY } from '../src/ai/recovery';
 import type { AIReply, AIRequest } from '../src/ai/protocol';
 
 class FakeWorker {
@@ -16,11 +17,43 @@ class FakeWorker {
   reply(message:AIReply){this.onmessage?.({data:message});}
 }
 beforeEach(async()=>{
-  await releaseModel();FakeWorker.instances=[];fixture.settings={contextTokens:8192,maxOutputTokens:512};fixture.installed=true;fixture.runtime=true;
+  await releaseModel();FakeWorker.instances=[];fixture.settings={contextTokens:8192,maxOutputTokens:512};fixture.installed=true;fixture.runtime=true;fixture.backend='idb';
   vi.stubGlobal('Worker',FakeWorker);vi.stubGlobal('navigator',{gpu:{}});vi.stubGlobal('isSecureContext',true);
 });
 afterEach(async()=>{await releaseModel();vi.unstubAllGlobals();});
 async function ready(){const promise=prepareAI();await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(1));const worker=FakeWorker.instances[0];worker.reply({id:worker.messages[0].id,type:'done'});await promise;return worker;}
+function localStore(){
+  const values=new Map<string,string>();vi.stubGlobal('localStorage',{getItem:(key:string)=>values.get(key)??null,setItem:(key:string,value:string)=>values.set(key,value),removeItem:(key:string)=>values.delete(key)});return values;
+}
+it('미완료 적재 기록이 있으면 재접속과 질문에서 자동 재시도하지 않고 축소 설정으로만 복구한다',async()=>{
+  const values=localStore();values.set(AI_OPERATION_KEY,JSON.stringify({version:1,id:'closed-page',stage:'engine',contextTokens:8192,startedAt:Date.now()}));
+  expect(await prepareAI()).toBe(false);expect(getAIStatus().phase).toBe('recovery');expect(FakeWorker.instances).toHaveLength(0);
+  await expect(generate('질문',[],vi.fn(),new AbortController().signal)).rejects.toThrow('자동 재시도');expect(values.has(AI_OPERATION_KEY)).toBe(true);
+  const changed=vi.fn();const retry=retryAIWithReducedContext(changed);await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(1));const worker=FakeWorker.instances[0];
+  expect(changed).toHaveBeenCalledWith({contextTokens:4096,maxOutputTokens:512});expect(worker.messages[0]).toMatchObject({type:'initialize',settings:{contextTokens:4096,maxOutputTokens:512}});worker.reply({id:worker.messages[0].id,type:'done'});await retry;
+  expect(getAIStatus().phase).toBe('ready');expect(values.has(AI_OPERATION_KEY)).toBe(false);
+});
+it('OPFS 모델은 큰 Blob 대신 저장 위치만 워커에 전달한다',async()=>{
+  fixture.backend='opfs';const worker=await ready();expect(worker.messages[0]).toMatchObject({model:{backend:'opfs',storageKey:'stored-model',size:5}});
+});
+it('준비를 기다리는 질문을 중단해도 진행 중인 초기화의 복구 기록을 지우지 않는다',async()=>{
+  const values=localStore();const controller=new AbortController();const generating=generate('질문',[],vi.fn(),controller.signal);const rejected=expect(generating).rejects.toThrow();
+  await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(1));controller.abort();await rejected;expect(values.has(AI_OPERATION_KEY)).toBe(true);
+  const worker=FakeWorker.instances[0];worker.reply({id:worker.messages[0].id,type:'done'});await vi.waitFor(()=>expect(values.has(AI_OPERATION_KEY)).toBe(false));
+});
+it('다른 탭이 GPU 엔진 잠금을 가진 경우 두 번째 엔진을 만들지 않는다',async()=>{
+  vi.stubGlobal('navigator',{gpu:{},locks:{request:async(_name:string,_options:unknown,callback:(lock:null)=>Promise<void>)=>callback(null)}});
+  expect(await prepareAI()).toBe(false);expect(getAIStatus().phase).toBe('recovery');expect(FakeWorker.instances).toHaveLength(0);
+});
+it('엔진 잠금은 준비 완료 후 유지하고 워커 종료 때 반환한다',async()=>{
+  let released=false;vi.stubGlobal('navigator',{gpu:{},locks:{request:async(_name:string,_options:unknown,callback:(lock:object)=>Promise<void>)=>{await callback({});released=true;}}});
+  await ready();expect(released).toBe(false);await releaseModel();await vi.waitFor(()=>expect(released).toBe(true));
+});
+it('문맥 변경 후 잠금 확인이 실패해도 준비 중 상태로 멈추지 않는다',async()=>{
+  await ready();fixture.settings.contextTokens=4096;
+  vi.stubGlobal('navigator',{gpu:{},locks:{request:async()=>{throw Error('lock denied');}}});
+  await expect(prepareAI()).rejects.toThrow('lock denied');expect(getAIStatus().phase).toBe('error');
+});
 
 it('중복된 자동 준비 요청은 한 번만 초기화하고 화면에 단계를 전달한다',async()=>{
   const first=prepareAI();const second=prepareAI();await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(1));const worker=FakeWorker.instances[0];

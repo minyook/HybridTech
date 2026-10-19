@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto';
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { DEFAULT_AI_SETTINGS, loadAISettings, normalizeAISettings, saveAISettings } from '../src/ai/preferences';
 import { setSetting } from '../src/storage/db';
 
@@ -14,4 +14,9 @@ it('답변 한도와 문맥 크기를 저장하고 새 조회에서 복원한다
 });
 it('문맥을 줄이면 답변 한도를 문맥의 절반 이하로 제한한다',()=>{
   expect(normalizeAISettings({contextTokens:4096,maxOutputTokens:4096})).toEqual({contextTokens:4096,maxOutputTokens:2048});
+});
+it('iPhone의 새 기본값은 작게 잡되 사용자가 저장한 설정은 유지한다',()=>{
+  vi.stubGlobal('navigator',{userAgent:'iPhone',maxTouchPoints:5});
+  try{expect(normalizeAISettings(undefined)).toEqual({contextTokens:4096,maxOutputTokens:512});expect(normalizeAISettings({contextTokens:8192,maxOutputTokens:1536})).toEqual({contextTokens:8192,maxOutputTokens:1536});}
+  finally{vi.unstubAllGlobals();}
 });

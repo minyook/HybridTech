@@ -1,4 +1,4 @@
-import { beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 const sdk=vi.hoisted(()=>({create:vi.fn(),load:vi.fn(),verify:vi.fn()}));
 vi.mock('@litert-lm/core',()=>({Engine:{create:sdk.create},loadLiteRtLm:sdk.load,SamplerType:{TOP_K:1}}));
 vi.mock('../src/ai/model',()=>({verifyStoredModel:sdk.verify}));
@@ -7,6 +7,7 @@ import type { AIReply, AIRequest } from '../src/ai/protocol';
 const settings={contextTokens:4096,maxOutputTokens:512};
 const init=():AIRequest=>({id:1,type:'initialize',model:new Blob(['model']),sha256:'verified',runtimeUrl:'https://local.invalid/runtime/',settings});
 beforeEach(()=>{vi.clearAllMocks();sdk.verify.mockReset().mockResolvedValue('full');sdk.load.mockResolvedValue(undefined);});
+afterEach(()=>vi.unstubAllGlobals());
 
 it('무결성 검증 후 저장된 문맥 한도로 실제 SDK 엔진을 만든다',async()=>{
   sdk.create.mockResolvedValue({});const reply=vi.fn();
@@ -15,7 +16,15 @@ it('무결성 검증 후 저장된 문맥 한도로 실제 SDK 엔진을 만든�
   expect(sdk.load).toHaveBeenCalledWith('https://local.invalid/runtime/');
   expect((globalThis as typeof globalThis&{Module:{locateFile:(name:string)=>string}}).Module.locateFile('litertlm_wasm_internal.wasm')).toBe('https://local.invalid/runtime/litertlm_wasm_internal.wasm');
   expect(sdk.create).toHaveBeenCalledWith(expect.objectContaining({mainExecutorSettings:{maxNumTokens:4096}}));
+  expect(sdk.create.mock.calls[0][0].model).toBeInstanceOf(ReadableStream);
   expect(reply).toHaveBeenLastCalledWith({id:1,type:'done',initialization:{verification:'full',verificationMs:expect.any(Number),runtimeMs:expect.any(Number),engineMs:expect.any(Number),totalMs:expect.any(Number)}});
+});
+it('OPFS 모델은 워커에서 열고 실제 파일 크기를 확인한 뒤 스트리밍 적재한다',async()=>{
+  const file=new File(['model'],'saved.litertlm');const getFileHandle=vi.fn(async()=>({getFile:async()=>file}));
+  vi.stubGlobal('navigator',{storage:{getDirectory:async()=>({getFileHandle})}});sdk.create.mockResolvedValue({});
+  const request={...init(),model:{backend:'opfs' as const,storageKey:'saved-model',size:file.size}} as AIRequest;
+  await new WorkerEngine().handle(request,vi.fn());expect(getFileHandle).toHaveBeenCalledWith('saved-model');expect(sdk.verify).toHaveBeenCalledWith(file,'verified',expect.any(Function));
+  sdk.create.mockClear();await new WorkerEngine().handle({...request,model:{backend:'opfs',storageKey:'saved-model',size:file.size+1}} as AIRequest,vi.fn());expect(sdk.create).not.toHaveBeenCalled();
 });
 it('모델이 손상된 경우 GPU 엔진을 만들지 않고 오류를 반환한다',async()=>{
   sdk.verify.mockRejectedValue(new Error('저장된 모델 검증에 실패했어요. 모델을 다시 다운로드해 주세요.'));const reply=vi.fn();await new WorkerEngine().handle(init(),reply);

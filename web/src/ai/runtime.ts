@@ -1,12 +1,14 @@
 import type { Source } from '../types';
 import { assetUrl, preparedGroups } from '../offline/assets';
 import { installedModel } from './model';
-import { loadAISettings } from './preferences';
+import { loadAISettings, REDUCED_AI_SETTINGS, saveAISettings, type AISettings } from './preferences';
 import { outputIssue } from './output-quality';
 import type { AIReply, AIRequest, GenerationResult, InitializationTiming } from './protocol';
 import { getAISupport } from './capabilities';
+import { beginAIOperation, finishAIOperation, recoveryMessage, resetAIRecovery, unfinishedAIOperation, updateAIStage } from './recovery';
+import { acquireEngineLease } from './engine-lease';
 
-export interface AIStatus { phase:'idle'|'checking'|'loading'|'ready'|'generating'|'error'|'unavailable';message:string;startedAt?:number;timing?:InitializationTiming }
+export interface AIStatus { phase:'idle'|'checking'|'loading'|'ready'|'generating'|'error'|'unavailable'|'recovery';message:string;startedAt?:number;timing?:InitializationTiming }
 let status:AIStatus={phase:'idle',message:'모델 다운로드 후 자동으로 준비해요'};
 const listeners=new Set<()=>void>();
 export const getAIStatus=()=>status;
@@ -14,6 +16,7 @@ export function subscribeAI(listener:()=>void){listeners.add(listener);return()=
 let timing:InitializationTiming|undefined;
 function publish(next:AIStatus){status={...next,...(timing?{timing}:{})};for(const listener of listeners)listener();}
 let worker:Worker|undefined;
+let releaseEngineLease:(()=>void)|undefined;
 let epoch=0;
 let contextTokens=0;
 let nextId=0;
@@ -24,7 +27,9 @@ export function supportsAI(){return getAISupport().available;}
 export function aiIsReady(){return Boolean(worker)&&['ready','generating'].includes(status.phase);}
 const abortError=()=>new DOMException('AI 작업을 중단했어요.','AbortError');
 function terminate(error:Error){
+  finishAIOperation();
   worker?.terminate();worker=undefined;contextTokens=0;timing=undefined;epoch++;
+  releaseEngineLease?.();releaseEngineLease=undefined;
   for(const item of pending.values()){clearTimeout(item.timer);item.reject(error);}pending.clear();
 }
 function makeWorker(){
@@ -33,7 +38,7 @@ function makeWorker(){
   candidate.onmessage=(event:MessageEvent<AIReply>)=>{
     if(worker!==candidate)return;
     const message=event.data;const item=pending.get(message.id);if(!item)return;
-    if(message.type==='progress'){publish({phase:'loading',message:message.message,startedAt:status.startedAt});return;}
+    if(message.type==='progress'){if(message.stage)updateAIStage(message.stage);publish({phase:'loading',message:message.message,startedAt:status.startedAt});return;}
     if(message.type==='text'){item.onText?.(message.answer);return;}
     if(message.type==='done'&&message.initialization)timing=message.initialization;
     clearTimeout(item.timer);pending.delete(message.id);
@@ -68,6 +73,8 @@ export function prepareAI(signal?:AbortSignal):Promise<boolean>{
     const operation=(async()=>{
       const support=getAISupport();
       if(!support.available){publish({phase:'unavailable',message:support.title});return false;}
+      const unfinished=unfinishedAIOperation();
+      if(unfinished){publish({phase:'recovery',message:recoveryMessage(unfinished.stage)});return false;}
       const settings=await loadAISettings();
       if(startedEpoch!==epoch)throw abortError();
       if(aiIsReady()&&contextTokens===settings.contextTokens)return true;
@@ -78,11 +85,21 @@ export function prepareAI(signal?:AbortSignal):Promise<boolean>{
       if(!(await preparedGroups()).runtime)throw new Error('AI 실행 파일이 없어요. 설정에서 AI 실행 파일을 준비해 주세요.');
       if(startedEpoch!==epoch)throw abortError();
       if(worker)terminate(abortError());
-      const candidate=makeWorker();
+      const leaseEpoch=epoch;
+      let lease:(()=>void)|undefined;
+      try{lease=await acquireEngineLease();}catch(error){if(leaseEpoch===epoch)publish({phase:'error',message:'AI 메모리 사용 권한을 확인하지 못했어요. 다른 AI 화면을 닫고 다시 시도해 주세요.'});throw error;}
+      if(leaseEpoch!==epoch){lease?.();throw abortError();}
+      if(!lease){publish({phase:'recovery',message:'다른 Safari 화면이나 홈 화면 앱에서 AI를 사용 중이에요. 해당 화면을 닫은 뒤 다시 준비해 주세요. 저장된 모델은 유지돼요.'});return false;}
+      releaseEngineLease=lease;
+      let candidate:Worker;
+      try{candidate=makeWorker();}catch(error){releaseEngineLease();releaseEngineLease=undefined;publish({phase:'error',message:'AI 백그라운드 실행을 시작하지 못했어요.'});throw error;}
+      beginAIOperation('verification',settings.contextTokens);
       publish({phase:'loading',message:'저장된 모델을 기기 메모리에 불러오고 있어요',startedAt:Date.now()});
       try{
-        await request(candidate,{id:++nextId,type:'initialize',model:installed.blob,sha256:installed.metadata.sha256,runtimeUrl:assetUrl('runtime/'),settings});
+        const model=installed.metadata.backend==='opfs'?{backend:'opfs' as const,storageKey:installed.metadata.storageKey,size:installed.metadata.size}:installed.blob;
+        await request(candidate,{id:++nextId,type:'initialize',model,sha256:installed.metadata.sha256,runtimeUrl:assetUrl('runtime/'),settings});
         if(worker!==candidate)throw abortError();
+        finishAIOperation();
         contextTokens=settings.contextTokens;publish({phase:'ready',message:'AI 사용 가능 · 바로 질문해 보세요'});return true;
       }catch(error){if(worker===candidate){terminate(error instanceof Error?error:new Error(String(error)));publish({phase:'error',message:error instanceof Error?error.message:'AI를 준비하지 못했어요.'});}throw error;}
     })();
@@ -110,16 +127,19 @@ export async function generate(question:string,sources:Source[],onText:(answer:s
   if(generating)throw new Error('앞선 답변을 처리하고 있어요.');
   generating=true;
   let candidate:Worker|undefined;
+  let executionStarted=false;
   const cancel=()=>{if(candidate&&worker===candidate){terminate(abortError());publish({phase:'idle',message:'답변 생성을 중단했어요. 다음 질문에서 자동으로 준비해요.'});}};
   try {
     let settings;
     do{
-      if(!await prepareAI(signal))throw new Error('AI 모델을 다운로드하면 자동으로 사용할 수 있어요.');
+      if(!await prepareAI(signal))throw new Error(status.message);
       signal.throwIfAborted();settings=await loadAISettings();signal.throwIfAborted();
       // A user can save new settings while the initial automatic load is in
       // flight. Never send that request to an engine with the older context.
     }while(contextTokens!==settings.contextTokens);
     candidate=worker;if(!candidate)throw new Error('AI 준비를 다시 시도해 주세요.');
+    beginAIOperation('generation',settings.contextTokens);
+    executionStarted=true;
     signal.addEventListener('abort',cancel,{once:true});
     publish({phase:'generating',message:'Gemma가 답변을 작성하고 있어요'});
     const referenceText=[question,...sources.map(source=>source.chunk.body)].join('\n');
@@ -131,10 +151,19 @@ export async function generate(question:string,sources:Source[],onText:(answer:s
     const issue=outputIssue(result.answer,referenceText);if(issue)throw new Error(issue);
     return result;
   } finally {
+    if(executionStarted)finishAIOperation();
     signal.removeEventListener('abort',cancel);generating=false;
     if(candidate&&worker===candidate&&status.phase==='generating')publish({phase:'ready',message:'AI 사용 가능 · 바로 질문해 보세요'});
   }
 }
 export async function releaseModel(){terminate(abortError());preparing=undefined;publish({phase:'idle',message:'모델 다운로드 후 자동으로 준비해요'});}
+export async function retryAIWithReducedContext(onSettings?:(settings:AISettings)=>void){
+  await releaseModel();
+  const settings=await saveAISettings(REDUCED_AI_SETTINGS);
+  onSettings?.(settings);
+  resetAIRecovery();
+  await prepareAI();
+  return settings;
+}
 
 if(import.meta.hot)import.meta.hot.dispose(()=>{terminate(abortError());});

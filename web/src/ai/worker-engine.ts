@@ -1,6 +1,15 @@
 import { Engine, loadLiteRtLm, SamplerType } from '@litert-lm/core';
 import { verifyStoredModel } from './model';
-import type { AIReply, AIRequest, GenerationResult, TokenUsage } from './protocol';
+import type { AIModelSource, AIReply, AIRequest, GenerationResult, TokenUsage } from './protocol';
+import { boundedModelStream } from './model-stream';
+
+async function openModel(source:AIModelSource):Promise<Blob>{
+  if(source instanceof Blob)return source;
+  const root=await navigator.storage.getDirectory();
+  const file=await(await root.getFileHandle(source.storageKey)).getFile();
+  if(file.size!==source.size)throw new Error('저장된 모델 크기가 달라요. 모델 파일을 확인해 주세요.');
+  return file;
+}
 
 // Runs exclusively in a classic Web Worker. Terminating the worker also releases
 // WASM/GPU allocations, including an initialization that cannot otherwise cancel.
@@ -14,10 +23,11 @@ export class WorkerEngine {
     try {
       if(request.type==='initialize') {
         const started=performance.now();
-        reply({id:request.id,type:'progress',message:'저장된 모델의 변경 여부 확인 중 · 다시 다운로드하지 않아요'});
-        const verification=await verifyStoredModel(request.model,request.sha256,message=>reply({id:request.id,type:'progress',message}));
+        reply({id:request.id,type:'progress',stage:'verification',message:'저장된 모델의 변경 여부 확인 중 · 다시 다운로드하지 않아요'});
+        const model=await openModel(request.model);
+        const verification=await verifyStoredModel(model,request.sha256,message=>reply({id:request.id,type:'progress',stage:'verification',message}));
         const verifiedAt=performance.now();
-        reply({id:request.id,type:'progress',message:'AI 실행 파일 불러오는 중'});
+        reply({id:request.id,type:'progress',stage:'runtime',message:'AI 실행 파일 불러오는 중'});
         if(!this.loaded){
           // Emscripten otherwise resolves WASM beside ai-worker.js instead of
           // beside the imported official loader in runtime/.
@@ -26,8 +36,8 @@ export class WorkerEngine {
           await loadLiteRtLm(request.runtimeUrl);this.loaded=true;
         }
         const runtimeLoadedAt=performance.now();
-        reply({id:request.id,type:'progress',message:'저장된 모델을 기기 메모리에 불러오는 중'});
-        this.engine=await Engine.create({model:request.model,benchmarkEnabled:true,mainExecutorSettings:{maxNumTokens:request.settings.contextTokens}});
+        reply({id:request.id,type:'progress',stage:'engine',message:'저장된 모델을 기기 메모리에 불러오는 중'});
+        this.engine=await Engine.create({model:boundedModelStream(model),benchmarkEnabled:true,mainExecutorSettings:{maxNumTokens:request.settings.contextTokens}});
         const completedAt=performance.now();
         const initialization={verification,verificationMs:Math.round(verifiedAt-started),runtimeMs:Math.round(runtimeLoadedAt-verifiedAt),engineMs:Math.round(completedAt-runtimeLoadedAt),totalMs:Math.round(completedAt-started)};
         console.info('AI initialization timing',initialization);

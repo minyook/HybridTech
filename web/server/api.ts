@@ -1,5 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { ApiError, type WorkStore } from './store.ts';
+import { randomBytes } from 'node:crypto';
+import { aiRecoveryPage } from './ai-recovery-page.ts';
 
 const COOKIE = 'fieldguard_session';
 function cookieToken(request: IncomingMessage) {
@@ -30,6 +32,12 @@ export function createWorkMiddleware(store: WorkStore) {
       if (origin && new URL(origin).host !== request.headers.host) throw new ApiError(403, '같은 사이트에서 요청해 주세요.');
       if (request.headers['sec-fetch-site'] === 'cross-site') throw new ApiError(403, '같은 사이트에서 요청해 주세요.');
       const token = cookieToken(request);
+      if(request.method==='GET'&&url.pathname==='/api/ai-recovery'){
+        const nonce=randomBytes(18).toString('base64');
+        response.setHeader('Content-Type','text/html; charset=utf-8');
+        response.setHeader('Content-Security-Policy',`default-src 'none'; script-src 'nonce-${nonce}'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'`);
+        response.statusCode=200;response.end(aiRecoveryPage(nonce));return;
+      }
       if (request.method === 'GET' && url.pathname === '/api/session') {
         const result = store.connect(token); if (result.token) setCookie(request, response, result.token);
         return send(200, result.session);

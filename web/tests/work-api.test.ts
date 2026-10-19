@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { Script } from 'node:vm';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createWorkMiddleware } from '../server/api';
 import { createWorkStore, type WorkSession, type WorkStore } from '../server/store';
@@ -57,6 +58,19 @@ async function events(who:Client,view='worker') {
 }
 
 describe('작업자 ↔ 감독관 실시간 요청·승인',()=>{
+  it('서비스 워커를 우회하는 복구 페이지는 모델·기록을 지우거나 GPU를 적재하지 않는다',async()=>{
+    const response=await fetch(`${base}/api/ai-recovery`);const html=await response.text();
+    expect(response.status).toBe(200);expect(response.headers.get('content-type')).toContain('text/html');expect(response.headers.get('cache-control')).toBe('no-store');
+    expect(response.headers.get('content-security-policy')).toContain("script-src 'nonce-");expect(html).toContain('registration.unregister()');expect(html).toContain('fieldguard-ai-operation');
+    for(const forbidden of ['caches.delete','deleteDatabase','removeModel','Engine.create','ai-worker.js'])expect(html).not.toContain(forbidden);
+  });
+  it('복구 동작은 자동 적재 차단과 해당 앱의 서비스 워커 연결 해제만 수행한다',async()=>{
+    const html=await(await fetch(`${base}/api/ai-recovery`)).text();const source=html.match(/<script nonce="[^"]+">([\s\S]*?)<\/script>/)![1];
+    const values=new Map([['saved-model','preserve']]);let click!:()=>Promise<void>;const unregister=()=>Promise.resolve(true);let unregisterCount=0;
+    const nodes={recover:{disabled:false,addEventListener:(_type:string,callback:()=>Promise<void>)=>{click=callback;}},status:{textContent:''},app:{hidden:true}};
+    new Script(source).runInNewContext({document:{getElementById:(id:keyof typeof nodes)=>nodes[id]},URL,location:{href:'https://field.test/api/ai-recovery'},crypto:{randomUUID:()=>randomUUID()},localStorage:{setItem:(key:string,value:string)=>values.set(key,value)},navigator:{serviceWorker:{getRegistration:async()=>({scope:'https://field.test/',unregister:()=>{unregisterCount++;return unregister();}})}}});
+    await click();expect(unregisterCount).toBe(1);expect(values.get('saved-model')).toBe('preserve');expect(JSON.parse(values.get('fieldguard-ai-operation')!)).toMatchObject({stage:'engine',contextTokens:4096});expect(nodes.app.hidden).toBe(false);
+  });
   it('작업자가 요청하고 감독관이 직접 승인해야 투입할 수 있으며 양쪽에 변경이 전달된다',async()=>{
     const worker=await client(),supervisor=await client();await grant(supervisor);
     const workerEvents=await events(worker),supervisorEvents=await events(supervisor,'supervisor');

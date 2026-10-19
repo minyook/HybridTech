@@ -15,7 +15,7 @@ beforeEach(async()=>{
 afterEach(()=>vi.restoreAllMocks());
 
 it('기존 설치는 한 번 전체 검사하고 새 조회에서도 결과를 복원해 전체 파일 읽기를 생략한다',async()=>{
-  const read=vi.spyOn(file,'stream');expect(await verifyStoredModel(file,metadata.sha256)).toBe('full');expect(read).toHaveBeenCalledOnce();
+  const read=vi.spyOn(file,'stream');const fullRead=vi.spyOn(file,'slice');expect(await verifyStoredModel(file,metadata.sha256)).toBe('full');expect(read).not.toHaveBeenCalled();expect(fullRead.mock.calls.some(([start=0,end=file.size])=>end-start===1024*1024)).toBe(true);
   expect((await modelMetadata())?.verification?.sampleSha256).toMatch(/^[0-9a-f]{64}$/);
   const reopened=new File([bytes],'model.litertlm',{lastModified:timestamp});const secondRead=vi.spyOn(reopened,'stream');const samples=vi.spyOn(reopened,'slice');
   expect(await verifyStoredModel(reopened,metadata.sha256)).toBe('cached');expect(secondRead).not.toHaveBeenCalled();
@@ -24,7 +24,7 @@ it('기존 설치는 한 번 전체 검사하고 새 조회에서도 결과를 �
 it('같은 크기의 수정 파일은 수정시각이 바뀌면 전체 검사하고 손상을 거부한다',async()=>{
   await verifyStoredModel(file,metadata.sha256);const changed=bytes.slice();changed[100_000]^=1;
   const modified=new File([changed],'model.litertlm',{lastModified:timestamp+1});const read=vi.spyOn(modified,'stream');
-  await expect(verifyStoredModel(modified,metadata.sha256)).rejects.toThrow('검증에 실패');expect(read).toHaveBeenCalledOnce();
+  await expect(verifyStoredModel(modified,metadata.sha256)).rejects.toThrow('검증에 실패');expect(read).not.toHaveBeenCalled();
 });
 it('크기·수정시각이 같아도 표본 구간이 다르면 전체 검사한다',async()=>{
   await verifyStoredModel(file,metadata.sha256);const changed=bytes.slice();changed[0]^=1;
