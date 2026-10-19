@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -185,7 +186,7 @@ fun TossFieldGuardApp(state: FieldGuardUiState, voice: VoiceUiState, actions: Fi
                 if ((!imeVisible || destination != AppDestination.CHAT) && !wide) TossBottomNavigation(destination, state.sourceReturnDestination, navigateFromTab)
             },
         ) { padding ->
-            Box(Modifier.fillMaxSize().padding(padding)) {
+            Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
                 when (destination) {
                     AppDestination.HOME -> FieldWorkspaceHome(state, actions)
                     AppDestination.CHAT -> TossChat(state, voice, actions, imeVisible)

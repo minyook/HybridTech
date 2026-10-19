@@ -8,21 +8,25 @@ export function useChatScroll(enabled:boolean,requestId:string|undefined){
   const [showLatest,setShowLatest]=useState(false);
   useLayoutEffect(()=>{
     if(!enabled||!messagesRef.current)return;
+    const pane=messagesRef.current.closest<HTMLElement>('.chat-scroll');
+    const mobile=window.matchMedia('(max-width:850px)');
+    const paneActive=()=>Boolean(pane&&(mobile.matches||pane.closest('.app-shell')?.classList.contains('keyboard-open')));
     const chatScroll=createChatScroll({
       read:()=>{
         const response=messagesRef.current?.querySelector('.answer[aria-busy="true"] .markdown');
         const viewportTop=window.visualViewport?.offsetTop??0;
         const viewportBottom=viewportTop+(window.visualViewport?.height??window.innerHeight);
-        const visibleTop=Math.max(viewportTop,document.querySelector('.topbar')?.getBoundingClientRect().bottom??0);
-        const visibleBottom=Math.min(viewportBottom,composerRef.current?.getBoundingClientRect().top??viewportBottom)-8;
+        const paneMode=paneActive();
+        const visibleTop=Math.max(viewportTop,document.querySelector('.topbar')?.getBoundingClientRect().bottom??0,paneMode?pane!.getBoundingClientRect().top:0);
+        const visibleBottom=Math.min(viewportBottom,composerRef.current?.getBoundingClientRect().top??viewportBottom,paneMode?pane!.getBoundingClientRect().bottom:viewportBottom)-8;
         return {
-          top:window.scrollY,maximum:Math.max(0,document.documentElement.scrollHeight-window.innerHeight),generating:Boolean(response),
+          top:paneMode?pane!.scrollTop:window.scrollY,maximum:Math.max(0,paneMode?pane!.scrollHeight-pane!.clientHeight:document.documentElement.scrollHeight-window.innerHeight),generating:Boolean(response),
           responseEndVisible:Boolean(response&&responseEndIsVisible(response.getBoundingClientRect().bottom,visibleTop,visibleBottom)),
         };
       },
       // Repeated smooth animations compete with wheel/touch scrolling. Follow
       // layout changes once per frame with an immediate, cancellable move.
-      scroll:top=>window.scrollTo({top,behavior:'instant'}),
+      scroll:top=>{if(pane&&paneActive())pane.scrollTo({top,behavior:'instant'});else window.scrollTo({top,behavior:'instant'});},
       requestFrame:callback=>requestAnimationFrame(callback),cancelFrame:cancelAnimationFrame,
       showLatest:visible=>setShowLatest(visible&&Boolean(messagesRef.current?.querySelector('.exchange'))),
     });
@@ -44,15 +48,17 @@ export function useChatScroll(enabled:boolean,requestId:string|undefined){
     const pointer=(event:PointerEvent)=>{if(event.clientX>=document.documentElement.clientWidth)chatScroll.pause();};
     const scrolled=()=>chatScroll.scrolled();const resized=()=>chatScroll.resized();
     const observer=new ResizeObserver(resized);observer.observe(messagesRef.current);if(composerRef.current)observer.observe(composerRef.current);
+    if(pane)observer.observe(pane);
     window.addEventListener('wheel',wheel,{passive:true,capture:true});window.addEventListener('touchstart',touchStart,{passive:true,capture:true});window.addEventListener('touchmove',touch,{passive:true,capture:true});
     window.addEventListener('keydown',keyboard,true);window.addEventListener('pointerdown',pointer,true);
     window.addEventListener('scroll',scrolled,{passive:true});window.addEventListener('resize',resized);
-    window.visualViewport?.addEventListener('resize',resized);
+    pane?.addEventListener('scroll',scrolled,{passive:true});
+    window.visualViewport?.addEventListener('resize',resized);window.visualViewport?.addEventListener('scroll',resized);
     return()=>{
       chatScroll.dispose();controller.current=undefined;observer.disconnect();
       window.removeEventListener('wheel',wheel,true);window.removeEventListener('touchstart',touchStart,true);window.removeEventListener('touchmove',touch,true);
       window.removeEventListener('keydown',keyboard,true);window.removeEventListener('pointerdown',pointer,true);
-      window.removeEventListener('scroll',scrolled);window.removeEventListener('resize',resized);window.visualViewport?.removeEventListener('resize',resized);
+      window.removeEventListener('scroll',scrolled);window.removeEventListener('resize',resized);pane?.removeEventListener('scroll',scrolled);window.visualViewport?.removeEventListener('resize',resized);window.visualViewport?.removeEventListener('scroll',resized);
     };
   },[enabled]);
   useLayoutEffect(()=>{if(enabled&&requestId)controller.current?.start();},[enabled,requestId]);

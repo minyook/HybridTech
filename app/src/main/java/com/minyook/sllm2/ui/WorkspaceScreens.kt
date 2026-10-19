@@ -40,13 +40,13 @@ import java.util.Locale
     var follow by remember(state.activeChatId){mutableStateOf(true)}
     val messages=if(state.activeChatId!=null||state.messages.size>1)state.messages else emptyList()
     LaunchedEffect(list){snapshotFlow{list.isScrollInProgress to list.canScrollForward}.collectLatest{(moving,forward)->if(moving)follow=false else if(!forward)follow=true}}
-    LaunchedEffect(messages.size,messages.lastOrNull()?.text){if(follow&&messages.isNotEmpty())list.scrollToItem(messages.size)}
+    LaunchedEffect(messages.size,messages.lastOrNull()?.text,imeVisible){if(follow&&messages.isNotEmpty())list.scrollToItem(messages.size)}
     Box(Modifier.fillMaxSize(),contentAlignment=Alignment.TopCenter){
-        Column(Modifier.widthIn(max=1260.dp).fillMaxSize().padding(horizontal=workspacePadding())){
-            LazyColumn(state=list,modifier=Modifier.weight(1f).testTag("conversationList"),verticalArrangement=Arrangement.spacedBy(24.dp),contentPadding=PaddingValues(top=26.dp,bottom=24.dp)){
+        Column(Modifier.widthIn(max=1260.dp).fillMaxSize().padding(horizontal=workspacePadding()).padding(bottom=if(imeVisible)8.dp else 0.dp)){
+            LazyColumn(state=list,modifier=Modifier.weight(1f).testTag("conversationList"),verticalArrangement=Arrangement.spacedBy(if(imeVisible)12.dp else 24.dp),contentPadding=PaddingValues(top=if(imeVisible)12.dp else 26.dp,bottom=if(imeVisible)12.dp else 24.dp)){
                 item(key="heading"){
                     Column(verticalArrangement=Arrangement.spacedBy(18.dp)){
-                        WorkspaceHeading("LOCAL DOCUMENT ASSISTANT","현장에서 궁금한 점을 물어보세요","문서에서 근거를 찾고, 같은 쪽의 원문까지 연결해요.",action={WorkspaceButton("새 대화",actions.onNewChat,primary=false,icon=WorkspaceSymbol.PLUS,enabled=!state.isAnswering)})
+                        if(!imeVisible)WorkspaceHeading("LOCAL DOCUMENT ASSISTANT","현장에서 궁금한 점을 물어보세요","문서에서 근거를 찾고, 같은 쪽의 원문까지 연결해요.",action={WorkspaceButton("새 대화",actions.onNewChat,primary=false,icon=WorkspaceSymbol.PLUS,enabled=!state.isAnswering)})
                         FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalArrangement=Arrangement.spacedBy(6.dp)){
                             WorkspaceBadge("● 문서 ${state.documents.sumOf{it.chunkCount}}개 쪽",green=true)
                             WorkspaceBadge(if(state.modelStatus.phase==ModelPhase.READY)"Gemma 모델 저장됨" else "문서 원문 검색 모드")
@@ -54,7 +54,10 @@ import java.util.Locale
                         }
                     }
                 }
-                if(messages.isEmpty())item(key="empty"){
+                if(messages.isEmpty()&&imeVisible)item(key="inputHint"){
+                    Text("궁금한 내용을 입력해 주세요.",fontSize=14.sp,lineHeight=22.sp,color=Color(0xFF8B95A1),textAlign=TextAlign.Center,modifier=Modifier.fillMaxWidth().padding(vertical=16.dp).testTag("chatInputHint"))
+                }
+                if(messages.isEmpty()&&!imeVisible)item(key="empty"){
                     Column(Modifier.fillMaxWidth().padding(vertical=24.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(15.dp)){
                         Surface(color=WorkspaceDesign.BlueWeak,shape=RoundedCornerShape(22.dp)){Box(Modifier.size(66.dp),contentAlignment=Alignment.Center){WorkspaceIcon(WorkspaceSymbol.CHAT,Modifier.size(32.dp),WorkspaceDesign.Blue)}}
                         Text("질문은 편하게,\n근거는 정확하게.",fontSize=26.sp,lineHeight=39.sp,fontWeight=FontWeight.Bold,textAlign=TextAlign.Center)
@@ -72,16 +75,16 @@ import java.util.Locale
             }
             if(!follow&&messages.isNotEmpty())TextButton(onClick={follow=true;scope.launch{list.scrollToItem(messages.size)}},modifier=Modifier.align(Alignment.CenterHorizontally).testTag("scrollLatest")){Text("최신 답변으로 이동 ↓",fontSize=11.sp)}
             if(state.inputError!=null)WorkspaceNotice(state.inputError,true)
-            Surface(color=Color.White,shape=RoundedCornerShape(18.dp),border=BorderStroke(1.dp,Color(0xFFDCE5F1)),modifier=Modifier.fillMaxWidth()){
+            Surface(color=Color.White,shape=RoundedCornerShape(18.dp),border=BorderStroke(1.dp,Color(0xFFDCE5F1)),modifier=Modifier.fillMaxWidth().testTag("chatComposer")){
                 Row(Modifier.padding(start=20.dp,end=14.dp,top=12.dp,bottom=12.dp),horizontalArrangement=Arrangement.spacedBy(10.dp),verticalAlignment=Alignment.CenterVertically){
-                    BasicTextField(value=state.input,onValueChange=actions.onInputChange,maxLines=4,textStyle=TextStyle(fontSize=14.sp,lineHeight=24.sp,color=Color(0xFF303D50)),modifier=Modifier.weight(1f).heightIn(min=46.dp,max=130.dp).testTag("chatInput"),decorationBox={inner->if(state.input.isEmpty())Text("궁금한 절차나 기준을 입력해 주세요",fontSize=14.sp,color=Color(0xFFA1ACBB));inner()})
+                    BasicTextField(value=state.input,onValueChange=actions.onInputChange,maxLines=4,textStyle=TextStyle(fontSize=14.sp,lineHeight=24.sp,color=Color(0xFF303D50)),modifier=Modifier.weight(1f).heightIn(min=if(imeVisible)24.dp else 46.dp,max=if(imeVisible)96.dp else 130.dp).testTag("chatInput"),decorationBox={inner->if(state.input.isEmpty())Text("궁금한 절차나 기준을 입력해 주세요",fontSize=14.sp,color=Color(0xFFA1ACBB));inner()})
                     IconButton(onClick={actions.onNavigate(AppDestination.VOICE);actions.onVoiceClick()},modifier=Modifier.size(37.dp).testTag("voiceQuestion").semantics{contentDescription="음성 질문"}){TossMicrophoneIcon()}
                     Surface(color=if(state.isAnswering||state.input.isBlank())Color(0xFFDEE7F4) else WorkspaceDesign.Blue,shape=RoundedCornerShape(12.dp),modifier=Modifier.size(41.dp).clickable(enabled=!state.isAnswering&&state.input.isNotBlank()){actions.onSubmit()}.testTag("sendMessage").semantics{contentDescription="메시지 전송"}){
                         Box(contentAlignment=Alignment.Center){WorkspaceIcon(WorkspaceSymbol.ARROW,Modifier.size(21.dp).graphicsLayer{rotationZ=-90f},if(state.isAnswering||state.input.isBlank())Color(0xFFA9B9D1) else Color.White)}
                     }
                 }
             }
-            Text("생성 답변의 수치와 조건은 원문에서 확인해 주세요.",fontSize=9.sp,color=Color(0xFFA0AABA),textAlign=TextAlign.Center,modifier=Modifier.fillMaxWidth().padding(top=10.dp,bottom=if(imeVisible)8.dp else 18.dp))
+            if(!imeVisible)Text("생성 답변의 수치와 조건은 원문에서 확인해 주세요.",fontSize=9.sp,color=Color(0xFFA0AABA),textAlign=TextAlign.Center,modifier=Modifier.fillMaxWidth().padding(top=10.dp,bottom=18.dp))
         }
     }
 }

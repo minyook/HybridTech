@@ -1,6 +1,6 @@
 # HybridTech O₂ Field Guard 웹 현행 설계서
 
-최종 갱신: 2026-10-16. 이 문서는 `web/`의 실제 구현을 설명합니다. 10월 7일 서버 RAG 제안은 [이전 권고안](ARCHITECTURE_PROPOSAL_20261007.md)에 보존했습니다. 현재 사용자 결정은 **Android 설치형 앱 유지 + 기기 내 AI를 사용하는 반응형 웹/PWA + 웹 기준 공통 디자인**입니다.
+최종 갱신: 2026-10-19. 이 문서는 `web/`의 실제 구현을 설명합니다. 10월 7일 서버 RAG 제안은 [이전 권고안](ARCHITECTURE_PROPOSAL_20261007.md)에 보존했습니다. 현재 사용자 결정은 **Android 설치형 앱 유지 + 기기 내 AI를 사용하는 반응형 웹/PWA + 웹 기준 공통 디자인**입니다.
 
 ## 제품 구성과 경계
 
@@ -56,9 +56,15 @@ React 19.2.0, TypeScript 5.9.3, Vite 8.3.4, PDF.js 6.4.299, LiteRT-LM 0.18.0을 
 
 PC 사이드바, 모바일 하단 메뉴와 320px 이상 반응형 레이아웃을 사용합니다. Markdown 표와 코드는 내부 가로 스크롤을 허용하고 페이지 전체가 넘치지 않게 합니다. 홈의 방패 그림은 모바일 카드 내부에 들어오도록 배치합니다.
 
+### 키보드와 보이는 화면 높이
+
+`chat/viewport.ts`의 측정기는 포커스와 키보드가 닫힌 높이를 기억합니다. `useChatViewport.ts`는 VisualViewport resize/scroll, 창 resize, focusin/out, pageshow를 프레임당 한 번 처리해 높이·위치·키보드 상태를 전달합니다. 작은 툴바 변화·포커스만 있는 하드웨어 키보드·핀치 확대를 구분하고 화면 방향 변경 후 기준 높이도 다시 맞춥니다. [VisualViewport API](https://developer.mozilla.org/en-US/docs/Web/API/VisualViewport)의 실제 보이는 높이를 사용합니다.
+
+850px 이하 질문 화면은 그 높이에 상단 바·대화 영역·입력창·하단 메뉴를 함께 배치합니다. 키보드가 열리면 큰 소개와 메뉴·하단 안내를 접고 입력창을 키보드 경계에 둡니다. 851px 이상의 넓은 태블릿도 키보드가 열린 동안 같은 배치를 사용하며 사이드바는 유지합니다. 대화만 스크롤하므로 창 전체 스크롤과 각각 fixed/sticky 입력창이 충돌하지 않습니다. 입력창은 내용에 따라 최대 4줄로 늘고 닫기 후 원문 입력을 유지합니다. `chat.css`는 페이지 이동 시 적용이 끝나며 다른 화면의 창 스크롤은 유지합니다.
+
 ### 생성 중 스크롤
 
-이전에는 토큰 갱신마다 `scrollIntoView({behavior: 'smooth'})`를 호출해 사용자의 휠·스크롤과 충돌했습니다. 현재는 `chat/useChatScroll.ts`와 `chat/scroll.ts`가 실제 문서 위치와 메시지 크기를 관찰합니다.
+이전에는 토큰 갱신마다 `scrollIntoView({behavior: 'smooth'})`를 호출해 사용자의 휠·스크롤과 충돌했습니다. 현재는 `chat/useChatScroll.ts`와 `chat/scroll.ts`가 실제 문서 위치와 메시지 크기를 관찰합니다. 일반 PC는 창, 모바일과 키보드가 열린 화면은 `.chat-scroll`의 scrollTop/clientHeight를 사용하며 동일한 따라가기 제어기를 공유합니다.
 
 1. 새 질문과 답변 끝에서 읽는 동안에만 자동으로 최신 내용을 따라갑니다.
 2. 휠·터치 이동·탐색 키·스크롤바 조작은 예약된 자동 이동을 취소합니다.
@@ -161,7 +167,7 @@ iPhone/iPad WebGPU의 정식 지원은 iOS/iPadOS 26부터입니다. 사용자 �
 
 Node.js 24.15 이상에서 개발 포트 5174와 프로덕션 미리보기 4173을 고정 사용하며 두 서버는 동일한 SQLite 작업 DB를 사용합니다. `.local/`과 서버 소스는 개발 서버 정적 접근에서 차단합니다. 정적 배포 출력은 `web/dist`이며 문서·AI에 HTTPS·COOP/COEP·WASM MIME과 캐시 설정이 필요합니다. 감독관·새 점검은 API 런타임이 필요하므로 `dist` 정적 호스팅만으로 사용할 수 없습니다. Vite 통합 API는 개발/미리보기용이며 실제 외부 운영 배포·계정 연동·DB 백업/복구 운영 구성은 수행하지 않았습니다.
 
-현재 자동 테스트는 24개 파일 **167개 통과**입니다. 검색 정답 쪽 회귀 평가는 **29/30**이며 생성 정확도 평가와 구분합니다. Windows Chromium의 실제 다운로드·초기화·생성·사용량·파일/PDF 오프라인 동작과 세부 조건은 [검증 기록](../../web/docs/validation.md)에 있습니다. 실제 iPhone과 제조사 센서 검증은 남아 있습니다.
+현재 자동 테스트는 25개 파일 **173개 통과**입니다. 검색 정답 쪽 회귀 평가는 **29/30**이며 생성 정확도 평가와 구분합니다. Windows Chromium의 실제 다운로드·초기화·생성·사용량·파일/PDF 오프라인 동작과 세부 조건은 [검증 기록](../../web/docs/validation.md)에 있습니다. 실제 iPhone과 제조사 센서 검증은 남아 있습니다.
 
 ## 주요 코드
 
@@ -171,6 +177,7 @@ Node.js 24.15 이상에서 개발 포트 5174와 프로덕션 미리보기 4173�
 | `src/chat/` | 사용자 스크롤을 보존하는 자동 이동 |
 | `src/ai/catalog.ts`, `model.ts` | 고정 다운로드·무결성·모델 저장 |
 | `src/ai/runtime.ts`, `worker-engine.ts`, `engine.worker.ts` | 자동 준비·워커 통신·SDK 추론 |
+| `src/chat/viewport.ts`, `useChatViewport.ts`, `chat.css` | 키보드와 보이는 높이·대화/입력 배치 |
 | `src/ai/model-stream.ts` | 최대 1MiB 단위 모델 입력 스트림 |
 | `src/ai/recovery.ts`, `engine-lease.ts` | 페이지 중단 감지와 엔진 잠금 |
 | `server/ai-recovery-page.ts` | AI를 로드하지 않는 서버 복구 화면 |

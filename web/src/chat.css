@@ -1,1 +1,52 @@
 .chat-main{overflow-anchor:none}.answer-label{min-height:29px}.answer-progress{width:29px;height:29px;display:grid;place-items:center;flex-shrink:0}.jump-latest{position:absolute;left:50%;top:-43px;transform:translateX(-50%);display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:9px 15px;border:1px solid #dce6f3;border-radius:99px;background:#fff;color:#52739e;box-shadow:0 4px 16px #24467512;font-size:11px;font-weight:600;white-space:nowrap}.jump-latest:hover{background:#edf4ff}.jump-latest svg{width:15px;height:15px;transform:rotate(90deg)}
+.chat-scroll{display:contents}.chat-input-hint{display:none}
+.chat-route.keyboard-open .toast{position:absolute;top:calc(76px + env(safe-area-inset-top));bottom:auto}
+/* The composer and navigation share one measured viewport. Only the messages
+   scroll on mobile, so an iOS keyboard cannot push fixed controls apart. */
+@media(max-width:850px){
+  html:has(.chat-route:not(.embedded-android)),body:has(.chat-route:not(.embedded-android)){overflow:hidden;overscroll-behavior:none}
+  .chat-route:not(.embedded-android){position:fixed;top:var(--chat-viewport-top,0px);inset-inline:0;height:var(--chat-viewport-height,100dvh);min-height:0;overflow:hidden}
+  .chat-route:not(.embedded-android) .workspace{display:flex;flex-direction:column;height:100%;min-height:0}
+  .chat-route .topbar{position:relative;flex-shrink:0;height:calc(66px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top)}
+  .chat-route .offline-banner{flex-shrink:0}
+  .chat-route:not(.embedded-android) .chat-main{display:flex;flex-direction:column;flex:1;min-height:0;width:100%;padding:0;margin:0}
+  .chat-route .ask-layout{height:100%;min-height:0;width:100%;overflow:hidden}
+  .chat-route .chat-scroll{display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;overscroll-behavior-y:contain;overflow-anchor:none;padding:27px 24px 24px;scroll-padding-block:16px}
+  .chat-scroll>.page-head,.chat-scroll>.ask-status,.chat-scroll>.messages{flex-shrink:0}
+  .chat-route .composer-wrap{position:relative;bottom:auto;flex-shrink:0;margin:0;padding:10px 24px 8px}
+  .chat-route .bottom-nav{position:relative;inset:auto;flex-shrink:0}
+  .chat-route.keyboard-open .bottom-nav{display:none}
+  .chat-route.keyboard-open .chat-scroll{padding-top:12px;padding-bottom:12px}
+  .chat-route.keyboard-open .page-head{display:none}
+  .chat-route.keyboard-open .ask-status{margin-bottom:8px}
+  .chat-route.keyboard-open .chat-empty{min-height:0;padding:16px 0;justify-content:flex-start}
+  .chat-route.keyboard-open .chat-empty>.empty-icon,.chat-route.keyboard-open .chat-empty>h2,.chat-route.keyboard-open .chat-empty>p,.chat-route.keyboard-open .prompt-chips{display:none}
+  .chat-route.keyboard-open .chat-empty>.chat-input-hint{display:block;margin:0;font-size:14px;line-height:22px}
+  .chat-route.keyboard-open .composer-wrap{padding-top:8px;padding-bottom:8px}
+  .chat-route.keyboard-open .composer-wrap>p{display:none}
+  .chat-route .toast{bottom:16px}
+}
+@media(max-width:640px){
+  .chat-route .topbar{height:calc(60px + env(safe-area-inset-top))}
+  .chat-route .chat-scroll{padding-inline:18px;padding-top:24px}
+  .chat-route .composer-wrap{padding-inline:18px}
+}
+/* Wide tablets also lose height to a software keyboard, even with a sidebar. */
+@media(min-width:851px){
+  html:has(.chat-route.keyboard-open:not(.embedded-android)),body:has(.chat-route.keyboard-open:not(.embedded-android)){overflow:hidden;overscroll-behavior:none}
+  .chat-route.keyboard-open:not(.embedded-android){position:fixed;top:var(--chat-viewport-top,0px);inset-inline:0;height:var(--chat-viewport-height,100dvh);min-height:0;overflow:hidden}
+  .chat-route.keyboard-open .sidebar{height:100%;overflow-y:auto}
+  .chat-route.keyboard-open .workspace{display:flex;flex-direction:column;height:100%;min-height:0}
+  .chat-route.keyboard-open .topbar{position:relative;flex-shrink:0}
+  .chat-route.keyboard-open .offline-banner{flex-shrink:0}
+  .chat-route.keyboard-open .chat-main{display:flex;flex-direction:column;flex:1;min-height:0;width:100%;padding:0;margin:0 auto}
+  .chat-route.keyboard-open .ask-layout{height:100%;min-height:0;width:100%;overflow:hidden}
+  .chat-route.keyboard-open .chat-scroll{display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;overscroll-behavior-y:contain;overflow-anchor:none;padding:12px 42px;scroll-padding-block:16px}
+  .chat-route.keyboard-open .page-head{display:none}
+  .chat-route.keyboard-open .ask-status{margin-bottom:8px}
+  .chat-route.keyboard-open .chat-empty{min-height:0;padding:16px 0;justify-content:flex-start}
+  .chat-route.keyboard-open .chat-empty>.empty-icon,.chat-route.keyboard-open .chat-empty>h2,.chat-route.keyboard-open .chat-empty>p,.chat-route.keyboard-open .prompt-chips{display:none}
+  .chat-route.keyboard-open .chat-empty>.chat-input-hint{display:block;margin:0;font-size:14px;line-height:22px}
+  .chat-route.keyboard-open .composer-wrap{position:relative;bottom:auto;flex-shrink:0;margin:0;padding:8px 42px}
+  .chat-route.keyboard-open .composer-wrap>p{display:none}
+}

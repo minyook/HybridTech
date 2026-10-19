@@ -12,6 +12,15 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
+import android.content.res.Configuration
 import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.minyook.sllm2.ui.AppDestination
@@ -21,6 +30,8 @@ import com.minyook.sllm2.ui.FieldGuardUiState
 import com.minyook.sllm2.ui.SourceUi
 import com.minyook.sllm2.ui.TossFieldGuardApp
 import com.minyook.sllm2.ui.VoiceUiState
+import com.minyook.sllm2.ui.WorkspaceChat
+import androidx.compose.material3.MaterialTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Before
@@ -118,6 +129,34 @@ class TossNavigationTest {
         compose.onNodeWithText("산소 농도").assertIsDisplayed()
         compose.onNodeWithText("참조한 문서").assertIsDisplayed()
         compose.onNodeWithText("근거 1 원문 보기").assertIsDisplayed()
+    }
+
+    @Test
+    fun compactKeyboardLayoutKeepsComposerBelowScrollableContentAndRestoresDraft() {
+        var imeVisible by mutableStateOf(true)
+        var state by mutableStateOf(FieldGuardUiState(destination=AppDestination.CHAT,input="검증 질문"))
+        compose.setContent {
+            val configuration=Configuration(LocalConfiguration.current).apply{screenWidthDp=390;screenHeightDp=420}
+            CompositionLocalProvider(LocalConfiguration provides configuration) {
+                MaterialTheme {
+                    Box(Modifier.size(390.dp,420.dp).testTag("keyboardViewport")) {
+                        WorkspaceChat(state,VoiceUiState(available=false),actions(onInputChange={state=state.copy(input=it)}),imeVisible)
+                    }
+                }
+            }
+        }
+        compose.onNodeWithTag("chatInputHint").assertIsDisplayed()
+        compose.onNodeWithText("질문은 편하게,\n근거는 정확하게.").assertDoesNotExist()
+        compose.onNodeWithTag("chatInput").assertTextEquals("검증 질문")
+        val composer=compose.onNodeWithTag("chatComposer").fetchSemanticsNode().boundsInRoot
+        val list=compose.onNodeWithTag("conversationList").fetchSemanticsNode().boundsInRoot
+        val viewport=compose.onNodeWithTag("keyboardViewport").fetchSemanticsNode().boundsInRoot
+        org.junit.Assert.assertTrue(list.bottom<=composer.top+1)
+        org.junit.Assert.assertTrue(composer.bottom<=viewport.bottom)
+        compose.runOnIdle{imeVisible=false}
+        compose.onNodeWithTag("chatInputHint").assertDoesNotExist()
+        compose.onNodeWithText("질문은 편하게,\n근거는 정확하게.").assertExists()
+        compose.onNodeWithTag("chatInput").assertTextEquals("검증 질문")
     }
 
     @Test

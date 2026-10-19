@@ -176,6 +176,14 @@ npm.cmd run supervisor -- revoke
 
 앱 전체를 웹으로 바꾸지 않았습니다. 홈·문서·질문·기록·설정·원문은 Compose, 작업 요청·감독관 점검은 공통 React 화면을 사용하는 제한된 WebView입니다. WebView에서 질문·모델 준비를 누르면 기존 Android 화면으로 돌아갑니다. 임의 외부 출처·파일 접근·JavaScript 네이티브 인터페이스는 열지 않습니다.
 
+## 키보드를 열었을 때의 질문 화면
+
+앱·웹 모두 입력 중에는 하단 메뉴와 큰 제목·소개·예시 질문·하단 안내를 접고, 입력창을 키보드 바로 위에 둡니다. 키보드를 닫으면 메뉴와 원래 소개 화면을 복원하며 작성 중인 문장은 유지합니다. 웹은 실제 보이는 화면 높이(`VisualViewport`) 안에서 상단 바·대화 영역·입력창·메뉴를 함께 배치합니다. 모바일에서는 대화 영역만 스크롤하고 넓은 태블릿도 소프트 키보드가 열리면 같은 방식으로 공간을 확보합니다. 여러 줄 입력은 최대 4줄까지 커집니다.
+
+[입력 중 웹 화면](web/docs/screenshots/chat-keyboard-open.jpg) · [키보드 닫기 후 복원](web/docs/screenshots/chat-keyboard-restored.jpg). 두 화면은 PC Chromium에서 390×844 → 390×460px로 키보드의 공간 감소를 모사한 결과이며 실제 iPhone 키보드 캡처가 아닙니다. 320px·1280px와 실제 Gemma 생성 중 수동 탐색도 확인했습니다. Android의 동일한 소개 접기·입력창 축소·여백 처리를 반영한 새 APK는 `app/build/outputs/apk/debug/app-debug.apk`입니다. 기존 일반 앱의 디버그 인증서와 같은 서명을 확인했으며 삭제 없이 업데이트 설치합니다. 현재 Android 기기가 연결되어 있지 않아 이번 키보드 수정의 계측 실행과 설치는 하지 않았습니다.
+
+웹/PWA에 이전 화면이 남아 있으면 한 번 새로고침해 업데이트를 받은 뒤 같은 주소의 탭·홈 화면 앱을 모두 닫고 다시 엽니다. 사이트 데이터를 지울 필요는 없습니다.
+
 ## 문서·모델·Markdown·스크롤
 
 - 공식 문서 2종, 총 87쪽의 검색 데이터와 실제 PDF를 함께 사용합니다. 답변 근거는 문서 ID와 실제 쪽수를 유지합니다.
@@ -268,7 +276,8 @@ Sllm2/
 | `web/src/ai/recovery.ts`, `engine-lease.ts` | 중단 흔적·자동 반복 방지·동일 출처 엔진 잠금 |
 | `web/server/ai-recovery-page.ts` | 모델을 로드하지 않는 `/api/ai-recovery` 복구 화면 |
 | `web/src/ai/preferences.ts`, `output-quality.ts` | 토큰 설정·비정상 생성 검사 |
-| `web/src/chat/scroll.ts`, `useChatScroll.ts` | 수동 스크롤 보존·생성 위치 자동 재개 |
+| `web/src/chat/scroll.ts`, `useChatScroll.ts` | 창/대화 영역 스크롤·수동 탐색 보존·생성 위치 자동 재개 |
+| `web/src/chat/viewport.ts`, `useChatViewport.ts`, `web/src/chat.css` | 키보드 감지·보이는 화면 높이·메뉴/입력창 배치 |
 | `web/src/rag/search.ts`, `storage/db.ts` | 로컬 검색·IndexedDB 기록/설정 |
 | `web/scripts/prepare-assets.mjs`, `build-ai-worker.mjs` | Android 자산 복사·SDK Worker 생성 |
 | `web/scripts/build-pwa.mjs`, `sw-template.js` | 버전별 셸 캐시·API 캐시 제외 |
@@ -308,7 +317,7 @@ npm.cmd run build
 
 Android UI 계측 테스트: `TossNavigationTest`, `WorkspaceDesignTest`. 원본 PDF 검증은 `data/SourcePdfRepositoryTest`입니다. 웹 검증에는 검색·Markdown·스크롤·모델 무결성·검증 재사용·토큰·날짜 경계·당일 코드 공동 사용·권한 우회 거부·동시 갱신을 포함합니다. 검색 회귀 정답 쪽 포함 결과는 29/30이며 AI 생성 답변 전체의 정확도 점수와 구분합니다. 최신 실행 수치·실기기 결과·남은 항목은 아래 검증 기록을 기준으로 합니다.
 
-2026-10-16 Android 갱신 결과: **Android JVM 19개·갤럭시 탭 UI 계측 17개 통과**, Android APK 빌드 성공. 2026-10-19 AI 준비 복구 반영 후 웹은 **24개 파일 167개 통과**, 프로덕션/PWA 빌드 성공. 개발 CA를 명시한 실제 TLS 검증·보안 쿠키·서버 응답도 확인했습니다. 실제 iPhone의 프로파일 설치·Safari·AI 시험 완료와는 구분합니다. 앱 화면은 Galaxy Tab S9 Ultra(SM-X910, Android 16)의 실제 렌더링 캡처이며 UI 테스트는 가상 상태를 사용합니다. 새 UI·공통 WebView 검증과 실제 모델 추론·BLE 장비 검증을 구분합니다.
+2026-10-16 Android 갱신 결과: **Android JVM 19개·갤럭시 탭 UI 계측 17개 통과**, Android APK 빌드 성공. 2026-10-19 키보드 입력 화면 수정 후 웹은 **25개 파일 173개 통과**, 프로덕션/PWA 빌드 성공. 개발 CA를 명시한 실제 TLS 검증·보안 쿠키·서버 응답도 확인했습니다. 실제 iPhone의 프로파일 설치·Safari·AI 시험 완료와는 구분합니다. 앱 화면은 Galaxy Tab S9 Ultra(SM-X910, Android 16)의 실제 렌더링 캡처이며 UI 테스트는 가상 상태를 사용합니다. 새 UI·공통 WebView 검증과 실제 모델 추론·BLE 장비 검증을 구분합니다.
 
 | 문서 | 내용 |
 |---|---|
