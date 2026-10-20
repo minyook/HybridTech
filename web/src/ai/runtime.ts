@@ -38,14 +38,15 @@ function makeWorker(){
   candidate.onmessage=(event:MessageEvent<AIReply>)=>{
     if(worker!==candidate)return;
     const message=event.data;const item=pending.get(message.id);if(!item)return;
-    if(message.type==='progress'){if(message.stage)updateAIStage(message.stage);publish({phase:message.stage&&['conversation','prefill','decode','generation'].includes(message.stage)?'generating':'loading',message:message.message,startedAt:status.startedAt});return;}
+    if(message.type==='progress'){if(message.stage)updateAIStage(message.stage);publish({phase:message.stage&&['conversation','prefill','decode','generation','cleanup'].includes(message.stage)?'generating':'loading',message:message.message,startedAt:status.startedAt});return;}
     if(message.type==='text'){item.onText?.(message.answer);return;}
     if(message.type==='done'&&message.initialization)timing=message.initialization;
     clearTimeout(item.timer);pending.delete(message.id);
     if(message.type==='error')item.reject(new Error(message.message));else item.resolve(message.result);
   };
   candidate.onerror=event=>{
-    event.preventDefault();const error=new Error('AI 백그라운드 처리에 실패했어요. 새로고침 후 다시 질문해 주세요.');terminate(error);publish({phase:'error',message:error.message});
+    event.preventDefault();if(worker!==candidate)return;
+    const error=new Error('AI 백그라운드 처리에 실패했어요. 새로고침 후 다시 질문해 주세요.');terminate(error);publish({phase:'error',message:error.message});
   };
   return candidate;
 }
@@ -153,7 +154,14 @@ export async function generate(question:string,sources:Source[],onText:(answer:s
   } finally {
     if(executionStarted)finishAIOperation();
     signal.removeEventListener('abort',cancel);generating=false;
-    if(candidate&&worker===candidate&&status.phase==='generating')publish({phase:'ready',message:'AI 사용 가능 · 바로 질문해 보세요'});
+    if(candidate&&worker===candidate&&executionStarted&&browserAIFeatures().appleMobile){
+      // WASM memory capacity cannot shrink while its worker stays alive. Retire
+      // it only after the SDK has deleted conversation + engine, then prewarm a
+      // single replacement. The next question shares prepareAI's promise.
+      terminate(abortError());preparing=undefined;
+      publish({phase:'idle',message:'다음 질문에 사용할 AI를 자동으로 준비해요'});
+      void prepareAI().catch(()=>{});
+    }else if(candidate&&worker===candidate&&status.phase==='generating')publish({phase:'ready',message:'AI 사용 가능 · 바로 질문해 보세요'});
   }
 }
 export async function releaseModel(){terminate(abortError());preparing=undefined;publish({phase:'idle',message:'모델 다운로드 후 자동으로 준비해요'});}

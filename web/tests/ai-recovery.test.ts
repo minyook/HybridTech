@@ -22,3 +22,8 @@ it('저장소 접근 오류는 예외를 누적하거나 앱을 종료시키지 
   vi.stubGlobal('localStorage',{getItem:()=>{throw Error('denied');},setItem:()=>{throw Error('denied');},removeItem:()=>{throw Error('denied');}});
   const guard=await import('../src/ai/recovery');expect(()=>{guard.beginAIOperation('engine',4096);guard.updateAIStage('generation');guard.finishAIOperation();guard.resetAIRecovery();}).not.toThrow();
 });
+it('엔진 정리 도중 종료된 기록도 다시 실행할 때 자동 적재를 멈춘다',async()=>{
+  let guard=await import('../src/ai/recovery');guard.beginAIOperation('decode',2048);guard.updateAIStage('cleanup');
+  vi.resetModules();guard=await import('../src/ai/recovery');expect(guard.unfinishedAIOperation()).toMatchObject({stage:'cleanup',contextTokens:2048});
+  expect(guard.recoveryMessage('cleanup')).toContain('AI 메모리 정리');
+});

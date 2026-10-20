@@ -46,8 +46,46 @@ it('iPhone의 실행 프로필을 워커에 전달하고 실제 생성 단계만
   expect(JSON.parse(values.get(AI_OPERATION_KEY)!)).toMatchObject({stage:'prefill',contextTokens:8192});
   worker.reply({id,type:'progress',stage:'decode',message:'첫 토큰 생성 중'});
   expect(JSON.parse(values.get(AI_OPERATION_KEY)!)).toMatchObject({stage:'decode'});
+  worker.reply({id,type:'progress',stage:'cleanup',message:'AI 메모리 정리 중'});
+  expect(getAIStatus()).toMatchObject({phase:'generating',message:'AI 메모리 정리 중'});
+  expect(JSON.parse(values.get(AI_OPERATION_KEY)!)).toMatchObject({stage:'cleanup'});
   worker.reply({id,type:'done',result:{answer:'답변',usage:{maxOutputTokens:512,contextTokens:8192}}});await generating;
-  expect(values.has(AI_OPERATION_KEY)).toBe(false);
+  expect(worker.terminated).toBe(true);
+  await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(2));const next=FakeWorker.instances[1];
+  next.reply({id:next.messages[0].id,type:'done'});await prepareAI();expect(values.has(AI_OPERATION_KEY)).toBe(false);
+});
+it('iPhone 연속 질문은 매번 한 워커만 준비하고 이전 워커의 지연 응답을 무시한다',async()=>{
+  const values=localStore();vi.stubGlobal('navigator',{gpu:{},userAgent:'iPhone'});let worker=await ready();
+  for(let round=0;round<3;round++){
+    const generation=generate(`질문 ${round}`,[],vi.fn(),new AbortController().signal);
+    await vi.waitFor(()=>expect(worker.messages.at(-1)?.type).toBe('generate'));const id=worker.messages.at(-1)!.id;
+    worker.reply({id,type:'done',result:{answer:`답변 ${round}`,usage:{maxOutputTokens:512,contextTokens:8192}}});
+    expect((await generation).answer).toBe(`답변 ${round}`);expect(worker.terminated).toBe(true);
+    worker.reply({id,type:'progress',stage:'decode',message:'폐기된 응답'});expect(getAIStatus().message).not.toBe('폐기된 응답');
+    await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(round+2));
+    expect(FakeWorker.instances.filter(candidate=>!candidate.terminated)).toHaveLength(1);
+    const retired=worker;retired.onerror?.(new Event('error'));expect(getAIStatus().phase).not.toBe('error');
+    worker=FakeWorker.instances[round+1];expect(worker.messages).toHaveLength(1);expect(worker.messages[0]).toMatchObject({type:'initialize',profile:'apple-mobile'});
+    expect(worker.terminated).toBe(false);
+    worker.reply({id:worker.messages[0].id,type:'done'});await prepareAI();expect(aiIsReady()).toBe(true);expect(values.has(AI_OPERATION_KEY)).toBe(false);
+  }
+});
+it('자동 준비를 기다리는 두 번째 질문을 취소해도 새 엔진의 준비를 중단하지 않는다',async()=>{
+  const values=localStore();vi.stubGlobal('navigator',{gpu:{},userAgent:'iPhone'});const first=await ready();
+  const generation=generate('첫 질문',[],vi.fn(),new AbortController().signal);await vi.waitFor(()=>expect(first.messages).toHaveLength(2));first.reply({id:first.messages[1].id,type:'done',result:{answer:'첫 답변',usage:{maxOutputTokens:512,contextTokens:8192}}});await generation;
+  await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(2));const next=FakeWorker.instances[1],controller=new AbortController();
+  const queued=generate('두 번째 질문',[],vi.fn(),controller.signal);const rejection=expect(queued).rejects.toThrow();controller.abort();await rejection;
+  expect(next.terminated).toBe(false);expect(next.messages).toHaveLength(1);expect(values.has(AI_OPERATION_KEY)).toBe(true);
+  next.reply({id:next.messages[0].id,type:'done'});await prepareAI();expect(aiIsReady()).toBe(true);expect(values.has(AI_OPERATION_KEY)).toBe(false);
+});
+it('데스크톱 연속 질문은 준비된 엔진과 워커를 유지한다',async()=>{
+  const worker=await ready();
+  for(let round=0;round<2;round++){
+    const generation=generate(`질문 ${round}`,[],vi.fn(),new AbortController().signal);
+    await vi.waitFor(()=>expect(worker.messages).toHaveLength(round+2));const id=worker.messages.at(-1)!.id;
+    worker.reply({id,type:'done',result:{answer:'답변',usage:{maxOutputTokens:512,contextTokens:8192}}});await generation;
+    expect(worker.terminated).toBe(false);expect(FakeWorker.instances).toHaveLength(1);expect(aiIsReady()).toBe(true);
+  }
 });
 it('준비를 기다리는 질문을 중단해도 진행 중인 초기화의 복구 기록을 지우지 않는다',async()=>{
   const values=localStore();const controller=new AbortController();const generating=generate('질문',[],vi.fn(),controller.signal);const rejected=expect(generating).rejects.toThrow();

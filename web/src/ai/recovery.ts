@@ -1,5 +1,5 @@
 export const AI_OPERATION_KEY='fieldguard-ai-operation';
-export const AI_STAGES=['verification','runtime','engine','generation','conversation','prefill','decode'] as const;
+export const AI_STAGES=['verification','runtime','engine','generation','conversation','prefill','decode','cleanup'] as const;
 export type AIStage=typeof AI_STAGES[number];
 interface Operation {version:1;id:string;stage:AIStage;contextTokens:number;startedAt:number}
 let activeId:string|undefined;
@@ -21,6 +21,6 @@ export function finishAIOperation(){
 }
 export function resetAIRecovery(){try{localStorage.removeItem(AI_OPERATION_KEY);}catch{/* Best effort. */}activeId=undefined;}
 export function recoveryMessage(stage:AIStage){
-  const names={verification:'모델 검사',runtime:'실행 파일 준비',engine:'모델 메모리 적재',generation:'답변 생성',conversation:'대화 작업 공간 준비',prefill:'질문·문서 입력 처리',decode:'답변 토큰 생성'};
+  const names={verification:'모델 검사',runtime:'실행 파일 준비',engine:'모델 메모리 적재',generation:'답변 생성',conversation:'대화 작업 공간 준비',prefill:'질문·문서 입력 처리',decode:'답변 토큰 생성',cleanup:'AI 메모리 정리'};
   return `이전 또는 다른 화면의 ${names[stage]} 완료를 확인하지 못해 자동 재시도를 멈췄어요. 저장된 모델은 유지돼요. 다른 AI 화면을 닫은 뒤 문맥을 줄여 다시 준비하거나 문서 기능을 이용해 주세요.`;
 }

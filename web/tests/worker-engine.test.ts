@@ -6,7 +6,7 @@ import { WorkerEngine } from '../src/ai/worker-engine';
 import type { AIReply, AIRequest } from '../src/ai/protocol';
 import { localModelSource } from '../src/ai/model-stream';
 const settings={contextTokens:4096,maxOutputTokens:512};
-const init=():AIRequest=>({id:1,type:'initialize',model:new Blob(['model']),sha256:'verified',runtimeUrl:'https://local.invalid/runtime/',settings});
+const init=():Extract<AIRequest,{type:'initialize'}>=>({id:1,type:'initialize',model:new Blob(['model']),sha256:'verified',runtimeUrl:'https://local.invalid/runtime/',settings});
 beforeEach(()=>{vi.clearAllMocks();sdk.verify.mockReset().mockResolvedValue('full');sdk.load.mockResolvedValue(undefined);});
 afterEach(()=>vi.unstubAllGlobals());
 
@@ -61,4 +61,26 @@ it('SDK 측정치가 없으면 글자 수로 토큰 사용량을 꾸며내지 �
   sdk.create.mockResolvedValue({createConversation:async()=>conversation});const engine=new WorkerEngine();await engine.handle(init(),vi.fn());const reply=vi.fn();
   await engine.handle({id:2,type:'generate',prompt:'질문',settings},reply);
   expect(reply).toHaveBeenLastCalledWith({id:2,type:'done',result:{answer:'답변',usage:{maxOutputTokens:512,contextTokens:4096}}});
+});
+it('iPhone은 대화와 엔진 정리가 끝나기 전에는 답변 완료를 알리지 않는다',async()=>{
+  let finish!:()=>void;
+  const conversation={sendMessageStreaming:()=>new ReadableStream({start(c){c.enqueue({content:'첫 답변'});c.close();}}),getBenchmarkInfo:async()=>({}),getTokenCount:async()=>0,delete:vi.fn(async()=>{})};
+  const dispose=vi.fn(()=>new Promise<void>(resolve=>{finish=resolve;}));sdk.create.mockResolvedValue({createConversation:async()=>conversation,delete:dispose});
+  const engine=new WorkerEngine();await engine.handle({...init(),profile:'apple-mobile'},vi.fn());const reply=vi.fn();
+  const generation=engine.handle({id:2,type:'generate',prompt:'질문',settings},reply);
+  await vi.waitFor(()=>expect(dispose).toHaveBeenCalledOnce());expect(conversation.delete).toHaveBeenCalledOnce();
+  expect(reply).toHaveBeenLastCalledWith(expect.objectContaining({type:'progress',stage:'cleanup'}));
+  expect(reply.mock.calls.some(([value])=>value.type==='done')).toBe(false);
+  finish();await generation;expect(reply).toHaveBeenLastCalledWith(expect.objectContaining({type:'done',result:expect.objectContaining({answer:'첫 답변'})}));
+  await engine.handle({id:3,type:'generate',prompt:'이전 엔진으로 다시 질문',settings},reply);
+  expect(reply).toHaveBeenLastCalledWith(expect.objectContaining({type:'error'}));expect(dispose).toHaveBeenCalledOnce();
+});
+it.each(['conversation','stream','cleanup'])('iPhone의 %s 실패에서도 엔진을 폐기하고 완료로 오인하지 않는다',async where=>{
+  const dispose=vi.fn(async()=>{if(where==='cleanup')throw Error('cleanup failed');});
+  const conversation={sendMessageStreaming:()=>new ReadableStream({start(c){if(where==='stream')c.error(Error('stream failed'));else{c.enqueue({content:'답변'});c.close();}}}),getBenchmarkInfo:async()=>({}),getTokenCount:async()=>0,delete:vi.fn(async()=>{})};
+  const createConversation=vi.fn(async()=>{if(where==='conversation')throw Error('conversation failed');return conversation;});
+  sdk.create.mockResolvedValue({createConversation,delete:dispose});const engine=new WorkerEngine();await engine.handle({...init(),profile:'apple-mobile'},vi.fn());const reply=vi.fn();
+  await engine.handle({id:2,type:'generate',prompt:'질문',settings},reply);
+  expect(dispose).toHaveBeenCalledOnce();expect(conversation.delete).toHaveBeenCalledTimes(where==='conversation'?0:1);
+  expect(reply).toHaveBeenLastCalledWith(expect.objectContaining({type:'error'}));expect(reply.mock.calls.some(([value])=>value.type==='done')).toBe(false);
 });
