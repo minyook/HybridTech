@@ -2,6 +2,7 @@ import { build } from 'vite';
 import { fileURLToPath } from 'node:url';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { bridgeLightSDK } from './light-worker-bridge.mjs';
 
 // The public Engine API only accepts sequential streams. Its 0.18.0 bridge
 // caches skipped/preserved bytes in JS as well as copying them to WASM. Local
@@ -30,3 +31,15 @@ await build({
 });
 if(!redirected)throw new Error('Local model reader bridge was not included in the AI worker');
 console.log('Prepared background AI worker.');
+
+const lightEntry=fileURLToPath(import.meta.resolve('@mlc-ai/web-llm'));
+const lightPackage=JSON.parse(await readFile(path.join(path.dirname(lightEntry),'../package.json'),'utf8'));
+if(lightPackage.version!=='0.2.86')throw Error('Review the light worker bridge before upgrading WebLLM');
+let lightBridged=false;
+await build({configFile:false,publicDir:false,logLevel:'warn',
+  plugins:[{name:'fieldguard-light-memory',enforce:'pre',transform(source,id){if(path.resolve(id)===path.resolve(lightEntry)){lightBridged=true;return bridgeLightSDK(source);}}}],
+  build:{outDir:fileURLToPath(new URL('../public/',import.meta.url)),emptyOutDir:false,
+    lib:{entry:fileURLToPath(new URL('../src/ai/light.worker.ts',import.meta.url)),name:'FieldGuardLightAI',formats:['iife'],fileName:()=> 'light-ai-worker.js'},target:'es2022',minify:true},
+});
+if(!lightBridged)throw Error('Light memory bridge was not bundled');
+console.log('Prepared cache-only light AI worker (64-token prefill).');

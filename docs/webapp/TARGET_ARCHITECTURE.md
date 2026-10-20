@@ -1,6 +1,6 @@
 # HybridTech O₂ Field Guard 웹 현행 설계서
 
-최종 갱신: 2026-10-19. 이 문서는 `web/`의 실제 구현을 설명합니다. 10월 7일 서버 RAG 제안은 [이전 권고안](ARCHITECTURE_PROPOSAL_20261007.md)에 보존했습니다. 현재 사용자 결정은 **Android 설치형 앱 유지 + 기기 내 AI를 사용하는 반응형 웹/PWA + 웹 기준 공통 디자인**입니다.
+최종 갱신: 2026-10-20. 이 문서는 `web/`의 실제 구현을 설명합니다. 10월 7일 서버 RAG 제안은 [이전 권고안](ARCHITECTURE_PROPOSAL_20261007.md)에 보존했습니다. 현재 사용자 결정은 **Android 설치형 앱 유지 + 기기 내 AI를 사용하는 반응형 웹/PWA + 웹 기준 공통 디자인**입니다.
 
 ## 제품 구성과 경계
 
@@ -33,12 +33,14 @@ flowchart TD
     Cache --> Worker
     Search --> Prompt[선택된 근거·질문·Markdown 지침]
     Prompt --> Worker
-    Worker --> SDK[LiteRT-LM·WebGPU·Gemma 4 E2B]
+    Worker --> SDK[PC/Android: LiteRT-LM·Gemma 4 E2B]
+    Worker --> Light[iPhone/iPad: WebLLM·Qwen3 0.6B]
+    Light --> Result
     SDK --> Result[스트리밍 답변·SDK 토큰 측정값]
     Result --> Browser
 ```
 
-React 19.2.0, TypeScript 5.9.3, Vite 8.3.4, PDF.js 6.4.299, LiteRT-LM 0.18.0을 lockfile로 고정합니다. 세부 의존성은 `web/package-lock.json`을 기준으로 합니다.
+React 19.2.0, TypeScript 5.9.3, Vite 8.3.4, PDF.js 6.4.299, LiteRT-LM 0.18.0·WebLLM 0.2.86을 lockfile로 고정합니다. 세부 의존성은 `web/package-lock.json`을 기준으로 합니다.
 
 ## 화면과 탐색
 
@@ -85,38 +87,25 @@ PDF 원본은 PDF.js로 렌더링합니다. 두 PDF의 SHA-256을 빌드 때 확
 
 ## 모델 다운로드와 자동 실행
 
-`ai/catalog.ts`는 [공식 웹 모델 파일](https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/blob/b3ca0d2f076785a8f4b2219ddbd2bdb99954eae1/gemma-4-E2B-it-web.litertlm)의 immutable 리비전·파일명·크기·SHA-256을 고정합니다.
+| 실행 환경 | 모델·엔진 | 저장 방식 | 실제 적용 한도 |
+| --- | --- | --- | --- |
+| PC·Android 브라우저 | Gemma 4 E2B / LiteRT-LM 0.18.0 | 약 2.01GB 단일 .litertlm, OPFS | 기본 문맥 8,192 / 출력 1,536, 사용자 설정 |
+| iPhone·iPad | Qwen3 0.6B q4f16_1 / WebLLM 0.2.86 | 총 353,285,213바이트 13개, Cache API | 문맥 2,048 고정 / 출력 256 기본·512 선택 / prefill 64 |
+| Android 설치형 | 기존 네이티브 Gemma | 기존 Android 모델 저장 | 기존 앱 설정 |
 
-- 파일: `gemma-4-E2B-it-web.litertlm`
-- 크기: `2,008,432,640`바이트, 약 2.01GB.
-- 리비전: `b3ca0d2f076785a8f4b2219ddbd2bdb99954eae1`.
-- SHA-256: `3a08e8d94e23b814ae5414469c370c503813949acb8ceaa17e4ebf8a35af35b5`.
+`ai/runtime.ts`는 Apple 모바일에서 **light-ai-worker.js**만 생성합니다. 기존 Gemma가 저장돼 있어도 읽거나 자동 실행하지 않고 경량 다운로드를 안내합니다. 새 다운로드 완료 후 중단 표시를 해제하고 자동 준비하며 기존 Gemma·대화·작업 데이터는 보존합니다. 토큰 설정도 `ai-settings-light-v1`로 분리해 큰 Gemma 설정을 물려받지 않습니다.
 
-다운로드는 실행 파일 준비 → 모델 스트리밍 → 크기·해시 검증 → OPFS 쓰기 완료 → 메타데이터 commit → 자동 AI 준비 순서입니다. 불완전한 파일은 설치 완료로 표시하지 않고, 기존 모델은 새 검증 성공 후 교체합니다. OPFS 미지원 환경의 대형 모델은 설치를 거부합니다. 모델 파일 단위 부분 이어받기는 없으며 중단 후 다시 다운로드합니다.
+`ai/light-manifest.json`은 공식 MLC 모델의 immutable HF 리비전·실행 WASM 커밋·13개 파일의 크기·SHA-256을 고정합니다. `light-model.ts`는 한 파일씩 스트리밍 해시 검증한 뒤 SDK와 같은 `webllm/config`, `webllm/model`, `webllm/wasm` Cache API에 저장합니다. 완료 파일은 취소/재시도에서 재사용하며, 해시/길이 오류 파일은 설치 완료로 남기지 않습니다. 전체 모델 ArrayBuffer/Blob이나 병렬 shard 다운로드를 만들지 않습니다. 모델 바이너리는 Git에 넣지 않습니다.
 
-앱 재접속 시 저장 모델을 자동으로 불러옵니다. 실행·메모리 해제 버튼은 없습니다. 무거운 검증·WASM/GPU 초기화·생성은 `ai-worker.js`에서 수행합니다. SDK가 importScripts를 사용하므로 개발/배포 모두 동일한 classic worker를 번들하며 WASM 경로를 `runtime/`으로 지정합니다. 중단·재설정·삭제·개발 중 교체 시 워커를 종료해 관련 메모리를 정리합니다.
+`light.worker.ts`의 네트워크 fetch와 SDK의 네이티브 Cache.add 경로는 차단합니다. 준비·생성은 저장 파일만 사용하며 누락 시 설정으로 안내합니다. `scripts/light-worker-bridge.mjs`는 고정 SDK의 입력 청크·KV prefill workspace를 최대 64로 제한하고 같은 토크나이저의 토큰 계산·WASM 용량 읽기를 연결합니다. 실제 SDK 버전/연결 지점이 바뀌면 빌드를 실패시킵니다. node_modules·모델·컴파일된 WASM은 수정하지 않습니다.
 
-Apple 모바일에서는 한 엔진으로 한 답변만 생성합니다. 답변과 SDK 사용량을 받은 뒤 conversation과 엔진의 `delete()`를 기다리고 Worker의 `done`을 전달합니다. 메인 런타임은 해당 Worker를 종료한 다음 다음 질문용 엔진 하나를 자동 준비합니다. WASM 힙이 이전 답변의 최대 용량을 유지한 채 다음 질문을 처리하지 않도록 수명을 나눕니다. 준비 중 질문은 같은 `prepareAI` Promise를 기다리고 이전 Worker의 늦은 메시지는 무시합니다. 준비 중 질문 취소는 새 초기화의 중단 표시를 지우지 않습니다. 데스크톱은 기존 엔진 재사용을 유지합니다. 페이지 새로고침·모델 재다운로드는 없지만 질문 사이 모델 준비 시간이 추가될 수 있습니다. 실제 iPhone의 모든 GPU 할당 반환 시점이나 연속 안정성을 보장하는 측정은 아닙니다.
+`light-prompt.ts`는 시스템 지침·답변 전체 공간·채팅 템플릿 여유 96토큰을 먼저 빼고 실제 토크나이저로 문서의 완결된 문장/행을 발췌합니다. 질문 자체가 넘치거나 근거를 하나도 넣지 못하면 GPU 생성 전에 오류를 보내 원문으로 전환합니다. 이전 대화는 모델에 보내지 않습니다. thinking은 끄고 템플릿의 think 표시는 `light-output.ts`에서 제거합니다. 작은 모델은 정확도·완전성이 다르며 기존 원문 충돌/누락 검사도 유지합니다.
 
-OPFS 파일은 첫 실행에서 저장된 바이트 전체의 SHA-256을 확인한 뒤 검증 기록을 모델 메타데이터에 보존합니다. 재접속 시 크기·수정 시각과 8개 구간의 최대 512KiB 표본 해시가 같고 기록이 7일 미만이면 전체 파일 읽기를 생략합니다. 기록 없음·이상·변경 감지·7일 경과 시 전체 검사를 수행하고, 파일 수정 시각을 확인할 수 없는 Blob/IndexedDB 저장은 전체 검사를 유지합니다. 검증 기록 갱신은 현재 설치와 동일한 키·해시·크기·설치 시각을 확인하는 트랜잭션으로 처리해 삭제/교체된 모델을 되살리지 않습니다. 표본 검사는 전체 무결성 검사와 같지 않으며 수정 정보가 유지된 표본 밖 손상은 주기적인 전체 검사 전까지 검출되지 않을 수 있습니다. 실행 준비·파일 확인·런타임·엔진 적재 시간은 워커의 실제 경과 시간을 측정하고, 화면에는 전체 준비와 파일 확인 시간을 표시합니다. SDK 0.18.0은 JS 경로의 실행 캐시를 `:nocache`로 지정하므로 모델 GPU 적재 시간은 남습니다.
+Apple 답변 완료 후 SDK unload·GPU 장치 정리를 기다린 뒤 main이 Worker를 종료하고 다음 엔진 하나만 자동 준비합니다. 준비 중 질문은 같은 Promise를 기다리고 Web Locks가 같은 저장소의 중복 엔진을 막습니다. 중단·삭제·HMR 시 Worker를 종료합니다. 페이지 강제 종료의 중단 표시는 자동 반복을 막고 진단은 로컬에만 보관합니다. 실행·메모리 해제 버튼이나 서버 추론은 추가하지 않습니다.
 
-자동 준비 요청은 합쳐 한 번만 실행합니다. 준비 중 질문은 완료를 기다리고, 모델이 없으면 다운로드 안내와 검색 원문을 표시합니다. 단계·경과 시간을 보여주며 설정을 떠나도 준비를 계속합니다. 기기 검증과 GPU 준비 시간은 필요합니다. 장시간 무응답은 제한 시간 후 오류로 표시하고 다음 질문에서 재시도할 수 있습니다.
+PC Gemma는 `ai/catalog.ts`의 리비전 `b3ca0d2f076785a8f4b2219ddbd2bdb99954eae1`, 크기 2,008,432,640바이트, SHA-256 `3a08e8d94e23b814ae5414469c370c503813949acb8ceaa17e4ebf8a35af35b5`를 유지합니다. 다운로드 후 OPFS commit·자동 준비, 첫 전체 검증/7일 이내 표본 재검증, 별도 classic `ai-worker.js`, 데스크톱 엔진 재사용도 유지합니다. 이전 Apple Gemma의 파일 구간 읽기·GPU 수명 보완과 Jetsam 이력은 [메모리 분석](IPHONE_MEMORY_ANALYSIS.md)에 보존했습니다.
 
-### 준비 중 페이지 종료와 메모리 입력 경로
-
-OPFS 모델은 메인 화면에서 대형 Blob을 워커로 전달하는 대신 저장 키·크기만 전달하고 워커가 직접 엽니다. 전체 SHA-256 검사와 SDK 입력 스트림은 한 번에 최대 1MiB씩 읽습니다. BYOB와 기본 reader를 모두 지원합니다. LiteRT-LM 0.18.0의 기존 스트리밍 경로를 유지하며 SDK·WASM·GPU가 보유하는 전체 메모리를 이 크기로 제한하는 것은 아닙니다.
-
-`ai/execution.ts`는 SDK의 GPU_ARTISAN 경로를 유지하면서 Apple 모바일의 `mainExecutorSettings.backendConfig`에 `sequence_batch_size:1`, `use_autosized_ringbuffers:true`, `wait_for_weight_uploads:true`, `max_top_k:1`, `num_output_candidates:1`을 전달합니다. 배치 1은 입력에도 길이 1의 decode 그래프를 재사용하고 자동 크기 버퍼는 즉시 되감기 대신 로컬 어텐션 메모리를 줄이는 SDK 옵션입니다. 출처는 고정 버전 [LiteRT-LM v0.18.0 executor 설정](https://github.com/google-ai-edge/LiteRT-LM/blob/v0.18.0/runtime/executor/llm_executor_settings.h)입니다. 외부 임베딩·decode logits·서브모델은 사용하지 않습니다. 데스크톱 엔진의 기존 설정은 유지합니다. 전체 메모리 상한은 보장하지 않으며 입력 시간이 늘 수 있습니다. 대화마다 새 conversation을 사용하고 시스템 지시·문서 근거를 그대로 전달합니다. conversation은 음성/영상 모달리티를 끄고 기존 기본값인 `prefillPrefaceOnInit:false`를 명시합니다.
-
-`ai/recovery.ts`는 준비·생성 전 localStorage의 `fieldguard-ai-operation`에 작업 ID·단계·문맥 크기·시각을 기록하고 정상 완료·처리된 실패·명시적 중단에는 자기 표시만 지웁니다. 질문의 단계는 `conversation`(대화 작업 공간), `prefill`(질문·문서 입력), `decode`(첫 답변 수신 이후), `cleanup`(AI 메모리 정리)로 구분하며 이전 `generation` 기록도 읽습니다. 프롬프트·답변 본문은 기록하지 않습니다. 페이지가 강제 종료돼 표시가 남으면 다음 실행은 `recovery` 상태로 자동 반복을 멈춥니다. 홈·질문 경로로 시작했을 때만 자기 저장소의 설정 화면으로 안내하므로 주소 표시줄이 없는 홈 화면 앱에서도 복구할 수 있습니다. 이후 문서 화면 이동은 막지 않습니다. 명시적 복구 선택으로만 **문맥 2,048/답변 256**을 저장해 다시 준비합니다. `ai/engine-lease.ts`의 Web Lock은 같은 출처·저장소에서 엔진 하나만 유지하고 워커 종료/페이지 종료 시 해제됩니다. 서로 분리된 브라우저·PWA 저장소까지 조정하지는 않습니다.
-
-이미 설치된 구형 서비스 워커의 앱 셸이 반복 종료되면 `GET /api/ai-recovery`로 독립 HTML을 제공합니다. 기존 `/api/` 캐시 제외 규칙으로 서버에서 직접 가져오고 모델·런타임을 import하지 않습니다. 사용자 선택 시 기존 중단 단계·문맥·시각을 보존해 새 표시를 기록하고 정확히 같은 출처의 루트 서비스 워커 등록만 해제합니다. 파일·기록·캐시는 삭제하지 않습니다. 응답은 no-store·nosniff·nonce 기반 CSP이며 작업 기록/감독관 API의 인증 규칙은 유지합니다. Safari에서 이 페이지를 열어도 분리된 홈 화면 앱 저장소의 설정을 바꾸지는 않습니다. 자세한 절차는 [iPhone 복구 안내](../IPHONE_TEST.md#모델-준비-중-페이지가-반복-종료될-때)에 있습니다.
-
-iPhone 13 Pro / iOS 27.0.1의 10/20 10:43:52 Jetsam 기록에서는 WebContent의 `highwater` 종료를 확인했습니다. 이후 파일 구간 읽기 수정 뒤 실제 기기의 첫 답변 성공과 두 번째 질문 ‘심폐소생술 알려줘’ 중 종료는 사용자 보고입니다. 두 번째 사건의 원인 로그는 아직 없습니다. 위 엔진 수명 변경과 PC 실행 결과는 실제 iPhone의 연속 안정성·메모리 사용량·답변 정확도 검증과 구분합니다. [로그·연속 질문 설계](IPHONE_MEMORY_ANALYSIS.md)를 참고하세요.
-
-2026-10-20 사용자는 복구 재시도 후에도 설정 화면의 반복 종료와 다음 진입의 `engine`(모델 메모리 적재) 미완료 안내를 확인했습니다. 이 기기의 Gemma 웹 준비 성공은 여전히 미검증이며 PC 테스트 통과로 지원 판정을 내리지 않습니다. SDK 고급 옵션의 상수 공유·GPU 가중치 변환·원본 텐서 madvise는 0.18.0 소스에서 이미 켜진 기본값이므로 단순히 다시 지정하는 것을 새로운 메모리 수정으로 설명하지 않습니다. iPhone용 경량 웹 모델을 추가하려면 별도 런타임·파일 무결성·저장·오프라인·한국어 근거 답변 품질을 검증해야 합니다. 같은 Gemma의 iOS 네이티브 경로도 PWA와 다른 배포/개발 범위이며 실제 기기 검증이 필요합니다. 모델 교체나 서버 추론으로 자동 전환하지 않습니다.
-
-이후 같은 날의 Jetsam 로그에서 WebContent `highwater` 종료가 확인돼 로컬 파일 입력 경로를 추가했습니다. `model-stream.ts`의 WeakMap으로 검증 파일과 입력 스트림을 같은 워커 안에서 연결하고, `file-model-reader.ts`가 요청한 임의 구간만 1MiB 이하로 읽어 WASM에 복사합니다. `readAndPreserve`의 재읽기는 파일에서 수행하므로 SDK 순차 래퍼의 건너뛴/보존 구간 JS 캐시가 필요하지 않습니다. `sdk-stream-reader.ts`는 등록된 입력만 이 경로를 사용하고 다른 입력은 upstream에 위임합니다. `build-ai-worker.mjs`가 고정 0.18.0 내부 import를 worker 한정으로 연결하고 버전·메서드·실제 연결을 확인해 실패 시 빌드를 중지합니다. `node_modules`·공식 WASM은 수정하지 않습니다. 준비 측정에는 `modelRead`의 방식·읽기 수·총 바이트·최대 읽기 크기를 선택적으로 포함합니다. 총 WASM/GPU 메모리 상한이나 실제 iPhone 성공을 보장하는 조치는 아닙니다. [분석과 유지보수 경계](IPHONE_MEMORY_ANALYSIS.md).
+실제 iPhone 13 Pro의 경량 모델 성공과 전체 WebContent/GPU 메모리는 아직 검증하지 않았습니다. [경량 설계](IPHONE_LIGHT_AI.md)와 [시험 순서](../IPHONE_TEST.md)를 참고하세요.
 
 ### 토큰 설정과 측정
 
@@ -124,7 +113,7 @@ iPhone 13 Pro / iOS 27.0.1의 10/20 10:43:52 Jetsam 기록에서는 WebContent�
 | --- | --- | --- |
 | 최대 답변 토큰 | 256 / 512 / 1,024 / 1,536 / 2,048 / 4,096 | SDK `sessionConfig.maxOutputTokens` |
 | 문맥 토큰 | 2,048 / 4,096 / 8,192 / 16,384 | SDK `mainExecutorSettings.maxNumTokens` |
-| 새 기본값 | iPhone/iPad 답변 512 / 문맥 4,096; 데스크톱 1,536 / 8,192 | 기존 저장 선택은 유지, 변경 시 IndexedDB에 저장하고 다음 질문부터 반영 |
+| 새 기본값 | iPhone/iPad 답변 256 / 문맥 2,048 고정; 데스크톱 1,536 / 8,192 | Apple은 별도 설정 키, 출력 선택은 256/512만 허용 |
 | 명시적 중단 복구 | 답변 256 / 문맥 2,048 | ‘문맥을 줄여 다시 준비’ 선택 시 저장 후 기존 모델 재사용 |
 
 답변 한도는 문맥의 절반 이하로 제한합니다. 문맥 변경은 새 엔진을 준비하고, 출력 한도만 변경하면 현재 준비된 엔진을 재사용할 수 있습니다. Apple 모바일은 별도로 각 답변 뒤 엔진을 교체합니다. 준비 도중 설정을 바꿔도 실제 질문은 새 문맥과 일치하는 엔진을 사용합니다. SDK에서 얻은 입력·생성·전체 토큰 수와 사용한 한도를 대화에 보존합니다. SDK 측정이 없으면 글자 수로 임의 추정하지 않습니다. 이 값은 기기 내 추론량이며 API 과금 내역이 아닙니다.
@@ -145,7 +134,7 @@ iPhone 13 Pro / iOS 27.0.1의 10/20 10:43:52 Jetsam 기록에서는 WebContent�
 
 `web/src/ai/capabilities.ts`가 보안 컨텍스트·WebGPU·Worker 기능을 확인하고 실패 원인별 안내를 생성합니다. `runtime.ts`와 `Settings.tsx`가 같은 판정을 사용하고, 미지원 시 워커 초기화와 모델 다운로드를 시작하지 않습니다. 기존의 포괄적인 ‘이 브라우저에서는 AI 사용 불가’ 문구를 원인·해결 절차와 조건 표시로 바꿨습니다.
 
-iPhone/iPad WebGPU의 정식 지원은 iOS/iPadOS 26부터입니다. 사용자 보고인 iPhone 13 Pro / iOS 18.6.2의 AI 다운로드 차단은 이 기본 지원 조건에 해당합니다. 13 Pro는 iOS 26 지원 기종이지만 업데이트 후 Gemma의 실제 메모리/GPU 실행을 별도로 시험해야 합니다. iOS 버전 문자열이나 기종 이름으로 무조건 차단하거나 실행 성공을 보장하지 않습니다. Safari 사용자 에이전트에 오래된 iOS 버전이 표시되더라도 실제 기능을 제공하면 통과합니다. 기본 검사 통과와 엔진 초기화·추론 성공은 구분합니다.
+iPhone/iPad WebGPU의 정식 지원은 iOS/iPadOS 26부터입니다. 사용자 보고인 iPhone 13 Pro / iOS 18.6.2의 AI 다운로드 차단은 이 기본 지원 조건에 해당합니다. 13 Pro는 iOS 26 지원 기종이지만 업데이트 후 경량 AI의 실제 메모리/GPU 실행을 별도로 시험해야 합니다. iOS 버전 문자열이나 기종 이름으로 무조건 차단하거나 실행 성공을 보장하지 않습니다. Safari 사용자 에이전트에 오래된 iOS 버전이 표시되더라도 실제 기능을 제공하면 통과합니다. 기본 검사 통과와 엔진 초기화·추론 성공은 구분합니다.
 
 ## iPhone의 같은 Wi-Fi HTTPS 시험
 
@@ -155,7 +144,7 @@ iPhone/iPad WebGPU의 정식 지원은 iOS/iPadOS 26부터입니다. 사용자 �
 
 정확한 명령·프로파일 설치·신뢰·제거·키 경로는 [iPhone 시험 안내](../IPHONE_TEST.md)에 정리합니다. HTTPS 접속 검증과 실제 iPhone AI·메모리 시험 결과는 구분합니다.
 
-정상 Apple 답변 종료에서는 엔진 삭제 이후 SDK 런타임의 실제 WebGPU 장치를 명시적으로 `destroy()`한 뒤 Worker를 종료합니다. `ai/worker-resources.ts`가 실제 WASM 힙 용량·GPU 오류 종류/장치 손실을 표본 기록하고 `ai/diagnostics.ts`가 설정값과 함께 최근 48개만 기기에 보관합니다. 설정의 **AI 진단 기록 저장**으로 내보내며 질문·답변·주소·기기 식별자와 원격 전송은 포함하지 않습니다. WASM 용량은 GPU·전체 WebContent 메모리가 아닙니다. 준비 완료 뒤 질문 전송/`decode`에서 종료가 재발한 실제 iPhone의 안정성은 미해결입니다. 추가된 12:20:58 로그에서는 WebContent의 highwater 종료와 약 2.703GiB 기록 사용량을 확인했습니다. 정확한 할당 비중·앱 빌드는 불명이며 12:38 GPU 정리·진단 변경의 성공/실패를 보여주는 로그가 아닙니다. [최신 원인 분석과 한계](IPHONE_MEMORY_ANALYSIS.md#준비-완료-뒤-질문-전송-시-decode-종료-재발).
+정상 Apple 경량 답변 종료에서는 SDK unload와 실제 GPU 장치 정리를 기다린 뒤 Worker를 종료합니다. `ai/light-engine.ts`는 모델 WASM 힙·GPU 오류/손실을 관찰하고, 기존 LiteRT 진단은 `ai/worker-resources.ts`가 담당하며 `ai/diagnostics.ts`가 설정값과 함께 최근 48개만 기기에 보관합니다. 설정의 **AI 진단 기록 저장**으로 내보내며 질문·답변·주소·기기 식별자와 원격 전송은 포함하지 않습니다. WASM 용량은 GPU·전체 WebContent 메모리가 아닙니다. 준비 완료 뒤 질문 전송/`decode`에서 종료가 재발한 실제 iPhone의 안정성은 미해결입니다. 추가된 12:20:58 로그에서는 WebContent의 highwater 종료와 약 2.703GiB 기록 사용량을 확인했습니다. 정확한 할당 비중·앱 빌드는 불명이며 12:38 GPU 정리·진단 변경의 성공/실패를 보여주는 로그가 아닙니다. [최신 원인 분석과 한계](IPHONE_MEMORY_ANALYSIS.md#준비-완료-뒤-질문-전송-시-decode-종료-재발).
 
 ## 저장·오프라인·업데이트
 
@@ -178,7 +167,7 @@ iPhone/iPad WebGPU의 정식 지원은 iOS/iPadOS 26부터입니다. 사용자 �
 
 Node.js 24.15 이상에서 개발 포트 5174와 프로덕션 미리보기 4173을 고정 사용하며 두 서버는 동일한 SQLite 작업 DB를 사용합니다. `.local/`과 서버 소스는 개발 서버 정적 접근에서 차단합니다. 정적 배포 출력은 `web/dist`이며 문서·AI에 HTTPS·COOP/COEP·WASM MIME과 캐시 설정이 필요합니다. 감독관·새 점검은 API 런타임이 필요하므로 `dist` 정적 호스팅만으로 사용할 수 없습니다. Vite 통합 API는 개발/미리보기용이며 실제 외부 운영 배포·계정 연동·DB 백업/복구 운영 구성은 수행하지 않았습니다.
 
-현재 자동 테스트는 28개 파일 **202개 통과**입니다. 검색 정답 쪽 회귀 평가는 **29/30**이며 생성 정확도 평가와 구분합니다. Windows Chromium의 실제 다운로드·초기화·생성·사용량·파일/PDF 오프라인 동작과 세부 조건은 [검증 기록](../../web/docs/validation.md)에 있습니다. 실제 iPhone의 연속 생성과 제조사 센서 검증은 남아 있습니다.
+현재 자동 테스트는 33개 파일 **220개 통과**입니다. 검색 정답 쪽 회귀 평가는 **29/30**이며 생성 정확도 평가와 구분합니다. Windows Chromium의 실제 다운로드·초기화·생성·사용량·파일/PDF 오프라인 동작과 세부 조건은 [검증 기록](../../web/docs/validation.md)에 있습니다. 실제 iPhone의 연속 생성과 제조사 센서 검증은 남아 있습니다.
 
 ## 주요 코드
 
@@ -186,6 +175,8 @@ Node.js 24.15 이상에서 개발 포트 5174와 프로덕션 미리보기 4173�
 | --- | --- |
 | `src/App.tsx`, `src/ui.tsx` | 화면·대화·탐색·Markdown |
 | `src/chat/` | 사용자 스크롤을 보존하는 자동 이동 |
+| `src/ai/light-manifest.json`, `light-model.ts`, `light.worker.ts`, `light-engine.ts` | Apple 경량 파일·검증·저장 전용 추론 |
+| `src/ai/light-prompt.ts`, `light-output.ts` | 경량 토큰 예산·템플릿 제거 |
 | `src/ai/catalog.ts`, `model.ts` | 고정 다운로드·무결성·모델 저장 |
 | `src/ai/runtime.ts`, `worker-engine.ts`, `engine.worker.ts` | 자동 준비·워커 통신·SDK 추론 |
 | `src/ai/worker-resources.ts`, `diagnostics.ts` | 명시적 GPU 장치 폐기·WASM/GPU 오류 표본·48개 로컬 진단 |

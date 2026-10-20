@@ -1,0 +1,85 @@
+{
+  "revision": "8c14ce481d4c692769976ad52afea453a102df19",
+  "base": "https://huggingface.co/mlc-ai/Qwen3-0.6B-q4f16_1-MLC/resolve/8c14ce481d4c692769976ad52afea453a102df19/",
+  "libRevision": "00fe7a40e57e5e8eb9fef87526a4bf28ad5846c0",
+  "files": [
+    {
+      "name": "mlc-chat-config.json",
+      "url": "https://huggingface.co/mlc-ai/Qwen3-0.6B-q4f16_1-MLC/resolve/8c14ce481d4c692769976ad52afea453a102df19/mlc-chat-config.json",
+      "size": 2075,
+      "sha256": "190a51c56b9a07a8d8721266f8e459bcd1b1689bcdff294795cd2bffa203ff2d"
+    },
+    {
+      "name": "tensor-cache.json",
+      "url": "https://huggingface.co/mlc-ai/Qwen3-0.6B-q4f16_1-MLC/resolve/8c14ce481d4c692769976ad52afea453a102df19/tensor-cache.json",
+      "size": 129391,
+      "sha256": "f4647d617dc869d91fbd7851c65af0a2cf7dd615884ebe3b110013801b65d8c7"
+    },
+    {
+      "name": "tokenizer.json",
+      "url": "https://huggingface.co/mlc-ai/Qwen3-0.6B-q4f16_1-MLC/resolve/8c14ce481d4c692769976ad52afea453a102df19/tokenizer.json",
+      "size": 11422654,
+      "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
+    },
+    {
+      "name": "params_shard_0.bin",
+      "url": "https://huggingface.co/mlc-ai/Qwen3-0.6B-q4f16_1-MLC/resolve/8c14ce481d4c692769976ad52afea453a102df19/params_shard_0.bin",
+      "size": 77791232,
+      "sha256": "61062e64b475309e648516c853c7bd949344f1ce5c0921e9b121f905953ce9e3"
+    },
+    {
+      "name": "params_shard_1.bin",
+      "url": "https://huggingface.co/mlc-ai/Qwen3-0.6B-q4f16_1-MLC/resolve/8c14ce481d4c692769976ad52afea453a102df19/params_shard_1.bin",
+      "size": 32740608,
+      "sha256": "a7d9e88e510636b34c850bf19c660c38cdacbe64bd128c6bb4dcc710455db81d"
+    },
+    {
+      "name": "params_shard_2.bin",
+      "url": "https://huggingface.co/mlc-ai/Qwen3-0.6B-q4f16_1-MLC/resolve/8c14ce481d4c692769976ad52afea453a102df19/params_shard_2.bin",
+      "size": 31866624,
+      "sha256": "eb5af136518c33abd7c2eb66e154b5504ce27f62728aafffd8fca26a3cab64a9"
+    },
+    {
+      "name": "params_shard_3.bin",
+      "url": "https://huggingface.co/mlc-ai/Qwen3-0.6B-q4f16_1-MLC/resolve/8c14ce481d4c692769976ad52afea453a102df19/params_shard_3.bin",
+      "size": 33505024,
+      "sha256": "482d32bfefe36ec9ee452d88c25cce42f31d8350e4abccc8f4727e4006ab2859"
+    },
+    {
+      "name": "params_shard_4.bin",
+      "url": "https://huggingface.co/mlc-ai/Qwen3-0.6B-q4f16_1-MLC/resolve/8c14ce481d4c692769976ad52afea453a102df19/params_shard_4.bin",
+      "size": 32000000,
+      "sha256": "b3d1ecb2553ae323c95b19e231dc74e1ef34d63094ccf0dd3e79a37f312663f3"
+    },
+    {
+      "name": "params_shard_5.bin",
+      "url": "https://huggingface.co/mlc-ai/Qwen3-0.6B-q4f16_1-MLC/resolve/8c14ce481d4c692769976ad52afea453a102df19/params_shard_5.bin",
+      "size": 31866624,
+      "sha256": "2c753a811fbea6e0292caf39d9f9ceeb8cb5ff74a183f7350be3f846f3013438"
+    },
+    {
+      "name": "params_shard_6.bin",
+      "url": "https://huggingface.co/mlc-ai/Qwen3-0.6B-q4f16_1-MLC/resolve/8c14ce481d4c692769976ad52afea453a102df19/params_shard_6.bin",
+      "size": 33505024,
+      "sha256": "52d543cee1e1d6526dae4a5a36a69c1bafa222d1e3e95c4ee46456d56f1aeab2"
+    },
+    {
+      "name": "params_shard_7.bin",
+      "url": "https://huggingface.co/mlc-ai/Qwen3-0.6B-q4f16_1-MLC/resolve/8c14ce481d4c692769976ad52afea453a102df19/params_shard_7.bin",
+      "size": 32000000,
+      "sha256": "3d9047c2603d24b4ca8e689bc924a7715224205ba591504238ff5910e8542c65"
+    },
+    {
+      "name": "params_shard_8.bin",
+      "url": "https://huggingface.co/mlc-ai/Qwen3-0.6B-q4f16_1-MLC/resolve/8c14ce481d4c692769976ad52afea453a102df19/params_shard_8.bin",
+      "size": 30097152,
+      "sha256": "13985d7899bf0188ff5a0d37fe6254a8b3e3bf7e4aba0d198de1469faa9ef9b4"
+    },
+    {
+      "name": "Qwen3-0.6B-q4f16_1_cs1k-webgpu.wasm",
+      "url": "https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/00fe7a40e57e5e8eb9fef87526a4bf28ad5846c0/web-llm-models/v0_2_86/base/Qwen3-0.6B-q4f16_1_cs1k-webgpu.wasm",
+      "size": 6358805,
+      "sha256": "19a1721867a481806adef35de0e0d0f2f4ff00a0c2e80d65b175fa55f21649c9"
+    }
+  ]
+}

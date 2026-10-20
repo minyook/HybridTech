@@ -4,6 +4,7 @@ public/knowledge/
 public/source-pdfs/
 public/runtime/
 public/ai-worker.js
+public/light-ai-worker.js
 public/pdfjs/
 public/asset-manifest.json
 public/icons/*.png

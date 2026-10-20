@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 import { expect, it, vi } from 'vitest';
 import { DEFAULT_AI_SETTINGS, loadAISettings, normalizeAISettings, saveAISettings } from '../src/ai/preferences';
-import { setSetting } from '../src/storage/db';
+import { getSetting, setSetting } from '../src/storage/db';
 
 it('저장하지 않은 경우와 손상된 값에는 유효한 기본 토큰 설정을 사용한다',async()=>{
   await setSetting('ai-settings',undefined);
@@ -20,8 +20,14 @@ it('복구용 2,048 문맥도 명시적으로 저장하고 답변 한도를 검�
   expect(await loadAISettings()).toEqual({contextTokens:2048,maxOutputTokens:256});
   expect(normalizeAISettings({contextTokens:2048,maxOutputTokens:4096}).maxOutputTokens).toBe(1024);
 });
-it('iPhone의 새 기본값은 작게 잡되 사용자가 저장한 설정은 유지한다',()=>{
+it('아이폰은 경량 전용 한도를 사용하고 기존 Gemma 설정을 덮어쓰지 않는다',async()=>{
+  const previous={contextTokens:8192,maxOutputTokens:1536};await setSetting('ai-settings',previous);await setSetting('ai-settings-light-v1',undefined);
   vi.stubGlobal('navigator',{userAgent:'iPhone',maxTouchPoints:5});
-  try{expect(normalizeAISettings(undefined)).toEqual({contextTokens:4096,maxOutputTokens:512});expect(normalizeAISettings({contextTokens:8192,maxOutputTokens:1536})).toEqual({contextTokens:8192,maxOutputTokens:1536});}
+  try{
+    expect(await loadAISettings()).toEqual({contextTokens:2048,maxOutputTokens:256});
+    expect(normalizeAISettings(previous)).toEqual({contextTokens:2048,maxOutputTokens:256});
+    expect(await saveAISettings({contextTokens:16384,maxOutputTokens:512})).toEqual({contextTokens:2048,maxOutputTokens:512});
+    expect(await loadAISettings()).toEqual({contextTokens:2048,maxOutputTokens:512});expect(await getSetting('ai-settings')).toEqual(previous);
+  }
   finally{vi.unstubAllGlobals();}
 });

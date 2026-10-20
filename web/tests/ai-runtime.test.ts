@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-const fixture=vi.hoisted(()=>({settings:{contextTokens:8192,maxOutputTokens:512},installed:true,runtime:true,backend:'idb'}));
+const fixture=vi.hoisted(()=>({settings:{contextTokens:8192,maxOutputTokens:512},installed:true,lightInstalled:true,runtime:true,backend:'idb'}));
+vi.mock('../src/ai/light-model',async importOriginal=>({...await importOriginal<typeof import('../src/ai/light-model')>(),lightModelInstalled:async()=>fixture.lightInstalled}));
 vi.mock('../src/ai/preferences',()=>({loadAISettings:async()=>({...fixture.settings}),RECOVERY_AI_SETTINGS:{contextTokens:2048,maxOutputTokens:256},saveAISettings:async(value:typeof fixture.settings)=>{fixture.settings={...value};return {...value};}}));
 vi.mock('../src/ai/model',()=>({installedModel:async()=>fixture.installed?{blob:new Blob(['model']),metadata:{sha256:'verified',backend:fixture.backend,storageKey:'stored-model',size:5}}:undefined}));
 vi.mock('../src/offline/assets',()=>({assetUrl:(path:string)=>`https://local.invalid/${path}`,preparedGroups:async()=>({runtime:fixture.runtime})}));
@@ -18,7 +19,7 @@ class FakeWorker {
   reply(message:AIReply){this.onmessage?.({data:message});}
 }
 beforeEach(async()=>{
-  await releaseModel();FakeWorker.instances=[];fixture.settings={contextTokens:8192,maxOutputTokens:512};fixture.installed=true;fixture.runtime=true;fixture.backend='idb';
+  await releaseModel();FakeWorker.instances=[];fixture.settings={contextTokens:8192,maxOutputTokens:512};fixture.installed=true;fixture.lightInstalled=true;fixture.runtime=true;fixture.backend='idb';
   vi.stubGlobal('Worker',FakeWorker);vi.stubGlobal('navigator',{gpu:{}});vi.stubGlobal('isSecureContext',true);
 });
 afterEach(async()=>{await releaseModel();vi.unstubAllGlobals();});
@@ -46,6 +47,15 @@ it('미완료 적재 기록이 있으면 재접속과 질문에서 자동 재시
 });
 it('OPFS 모델은 큰 Blob 대신 저장 위치만 워커에 전달한다',async()=>{
   fixture.backend='opfs';const worker=await ready();expect(worker.messages[0]).toMatchObject({model:{backend:'opfs',storageKey:'stored-model',size:5}});
+});
+it('아이폰은 기존 Gemma만 있어도 무거운 워커를 생성하지 않고 경량 모델 다운로드를 안내한다',async()=>{
+  vi.stubGlobal('navigator',{gpu:{},userAgent:'iPhone'});fixture.lightInstalled=false;
+  expect(await prepareAI()).toBe(false);expect(FakeWorker.instances).toHaveLength(0);expect(getAIStatus().message).toContain('경량 모델');
+});
+it('아이폰 경량 준비에는 LiteRT 파일이 필요 없고 Gemma Blob도 전달하지 않는다',async()=>{
+  vi.stubGlobal('navigator',{gpu:{},userAgent:'iPhone'});fixture.runtime=false;
+  const worker=await ready();expect(worker.url).toBe('https://local.invalid/light-ai-worker.js');
+  const message=worker.messages[0];expect(message).toMatchObject({provider:'light'});if(message.type==='initialize')expect((message.model as Blob).size).toBe(0);
 });
 it('iPhone의 실행 프로필을 워커에 전달하고 실제 생성 단계만 중단 기록에 남긴다',async()=>{
   const values=localStore();vi.stubGlobal('navigator',{gpu:{},userAgent:'iPhone'});
@@ -185,4 +195,12 @@ it('시스템 지시와 질문·원문 데이터를 분리한다',()=>{
   const prompt=buildPrompt('산소 측정방법',[]);
   expect(prompt).toContain('[질문]\n산소 측정방법');expect(prompt).not.toContain(SYSTEM_INSTRUCTION);
   expect(SYSTEM_INSTRUCTION).toContain('한국어');expect(SYSTEM_INSTRUCTION).toContain('수치·단위·조건');
+});
+it('경량 심폐소생술에서 핵심 압박 절차가 빠지면 스트림을 보류하고 원문 전환 오류로 반환한다',async()=>{
+  vi.stubGlobal('navigator',{gpu:{},userAgent:'iPhone'});const worker=await ready(),onText=vi.fn();
+  const sources=[{score:1,chunk:{id:'cpr',documentId:'guide',documentTitle:'문서',pageNumber:40,sourceKind:'guide',chunkIndex:0,heading:'',body:'심폐소생술 흉부 압박 절차'}}];
+  const generation=generate('심폐소생술 알려줘',sources,onText,new AbortController().signal);const rejected=expect(generation).rejects.toThrow('핵심 절차');
+  await vi.waitFor(()=>expect(worker.messages).toHaveLength(2));const id=worker.messages[1].id;
+  worker.reply({id,type:'text',answer:'기도를 개방합니다.'});expect(onText).not.toHaveBeenCalledWith('기도를 개방합니다.');
+  worker.reply({id,type:'done',result:{answer:'기도를 개방합니다.',usage:{contextTokens:2048,maxOutputTokens:256}}});await rejected;
 });

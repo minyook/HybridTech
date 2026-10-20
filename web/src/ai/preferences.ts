@@ -7,12 +7,15 @@ export interface AISettings { maxOutputTokens:number;contextTokens:number }
 export const DEFAULT_AI_SETTINGS:AISettings = {maxOutputTokens:1536,contextTokens:8192};
 export const REDUCED_AI_SETTINGS:AISettings = {maxOutputTokens:512,contextTokens:4096};
 export const RECOVERY_AI_SETTINGS:AISettings = {maxOutputTokens:256,contextTokens:2048};
+export const LIGHT_AI_SETTINGS:AISettings = {maxOutputTokens:256,contextTokens:2048};
 export function normalizeAISettings(value:unknown):AISettings {
   const candidate = value && typeof value==='object' ? value as Partial<AISettings> : {};
+  if(browserAIFeatures().appleMobile)return {contextTokens:2048,maxOutputTokens:candidate.maxOutputTokens===512?512:256};
   const defaults=browserAIFeatures().appleMobile?REDUCED_AI_SETTINGS:DEFAULT_AI_SETTINGS;
   const contextTokens = CONTEXT_TOKEN_OPTIONS.find(option=>option===candidate.contextTokens)??defaults.contextTokens;
   const output = OUTPUT_TOKEN_OPTIONS.find(option=>option===candidate.maxOutputTokens)??defaults.maxOutputTokens;
   return {contextTokens,maxOutputTokens:Math.min(output,contextTokens/2)};
 }
-export async function loadAISettings() { return normalizeAISettings(await getSetting('ai-settings')); }
-export async function saveAISettings(value:AISettings) { const settings=normalizeAISettings(value);await setSetting('ai-settings',settings);return settings; }
+const settingsKey=()=>browserAIFeatures().appleMobile?'ai-settings-light-v1':'ai-settings';
+export async function loadAISettings() { return normalizeAISettings(await getSetting(settingsKey())); }
+export async function saveAISettings(value:AISettings) { const settings=normalizeAISettings(value);await setSetting(settingsKey(),settings);return settings; }

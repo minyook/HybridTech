@@ -8,6 +8,8 @@ import { browserAIFeatures, getAISupport } from './capabilities';
 import { beginAIOperation, finishAIOperation, recoveryMessage, resetAIRecovery, unfinishedAIOperation, updateAIStage } from './recovery';
 import { acquireEngineLease } from './engine-lease';
 import { recordAIDiagnostic } from './diagnostics';
+import { LIGHT_MODEL, lightModelInstalled, usesLightAI } from './light-model';
+import { contradictsSources } from '../rag/search';
 
 export interface AIStatus { phase:'idle'|'checking'|'loading'|'ready'|'generating'|'error'|'unavailable'|'recovery';message:string;startedAt?:number;timing?:InitializationTiming }
 let status:AIStatus={phase:'idle',message:'모델 다운로드 후 자동으로 준비해요'};
@@ -35,7 +37,7 @@ function terminate(error:Error){
   for(const item of pending.values()){clearTimeout(item.timer);item.reject(error);}pending.clear();
 }
 function makeWorker(){
-  const candidate=new Worker(assetUrl('ai-worker.js'));
+  const candidate=new Worker(assetUrl(usesLightAI()?'light-ai-worker.js':'ai-worker.js'));
   worker=candidate;
   candidate.onmessage=(event:MessageEvent<AIReply>)=>{
     if(worker!==candidate)return;
@@ -80,16 +82,22 @@ export function prepareAI(signal?:AbortSignal):Promise<boolean>{
     const operation=(async()=>{
       const support=getAISupport();
       if(!support.available){publish({phase:'unavailable',message:support.title});return false;}
+      // Never load a previously installed 2 GB Gemma file on Apple devices.
+      // A new model download explicitly clears any old interrupted Gemma run.
+      if(usesLightAI()&&!await lightModelInstalled()){
+        if(startedEpoch!==epoch)throw abortError();
+        publish({phase:'idle',message:'설정에서 아이폰용 경량 모델을 다운로드해 주세요. 기존 Gemma 파일은 보존돼요.'});return false;
+      }
       const unfinished=unfinishedAIOperation();
       if(unfinished){publish({phase:'recovery',message:recoveryMessage(unfinished.stage)});return false;}
       const settings=await loadAISettings();
       if(startedEpoch!==epoch)throw abortError();
       if(aiIsReady()&&contextTokens===settings.contextTokens)return true;
       publish({phase:'checking',message:'저장된 AI 모델을 확인하고 있어요',startedAt:Date.now()});
-      const installed=await installedModel();
+      const installed=usesLightAI()?undefined:await installedModel();
       if(startedEpoch!==epoch)throw abortError();
-      if(!installed){publish({phase:'idle',message:'모델을 다운로드하면 AI가 자동으로 준비돼요'});return false;}
-      if(!(await preparedGroups()).runtime)throw new Error('AI 실행 파일이 없어요. 설정에서 AI 실행 파일을 준비해 주세요.');
+      if(!usesLightAI()&&!installed){publish({phase:'idle',message:'모델을 다운로드하면 AI가 자동으로 준비돼요'});return false;}
+      if(!usesLightAI()&&!(await preparedGroups()).runtime)throw new Error('AI 실행 파일이 없어요. 설정에서 AI 실행 파일을 준비해 주세요.');
       if(startedEpoch!==epoch)throw abortError();
       if(worker)terminate(abortError());
       const leaseEpoch=epoch;
@@ -103,14 +111,14 @@ export function prepareAI(signal?:AbortSignal):Promise<boolean>{
       beginAIOperation('verification',settings.contextTokens);
       publish({phase:'loading',message:'저장된 모델을 기기 메모리에 불러오고 있어요',startedAt:Date.now()});
       try{
-        const model=installed.metadata.backend==='opfs'?{backend:'opfs' as const,storageKey:installed.metadata.storageKey,size:installed.metadata.size}:installed.blob;
-        await request(candidate,{id:++nextId,type:'initialize',model,sha256:installed.metadata.sha256,runtimeUrl:assetUrl('runtime/'),settings,profile:browserAIFeatures().appleMobile?'apple-mobile':'standard'});
+        const model=installed?(installed.metadata.backend==='opfs'?{backend:'opfs' as const,storageKey:installed.metadata.storageKey,size:installed.metadata.size}:installed.blob):new Blob();
+        await request(candidate,{id:++nextId,type:'initialize',model,sha256:installed?.metadata.sha256??LIGHT_MODEL.revision,runtimeUrl:assetUrl('runtime/'),settings,profile:browserAIFeatures().appleMobile?'apple-mobile':'standard',...(usesLightAI()?{provider:'light'}:{})});
         if(worker!==candidate)throw abortError();
         finishAIOperation();
         contextTokens=settings.contextTokens;publish({phase:'ready',message:'AI 사용 가능 · 바로 질문해 보세요'});return true;
       }catch(error){if(worker===candidate){terminate(error instanceof Error?error:new Error(String(error)));publish({phase:'error',message:error instanceof Error?error.message:'AI를 준비하지 못했어요.'});}throw error;}
     })();
-    const shared=operation.catch(error=>{if(startedEpoch===epoch&&status.phase==='checking')publish({phase:'error',message:error instanceof Error?error.message:'AI를 준비하지 못했어요.'});throw error;}).finally(()=>{if(preparing===shared)preparing=undefined;});
+    const shared=operation.catch(error=>{if(startedEpoch===epoch&&status.phase!=='error')publish({phase:'error',message:error instanceof Error?error.message:'AI를 준비하지 못했어요.'});throw error;}).finally(()=>{if(preparing===shared)preparing=undefined;});
     preparing=shared;
   }
   return abortable(preparing,signal);
@@ -150,12 +158,13 @@ export async function generate(question:string,sources:Source[],onText:(answer:s
     signal.addEventListener('abort',cancel,{once:true});
     publish({phase:'generating',message:'답변에 필요한 작업 공간을 준비하고 있어요',startedAt:Date.now()});
     const referenceText=[question,...sources.map(source=>source.chunk.body)].join('\n');
-    const result=await request(candidate,{id:++nextId,type:'generate',prompt:buildPrompt(question,sources),systemInstruction:SYSTEM_INSTRUCTION,settings},answer=>{
+    const result=await request(candidate,{id:++nextId,type:'generate',prompt:usesLightAI()?'':buildPrompt(question,sources),...(usesLightAI()?{question,sources}:{}),systemInstruction:SYSTEM_INSTRUCTION,settings},answer=>{
       // Do not keep streaming visibly corrupted text while waiting for completion.
-      onText(outputIssue(answer,referenceText)?'생성된 문장을 확인하고 있어요…':answer);
+      onText(outputIssue(answer,referenceText)||(usesLightAI()&&contradictsSources(question,answer,sources))?'생성된 문장을 확인하고 있어요…':answer);
     });
     signal.throwIfAborted();if(!result)throw new Error('AI가 답변을 반환하지 않았어요.');
     const issue=outputIssue(result.answer,referenceText);if(issue)throw new Error(issue);
+    if(contradictsSources(question,result.answer,sources))throw Error('생성된 답변에 핵심 절차가 누락되거나 선택한 근거와 맞지 않아요.');
     return result;
   } finally {
     if(executionStarted)finishAIOperation();

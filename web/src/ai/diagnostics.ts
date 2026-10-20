@@ -1,6 +1,6 @@
 import { AI_OPERATION_KEY } from './recovery';
 export const AI_DIAGNOSTIC_KEY='fieldguard-ai-diagnostics';
-export const AI_RUNTIME_REVISION='apple-gpu-lifecycle-20261020.3';
+export const AI_RUNTIME_REVISION='apple-light-qwen-20261020.4';
 export interface AIDiagnostic {
   stage:string;kind?:'memory'|'gpu-error'|'gpu-lost'|'gpu-destroyed';wasmHeapBytes?:number;
   gpuError?:'out-of-memory'|'validation'|'internal'|'unknown';
@@ -25,5 +25,5 @@ export function recordAIDiagnostic(sample:AIDiagnostic){
 export function aiDiagnosticReport(){
   let interrupted:{stage:string;contextTokens?:number;startedAt?:number}|undefined;
   try{const saved=JSON.parse(localStorage.getItem(AI_OPERATION_KEY)??'null');if(saved&&typeof saved.stage==='string'&&/^[a-z-]{1,32}$/.test(saved.stage))interrupted={stage:saved.stage,...(Number.isSafeInteger(saved.contextTokens)?{contextTokens:saved.contextTokens}:{}),...(Number.isFinite(saved.startedAt)?{startedAt:saved.startedAt}:{})};}catch{/* Optional guard. */}
-  return {version:1,revision:AI_RUNTIME_REVISION,exportedAt:new Date().toISOString(),memoryScope:'WASM heap capacity only; excludes GPU and total WebContent memory',interrupted,events:entries()};
+  return {version:1,revision:AI_RUNTIME_REVISION,exportedAt:new Date().toISOString(),memoryScope:'Model runtime WASM heap capacity only; excludes GPU, separate tokenizer and total WebContent memory',interrupted,events:entries()};
 }
