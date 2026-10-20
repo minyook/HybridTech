@@ -155,7 +155,7 @@ iPhone/iPad WebGPU의 정식 지원은 iOS/iPadOS 26부터입니다. 사용자 �
 
 정확한 명령·프로파일 설치·신뢰·제거·키 경로는 [iPhone 시험 안내](../IPHONE_TEST.md)에 정리합니다. HTTPS 접속 검증과 실제 iPhone AI·메모리 시험 결과는 구분합니다.
 
-정상 Apple 답변 종료에서는 엔진 삭제 이후 SDK 런타임의 실제 WebGPU 장치를 명시적으로 `destroy()`한 뒤 Worker를 종료합니다. `ai/worker-resources.ts`가 실제 WASM 힙 용량·GPU 오류 종류/장치 손실을 표본 기록하고 `ai/diagnostics.ts`가 설정값과 함께 최근 48개만 기기에 보관합니다. 설정의 **AI 진단 기록 저장**으로 내보내며 질문·답변·주소·기기 식별자와 원격 전송은 포함하지 않습니다. WASM 용량은 GPU·전체 WebContent 메모리가 아닙니다. 준비 완료 뒤 질문 전송/`decode`에서 종료가 재발한 실제 iPhone의 안정성은 미해결이며, 이번 시각의 새 시스템 로그가 필요합니다. [최신 원인 분석과 한계](IPHONE_MEMORY_ANALYSIS.md#준비-완료-뒤-질문-전송-시-decode-종료-재발).
+정상 Apple 답변 종료에서는 엔진 삭제 이후 SDK 런타임의 실제 WebGPU 장치를 명시적으로 `destroy()`한 뒤 Worker를 종료합니다. `ai/worker-resources.ts`가 실제 WASM 힙 용량·GPU 오류 종류/장치 손실을 표본 기록하고 `ai/diagnostics.ts`가 설정값과 함께 최근 48개만 기기에 보관합니다. 설정의 **AI 진단 기록 저장**으로 내보내며 질문·답변·주소·기기 식별자와 원격 전송은 포함하지 않습니다. WASM 용량은 GPU·전체 WebContent 메모리가 아닙니다. 준비 완료 뒤 질문 전송/`decode`에서 종료가 재발한 실제 iPhone의 안정성은 미해결입니다. 추가된 12:20:58 로그에서는 WebContent의 highwater 종료와 약 2.703GiB 기록 사용량을 확인했습니다. 정확한 할당 비중·앱 빌드는 불명이며 12:38 GPU 정리·진단 변경의 성공/실패를 보여주는 로그가 아닙니다. [최신 원인 분석과 한계](IPHONE_MEMORY_ANALYSIS.md#준비-완료-뒤-질문-전송-시-decode-종료-재발).
 
 ## 저장·오프라인·업데이트
 
