@@ -155,6 +155,8 @@ iPhone/iPad WebGPU의 정식 지원은 iOS/iPadOS 26부터입니다. 사용자 �
 
 정확한 명령·프로파일 설치·신뢰·제거·키 경로는 [iPhone 시험 안내](../IPHONE_TEST.md)에 정리합니다. HTTPS 접속 검증과 실제 iPhone AI·메모리 시험 결과는 구분합니다.
 
+정상 Apple 답변 종료에서는 엔진 삭제 이후 SDK 런타임의 실제 WebGPU 장치를 명시적으로 `destroy()`한 뒤 Worker를 종료합니다. `ai/worker-resources.ts`가 실제 WASM 힙 용량·GPU 오류 종류/장치 손실을 표본 기록하고 `ai/diagnostics.ts`가 설정값과 함께 최근 48개만 기기에 보관합니다. 설정의 **AI 진단 기록 저장**으로 내보내며 질문·답변·주소·기기 식별자와 원격 전송은 포함하지 않습니다. WASM 용량은 GPU·전체 WebContent 메모리가 아닙니다. 준비 완료 뒤 질문 전송/`decode`에서 종료가 재발한 실제 iPhone의 안정성은 미해결이며, 이번 시각의 새 시스템 로그가 필요합니다. [최신 원인 분석과 한계](IPHONE_MEMORY_ANALYSIS.md#준비-완료-뒤-질문-전송-시-decode-종료-재발).
+
 ## 저장·오프라인·업데이트
 
 | 저장 위치 | 내용 |
@@ -176,7 +178,7 @@ iPhone/iPad WebGPU의 정식 지원은 iOS/iPadOS 26부터입니다. 사용자 �
 
 Node.js 24.15 이상에서 개발 포트 5174와 프로덕션 미리보기 4173을 고정 사용하며 두 서버는 동일한 SQLite 작업 DB를 사용합니다. `.local/`과 서버 소스는 개발 서버 정적 접근에서 차단합니다. 정적 배포 출력은 `web/dist`이며 문서·AI에 HTTPS·COOP/COEP·WASM MIME과 캐시 설정이 필요합니다. 감독관·새 점검은 API 런타임이 필요하므로 `dist` 정적 호스팅만으로 사용할 수 없습니다. Vite 통합 API는 개발/미리보기용이며 실제 외부 운영 배포·계정 연동·DB 백업/복구 운영 구성은 수행하지 않았습니다.
 
-현재 자동 테스트는 26개 파일 **195개 통과**입니다. 검색 정답 쪽 회귀 평가는 **29/30**이며 생성 정확도 평가와 구분합니다. Windows Chromium의 실제 다운로드·초기화·생성·사용량·파일/PDF 오프라인 동작과 세부 조건은 [검증 기록](../../web/docs/validation.md)에 있습니다. 실제 iPhone의 연속 생성과 제조사 센서 검증은 남아 있습니다.
+현재 자동 테스트는 28개 파일 **202개 통과**입니다. 검색 정답 쪽 회귀 평가는 **29/30**이며 생성 정확도 평가와 구분합니다. Windows Chromium의 실제 다운로드·초기화·생성·사용량·파일/PDF 오프라인 동작과 세부 조건은 [검증 기록](../../web/docs/validation.md)에 있습니다. 실제 iPhone의 연속 생성과 제조사 센서 검증은 남아 있습니다.
 
 ## 주요 코드
 
@@ -186,6 +188,7 @@ Node.js 24.15 이상에서 개발 포트 5174와 프로덕션 미리보기 4173�
 | `src/chat/` | 사용자 스크롤을 보존하는 자동 이동 |
 | `src/ai/catalog.ts`, `model.ts` | 고정 다운로드·무결성·모델 저장 |
 | `src/ai/runtime.ts`, `worker-engine.ts`, `engine.worker.ts` | 자동 준비·워커 통신·SDK 추론 |
+| `src/ai/worker-resources.ts`, `diagnostics.ts` | 명시적 GPU 장치 폐기·WASM/GPU 오류 표본·48개 로컬 진단 |
 | `src/chat/viewport.ts`, `useChatViewport.ts`, `chat.css` | 키보드와 보이는 높이·대화/입력 배치 |
 | `src/ai/model-stream.ts` | 최대 1MiB 단위 모델 입력 스트림 |
 | `src/ai/recovery.ts`, `engine-lease.ts` | 페이지 중단 감지와 엔진 잠금 |

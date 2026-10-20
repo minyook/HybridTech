@@ -99,6 +99,10 @@ Safari에서 다운로드·실행한 경우에는 같은 출처의 `https://<PC-
 
 **연속 질문 보완:** 첫 답변 뒤 두 번째 질문 **‘심폐소생술 알려줘’**에서 페이지가 다시 열리고 ‘답변 토큰 생성 완료를 확인하지 못해’가 표시됐다는 사용자 보고를 반영했습니다. 기존에는 conversation만 삭제하고 엔진/Worker는 재사용했습니다. 이제 iPhone/iPad에서는 답변마다 conversation과 엔진의 삭제를 기다린 뒤 Worker를 종료하고 다음 질문용 엔진 하나를 자동 준비합니다. 준비 중 보낸 질문은 기다렸다가 이어서 처리하며 새로고침·모델 재다운로드·실행 버튼은 필요하지 않습니다. **질문 사이 모델 준비 시간이 추가될 수 있습니다.** 설정의 **‘답변이 끝나면 AI 메모리를 정리하고 다음 질문을 자동으로 준비해요’** 문구로 이 버전을 확인합니다. 이번 두 번째 질문의 종료 원인이 누적 메모리인지 새 입력의 최대 사용량인지 새 기기 로그 없이 확정하지 않습니다.
 
+**최신 상태 — 아이폰 문제 미해결:** 위 수정 뒤에도 사용자는 준비 완료 후 **질문 보내기**를 누르면 반복 종료되며, 다음 실행의 표시가 다시 **‘답변 토큰 생성’**이라고 확인했습니다. 화면 이동 전용 오류나 토큰 사용량 소진이 아닌 생성 중 중단입니다. 앞선 로그 때문에 메모리 압박을 우선 의심하지만 이번 사건의 원인·할당 위치는 새 Jetsam/WebKit 로그 없이 확정하지 않습니다. 모델 준비 완료는 실제 답변 성공을 보장하지 않습니다. PC의 연속 통과를 해당 아이폰의 해결 판정으로 사용하지 않습니다.
+
+정상 Apple 답변 종료 시 SDK 대화/엔진 삭제 뒤 실제 WebGPU 장치에도 `destroy()`를 호출하고 Worker를 종료하도록 보완했습니다. **설정 → AI 진단 기록 저장**은 실행 단계·문맥/답변 한도·WASM 힙 크기·GPU 오류 종류의 최근 48개 기록을 JSON으로 저장합니다. 질문/답변·주소·기기 식별자는 포함하지 않고 자동 전송하지 않습니다. WASM 힙은 GPU·전체 WebContent 메모리 측정이 아닙니다. 표시 버전은 **`apple-gpu-lifecycle-20261020.3`**입니다. 같은 종료가 반복되면 문맥 축소·재다운로드를 계속 반복하지 않고 **이번 종료 시각의 새 시스템 로그**와 비교합니다. 이 보완도 해당 iPhone의 생성 중 종료 해결을 입증한 것은 아닙니다.
+
 ## 작업자 요청 ↔ 감독관 승인
 
 기본 작업 화면은 진행 중인 요청만 표시합니다. 종료된 과거 작업은 ‘종료 이력’에서 확인하며 새 요청의 승인으로 사용하지 않습니다. 감독관 코드를 입력해도 작업은 승인되지 않습니다.
@@ -281,6 +285,7 @@ Sllm2/
 | `web/server/api.ts`, `plugin.ts`, `manage.ts` | HTTP API·Vite 연결·코드 관리 CLI |
 | `web/src/ai/catalog.ts`, `model.ts` | 공식 모델 정보·다운로드·저장·검증 재사용 |
 | `web/src/ai/runtime.ts`, `worker-engine.ts`, `engine.worker.ts` | 자동 준비·Worker 통신·실제 SDK 추론 |
+| `web/src/ai/worker-resources.ts`, `diagnostics.ts` | WebGPU 장치 정리·WASM/GPU 오류 표본·개인 내용 없는 로컬 진단 |
 | `web/src/ai/model-stream.ts` | OPFS 모델의 1MiB 단위 SDK 입력 스트림 |
 | `web/src/ai/recovery.ts`, `engine-lease.ts` | 중단 흔적·자동 반복 방지·동일 출처 엔진 잠금 |
 | `web/src/ai/execution.ts` | iPhone/iPad용 LiteRT-LM 입력 배치·GPU 버퍼 설정 |
@@ -328,7 +333,7 @@ npm.cmd run build
 
 Android UI 계측 테스트: `TossNavigationTest`, `WorkspaceDesignTest`. 원본 PDF 검증은 `data/SourcePdfRepositoryTest`입니다. 웹 검증에는 검색·Markdown·스크롤·모델 무결성·검증 재사용·토큰·날짜 경계·당일 코드 공동 사용·권한 우회 거부·동시 갱신을 포함합니다. 검색 회귀 정답 쪽 포함 결과는 29/30이며 AI 생성 답변 전체의 정확도 점수와 구분합니다. 최신 실행 수치·실기기 결과·남은 항목은 아래 검증 기록을 기준으로 합니다.
 
-2026-10-16 Android 갱신 결과: **Android JVM 19개·갤럭시 탭 UI 계측 17개 통과**, Android APK 빌드 성공. 2026-10-20 iPhone 연속 질문 변경 후 웹은 **26개 파일 195개 통과**, 프로덕션/PWA 빌드 성공. Windows Chromium에서 iPhone용 프로필·실제 공식 E2B 모델의 구간 읽기 초기화와 입력 1,348/생성 256토큰을 확인했습니다. 같은 실행 정책으로 실제 `runtime.generate`를 통해 **5회 연속 생성**, Worker 생성/종료 각 5개·동시 최대 1개를 확인했습니다. [PC 연속 질문 화면](web/docs/screenshots/ai-continuous-pc.png)이며 실제 iPhone 연속 성공이나 전체 메모리 개선율·생성 답변 정확도 검수를 뜻하지 않습니다. 개발 CA를 명시한 실제 TLS 검증·보안 쿠키·서버 응답도 확인했습니다. 앱 화면은 Galaxy Tab S9 Ultra(SM-X910, Android 16)의 실제 렌더링 캡처이며 UI 테스트는 가상 상태를 사용합니다. 새 UI·공통 WebView 검증과 실제 모델 추론·BLE 장비 검증을 구분합니다.
+2026-10-16 Android 갱신 결과: **Android JVM 19개·갤럭시 탭 UI 계측 17개 통과**, Android APK 빌드 성공. 2026-10-20 iPhone GPU 정리·진단 추가 후 웹은 **28개 파일 202개 통과**, 프로덕션/PWA 빌드 성공. Windows Chromium에서 iPhone용 프로필·실제 공식 E2B 모델의 구간 읽기 초기화와 입력 1,348/생성 256토큰을 확인했습니다. 같은 실행 정책으로 실제 `runtime.generate`를 통해 **5회 연속 생성**, Worker 생성/종료 각 5개·동시 최대 1개를 확인했습니다. [PC 연속 질문 화면](web/docs/screenshots/ai-continuous-pc.png)이며 실제 iPhone 연속 성공이나 전체 메모리 개선율·생성 답변 정확도 검수를 뜻하지 않습니다. 개발 CA를 명시한 실제 TLS 검증·보안 쿠키·서버 응답도 확인했습니다. 앱 화면은 Galaxy Tab S9 Ultra(SM-X910, Android 16)의 실제 렌더링 캡처이며 UI 테스트는 가상 상태를 사용합니다. 새 UI·공통 WebView 검증과 실제 모델 추론·BLE 장비 검증을 구분합니다.
 
 | 문서 | 내용 |
 |---|---|

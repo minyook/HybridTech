@@ -46,6 +46,18 @@ SDK의 공개 `Engine`/대화 API, GPU_ARTISAN, 공식 E2B 파일·해시와 문
 
 관련 경로는 `web/src/ai/worker-engine.ts`(SDK 정리 순서), `runtime.ts`(Worker 교체·단일 자동 준비·질문 대기), `recovery.ts`(정리 단계), `web/tests/worker-engine.test.ts`·`ai-runtime.test.ts`·`ai-recovery.test.ts`(회귀 검사)입니다.
 
+## 준비 완료 뒤 질문 전송 시 decode 종료 재발
+
+엔진 수명 분리 수정 뒤에도 사용자는 준비가 끝난 상태에서 질문 보내기를 누르면 ‘문제가 반복적으로 발생했습니다’가 나타나며 다음 실행의 안내가 **답변 토큰 생성**이라고 확인했습니다. 따라서 질문 화면을 여는 것만으로 종료되는 사례로 분류하지 않습니다. `decode`는 첫 텍스트 수신 이후의 지속 표시이므로 새 시스템 로그 없이 정확한 할당이나 종료 원인을 단정하지 않습니다. 10:43:52의 `highwater`는 앞선 사건의 증거이며 이번 사건 자체를 확정하는 로그가 아닙니다.
+
+모델 초기화는 가중치/엔진 준비이고 실제 대화의 입력·생성·토큰별 작업 공간은 이후 사용됩니다. 준비 성공과 답변 성공은 다릅니다. 답변 뒤 Worker를 교체하는 조치는 앞선 엔진의 수명을 줄이지만 **한 답변 생성 중의 최대 메모리**를 보장하지 않습니다. 토큰 설정 축소나 같은 파일 재다운로드를 반복하는 것으로 해결됐다고 판정하지 않습니다.
+
+고정 SDK 0.18.0은 엔진 삭제와 별도로 `liteRtLmWasm.preinitializedWebGPUDevice`에 GPU 장치를 보관합니다. SDK의 `LiteRtLm.delete()`는 이 버전에서 no-op입니다. Apple 정상 종료에는 엔진 삭제 뒤 이 장치의 `destroy()`를 명시하고, 그 다음 Worker를 종료합니다. 엔진 삭제가 실패해도 GPU 장치 정리를 시도합니다. 강제 종료·취소에서 모든 장치 메모리가 즉시 반환된다고 보장하지 않습니다. 이 누락을 고친 것만으로 현재 `decode` 종료의 원인이 밝혀졌다고 주장하지 않습니다.
+
+`web/src/ai/worker-resources.ts`는 SDK가 공개한 실제 런타임의 WASM 힙 용량을 engine/engine-ready/conversation/prefill/decode/metrics/cleanup에서 표본 수집하고 장치 손실과 미처리 GPU 오류의 종류를 관찰합니다. 생성 중에는 첫 스트림 청크와 이후 32청크마다 기록하며 이는 토큰 수 측정이 아닙니다. `web/src/ai/diagnostics.ts`는 설정값과 시각·실행 버전을 함께 최대 48개만 localStorage `fieldguard-ai-diagnostics`에 남깁니다. 질문·답변·원시 오류·주소·기기 식별자는 저장하지 않고 허용된 필드만 내보냅니다. 설정의 **AI 진단 기록 저장**으로 JSON을 받을 수 있으며 원격 수집은 없습니다.
+
+**WASM 힙 용량은 실제 상주 메모리·GPU 버퍼·WebContent 전체 메모리가 아닙니다.** GPU 오류가 없다는 기록 역시 OS 메모리 종료를 배제하지 않습니다. 새 기록은 앞으로의 실행부터 수집하므로 이전 사건의 최대 사용량을 소급해 계산하지 않습니다. 해당 종료 시각의 새 Jetsam/WebKit 기록과 함께 분석해야 합니다.
+
 ## 검증 범위
 
 자동 검증과 Windows Chromium에서의 실제 E2B 결과는 [검증 기록](../../web/docs/validation.md)을 따릅니다. PC의 최대 파일 읽기 1MiB 관찰은 iPhone 전체 메모리 사용량이나 개선율을 뜻하지 않습니다. **실제 iPhone의 첫 답변 성공은 사용자 보고이며, 이번 엔진 교체 수정 이후의 연속 실행·최대 메모리는 아직 확인하지 않았습니다.**

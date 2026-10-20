@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-const sdk=vi.hoisted(()=>({create:vi.fn(),load:vi.fn(),verify:vi.fn()}));
-vi.mock('@litert-lm/core',()=>({Engine:{create:sdk.create},loadLiteRtLm:sdk.load,SamplerType:{TOP_K:1}}));
+const sdk=vi.hoisted(()=>({create:vi.fn(),load:vi.fn(),verify:vi.fn(),setup:vi.fn(),global:vi.fn()}));
+vi.mock('@litert-lm/core',()=>({Engine:{create:sdk.create},loadLiteRtLm:sdk.load,SamplerType:{TOP_K:1},setupDefaultWebGpuDevice:sdk.setup,getGlobalLiteRtLm:sdk.global}));
 vi.mock('../src/ai/model',()=>({verifyStoredModel:sdk.verify}));
 import { WorkerEngine } from '../src/ai/worker-engine';
 import type { AIReply, AIRequest } from '../src/ai/protocol';
 import { localModelSource } from '../src/ai/model-stream';
 const settings={contextTokens:4096,maxOutputTokens:512};
 const init=():Extract<AIRequest,{type:'initialize'}>=>({id:1,type:'initialize',model:new Blob(['model']),sha256:'verified',runtimeUrl:'https://local.invalid/runtime/',settings});
-beforeEach(()=>{vi.clearAllMocks();sdk.verify.mockReset().mockResolvedValue('full');sdk.load.mockResolvedValue(undefined);});
+beforeEach(()=>{vi.clearAllMocks();sdk.verify.mockReset().mockResolvedValue('full');sdk.load.mockResolvedValue(undefined);sdk.setup.mockResolvedValue(undefined);sdk.global.mockReset().mockImplementation(()=>{throw Error('no runtime in fixture');});});
 afterEach(()=>vi.unstubAllGlobals());
 
 it('무결성 검증 후 저장된 문맥 한도로 실제 SDK 엔진을 만든다',async()=>{
@@ -64,14 +64,16 @@ it('SDK 측정치가 없으면 글자 수로 토큰 사용량을 꾸며내지 �
 });
 it('iPhone은 대화와 엔진 정리가 끝나기 전에는 답변 완료를 알리지 않는다',async()=>{
   let finish!:()=>void;
+  const gpu={destroy:vi.fn(),lost:new Promise<{reason:string}>(()=>{}),addEventListener:vi.fn(),removeEventListener:vi.fn()};
+  sdk.global.mockReturnValue({liteRtLmWasm:{HEAPU8:new Uint8Array(16),preinitializedWebGPUDevice:gpu}});
   const conversation={sendMessageStreaming:()=>new ReadableStream({start(c){c.enqueue({content:'첫 답변'});c.close();}}),getBenchmarkInfo:async()=>({}),getTokenCount:async()=>0,delete:vi.fn(async()=>{})};
   const dispose=vi.fn(()=>new Promise<void>(resolve=>{finish=resolve;}));sdk.create.mockResolvedValue({createConversation:async()=>conversation,delete:dispose});
   const engine=new WorkerEngine();await engine.handle({...init(),profile:'apple-mobile'},vi.fn());const reply=vi.fn();
   const generation=engine.handle({id:2,type:'generate',prompt:'질문',settings},reply);
   await vi.waitFor(()=>expect(dispose).toHaveBeenCalledOnce());expect(conversation.delete).toHaveBeenCalledOnce();
-  expect(reply).toHaveBeenLastCalledWith(expect.objectContaining({type:'progress',stage:'cleanup'}));
+  expect(reply).toHaveBeenLastCalledWith(expect.objectContaining({type:'progress',stage:'cleanup'}));expect(gpu.destroy).not.toHaveBeenCalled();
   expect(reply.mock.calls.some(([value])=>value.type==='done')).toBe(false);
-  finish();await generation;expect(reply).toHaveBeenLastCalledWith(expect.objectContaining({type:'done',result:expect.objectContaining({answer:'첫 답변'})}));
+  finish();await generation;expect(reply).toHaveBeenLastCalledWith(expect.objectContaining({type:'done',result:expect.objectContaining({answer:'첫 답변'})}));expect(gpu.destroy).toHaveBeenCalledOnce();expect(gpu.addEventListener).toHaveBeenCalledOnce();
   await engine.handle({id:3,type:'generate',prompt:'이전 엔진으로 다시 질문',settings},reply);
   expect(reply).toHaveBeenLastCalledWith(expect.objectContaining({type:'error'}));expect(dispose).toHaveBeenCalledOnce();
 });

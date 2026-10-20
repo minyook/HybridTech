@@ -5,6 +5,7 @@ vi.mock('../src/ai/model',()=>({installedModel:async()=>fixture.installed?{blob:
 vi.mock('../src/offline/assets',()=>({assetUrl:(path:string)=>`https://local.invalid/${path}`,preparedGroups:async()=>({runtime:fixture.runtime})}));
 import { aiIsReady, buildPrompt, generate, getAIStatus, prepareAI, releaseModel, retryAIWithReducedContext, SYSTEM_INSTRUCTION } from '../src/ai/runtime';
 import { AI_OPERATION_KEY } from '../src/ai/recovery';
+import { aiDiagnosticReport } from '../src/ai/diagnostics';
 import type { AIReply, AIRequest } from '../src/ai/protocol';
 
 class FakeWorker {
@@ -25,6 +26,16 @@ async function ready(){const promise=prepareAI();await vi.waitFor(()=>expect(Fak
 function localStore(){
   const values=new Map<string,string>();vi.stubGlobal('localStorage',{getItem:(key:string)=>values.get(key)??null,setItem:(key:string,value:string)=>values.set(key,value),removeItem:(key:string)=>values.delete(key)});return values;
 }
+it('워커의 메모리 진단을 설정값과 저장하고 생성 완료로 오인하지 않는다',async()=>{
+  localStore();const worker=await ready();worker.reply({id:worker.messages[0].id,type:'diagnostic',sample:{stage:'engine-ready',kind:'gpu-lost'}});
+  expect(aiDiagnosticReport().events.at(-1)).toMatchObject({stage:'engine-ready',kind:'gpu-lost'});
+  const generation=generate('private question',[],vi.fn(),new AbortController().signal);
+  await vi.waitFor(()=>expect(worker.messages).toHaveLength(2));const id=worker.messages[1].id;
+  worker.reply({id,type:'diagnostic',sample:{stage:'decode',kind:'memory',wasmHeapBytes:987654}});
+  expect(getAIStatus().phase).toBe('generating');expect(aiDiagnosticReport().events.at(-1)).toMatchObject({stage:'decode',wasmHeapBytes:987654,contextTokens:8192,maxOutputTokens:512});
+  expect(JSON.stringify(aiDiagnosticReport())).not.toContain('private question');
+  worker.reply({id,type:'done',result:{answer:'답변',usage:{maxOutputTokens:512,contextTokens:8192}}});expect((await generation).answer).toBe('답변');
+});
 it('미완료 적재 기록이 있으면 재접속과 질문에서 자동 재시도하지 않고 축소 설정으로만 복구한다',async()=>{
   const values=localStore();values.set(AI_OPERATION_KEY,JSON.stringify({version:1,id:'closed-page',stage:'engine',contextTokens:8192,startedAt:Date.now()}));
   expect(await prepareAI()).toBe(false);expect(getAIStatus().phase).toBe('recovery');expect(FakeWorker.instances).toHaveLength(0);

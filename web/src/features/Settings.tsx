@@ -10,6 +10,7 @@ import { getWorkOrders, refreshWorkSession } from '../workflow/access';
 import { manifest, prepareAssets, preparedGroups, storageInfo } from '../offline/assets';
 import { bytes, go, Icon, Notice, PageHead } from '../ui';
 import type { Asset, AssetManifest, ModelRecord } from '../types';
+import { aiDiagnosticReport, AI_RUNTIME_REVISION } from '../ai/diagnostics';
 
 const preparationDuration=(milliseconds:number)=>milliseconds<100?'0.1초 미만':`${(milliseconds/1000).toFixed(1)}초`;
 
@@ -21,6 +22,7 @@ export default function Settings({ notify, changed }: { notify: (message: string
   const defaultTokens=normalizeAISettings(undefined);const [tokens,setTokens]=useState<AISettings>(defaultTokens);const [savedTokens,setSavedTokens]=useState<AISettings>();
   const [elapsed,setElapsed]=useState(0);
   const [busy,setBusy] = useState(''); const [status,setStatus] = useState(''); const [failure,setFailure] = useState('');
+  const [diagnostic,setDiagnostic]=useState('');
   const controller = useRef<AbortController | undefined>(undefined);
   async function refresh() { const [g,c,i,m] = await Promise.all([preparedGroups(),manifest(),storageInfo(),installedModel()]); setGroups(g); setCatalog(c); setInfo(i); setModel(m?.metadata); }
   useEffect(() => { refresh().catch(error => setFailure(error.message));loadAISettings().then(value=>{setTokens(value);setSavedTokens(value);}).catch(()=>setFailure('AI 토큰 설정을 읽지 못했어요.')); return () => controller.current?.abort(); },[]);
@@ -50,6 +52,11 @@ export default function Settings({ notify, changed }: { notify: (message: string
       link.href = objectUrl; link.download = `fieldguard-records-${new Date().toISOString().slice(0,10)}.json`; link.click(); setTimeout(() => URL.revokeObjectURL(objectUrl),10000);
     } catch { notify('기록을 내보내지 못했어요.'); }
   }
+  function exportAIDiagnostics(){
+    const text=JSON.stringify(aiDiagnosticReport(),null,2);setDiagnostic(text);
+    const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));
+    const link=document.createElement('a');link.href=url;link.download='fieldguard-ai-diagnostics.json';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
+  }
   return <>
     <PageHead eyebrow="YOUR WORKSPACE" title="현장에 가기 전, 준비해요" description="문서와 AI를 이 기기에 저장하면 인터넷 없이 사용할 수 있어요."/>
     {!isSecureContext && <Notice kind="warning">PWA 설치와 기기 저장에는 HTTPS가 필요해요. PC 개발 환경에서는 localhost를 사용할 수 있어요.</Notice>}
@@ -64,6 +71,7 @@ export default function Settings({ notify, changed }: { notify: (message: string
       {!support.available&&<section className="ai-compatibility" aria-label="AI 실행 조건"><p>{support.message}</p><div className="ready-list">{([['secure','보안 연결(HTTPS)'],['webgpu','AI 그래픽 기능(WebGPU)'],['worker','백그라운드 실행']] as const).map(([key,label])=><span className={`badge ${support.features[key]?'green':''}`} key={key}>{support.features[key]?'✓':'○'} {label} {support.features[key]?'지원':'확인 필요'}</span>)}</div>{support.reason==='webgpu'&&support.features.appleMobile&&<a href="https://support.apple.com/ko-kr/123705" target="_blank" rel="noreferrer">iOS 업데이트 안내 ↗</a>}<p>문서 검색·PDF·작업 요청과 감독관 승인은 AI 지원 여부와 별개로 사용할 수 있어요.</p></section>}
       {ai.phase==='recovery'&&<section className="ai-compatibility" aria-label="AI 준비 복구"><p>메모리 부족이나 브라우저 종료가 원인일 수 있어요. 다른 AI 화면을 닫은 뒤 문맥 {RECOVERY_AI_SETTINGS.contextTokens.toLocaleString()}·답변 한도 {RECOVERY_AI_SETTINGS.maxOutputTokens} 토큰으로 다시 시험할 수 있어요. 저장된 모델은 다시 다운로드하지 않아요.</p><div className="button-row spaced"><button className="btn secondary" disabled={Boolean(busy)} onClick={()=>task('recovery',async()=>{await retryAIWithReducedContext(settings=>{setTokens(settings);setSavedTokens(settings);});})}>문맥을 줄여 다시 준비</button><button className="text-button" onClick={()=>go('/library')}>문서 먼저 이용하기 →</button></div></section>}
       {support.features.appleMobile&&<p className="caption">iPhone·iPad에서는 저장 파일을 필요한 부분씩 읽어 준비해요. 답변이 끝나면 AI 메모리를 정리하고 다음 질문을 자동으로 준비해요. 준비 중에 보낸 질문은 잠시 기다렸다가 처리해요. 이 기기의 안정적인 연속 실행은 별도 확인이 필요해요.</p>}
+      {support.features.appleMobile&&<div className="ai-compatibility"><p>모델 준비 완료 후에도 실제 답변 중 메모리·GPU 문제로 종료될 수 있어요. 같은 종료가 반복되면 추가 재시도 없이 진단 기록을 저장해 주세요.</p><button className="btn secondary small" onClick={exportAIDiagnostics}>AI 진단 기록 저장</button><p className="caption">실행 단계·토큰 설정·WASM 힙 크기·GPU 오류 종류만 이 기기에 남겨요. 질문·답변은 포함하지 않으며 자동 전송하지 않아요. WASM 힙은 GPU·브라우저 전체 메모리와 달라요. 버전 {AI_RUNTIME_REVISION}</p>{diagnostic&&<label className="field">저장이 안 되면 아래 내용을 복사해 주세요<textarea aria-label="AI 진단 기록 내용" readOnly rows={6} style={{width:'100%',fontSize:12}} value={diagnostic}/></label>}</div>}
       <p className="setting-description">모델 파일은 한 번 다운로드하면 이 기기에 저장돼요. 다시 열 때는 이전 검증 결과로 파일의 변경 여부를 빠르게 확인하고 실행 메모리에 불러와요. 파일이 바뀌거나 검증 후 7일이 지나면 전체를 다시 검사해요. 앱 안에서 화면만 이동할 때는 준비된 AI를 계속 사용해요.</p>
       {model && <div className="model-detail"><strong>{model.name}</strong><p>{bytes(model.size)} · SHA-256 검증됨 · {model.backend.toUpperCase()}</p><button className="btn danger small" disabled={Boolean(busy)||ai.phase==='generating'} onClick={() => { if (window.confirm('저장된 AI 모델을 삭제할까요? 문서와 기록은 유지돼요.')) void task('delete',async () => { await releaseModel(); await removeModel(); }); }}>모델 삭제</button></div>}
       <div className="model-download-card"><div><Icon name="cpu"/><strong>Gemma 4 E2B</strong><span className="badge blue">웹용 · 2.01 GB</span></div><p>한 번 다운로드하면 바로 AI 준비가 시작돼요. 별도의 실행 버튼을 누를 필요가 없어요.</p><button className="btn primary full" disabled={Boolean(busy)||ai.phase==='generating'||!support.available||model?.sha256===GEMMA4_E2B.sha256} onClick={() => task('model',download)}><Icon name="download"/>{!support.available?'AI 실행 조건을 먼저 확인해 주세요':model?.sha256===GEMMA4_E2B.sha256?'Gemma 4 E2B 다운로드 완료':busy==='model'?'Gemma 4 E2B 다운로드 중':'Gemma 4 E2B 다운로드 받기'}</button>{busy==='model'&&<div className="download-progress" role="status"><p>{status}</p><progress aria-label="Gemma 다운로드 진행률" max={100} {...(/(\d+)%/.test(status)?{value:Number(status.match(/(\d+)%/)?.[1])}:{})}/><button className="text-button" onClick={() => controller.current?.abort()}>다운로드 중단</button></div>}<p className="caption">최초 다운로드와 AI 준비에는 시간이 걸릴 수 있어요. ‘AI 사용 가능’으로 바뀌면 바로 질문할 수 있어요. <a href={GEMMA4_E2B.source} target="_blank" rel="noreferrer">모델 출처 ↗</a></p></div>

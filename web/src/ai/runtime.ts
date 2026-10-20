@@ -7,6 +7,7 @@ import type { AIReply, AIRequest, GenerationResult, InitializationTiming } from 
 import { browserAIFeatures, getAISupport } from './capabilities';
 import { beginAIOperation, finishAIOperation, recoveryMessage, resetAIRecovery, unfinishedAIOperation, updateAIStage } from './recovery';
 import { acquireEngineLease } from './engine-lease';
+import { recordAIDiagnostic } from './diagnostics';
 
 export interface AIStatus { phase:'idle'|'checking'|'loading'|'ready'|'generating'|'error'|'unavailable'|'recovery';message:string;startedAt?:number;timing?:InitializationTiming }
 let status:AIStatus={phase:'idle',message:'모델 다운로드 후 자동으로 준비해요'};
@@ -22,6 +23,7 @@ let contextTokens=0;
 let nextId=0;
 let preparing:Promise<boolean>|undefined;
 let generating=false;
+let diagnosticSettings:AISettings|undefined;
 const pending=new Map<number,{resolve:(result?:GenerationResult)=>void;reject:(error:Error)=>void;onText?:(answer:string)=>void;timer:ReturnType<typeof setTimeout>}>();
 export function supportsAI(){return getAISupport().available;}
 export function aiIsReady(){return Boolean(worker)&&['ready','generating'].includes(status.phase);}
@@ -37,7 +39,9 @@ function makeWorker(){
   worker=candidate;
   candidate.onmessage=(event:MessageEvent<AIReply>)=>{
     if(worker!==candidate)return;
-    const message=event.data;const item=pending.get(message.id);if(!item)return;
+    const message=event.data;
+    if(message.type==='diagnostic'){recordAIDiagnostic({...message.sample,...diagnosticSettings});return;}
+    const item=pending.get(message.id);if(!item)return;
     if(message.type==='progress'){if(message.stage)updateAIStage(message.stage);publish({phase:message.stage&&['conversation','prefill','decode','generation','cleanup'].includes(message.stage)?'generating':'loading',message:message.message,startedAt:status.startedAt});return;}
     if(message.type==='text'){item.onText?.(message.answer);return;}
     if(message.type==='done'&&message.initialization)timing=message.initialization;
@@ -51,6 +55,8 @@ function makeWorker(){
   return candidate;
 }
 function request(candidate:Worker,message:AIRequest,onText?:(answer:string)=>void){
+  diagnosticSettings=message.settings;
+  recordAIDiagnostic({stage:message.type==='initialize'?'initialize':'generate',...message.settings});
   return new Promise<GenerationResult|undefined>((resolve,reject)=>{
     const timer=setTimeout(()=>{
       const error=new Error('기기의 AI 응답이 너무 오래 걸려 중단했어요. 문맥·답변 토큰을 줄이고 다시 질문해 주세요.');
