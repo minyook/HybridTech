@@ -1,7 +1,7 @@
 import { Engine, loadLiteRtLm, SamplerType } from '@litert-lm/core';
 import { verifyStoredModel } from './model';
 import type { AIModelSource, AIReply, AIRequest, GenerationResult, TokenUsage } from './protocol';
-import { boundedModelStream } from './model-stream';
+import { boundedModelStream, localModelStream,localModelReadStats } from './model-stream';
 import { executorSettings } from './execution';
 
 async function openModel(source:AIModelSource):Promise<Blob>{
@@ -38,9 +38,11 @@ export class WorkerEngine {
         }
         const runtimeLoadedAt=performance.now();
         reply({id:request.id,type:'progress',stage:'engine',message:'저장된 모델을 기기 메모리에 불러오는 중'});
-        this.engine=await Engine.create({model:boundedModelStream(model),benchmarkEnabled:true,mainExecutorSettings:executorSettings(request.settings.contextTokens,request.profile)});
+        const input=request.profile==='apple-mobile'?localModelStream(model):boundedModelStream(model);
+        this.engine=await Engine.create({model:input,benchmarkEnabled:true,mainExecutorSettings:executorSettings(request.settings.contextTokens,request.profile)});
         const completedAt=performance.now();
-        const initialization={verification,verificationMs:Math.round(verifiedAt-started),runtimeMs:Math.round(runtimeLoadedAt-verifiedAt),engineMs:Math.round(completedAt-runtimeLoadedAt),totalMs:Math.round(completedAt-started)};
+        const reads=localModelReadStats(input);
+        const initialization={verification,verificationMs:Math.round(verifiedAt-started),runtimeMs:Math.round(runtimeLoadedAt-verifiedAt),engineMs:Math.round(completedAt-runtimeLoadedAt),totalMs:Math.round(completedAt-started),...(reads?{modelRead:{mode:'file-range' as const,...reads}}:{})};
         console.info('AI initialization timing',initialization);
         reply({id:request.id,type:'done',initialization});
       } else {

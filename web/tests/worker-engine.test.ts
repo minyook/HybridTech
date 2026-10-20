@@ -4,6 +4,7 @@ vi.mock('@litert-lm/core',()=>({Engine:{create:sdk.create},loadLiteRtLm:sdk.load
 vi.mock('../src/ai/model',()=>({verifyStoredModel:sdk.verify}));
 import { WorkerEngine } from '../src/ai/worker-engine';
 import type { AIReply, AIRequest } from '../src/ai/protocol';
+import { localModelSource } from '../src/ai/model-stream';
 const settings={contextTokens:4096,maxOutputTokens:512};
 const init=():AIRequest=>({id:1,type:'initialize',model:new Blob(['model']),sha256:'verified',runtimeUrl:'https://local.invalid/runtime/',settings});
 beforeEach(()=>{vi.clearAllMocks();sdk.verify.mockReset().mockResolvedValue('full');sdk.load.mockResolvedValue(undefined);});
@@ -17,6 +18,7 @@ it('무결성 검증 후 저장된 문맥 한도로 실제 SDK 엔진을 만든�
   expect((globalThis as typeof globalThis&{Module:{locateFile:(name:string)=>string}}).Module.locateFile('litertlm_wasm_internal.wasm')).toBe('https://local.invalid/runtime/litertlm_wasm_internal.wasm');
   expect(sdk.create).toHaveBeenCalledWith(expect.objectContaining({mainExecutorSettings:{maxNumTokens:4096}}));
   expect(sdk.create.mock.calls[0][0].model).toBeInstanceOf(ReadableStream);
+  expect(localModelSource(sdk.create.mock.calls[0][0].model)).toBeUndefined();
   expect(reply).toHaveBeenLastCalledWith({id:1,type:'done',initialization:{verification:'full',verificationMs:expect.any(Number),runtimeMs:expect.any(Number),engineMs:expect.any(Number),totalMs:expect.any(Number)}});
 });
 it('OPFS 모델은 워커에서 열고 실제 파일 크기를 확인한 뒤 스트리밍 적재한다',async()=>{
@@ -30,6 +32,7 @@ it('iPhone 실행은 입력 배치 1과 작은 ringbuffer를 사용하고 데스
   sdk.create.mockResolvedValue({});await new WorkerEngine().handle({...init(),profile:'apple-mobile'} as AIRequest,vi.fn());
   expect(sdk.create.mock.calls[0][0].mainExecutorSettings).toMatchObject({maxNumTokens:4096,backendConfig:{sequence_batch_size:1,use_autosized_ringbuffers:true,wait_for_weight_uploads:true,max_top_k:1}});
   expect(sdk.create.mock.calls[0][0].mainExecutorSettings.backendConfig.enable_external_embeddings).toBe(false);
+  expect(localModelSource(sdk.create.mock.calls[0][0].model)).toBeInstanceOf(Blob);
 });
 it('모델이 손상된 경우 GPU 엔진을 만들지 않고 오류를 반환한다',async()=>{
   sdk.verify.mockRejectedValue(new Error('저장된 모델 검증에 실패했어요. 모델을 다시 다운로드해 주세요.'));const reply=vi.fn();await new WorkerEngine().handle(init(),reply);
