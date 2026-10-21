@@ -1,23 +1,31 @@
 import type { Source } from '../types';
 import { compactText, genericTerms, pageBody, queryTerms } from './text';
 
-export interface EvidenceUnit {text:string;section:string;order:number}
+export interface EvidenceUnit {text:string;section:string;order:number;group?:number}
 export function evidenceUnits(source:Source):EvidenceUnit[]{
   const lines=pageBody(source.chunk)
     .replace(/([▶•◆※☞])/g,'\n$1').replace(/\s+([①-⑳])(?=\s)/g,'\n$1').replace(/\s+-\s+/g,'\n- ')
-    .split(/\n+|(?<!ex\.)(?<!e\.g\.)(?<=[.!?])\s+/u).map(line=>line.trim()).filter(Boolean);
+    .replace(/\s+(?=\([가-힣]{2,8}\))/g,'\n')
+    .split(/\n+/).flatMap((block,group)=>block.split(/(?<!ex\.)(?<!e\.g\.)(?<=[.!?])\s+/u).map(text=>({text:text.trim(),group}))).filter(line=>line.text);
   let section='';const units:EvidenceUnit[]=[];
   for(let i=0;i<lines.length;i++){
-    const line=lines[i];
+    const {text:line,group}=lines[i];
     const marked=/^[•◆※☞①-⑳*\-]/.test(line);
     const text=line.replace(/^[▶•◆※☞*\-]\s*/,'').replace(/^산업안전보건기준에\s*관한\s*규칙\s*제\d+조(?:의\d+)?(?:\s*제\d+항)?\s*/,'').trim();
     if(!text)continue;
-    const followedByItem=/^[•◆※☞①-⑳*\-]/.test(lines[i+1]??'');
+    const followedByItem=/^[•◆※☞①-⑳*\-]/.test(lines[i+1]?.text??'');
     if(followedByItem&&text.length<55&&!/[:：>]/.test(text)&&(line.startsWith('▶')||(!marked&&!/[.!?。]/.test(text)&&!/(?:이상|미만|이하|초과)/.test(text)))){section=text.replace(/^순\s*서\s*실\s*시\s*방\s*법\s*/,'');continue;}
-    units.push({text,section,order:units.length});
+    // Sentences in the same bullet share an atomic group: a condition and its
+    // action/example must not be separated when selecting a direct answer.
+    units.push({text,section,order:units.length,group});
   }
   if(!units.length){const text=pageBody(source.chunk);if(text)units.push({text,section:'',order:0});}
   return units;
+}
+
+export function selectedEvidence(source:Source):EvidenceUnit[]{
+  const units=evidenceUnits(source);
+  return source.evidenceOrders?source.evidenceOrders.flatMap(order=>units.filter(unit=>unit.order===order)):units;
 }
 
 /** Visit each section once before taking its next bullet; a long opening
@@ -47,7 +55,7 @@ export function formatEvidenceUnits(units:EvidenceUnit[]){
 export function detailedEvidence(sources:Source[]){
   return sources.map(source=>{
     let section='';const lines:string[]=[];
-    for(const unit of evidenceUnits(source)){
+    for(const unit of selectedEvidence(source)){
       if(unit.section&&unit.section!==section){section=unit.section;lines.push(`**${escapeMarkdown(section)}**`);}
       lines.push(`- ${escapeMarkdown(unit.text)}`);
     }
@@ -56,7 +64,7 @@ export function detailedEvidence(sources:Source[]){
 }
 
 export function evidenceAnswer(sources:Source[]){
-  const details=formatEvidenceUnits(sources.flatMap(evidenceUnits));
+  const details=sources.map(source=>formatEvidenceUnits(selectedEvidence(source))).join('\n\n');
   if(!details)return '제공 문서에서 질문에 맞는 근거를 찾지 못했어요. 다른 표현으로 검색해 주세요.';
   return details;
 }

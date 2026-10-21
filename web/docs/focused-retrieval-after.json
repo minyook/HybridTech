@@ -1,0 +1,502 @@
+{
+  "createdAt": "2026-10-21T07:16:28.354Z",
+  "status": "Development regression cases; source-linked, domain review pending. Not an unseen holdout.",
+  "corpusSha256": "2c8e9edcc986c9e0c65f66d9a4784d88462656702669ba5a7182c98a86bfebae",
+  "rubricSha256": "92a24f37096fd3de710e081f3259b3304c75b1f3a39a7ec656b5ee6ce3e79816",
+  "measurement": "PC source retrieval/composition only; first = within 400 source characters. No model generation or actual iPhone test.",
+  "total": 33,
+  "pagePassed": 33,
+  "passed": 33,
+  "results": [
+    {
+      "question": "어두운 밀폐공간 측정 전등은 어떤 걸 써야해",
+      "pages": [
+        27
+      ],
+      "expectedPages": [
+        27
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 17.934300000000007
+    },
+    {
+      "question": "밀폐공간 측정할 때 조명은 어떤 걸 사용해야 해?",
+      "pages": [
+        27
+      ],
+      "expectedPages": [
+        27
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 4.791699999999992
+    },
+    {
+      "question": "가스 측정용 랜턴은 아무거나 써도 돼?",
+      "pages": [
+        27
+      ],
+      "expectedPages": [
+        27
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 1.463200000000029
+    },
+    {
+      "question": "전등 종류 알려줘",
+      "pages": [
+        27
+      ],
+      "expectedPages": [
+        27
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 1.174099999999953
+    },
+    {
+      "question": "방폭 전등을 쓰는 이유를 쉽게 설명해줘",
+      "pages": [
+        27
+      ],
+      "expectedPages": [
+        27
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 1.4121999999999844
+    },
+    {
+      "question": "산소 측정할 때 머리를 맨홀 안에 넣고 봐도 돼?",
+      "pages": [
+        27
+      ],
+      "expectedPages": [
+        27
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 1.8600999999999885
+    },
+    {
+      "question": "깊은 탱크에서 쓰는 채기관 눈금은 어떻게 표시해?",
+      "pages": [
+        27
+      ],
+      "expectedPages": [
+        27
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 2.0711000000000013
+    },
+    {
+      "question": "측정기를 야외에서 확인했는데 산소 20.9%가 아니면?",
+      "pages": [
+        27
+      ],
+      "expectedPages": [
+        27
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 1.6006000000000995
+    },
+    {
+      "question": "덕트 길이를 제조사가 안 알려주면 얼마나 길게 써?",
+      "pages": [
+        29
+      ],
+      "expectedPages": [
+        29
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 1.377299999999991
+    },
+    {
+      "question": "환기팬이 정전으로 멈추면 작업자는 어떻게 해?",
+      "pages": [
+        29
+      ],
+      "expectedPages": [
+        29
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 1.9529999999999745
+    },
+    {
+      "question": "안에 사람이 있는지 확인하는 건 출입문을 잠그기 전이야?",
+      "pages": [
+        33
+      ],
+      "expectedPages": [
+        33
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 1.6019999999999754
+    },
+    {
+      "question": "출입금지 표지판의 최소 가로 세로 크기 알려줘",
+      "pages": [
+        19
+      ],
+      "expectedPages": [
+        19
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 2.405599999999936
+    },
+    {
+      "question": "밀폐공간 표지판 바탕색과 글씨색은?",
+      "pages": [
+        19
+      ],
+      "expectedPages": [
+        19
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 0.9611999999999625
+    },
+    {
+      "question": "평소에 출입할 필요가 없는 밀폐공간은 출입을 어떻게 제한해?",
+      "pages": [
+        19
+      ],
+      "expectedPages": [
+        19
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 0.9858000000000402
+    },
+    {
+      "question": "작업허가서를 언제까지 어디에 게시해야 해?",
+      "pages": [
+        22,
+        23
+      ],
+      "expectedPages": [
+        22
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 2.261799999999994
+    },
+    {
+      "question": "허가서와 다른 상황을 발견했으면 누구에게 알려?",
+      "pages": [
+        22,
+        44,
+        23
+      ],
+      "expectedPages": [
+        22
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 3.7869000000000597
+    },
+    {
+      "question": "작업허가 유효기간은 다음날에도 유지돼?",
+      "pages": [
+        21
+      ],
+      "expectedPages": [
+        21
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 2.3100999999999203
+    },
+    {
+      "question": "소화설비 자동 수동 전환스위치는 작업할 때 어디로?",
+      "pages": [
+        32
+      ],
+      "expectedPages": [
+        32
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 1.888900000000035
+    },
+    {
+      "question": "소화설비 경보 후 이산화탄소 방출 전 대피 시간은?",
+      "pages": [
+        32
+      ],
+      "expectedPages": [
+        32
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 2.177099999999996
+    },
+    {
+      "question": "송기마스크 송기라인이 꼬이거나 끊어지면 안 되지?",
+      "pages": [
+        36
+      ],
+      "expectedPages": [
+        36
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 1.1309999999999718
+    },
+    {
+      "question": "밀폐공간 내려가는 사다리 미끄러움에 대비할 장비는?",
+      "pages": [
+        37
+      ],
+      "expectedPages": [
+        37
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 0.9824000000000979
+    },
+    {
+      "question": "구조용 삼각대 말고 어떤 구조장비를 준비해?",
+      "pages": [
+        37,
+        36
+      ],
+      "expectedPages": [
+        37
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 1.3762000000000398
+    },
+    {
+      "question": "도급인은 수급인에게 어떤 안전 정보를 줘야 해?",
+      "pages": [
+        40
+      ],
+      "expectedPages": [
+        40
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 1.1763999999999442
+    },
+    {
+      "question": "밀폐공간 작업 프로그램은 누가 함께 만들고 뭘 적어?",
+      "pages": [
+        41,
+        17
+      ],
+      "expectedPages": [
+        41
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 3.145399999999995
+    },
+    {
+      "question": "일용직 특별교육 몇 시간 받아야 해?",
+      "pages": [
+        38
+      ],
+      "expectedPages": [
+        38
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 1.0736000000000558
+    },
+    {
+      "question": "밀폐공간 동료가 쓰러졌는데 호흡용 보호구 없이 들어가 구해도 돼?",
+      "pages": [
+        44
+      ],
+      "expectedPages": [
+        44
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 3.088899999999967
+    },
+    {
+      "question": "환기만으로 충분하지 않은 곳에서 보호구는?",
+      "pages": [
+        34,
+        30,
+        36
+      ],
+      "expectedPages": [
+        36
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 3.595199999999977
+    },
+    {
+      "question": "감시인은 밀폐공간 안과 밖 중 어디에 배치해?",
+      "pages": [
+        34,
+        27
+      ],
+      "expectedPages": [
+        34
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 3.1924999999999955
+    },
+    {
+      "question": "측정 전등 종류 그리고 출입금지 표지판 크기 알려줘",
+      "pages": [
+        27,
+        19,
+        32
+      ],
+      "expectedPages": [
+        27,
+        19
+      ],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 4.787399999999934
+    },
+    {
+      "question": "전등 전압은 몇 볼트여야 해?",
+      "pages": [],
+      "expectedPages": [],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 0.4297000000000253
+    },
+    {
+      "question": "밀폐공간용 랜턴 방수 IP 등급 알려줘",
+      "pages": [],
+      "expectedPages": [],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 0.4158999999999651
+    },
+    {
+      "question": "밀폐공간 측정기 블루투스 비밀번호가 뭐야?",
+      "pages": [],
+      "expectedPages": [],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 0.1775000000000091
+    },
+    {
+      "question": "전등 모델명과 가격 추천해줘",
+      "pages": [],
+      "expectedPages": [],
+      "pagePassed": true,
+      "firstPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "passed": true,
+      "ms": 0.45820000000003347
+    }
+  ]
+}

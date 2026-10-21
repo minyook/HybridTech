@@ -37,7 +37,7 @@ it('도착 시점과 산소 상한의 비교 연산자를 보존한다',()=>{
 it('이전 PDF 페이지의 교육 신청 항목이 다음 페이지 본문의 제목이 되지 않는다',()=>{
   const plan=planFor('산소 및 유해가스 측정방법');
   expect(plan.body).not.toMatch(/^### .*신청방법/m);
-  expect(plan.body.indexOf('### 사전준비')).toBeLessThan(plan.body.indexOf('산소·유해가스 농도 측정1'));
+  expect(plan.body.indexOf('### 사전준비')).toBeLessThan(plan.body.indexOf('### 측정방법'));
 });
 it('보충은 본문 뒤에만 추가하고 기존 본문은 바꾸지 않는다',()=>{
   const plan=planFor('가스 측정이 왜 필요해');const answer=composeAnswer(plan,'추가 설명');

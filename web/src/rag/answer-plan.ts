@@ -1,5 +1,5 @@
 import type { Source } from '../types';
-import { evidenceUnits, formatEvidenceUnits, type EvidenceUnit } from './evidence';
+import { selectedEvidence, formatEvidenceUnits, type EvidenceUnit } from './evidence';
 import { compactText } from './text';
 
 export interface PlannedEvidence extends EvidenceUnit {
@@ -25,10 +25,9 @@ function criteria(text:string):PlannedEvidence['criteria']{
  * No real-world work permission is inferred from document questions. */
 export function createAnswerPlan(question:string,sources:Source[]):AnswerPlan {
   const evidence=sources.flatMap(source=>{
-    // Section relevance must never move compression ahead of response/breathing
-    // checks or otherwise reorder a procedure. Retrieval selects the page;
-    // rendering preserves that page's original section and step order.
-    return evidenceUnits(source).map(unit=>({...unit,id:`${source.chunk.id}/${unit.order}`,sourceId:source.chunk.id,documentId:source.chunk.documentId,page:source.chunk.pageNumber,quantitativeFacts:quantifiedFacts(unit.text),criteria:criteria(unit.text),conditional:/경우|때|다면|없이|않|금지|미만|이상|이하|초과/.test(unit.text),requiresFigure:/①~③|\bX\b|그림|도식/.test(unit.text)}));
+    // Retrieval supplies a focused bullet plus its safety context. Ordered
+    // procedure tables remain in their original section and step order.
+    return selectedEvidence(source).map(unit=>({...unit,id:`${source.chunk.id}/${unit.order}`,sourceId:source.chunk.id,documentId:source.chunk.documentId,page:source.chunk.pageNumber,quantitativeFacts:quantifiedFacts(unit.text),criteria:criteria(unit.text),conditional:/경우|때|다면|없이|않|금지|미만|이상|이하|초과/.test(unit.text),requiresFigure:/①~③|\bX\b|그림|도식/.test(unit.text)}));
   });
   // A section on one PDF page must never become the parent of another page.
   const body=sources.map(source=>formatEvidenceUnits(evidence.filter(unit=>unit.sourceId===source.chunk.id))).filter(Boolean).join('\n\n')||'제공 문서에서 질문에 맞는 근거를 찾지 못했어요. 문서에 있는 표현으로 다시 질문해 주세요.';

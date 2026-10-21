@@ -8,7 +8,7 @@ export interface Chunk {
   heading: string;
   body: string;
 }
-export interface Source { chunk: Chunk; score: number }
+export interface Source { chunk: Chunk; score: number; evidenceOrders?:number[] }
 export interface Chat {
   id: string; question: string; answer: string; citationIds: string[];
   mode: 'source' | 'ai' | 'cancelled'; createdAt: string; notice?: string;

@@ -28,6 +28,11 @@ async function ready(){const promise=prepareAI();await vi.waitFor(()=>expect(Fak
 function localStore(){
   const values=new Map<string,string>();vi.stubGlobal('localStorage',{getItem:(key:string)=>values.get(key)??null,setItem:(key:string,value:string)=>values.set(key,value),removeItem:(key:string)=>values.delete(key)});return values;
 }
+it('Gemma도 선택한 문단만 프롬프트에 넣고 전체 원문을 다시 섞지 않는다',()=>{
+  const source={score:1,evidenceOrders:[1],chunk:{id:'a',documentId:'g',documentTitle:'문서',sourceKind:'guide',pageNumber:27,chunkIndex:0,heading:'',body:'▶ 사전준비 • 측정기의 산소농도를 확인합니다. ▶ 주의사항 • 가연성가스가 있을 수 있으므로 방폭구조의 전등을 사용하십시오.'}};
+  const prompt=buildPrompt('어떤 전등을 써야 해?',[source]);
+  expect(prompt).toContain('방폭구조의 전등');expect(prompt).not.toContain('측정기의 산소농도');expect(source.chunk.body).toContain('측정기의 산소농도');
+});
 it('아이폰의 일반 질문은 모델 적재를 기다리지 않고 문서 본문과 0 생성 토큰을 반환한다',async()=>{
   fixture.forceSupplement=false;vi.stubGlobal('navigator',{gpu:{},userAgent:'iPhone'});
   const sources=[{score:1,chunk:{id:'a',documentId:'g',documentTitle:'문서',sourceKind:'guide',pageNumber:1,chunkIndex:0,heading:'',body:'• 채기관은 1m마다 작은 눈금을 표시합니다.'}}];

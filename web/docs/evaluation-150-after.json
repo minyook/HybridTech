@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "createdAt": "2026-10-21T06:35:47.086Z",
+  "createdAt": "2026-10-21T07:16:30.165Z",
   "variant": "grounded-answer-plan",
   "corpusSha256": "2c8e9edcc986c9e0c65f66d9a4784d88462656702669ba5a7182c98a86bfebae",
   "rubricSha256": "d2083c4b22e6eb5b6967ce73eb5722a318d52072050b2c9516d73a19bd6f2ecb",
@@ -29,8 +29,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 7.239599999999996,
-      "compositionMs": 1.558499999999981,
+      "retrievalMs": 14.69420000000008,
+      "compositionMs": 0.8612000000000535,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -45,24 +45,20 @@
       ],
       "retrieved": [
         {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 24
-        },
-        {
           "documentId": "confined_space_checklist_2026",
           "page": 2
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 60
+          "page": 24
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 3.5668000000000006,
-      "compositionMs": 0.685799999999972,
+      "retrievalMs": 6.330000000000041,
+      "compositionMs": 0.4033999999999196,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -85,8 +81,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.6299000000000206,
-      "compositionMs": 0.07389999999998054,
+      "retrievalMs": 2.241899999999987,
+      "compositionMs": 0.08589999999992415,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -109,8 +105,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.4802000000000248,
-      "compositionMs": 0.07009999999996808,
+      "retrievalMs": 5.068299999999908,
+      "compositionMs": 0.11599999999998545,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -126,23 +122,23 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 24
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
           "page": 25
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 63
+          "page": 24
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.3208999999999946,
-      "compositionMs": 0.17650000000003274,
+      "retrievalMs": 7.959599999999909,
+      "compositionMs": 0.25139999999998963,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -159,14 +155,18 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 25
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 22
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.9074999999999704,
-      "compositionMs": 0.07429999999999382,
+      "retrievalMs": 1.3729000000000724,
+      "compositionMs": 0.11119999999993979,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -182,19 +182,23 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 2
+          "page": 25
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 25
+          "page": 28
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 22
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.9350999999999772,
-      "compositionMs": 0.08999999999997499,
+      "retrievalMs": 3.728900000000067,
+      "compositionMs": 0.15629999999998745,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -211,14 +215,18 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 25
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.3461000000000354,
-      "compositionMs": 0.06890000000004193,
+      "retrievalMs": 2.3378000000000156,
+      "compositionMs": 0.18389999999999418,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -241,8 +249,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.3219000000000278,
-      "compositionMs": 0.07409999999998718,
+      "retrievalMs": 6.798599999999965,
+      "compositionMs": 0.10770000000002256,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -265,8 +273,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.9600000000000364,
-      "compositionMs": 0.07150000000001455,
+      "retrievalMs": 0.9300999999999249,
+      "compositionMs": 0.11620000000004893,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -289,8 +297,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.8448000000000206,
-      "compositionMs": 0.18080000000003338,
+      "retrievalMs": 1.547399999999925,
+      "compositionMs": 0.08109999999999218,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -306,19 +314,23 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 64
+          "page": 34
         },
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 25
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 22
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 2.022800000000018,
-      "compositionMs": 0.2913000000000352,
+      "retrievalMs": 2.0217999999999847,
+      "compositionMs": 0.1832000000000562,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -338,10 +350,6 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 69
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
           "page": 27
         }
       ],
@@ -349,8 +357,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.987700000000018,
-      "compositionMs": 0.21059999999999945,
+      "retrievalMs": 1.5602999999999838,
+      "compositionMs": 0.1613999999999578,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -373,8 +381,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.0001000000000317,
-      "compositionMs": 0.06459999999998445,
+      "retrievalMs": 1.2107999999999493,
+      "compositionMs": 0.16160000000002128,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -391,14 +399,18 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 26
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.9350000000000023,
-      "compositionMs": 0.041600000000016735,
+      "retrievalMs": 1.161799999999971,
+      "compositionMs": 0.17849999999998545,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -421,8 +433,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.9191999999999894,
-      "compositionMs": 0.04059999999998354,
+      "retrievalMs": 0.9138000000000375,
+      "compositionMs": 0.07439999999996871,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -442,10 +454,6 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 69
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
           "page": 27
         }
       ],
@@ -453,8 +461,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.5007999999999697,
-      "compositionMs": 0.13769999999999527,
+      "retrievalMs": 1.3844000000000278,
+      "compositionMs": 0.18269999999995434,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -477,8 +485,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.8731999999999971,
-      "compositionMs": 0.04149999999998499,
+      "retrievalMs": 0.9335999999999558,
+      "compositionMs": 0.09699999999997999,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -501,8 +509,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.0120000000000005,
-      "compositionMs": 0.04210000000000491,
+      "retrievalMs": 1.59699999999998,
+      "compositionMs": 0.05960000000004584,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -525,8 +533,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.807200000000023,
-      "compositionMs": 0.045400000000029195,
+      "retrievalMs": 0.6336000000000013,
+      "compositionMs": 0.06100000000003547,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -546,10 +554,6 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 69
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
           "page": 27
         }
       ],
@@ -557,8 +561,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.5027000000000044,
-      "compositionMs": 0.14240000000000919,
+      "retrievalMs": 1.3583000000000993,
+      "compositionMs": 0.1492000000000644,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -581,8 +585,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.0255000000000223,
-      "compositionMs": 0.039199999999993906,
+      "retrievalMs": 1.050799999999981,
+      "compositionMs": 0.05480000000000018,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -605,8 +609,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.6852999999999838,
-      "compositionMs": 0.04230000000001155,
+      "retrievalMs": 0.6903999999999542,
+      "compositionMs": 0.06209999999998672,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -629,8 +633,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.2349999999999568,
-      "compositionMs": 0.12239999999997053,
+      "retrievalMs": 1.2226000000000568,
+      "compositionMs": 0.06209999999998672,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -653,8 +657,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.049199999999928,
-      "compositionMs": 0.12889999999993051,
+      "retrievalMs": 1.225400000000036,
+      "compositionMs": 0.08710000000007767,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -677,8 +681,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 2.5856999999999744,
-      "compositionMs": 0.10760000000004766,
+      "retrievalMs": 3.998399999999947,
+      "compositionMs": 0.12930000000005748,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -695,18 +699,14 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 27
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 69
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.2612000000000307,
-      "compositionMs": 0.11099999999999,
+      "retrievalMs": 2.419399999999996,
+      "compositionMs": 0.07600000000002183,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -729,8 +729,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.8916000000000395,
-      "compositionMs": 0.06700000000000728,
+      "retrievalMs": 1.239099999999894,
+      "compositionMs": 0.06029999999998381,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -746,7 +746,7 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 21
+          "page": 32
         },
         {
           "documentId": "confined_space_safety_guide_2022",
@@ -761,8 +761,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.3912000000000262,
-      "compositionMs": 0.17669999999998254,
+      "retrievalMs": 2.82000000000005,
+      "compositionMs": 0.22480000000007294,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -783,18 +783,14 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 27
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 67
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.7087999999999965,
-      "compositionMs": 0.12319999999999709,
+      "retrievalMs": 0.8663000000000238,
+      "compositionMs": 0.14780000000007476,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -817,8 +813,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.9876000000000431,
-      "compositionMs": 0.07049999999992451,
+      "retrievalMs": 1.4862000000000535,
+      "compositionMs": 0.08299999999996999,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -841,8 +837,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.6060999999999694,
-      "compositionMs": 0.06340000000000146,
+      "retrievalMs": 8.652600000000007,
+      "compositionMs": 0.09210000000007312,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -865,8 +861,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.6411999999999125,
-      "compositionMs": 0.06749999999999545,
+      "retrievalMs": 0.9488000000000056,
+      "compositionMs": 0.0705000000000382,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -889,8 +885,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.5226000000000113,
-      "compositionMs": 0.06570000000010623,
+      "retrievalMs": 0.84599999999989,
+      "compositionMs": 0.08590000000003783,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -913,8 +909,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.4012000000000171,
-      "compositionMs": 0.06730000000004566,
+      "retrievalMs": 0.9937999999999647,
+      "compositionMs": 0.08490000000006148,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -938,15 +934,15 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 32
+          "page": 25
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.8422999999999092,
-      "compositionMs": 0.15260000000000673,
+      "retrievalMs": 3.2824000000000524,
+      "compositionMs": 0.18110000000001492,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -963,14 +959,18 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 27
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 24
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.0891000000000304,
-      "compositionMs": 0.06740000000002055,
+      "retrievalMs": 7.606600000000071,
+      "compositionMs": 0.20899999999994634,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -994,15 +994,15 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 64
+          "page": 44
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.231899999999996,
-      "compositionMs": 0.1655999999999267,
+      "retrievalMs": 8.016300000000001,
+      "compositionMs": 0.15950000000009368,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1025,8 +1025,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.6260999999999513,
-      "compositionMs": 0.19480000000010023,
+      "retrievalMs": 1.3342000000000098,
+      "compositionMs": 0.07110000000000127,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1050,15 +1050,15 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 24
+          "page": 34
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 2.1807999999999765,
-      "compositionMs": 0.29570000000001073,
+      "retrievalMs": 6.998299999999972,
+      "compositionMs": 0.23860000000001946,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1075,14 +1075,18 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 28
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.0510000000000446,
-      "compositionMs": 0.05700000000001637,
+      "retrievalMs": 7.831699999999955,
+      "compositionMs": 0.14970000000005257,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1105,8 +1109,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.2545000000000073,
-      "compositionMs": 0.05380000000002383,
+      "retrievalMs": 0.9326999999999543,
+      "compositionMs": 0.08360000000004675,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1127,18 +1131,14 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 28
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 65
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.9802999999999429,
-      "compositionMs": 0.17079999999998563,
+      "retrievalMs": 1.2578999999999496,
+      "compositionMs": 0.09409999999991214,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1161,8 +1161,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.7746999999999389,
-      "compositionMs": 0.053599999999960346,
+      "retrievalMs": 0.6747000000000298,
+      "compositionMs": 0.06410000000005311,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1185,8 +1185,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.9460000000000264,
-      "compositionMs": 0.06000000000005912,
+      "retrievalMs": 0.9388999999999896,
+      "compositionMs": 0.053599999999960346,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1209,8 +1209,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.6398000000000366,
-      "compositionMs": 0.04570000000001073,
+      "retrievalMs": 0.6344000000000278,
+      "compositionMs": 0.05110000000001946,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1233,8 +1233,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.9889000000000578,
-      "compositionMs": 0.04510000000004766,
+      "retrievalMs": 0.8797000000000708,
+      "compositionMs": 0.08349999999995816,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1251,14 +1251,22 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 28
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 21
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 10
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.0635999999999513,
-      "compositionMs": 0.048800000000028376,
+      "retrievalMs": 1.4092999999999165,
+      "compositionMs": 0.15489999999999782,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1281,8 +1289,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.45680000000004384,
-      "compositionMs": 0.051300000000082946,
+      "retrievalMs": 0.7951999999999089,
+      "compositionMs": 0.05319999999994707,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1305,8 +1313,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.7232999999999947,
-      "compositionMs": 0.05190000000004602,
+      "retrievalMs": 1.5751000000000204,
+      "compositionMs": 0.09590000000002874,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1329,8 +1337,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.9469000000000278,
-      "compositionMs": 0.05099999999993088,
+      "retrievalMs": 2.073599999999942,
+      "compositionMs": 0.08059999999989031,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1353,8 +1361,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.49249999999995,
-      "compositionMs": 0.048499999999989996,
+      "retrievalMs": 0.7726000000000113,
+      "compositionMs": 0.05409999999994852,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1377,8 +1385,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.6167000000000371,
-      "compositionMs": 0.06720000000007076,
+      "retrievalMs": 0.7842999999999165,
+      "compositionMs": 0.05259999999998399,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1401,8 +1409,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.1971999999999525,
-      "compositionMs": 0.08820000000002892,
+      "retrievalMs": 1.1704999999999472,
+      "compositionMs": 0.04500000000007276,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1425,8 +1433,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.7572000000000116,
-      "compositionMs": 0.1333999999999378,
+      "retrievalMs": 0.5813999999999169,
+      "compositionMs": 0.04210000000000491,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1449,8 +1457,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.5104000000000042,
-      "compositionMs": 0.21620000000007167,
+      "retrievalMs": 0.5811999999999671,
+      "compositionMs": 0.05009999999992942,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1473,8 +1481,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.077600000000075,
-      "compositionMs": 0.09559999999999036,
+      "retrievalMs": 1.0125999999999067,
+      "compositionMs": 0.04460000000005948,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1497,8 +1505,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.6425999999999021,
-      "compositionMs": 0.08569999999997435,
+      "retrievalMs": 0.916300000000092,
+      "compositionMs": 0.049500000000080036,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1521,8 +1529,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.7489000000000487,
-      "compositionMs": 0.06529999999997926,
+      "retrievalMs": 0.7117000000000644,
+      "compositionMs": 0.04450000000008458,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1545,8 +1553,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.1758000000000948,
-      "compositionMs": 0.06820000000004711,
+      "retrievalMs": 1.0049999999999955,
+      "compositionMs": 0.04390000000000782,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1563,14 +1571,18 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 29
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 36
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.9503999999999451,
-      "compositionMs": 0.05489999999997508,
+      "retrievalMs": 1.243099999999913,
+      "compositionMs": 0.12020000000006803,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1587,14 +1599,18 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 29
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 36
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.542699999999968,
-      "compositionMs": 0.05299999999999727,
+      "retrievalMs": 0.9250999999999294,
+      "compositionMs": 0.09919999999999618,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1621,8 +1637,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.5182000000000926,
-      "compositionMs": 0.10649999999998272,
+      "retrievalMs": 1.776399999999967,
+      "compositionMs": 0.09929999999997108,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1639,14 +1655,18 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 29
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.244100000000003,
-      "compositionMs": 0.05769999999995434,
+      "retrievalMs": 1.9447999999999865,
+      "compositionMs": 0.09789999999998145,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1662,23 +1682,23 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 76
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
           "page": 30
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 74
+          "page": 34
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.637299999999982,
-      "compositionMs": 0.11610000000007403,
+      "retrievalMs": 2.078399999999988,
+      "compositionMs": 0.13670000000001892,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1705,8 +1725,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.1830999999999676,
-      "compositionMs": 0.07749999999998636,
+      "retrievalMs": 1.7835000000000036,
+      "compositionMs": 0.08609999999998763,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1722,23 +1742,23 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
+          "page": 30
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
           "page": 28
         },
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 29
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 30
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.3063000000000784,
-      "compositionMs": 0.17050000000006094,
+      "retrievalMs": 1.8314000000000306,
+      "compositionMs": 0.15249999999991815,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1758,19 +1778,19 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 36
+          "page": 44
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 44
+          "page": 17
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.540300000000002,
-      "compositionMs": 0.16440000000000055,
+      "retrievalMs": 5.396199999999908,
+      "compositionMs": 0.11559999999997217,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1793,8 +1813,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.6306000000000722,
-      "compositionMs": 0.04589999999996053,
+      "retrievalMs": 0.7186000000000377,
+      "compositionMs": 0.04809999999997672,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1815,14 +1835,18 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 33
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 19
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.4198000000000093,
-      "compositionMs": 0.07519999999999527,
+      "retrievalMs": 3.1043999999999414,
+      "compositionMs": 0.08969999999999345,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1849,8 +1873,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.3351000000000113,
-      "compositionMs": 0.10500000000001819,
+      "retrievalMs": 1.4802000000000817,
+      "compositionMs": 0.10320000000001528,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1873,8 +1897,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.9235999999999649,
-      "compositionMs": 0.049999999999954525,
+      "retrievalMs": 1.517400000000066,
+      "compositionMs": 0.05160000000000764,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1897,8 +1921,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.1510999999999285,
-      "compositionMs": 0.05570000000000164,
+      "retrievalMs": 1.5189000000000306,
+      "compositionMs": 0.052099999999995816,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1921,8 +1945,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.054300000000012,
-      "compositionMs": 0.04719999999997526,
+      "retrievalMs": 1.0516999999999825,
+      "compositionMs": 0.04729999999995016,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1945,8 +1969,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.4178000000000566,
-      "compositionMs": 0.050299999999992906,
+      "retrievalMs": 1.663599999999974,
+      "compositionMs": 0.05389999999999873,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1966,15 +1990,19 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 30
+          "page": 21
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 36
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.6870000000000118,
-      "compositionMs": 0.08770000000004075,
+      "retrievalMs": 3.870700000000056,
+      "compositionMs": 0.16639999999995325,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -1997,8 +2025,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.5516000000000076,
-      "compositionMs": 0.04090000000007876,
+      "retrievalMs": 0.7437999999999647,
+      "compositionMs": 0.050700000000006185,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2021,8 +2049,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.0821999999999434,
-      "compositionMs": 0.04319999999995616,
+      "retrievalMs": 1.7703000000000202,
+      "compositionMs": 0.052800000000047476,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2045,8 +2073,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.3815000000000737,
-      "compositionMs": 0.051899999999932334,
+      "retrievalMs": 1.7826000000000022,
+      "compositionMs": 0.05330000000003565,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2063,22 +2091,14 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 31
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 45
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 46
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 2.387499999999932,
-      "compositionMs": 0.18729999999993652,
+      "retrievalMs": 1.2115999999999758,
+      "compositionMs": 0.050399999999967804,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2101,8 +2121,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.971400000000017,
-      "compositionMs": 0.09789999999998145,
+      "retrievalMs": 1.9254000000000815,
+      "compositionMs": 0.06969999999989795,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2122,19 +2142,19 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 77
+          "page": 61
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 61
+          "page": 77
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.4043000000000347,
-      "compositionMs": 0.16690000000005512,
+      "retrievalMs": 2.009800000000041,
+      "compositionMs": 0.18439999999998236,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2157,8 +2177,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.6222000000000207,
-      "compositionMs": 0.06509999999991578,
+      "retrievalMs": 1.709600000000023,
+      "compositionMs": 0.09130000000004657,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2181,8 +2201,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.3225999999999658,
-      "compositionMs": 0.058300000000031105,
+      "retrievalMs": 1.8532000000000153,
+      "compositionMs": 0.06970000000001164,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2199,18 +2219,14 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 33
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 63
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.631900000000087,
-      "compositionMs": 0.07729999999992287,
+      "retrievalMs": 0.8766000000000531,
+      "compositionMs": 0.021700000000009823,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2233,8 +2249,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.296199999999999,
-      "compositionMs": 0.01749999999992724,
+      "retrievalMs": 1.350500000000011,
+      "compositionMs": 0.022600000000011278,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2257,8 +2273,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.9645000000000437,
-      "compositionMs": 0.018100000000004002,
+      "retrievalMs": 0.7694999999999936,
+      "compositionMs": 0.023400000000037835,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2281,8 +2297,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.060699999999997,
-      "compositionMs": 0.016799999999989268,
+      "retrievalMs": 1.025700000000029,
+      "compositionMs": 0.020800000000008367,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2305,8 +2321,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.4914999999999736,
-      "compositionMs": 0.04809999999997672,
+      "retrievalMs": 1.0973000000000184,
+      "compositionMs": 0.062200000000075306,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2323,18 +2339,14 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 34
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 44
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.939200000000028,
-      "compositionMs": 0.08270000000004529,
+      "retrievalMs": 2.1562000000000126,
+      "compositionMs": 0.05319999999994707,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2357,8 +2369,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.6213000000000193,
-      "compositionMs": 0.047400000000038744,
+      "retrievalMs": 0.6838000000000193,
+      "compositionMs": 0.05009999999992942,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2381,8 +2393,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.7372000000000298,
-      "compositionMs": 0.10980000000006385,
+      "retrievalMs": 1.9639999999999418,
+      "compositionMs": 0.05089999999995598,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2405,8 +2417,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.527400000000057,
-      "compositionMs": 0.05129999999996926,
+      "retrievalMs": 1.0012000000000398,
+      "compositionMs": 0.020099999999956708,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2429,8 +2441,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.952099999999973,
-      "compositionMs": 0.047100000000000364,
+      "retrievalMs": 1.3250999999999067,
+      "compositionMs": 0.02030000000002019,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2453,8 +2465,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.8609000000000151,
-      "compositionMs": 0.025100000000065847,
+      "retrievalMs": 1.9494999999999436,
+      "compositionMs": 0.020999999999958163,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2470,7 +2482,7 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 41
+          "page": 21
         },
         {
           "documentId": "confined_space_safety_guide_2022",
@@ -2478,15 +2490,15 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 64
+          "page": 22
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 2.1549999999999727,
-      "compositionMs": 0.2604999999999791,
+      "retrievalMs": 9.373000000000047,
+      "compositionMs": 0.11389999999994416,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2502,15 +2514,23 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
+          "page": 44
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
           "page": 36
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 34
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.3076999999999543,
-      "compositionMs": 0.06409999999993943,
+      "retrievalMs": 3.8437000000000126,
+      "compositionMs": 0.17439999999999145,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2526,19 +2546,19 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 36
+          "page": 29
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 29
+          "page": 36
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.0810000000000173,
-      "compositionMs": 0.09849999999994452,
+      "retrievalMs": 1.671799999999962,
+      "compositionMs": 0.11360000000001946,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2565,8 +2585,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.7653999999999996,
-      "compositionMs": 0.09640000000001692,
+      "retrievalMs": 1.6350999999999658,
+      "compositionMs": 0.11749999999994998,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2582,23 +2602,23 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 30
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 29
+          "page": 44
         },
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 36
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 30
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.0652000000000044,
-      "compositionMs": 0.12789999999995416,
+      "retrievalMs": 2.152900000000045,
+      "compositionMs": 0.1591999999999416,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2615,18 +2635,14 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 38
-        },
-        {
-          "documentId": "confined_space_checklist_2026",
-          "page": 3
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.38580000000001746,
-      "compositionMs": 0.08210000000008222,
+      "retrievalMs": 1.0835000000000719,
+      "compositionMs": 0.04910000000006676,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2649,8 +2665,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.7142000000000053,
-      "compositionMs": 0.03819999999996071,
+      "retrievalMs": 0.8745999999999867,
+      "compositionMs": 0.04739999999992506,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2673,8 +2689,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.0421999999999798,
-      "compositionMs": 0.03780000000006112,
+      "retrievalMs": 1.356999999999971,
+      "compositionMs": 0.050299999999992906,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2697,8 +2713,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.1639999999999873,
-      "compositionMs": 0.16049999999995634,
+      "retrievalMs": 1.432700000000068,
+      "compositionMs": 0.06839999999999691,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2721,8 +2737,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.565300000000093,
-      "compositionMs": 0.07720000000006166,
+      "retrievalMs": 0.9946999999999662,
+      "compositionMs": 0.05520000000001346,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2742,15 +2758,19 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 66
+          "page": 18
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 13
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.128500000000031,
-      "compositionMs": 0.1912000000000944,
+      "retrievalMs": 2.4717999999999165,
+      "compositionMs": 0.1634000000000242,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2770,10 +2790,6 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 66
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
           "page": 40
         }
       ],
@@ -2781,8 +2797,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.2093999999999596,
-      "compositionMs": 0.22059999999999036,
+      "retrievalMs": 1.9265000000000327,
+      "compositionMs": 0.06950000000006185,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2805,8 +2821,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.3378000000000156,
-      "compositionMs": 0.047300000000063847,
+      "retrievalMs": 1.3704000000000178,
+      "compositionMs": 0.047799999999938336,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2823,14 +2839,18 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 44
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.9411000000000058,
-      "compositionMs": 0.047899999999913234,
+      "retrievalMs": 1.48599999999999,
+      "compositionMs": 0.1250999999999749,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2853,8 +2873,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.5126000000000204,
-      "compositionMs": 0.04390000000000782,
+      "retrievalMs": 1.5324000000000524,
+      "compositionMs": 0.09329999999999927,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2871,22 +2891,14 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 44
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 29
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 36
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.6449999999999818,
-      "compositionMs": 0.14010000000007494,
+      "retrievalMs": 0.7178000000000111,
+      "compositionMs": 0.0544999999999618,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2909,8 +2921,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.7830999999999904,
-      "compositionMs": 0.04330000000004475,
+      "retrievalMs": 0.8951000000000704,
+      "compositionMs": 0.053599999999960346,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2937,8 +2949,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.20830000000000837,
-      "compositionMs": 0.07230000000004111,
+      "retrievalMs": 0.6105000000000018,
+      "compositionMs": 0.09179999999992106,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2961,8 +2973,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.6342999999999392,
-      "compositionMs": 0.05480000000000018,
+      "retrievalMs": 0.5383000000000493,
+      "compositionMs": 0.06590000000005602,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -2989,8 +3001,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.8714999999999691,
-      "compositionMs": 0.07619999999997162,
+      "retrievalMs": 0.9533000000000129,
+      "compositionMs": 0.09449999999992542,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3013,8 +3025,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.0643999999999778,
-      "compositionMs": 0.05730000000005475,
+      "retrievalMs": 1.0538999999999987,
+      "compositionMs": 0.0706000000000131,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3037,8 +3049,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.3793999999999187,
-      "compositionMs": 0.023199999999974352,
+      "retrievalMs": 0.5692999999999984,
+      "compositionMs": 0.027899999999931424,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3054,10 +3066,6 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 45
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
           "page": 46
         }
       ],
@@ -3065,8 +3073,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.4755999999999858,
-      "compositionMs": 0.07110000000000127,
+      "retrievalMs": 0.24739999999997053,
+      "compositionMs": 0.026299999999991996,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3089,8 +3097,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.35800000000006094,
-      "compositionMs": 0.022699999999986176,
+      "retrievalMs": 0.2565999999999349,
+      "compositionMs": 0.024199999999950705,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3113,8 +3121,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.3061999999999898,
-      "compositionMs": 0.023000000000024556,
+      "retrievalMs": 0.22910000000001673,
+      "compositionMs": 0.023500000000012733,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3138,14 +3146,18 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 25
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 2.0067999999999984,
-      "compositionMs": 0.10159999999996217,
+      "retrievalMs": 10.101300000000037,
+      "compositionMs": 0.32599999999990814,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3165,14 +3177,18 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 27
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 24
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.6202999999999292,
-      "compositionMs": 0.12259999999992033,
+      "retrievalMs": 8.036800000000085,
+      "compositionMs": 0.13900000000001,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3191,7 +3207,7 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 21
+          "page": 32
         },
         {
           "documentId": "confined_space_safety_guide_2022",
@@ -3206,8 +3222,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 2.3876999999999953,
-      "compositionMs": 0.24490000000002965,
+      "retrievalMs": 3.609800000000064,
+      "compositionMs": 0.19079999999996744,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3231,14 +3247,18 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 29
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.1171999999999116,
-      "compositionMs": 0.11029999999993834,
+      "retrievalMs": 5.620900000000006,
+      "compositionMs": 0.18050000000005184,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3264,8 +3284,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.9379000000000133,
-      "compositionMs": 0.059499999999957254,
+      "retrievalMs": 1.7875000000000227,
+      "compositionMs": 0.08209999999996853,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3285,14 +3305,18 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 29
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 36
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.517500000000041,
-      "compositionMs": 0.05600000000004002,
+      "retrievalMs": 2.696399999999926,
+      "compositionMs": 0.11450000000002092,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3311,23 +3335,23 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 76
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
           "page": 30
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 74
+          "page": 34
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.0356999999999061,
-      "compositionMs": 0.11180000000001655,
+      "retrievalMs": 3.1855000000000473,
+      "compositionMs": 0.14220000000000255,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3353,8 +3377,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.3710999999999558,
-      "compositionMs": 0.04630000000008749,
+      "retrievalMs": 1.6914000000000442,
+      "compositionMs": 0.045600000000035834,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3378,18 +3402,14 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 33
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 63
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 2.1376999999999953,
-      "compositionMs": 0.1313000000000102,
+      "retrievalMs": 2.3297000000000025,
+      "compositionMs": 0.07590000000004693,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3419,8 +3439,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.397199999999998,
-      "compositionMs": 0.05769999999995434,
+      "retrievalMs": 1.556600000000003,
+      "compositionMs": 0.05529999999998836,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3439,7 +3459,7 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 36
+          "page": 44
         },
         {
           "documentId": "confined_space_safety_guide_2022",
@@ -3447,15 +3467,15 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 66
+          "page": 36
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.1480000000000246,
-      "compositionMs": 0.15219999999999345,
+      "retrievalMs": 4.284400000000005,
+      "compositionMs": 0.15480000000002292,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3479,14 +3499,18 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 44
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.8830000000000382,
-      "compositionMs": 0.15439999999989595,
+      "retrievalMs": 2.0273999999999432,
+      "compositionMs": 0.1530999999999949,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3516,8 +3540,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.6802000000000135,
-      "compositionMs": 0.14740000000006148,
+      "retrievalMs": 0.9710999999999785,
+      "compositionMs": 0.08360000000004675,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3536,7 +3560,7 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 24
+          "page": 25
         },
         {
           "documentId": "confined_space_safety_guide_2022",
@@ -3544,15 +3568,15 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 25
+          "page": 24
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 2.393199999999979,
-      "compositionMs": 0.14019999999993615,
+      "retrievalMs": 6.322099999999978,
+      "compositionMs": 0.11820000000000164,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3576,14 +3600,18 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 44
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.9035000000000082,
-      "compositionMs": 0.1150000000000091,
+      "retrievalMs": 6.869199999999978,
+      "compositionMs": 0.4933000000000902,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3606,6 +3634,10 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
+          "page": 44
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
           "page": 36
         }
       ],
@@ -3613,8 +3645,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.8121000000001004,
-      "compositionMs": 0.10509999999999309,
+      "retrievalMs": 6.11749999999995,
+      "compositionMs": 0.17269999999996344,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3641,15 +3673,15 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 36
+          "page": 25
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.3292999999999893,
-      "compositionMs": 0.14400000000000546,
+      "retrievalMs": 5.9213000000000875,
+      "compositionMs": 0.2377999999999929,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3679,8 +3711,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 1.3099999999999454,
-      "compositionMs": 0.07639999999992142,
+      "retrievalMs": 2.008799999999951,
+      "compositionMs": 0.0946999999999889,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3704,18 +3736,14 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 39
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 66
         }
       ],
       "retrievalPassed": true,
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.5395999999999503,
-      "compositionMs": 0.12799999999992906,
+      "retrievalMs": 1.84050000000002,
+      "compositionMs": 0.09130000000004657,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3749,8 +3777,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.8642999999999574,
-      "compositionMs": 0.14459999999996853,
+      "retrievalMs": 1.474299999999971,
+      "compositionMs": 0.1453000000000202,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3764,8 +3792,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.3772000000000162,
-      "compositionMs": 0.003199999999992542,
+      "retrievalMs": 0.16390000000001237,
+      "compositionMs": 0.010800000000017462,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3779,8 +3807,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.23879999999996926,
-      "compositionMs": 0.0007999999999128704,
+      "retrievalMs": 0.14550000000008367,
+      "compositionMs": 0.0008000000000265572,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3794,8 +3822,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.21450000000004366,
-      "compositionMs": 0.0008000000000265572,
+      "retrievalMs": 0.11590000000001055,
+      "compositionMs": 0.0006000000000767614,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3809,8 +3837,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.9578999999999951,
-      "compositionMs": 0.0024000000000796717,
+      "retrievalMs": 0.4057999999999993,
+      "compositionMs": 0.0007000000000516593,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3824,8 +3852,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.4348000000001093,
-      "compositionMs": 0.0009999999999763531,
+      "retrievalMs": 0.15779999999995198,
+      "compositionMs": 0.0006000000000767614,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3839,8 +3867,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.4578999999999951,
-      "compositionMs": 0.0039000000000442014,
+      "retrievalMs": 0.15089999999997872,
+      "compositionMs": 0.0004999999999881766,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3854,8 +3882,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.5424999999999045,
-      "compositionMs": 0.0013000000000147338,
+      "retrievalMs": 0.2237999999999829,
+      "compositionMs": 0.0006000000000767614,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3869,8 +3897,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.439200000000028,
-      "compositionMs": 0.0014999999999645297,
+      "retrievalMs": 0.18490000000008422,
+      "compositionMs": 0.0005999999999630745,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3884,8 +3912,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.2644000000000233,
-      "compositionMs": 0.0009999999999763531,
+      "retrievalMs": 0.11170000000004165,
+      "compositionMs": 0.0006000000000767614,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     },
@@ -3899,8 +3927,8 @@
       "bodyPassed": true,
       "missing": [],
       "forbidden": [],
-      "retrievalMs": 0.002100000000041291,
-      "compositionMs": 0.015499999999974534,
+      "retrievalMs": 0.0009999999999763531,
+      "compositionMs": 0.003300000000081127,
       "generatedAnswer": "not-run",
       "humanSemanticReview": "pending"
     }
