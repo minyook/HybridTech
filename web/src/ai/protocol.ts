@@ -5,8 +5,8 @@ import type { ModelReaderStats } from './model-stream';
 import type { AIDiagnostic } from './diagnostics';
 import type { Source } from '../types';
 export type AIModelSource=Blob|{backend:'opfs';storageKey:string;size:number};
-export interface TokenUsage { inputTokens?:number;outputTokens?:number;totalTokens?:number;maxOutputTokens:number;contextTokens:number }
-export interface GenerationResult { answer:string;usage:TokenUsage;truncated?:boolean }
+export interface TokenUsage { inputTokens?:number;outputTokens?:number;totalTokens?:number;maxOutputTokens:number;contextTokens:number;passes?:number;perPassMaxOutputTokens?:number }
+export interface GenerationResult { answer:string;usage:TokenUsage;truncated?:boolean;sourceSupplemented?:boolean }
 export interface InitializationTiming { verification:'full'|'cached';verificationMs:number;runtimeMs:number;engineMs:number;totalMs:number;modelRead? :ModelReaderStats&{mode:'file-range'} }
 export type AIRequest =
   | {id:number;type:'initialize';model:AIModelSource;sha256:string;runtimeUrl:string;settings:AISettings;profile?:AIExecutionProfile;provider?:'light'}

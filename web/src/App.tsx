@@ -83,7 +83,7 @@ export default function App() {
     setQuestion(''); setBusy(true); setStream(''); go('/ask');
     const sources = retrieve(trimmed,chunks); const missing = missingAspects(trimmed,chunks);
     const chat: Chat = { id:crypto.randomUUID(),question:trimmed,answer:'',citationIds:sources.map(source => source.chunk.id),mode:'source',createdAt:new Date().toISOString() };
-    const detailed=usesLightAI();chat.includesEvidence=detailed&&sources.length>0;
+    const detailed=usesLightAI();if(detailed)chat.answerFormat='integrated';
     const documentAnswer=()=>detailed?evidenceAnswer(sources):sourceAnswer(sources);
     controller.current = new AbortController(); const signal = controller.current.signal;
     setCurrent(chat); setActiveIds(previous => [...previous,chat.id]);
@@ -92,8 +92,8 @@ export default function App() {
         try {
           const result = await generate(trimmed,sources,setStream,signal);
           if (contradictsSources(trimmed,result.answer,sources)) throw new Error('생성된 답변이 선택한 근거와 맞지 않아 원문을 표시해요.');
-          chat.answer = detailed?evidenceAnswer(sources,result.answer):result.answer; chat.mode = 'ai';chat.tokenUsage=result.usage;
-          if(result.truncated||(result.usage.outputTokens!==undefined&&result.usage.outputTokens>=result.usage.maxOutputTokens))chat.notice=detailed?'AI 정리가 길이 한도에 도달했어요. 아래 문서 발췌에서 나머지 절차와 주의사항을 확인해 주세요.':'설정한 답변 토큰 한도에 도달했어요. 내용이 더 필요하면 한도를 늘려 다시 질문해 주세요.';
+          chat.answer = result.answer; chat.mode = 'ai';chat.tokenUsage=result.usage;
+          if(result.truncated||(!detailed&&result.usage.outputTokens!==undefined&&result.usage.outputTokens>=result.usage.maxOutputTokens))chat.notice='설정한 답변 토큰 한도에 도달했어요. 내용이 더 필요하면 질문을 나누어 주세요.';
         } catch (error) {
           chat.answer = documentAnswer(); chat.mode = signal.aborted?'cancelled':'source';
           chat.notice = signal.aborted ? '답변 생성을 중단했어요. 검색된 원문은 확인할 수 있어요.' : `${error instanceof Error?error.message:'AI 답변 생성에 실패했어요.'} 검색 원문을 표시해요.`;
@@ -130,7 +130,7 @@ export default function App() {
       return <article className="exchange" key={chat.id}><div className="user-message">{chat.question}</div><div className="answer" aria-busy={writing||undefined}>
         <div className="answer-label">{writing?<><span className="answer-progress"><span className="spinner"/></span><strong>{stream?'AI가 답변을 작성하고 있어요':['checking','loading','generating'].includes(ai.phase)?ai.message:'문서 근거를 확인하고 있어요'}</strong></>:<><div className="mini-brand">O₂</div><strong>{chat.mode==='ai'?'AI 답변':'관련 문서 원문'}</strong><span>{savedIds.has(chat.id)?'기기 저장됨':'저장되지 않음'}</span></>}</div>
         {chat.notice&&<Notice>{chat.notice}</Notice>}<TextContent text={writing?stream:chat.answer}/>
-        {!writing&&<>{chat.tokenUsage&&<p className="token-usage">{chat.includesEvidence&&'AI 정리 사용량(문서 발췌 제외) · '}{chat.tokenUsage.inputTokens!==undefined&&`입력 ${chat.tokenUsage.inputTokens.toLocaleString()} · `}{chat.tokenUsage.outputTokens!==undefined&&`생성 ${chat.tokenUsage.outputTokens.toLocaleString()} · `}{chat.tokenUsage.totalTokens!==undefined&&`전체 ${chat.tokenUsage.totalTokens.toLocaleString()} · `}답변 한도 {chat.tokenUsage.maxOutputTokens.toLocaleString()} 토큰</p>}{renderSources(chat.citationIds.flatMap(id=>{const chunk=chunks.find(chunk=>chunk.id===id);return chunk?[{chunk,score:0}]:[];}))}</>}
+        {!writing&&<>{chat.tokenUsage&&<p className="token-usage">{chat.includesEvidence&&'AI 정리 사용량(문서 발췌 제외) · '}{chat.tokenUsage.inputTokens!==undefined&&`입력 ${chat.tokenUsage.inputTokens.toLocaleString()} · `}{chat.tokenUsage.outputTokens!==undefined&&`생성 ${chat.tokenUsage.outputTokens.toLocaleString()} · `}{chat.tokenUsage.totalTokens!==undefined&&`전체 ${chat.tokenUsage.totalTokens.toLocaleString()} · `}{chat.tokenUsage.passes!==undefined?`순차 작성 ${chat.tokenUsage.passes}회 · 회당 한도 ${chat.tokenUsage.perPassMaxOutputTokens?.toLocaleString()} 토큰`:`답변 한도 ${chat.tokenUsage.maxOutputTokens.toLocaleString()} 토큰`}</p>}{renderSources(chat.citationIds.flatMap(id=>{const chunk=chunks.find(chunk=>chunk.id===id);return chunk?[{chunk,score:0}]:[];}))}</>}
       </div></article>;
     })}</div>
     </div><form className="composer-wrap" ref={composerRef} onSubmit={event => {event.preventDefault(); void ask();}}>{showLatest&&<button type="button" className="jump-latest" onClick={scrollToLatest}><Icon name="arrow"/>최신 답변으로 이동</button>}<div className="composer"><textarea aria-label="문서에 질문하기" placeholder={chunks.length?'궁금한 절차나 기준을 입력해 주세요':'문서를 불러오고 있어요'} maxLength={1500} value={question} disabled={busy||!chunks.length} rows={chatViewport.keyboardOpen?1:2} onChange={event => setQuestion(event.target.value)} onKeyDown={event => {if(event.key==='Enter'&&!event.shiftKey&&!event.nativeEvent.isComposing){event.preventDefault(); void ask();}}}/>{busy?<button type="button" className="send-button stop" aria-label="답변 생성 중단" onClick={() => controller.current?.abort()}><span/></button>:<button className="send-button" type="submit" aria-label="질문 보내기" disabled={!question.trim()||!chunks.length}><Icon name="arrow"/></button>}</div><p>생성 답변의 수치와 조건은 원문에서 확인해 주세요. 실제 측정은 Android 앱을 사용해 주세요.</p></form></div>; }

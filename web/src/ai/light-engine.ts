@@ -2,12 +2,13 @@ import type { MLCEngine } from '@mlc-ai/web-llm';
 import { LIGHT_MODEL, lightModelInstalled } from './light-model';
 import { boundedLightPrompt } from './light-prompt';
 import { cleanLightSummary } from './light-output';
+import { explainLightPart, joinLightAnswer, lightAnswerParts } from './light-answer';
 import type { AIReply, AIRequest } from './protocol';
 
 interface Device {destroy:()=>void;addEventListener:(type:string,listener:(event:{error?:{constructor?:{name?:string}}})=>void)=>void;lost:Promise<{reason:string}>}
 interface Hooks {__fieldguardCountTokens?:(text:string)=>number;__fieldguardWasmBytes?:()=>number;__fieldguardDevice?:Device}
 const hooks=globalThis as Hooks;
-type Engine=Pick<MLCEngine,'reload'|'unload'|'chat'>;
+type Engine=Pick<MLCEngine,'reload'|'unload'|'resetChat'|'chat'>;
 export class LightWorkerEngine {
   private engine?:Engine;
   private busy=false;
@@ -39,20 +40,38 @@ export class LightWorkerEngine {
         const maxOutputTokens=Math.min(message.settings.maxOutputTokens,512);
         const system=message.systemInstruction??'';
         const budget=2048-maxOutputTokens-count(system)-96;
-        const prompt=boundedLightPrompt(message.question??message.prompt,message.sources??[],count,budget);
-        progress('prefill','문서 근거를 작은 묶음으로 처리하고 있어요');memory('light-prefill');
-        const stream=await engine.chat.completions.create({messages:[{role:'system',content:system},{role:'user',content:prompt}],stream:true,stream_options:{include_usage:true},temperature:0,max_tokens:maxOutputTokens,extra_body:{enable_thinking:false}});
-        let raw='',answer='',usage:import('@mlc-ai/web-llm').CompletionUsage|undefined,started=false,truncated=false;
-        for await(const part of stream){
-          if(part.usage)usage=part.usage;
-          if(part.choices[0]?.finish_reason==='length')truncated=true;
-          const text=part.choices[0]?.delta.content;
-          if(text){if(!started){started=true;progress('decode','AI가 답변을 작성하고 있어요');memory('light-decode');}raw+=text;answer=cleanLightSummary(raw);if(answer)reply({id,type:'text',answer});}
+        const question=message.question??message.prompt,sources=message.sources??[];
+        const parts=sources.length?lightAnswerParts(question,sources,count,budget,maxOutputTokens):[{units:[],prompt:boundedLightPrompt(question,[],count,budget),fallback:'',generate:true}];
+        if(!parts.length)throw Error('답변할 문서 근거를 확인하지 못했어요.');
+        const answers:string[]=[],usages:import('@mlc-ai/web-llm').CompletionUsage[]=[];
+        let passes=0,truncated=false,sourceSupplemented=false;
+        for(let index=0;index<parts.length;index++){
+          const part=parts[index];
+          if(!part.generate){answers.push(part.fallback);sourceSupplemented=true;reply({id,type:'text',answer:joinLightAnswer(answers)});continue;}
+          // resetChat clears the conversation and KV sequences. Never carry a
+          // prior paragraph's prompt or generated tokens into the next one.
+          if(passes){await engine.resetChat();memory('light-context-reset');}
+          passes++;
+          progress('prefill',`문서 근거를 반영해 답변을 작성하고 있어요 (${index+1}/${parts.length})`);memory('light-prefill');
+          const stream=await engine.chat.completions.create({messages:[{role:'system',content:system},{role:'user',content:part.prompt}],stream:true,stream_options:{include_usage:true},temperature:0,max_tokens:maxOutputTokens,extra_body:{enable_thinking:false}});
+          let raw='',started=false,length=false,usage:import('@mlc-ai/web-llm').CompletionUsage|undefined;
+          for await(const chunk of stream){
+            if(chunk.usage)usage=chunk.usage;
+            if(chunk.choices[0]?.finish_reason==='length')length=true;
+            const text=chunk.choices[0]?.delta.content;
+            if(text){if(!started){started=true;progress('decode','문서 근거를 반영해 답변을 작성하고 있어요');memory('light-decode');}raw+=text;const visible=cleanLightSummary(raw);const answer=part.units.length?explainLightPart(visible,part.units,false).answer:visible;if(answer)reply({id,type:'text',answer:joinLightAnswer([...answers,answer])});}
+          }
+          if(usage)usages.push(usage);
+          let answer=cleanLightSummary(raw,length);
+          if(part.units.length){const result=explainLightPart(cleanLightSummary(raw),part.units,true,length);answer=result.answer;sourceSupplemented||=result.supplemented;}
+          else if(length)truncated=true;
+          answers.push(answer);reply({id,type:'text',answer:joinLightAnswer(answers)});
         }
-        answer=cleanLightSummary(raw,truncated);
+        const answer=joinLightAnswer(answers);
+        const sum=(key:'prompt_tokens'|'completion_tokens'|'total_tokens')=>usages.length===passes&&passes?usages.reduce((total,usage)=>total+usage[key],0):undefined;
         memory('light-complete');progress('cleanup','다음 질문을 위해 AI 메모리를 정리하고 있어요');
         await this.dispose();
-        reply({id,type:'done',result:{answer,truncated,usage:{inputTokens:usage?.prompt_tokens,outputTokens:usage?.completion_tokens,totalTokens:usage?.total_tokens,maxOutputTokens,contextTokens:2048}}});
+        reply({id,type:'done',result:{answer,truncated,sourceSupplemented,usage:{inputTokens:sum('prompt_tokens'),outputTokens:sum('completion_tokens'),totalTokens:sum('total_tokens'),maxOutputTokens:maxOutputTokens*passes,contextTokens:2048,...(sources.length?{passes,perPassMaxOutputTokens:maxOutputTokens}:{})}}});
       }
     }catch(error){
       await this.dispose().catch(()=>{});

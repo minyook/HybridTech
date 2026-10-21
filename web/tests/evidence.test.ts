@@ -14,8 +14,9 @@ it('실제 CPR 원문에서 앞·중간·끝 절차와 수치를 빼먹지 않�
   expect(sources.map(source=>source.chunk.body)).toEqual(original);
 });
 it('실제 가스 측정 원문에서 준비·측정·주의사항과 장비 확인 수치를 보존한다',()=>{
-  const text=evidenceAnswer(retrieve('산소 및 유해가스 측정방법',chunks),'기기 내 AI 정리');
-  for(const required of ['AI 정리','문서에서 확인한 상세 내용','27쪽','사전준비','측정방법','측정시 주의사항','20.9%','3개소','1m','5m','방폭구조','감시인','①\\~③','ex. 점심시간','ex. 2시간'])expect(text).toContain(required);
+  const text=evidenceAnswer(retrieve('산소 및 유해가스 측정방법',chunks));
+  for(const required of ['사전준비','측정방법','측정시 주의사항','20.9%','3개소','1m','5m','방폭구조','감시인','①\\~③','ex. 점심시간','ex. 2시간'])expect(text).toContain(required);
+  expect(text).not.toMatch(/AI 정리|문서에서 확인한 상세 내용|27쪽/);
 });
 it('긴 첫 문장이 예산을 초과해도 뒤쪽의 짧은 관련 조건을 버리지 않는다',()=>{
   const source={score:1,chunk:{id:'x',documentId:'guide',documentTitle:'문서',pageNumber:1,sourceKind:'guide',chunkIndex:0,heading:'',body:'▶ 사전준비 • '+'긴 설명 '.repeat(100)+'\n▶ 주의사항 • 반드시 감시인을 배치하십시오.'}} as Source;

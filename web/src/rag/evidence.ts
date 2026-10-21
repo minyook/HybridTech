@@ -34,6 +34,14 @@ export function evidenceQueue(question:string,units:EvidenceUnit[]){
 }
 
 const escapeMarkdown=(text:string)=>text.replace(/[\\`*_{}\[\]<>#|~]/g,'\\$&');
+export function formatEvidenceUnits(units:EvidenceUnit[]){
+  let section='';const lines:string[]=[];
+  for(const unit of units){
+    if(unit.section&&unit.section!==section){section=unit.section;lines.push(`### ${escapeMarkdown(section)}`);}
+    lines.push(`- ${escapeMarkdown(unit.text)}`);
+  }
+  return lines.join('\n\n');
+}
 /** Display evidence outside the model's KV cache/output-token budget. Content
  * is extracted from the selected pages, never authored from a topic template. */
 export function detailedEvidence(sources:Source[]){
@@ -47,8 +55,8 @@ export function detailedEvidence(sources:Source[]){
   }).join('\n\n');
 }
 
-export function evidenceAnswer(sources:Source[],summary?:string){
-  const details=detailedEvidence(sources);
+export function evidenceAnswer(sources:Source[]){
+  const details=formatEvidenceUnits(sources.flatMap(evidenceUnits));
   if(!details)return '제공 문서에서 질문에 맞는 근거를 찾지 못했어요. 다른 표현으로 검색해 주세요.';
-  return `${summary?`### AI 정리\n\n${summary.trim()}\n\n`:''}### 문서에서 확인한 상세 내용\n\n아래는 검색된 문서의 발췌이며 줄바꿈과 목록을 정리했어요.\n\n${details}`;
+  return details;
 }

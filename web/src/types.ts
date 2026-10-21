@@ -14,6 +14,7 @@ export interface Chat {
   mode: 'source' | 'ai' | 'cancelled'; createdAt: string; notice?: string;
   tokenUsage?:import('./ai/protocol').TokenUsage;
   includesEvidence?:boolean;
+  answerFormat?:'integrated';
 }
 export interface Checklist { id: string; checked: number[]; site: string; note: string; createdAt: string }
 export interface Asset { path: string; size: number; sha256: string; group: 'knowledge' | 'pdf' | 'runtime' }
