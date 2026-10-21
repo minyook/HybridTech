@@ -7,15 +7,17 @@ export interface AISettings { maxOutputTokens:number;contextTokens:number }
 export const DEFAULT_AI_SETTINGS:AISettings = {maxOutputTokens:1536,contextTokens:8192};
 export const REDUCED_AI_SETTINGS:AISettings = {maxOutputTokens:512,contextTokens:4096};
 export const RECOVERY_AI_SETTINGS:AISettings = {maxOutputTokens:256,contextTokens:2048};
-export const LIGHT_AI_SETTINGS:AISettings = {maxOutputTokens:256,contextTokens:2048};
+export const LIGHT_AI_SETTINGS:AISettings = {maxOutputTokens:512,contextTokens:2048};
 export function normalizeAISettings(value:unknown):AISettings {
   const candidate = value && typeof value==='object' ? value as Partial<AISettings> : {};
-  if(browserAIFeatures().appleMobile)return {contextTokens:2048,maxOutputTokens:candidate.maxOutputTokens===512?512:256};
-  const defaults=browserAIFeatures().appleMobile?REDUCED_AI_SETTINGS:DEFAULT_AI_SETTINGS;
+  if(browserAIFeatures().appleMobile)return {...LIGHT_AI_SETTINGS,maxOutputTokens:candidate.maxOutputTokens===256?256:512};
+  const defaults=DEFAULT_AI_SETTINGS;
   const contextTokens = CONTEXT_TOKEN_OPTIONS.find(option=>option===candidate.contextTokens)??defaults.contextTokens;
   const output = OUTPUT_TOKEN_OPTIONS.find(option=>option===candidate.maxOutputTokens)??defaults.maxOutputTokens;
   return {contextTokens,maxOutputTokens:Math.min(output,contextTokens/2)};
 }
-const settingsKey=()=>browserAIFeatures().appleMobile?'ai-settings-light-v1':'ai-settings';
+// Preserve v1/Gemma preferences. The revised evidence prompt has its own default
+// output budget; a deliberate 256-token choice can still be saved in v2.
+const settingsKey=()=>browserAIFeatures().appleMobile?'ai-settings-light-v2':'ai-settings';
 export async function loadAISettings() { return normalizeAISettings(await getSetting(settingsKey())); }
 export async function saveAISettings(value:AISettings) { const settings=normalizeAISettings(value);await setSetting(settingsKey(),settings);return settings; }

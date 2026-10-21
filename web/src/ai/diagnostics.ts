@@ -1,6 +1,6 @@
 import { AI_OPERATION_KEY } from './recovery';
 export const AI_DIAGNOSTIC_KEY='fieldguard-ai-diagnostics';
-export const AI_RUNTIME_REVISION='apple-light-qwen-20261020.4';
+export const AI_RUNTIME_REVISION='apple-evidence-detail-20261021.1';
 export interface AIDiagnostic {
   stage:string;kind?:'memory'|'gpu-error'|'gpu-lost'|'gpu-destroyed';wasmHeapBytes?:number;
   gpuError?:'out-of-memory'|'validation'|'internal'|'unknown';

@@ -34,3 +34,12 @@ it('생성 실패 시 완료로 표시하지 않고 정리한다',async()=>{
   await f.worker.handle({id:2,type:'generate',prompt:'질문',settings:{contextTokens:2048,maxOutputTokens:256}},f.reply);
   expect(f.replies.at(-1)?.type).toBe('error');expect(f.device.destroy).toHaveBeenCalled();
 });
+it('SDK가 길이 종료를 알리면 토큰 수가 한도 미만이어도 중단 표시와 완결 문장만 반환한다',async()=>{
+  const f=fixture();await f.worker.handle(initialize,f.reply);
+  f.engine.chat.completions.create.mockImplementation(async function*(){
+    yield {choices:[{delta:{content:'1. 장비 상태를 확인합니다.\n2. 다음 단계는 미완'},finish_reason:'length'}]};
+    yield {choices:[],usage:{prompt_tokens:1200,completion_tokens:508,total_tokens:1708}};
+  });
+  await f.worker.handle({id:2,type:'generate',prompt:'질문',settings:{contextTokens:2048,maxOutputTokens:512}},f.reply);
+  expect(f.replies.at(-1)).toMatchObject({type:'done',result:{answer:'1. 장비 상태를 확인합니다.',truncated:true,usage:{outputTokens:508,maxOutputTokens:512}}});
+});

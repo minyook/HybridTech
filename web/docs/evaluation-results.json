@@ -1,8 +1,8 @@
 {
-  "date": "2026-10-14",
+  "date": "2026-10-21",
   "kind": "local retrieval regression; not generated-answer or real-device validation",
   "total": 30,
-  "passed": 29,
+  "passed": 30,
   "results": [
     {
       "question": "사업장 밀폐공간 확인",
@@ -18,12 +18,8 @@
           "page": 18
         },
         {
-          "documentId": "confined_space_checklist_2026",
-          "page": 2
-        },
-        {
-          "documentId": "confined_space_checklist_2026",
-          "page": 1
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 41
         }
       ],
       "passed": true
@@ -40,14 +36,6 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 19
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 57
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 62
         }
       ],
       "passed": true
@@ -68,10 +56,6 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 21
-        },
-        {
-          "documentId": "confined_space_checklist_2026",
-          "page": 2
         }
       ],
       "passed": true
@@ -89,14 +73,6 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 22
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 23
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 65
         }
       ],
       "passed": true
@@ -113,14 +89,6 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 24
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 59
-        },
-        {
-          "documentId": "confined_space_checklist_2026",
-          "page": 2
         }
       ],
       "passed": true
@@ -136,11 +104,11 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 25
+          "page": 24
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 24
+          "page": 25
         },
         {
           "documentId": "confined_space_safety_guide_2022",
@@ -161,14 +129,6 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 26
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 27
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 25
         }
       ],
       "passed": true
@@ -185,14 +145,6 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 27
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 38
-        },
-        {
-          "documentId": "confined_space_checklist_2026",
-          "page": 2
         }
       ],
       "passed": true
@@ -209,14 +161,6 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 28
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 25
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 63
         }
       ],
       "passed": true
@@ -248,15 +192,15 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 75
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 59
+          "page": 76
         },
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 30
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 74
         }
       ],
       "passed": true
@@ -273,14 +217,6 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 31
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 77
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 75
         }
       ],
       "passed": true
@@ -320,15 +256,11 @@
       "retrieved": [
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 63
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
           "page": 33
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 60
+          "page": 63
         }
       ],
       "passed": true
@@ -345,10 +277,6 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 34
-        },
-        {
-          "documentId": "confined_space_checklist_2026",
-          "page": 2
         }
       ],
       "passed": true
@@ -365,14 +293,6 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 35
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 39
-        },
-        {
-          "documentId": "confined_space_checklist_2026",
-          "page": 2
         }
       ],
       "passed": true
@@ -389,14 +309,6 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 39
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 66
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 40
         }
       ],
       "passed": true
@@ -417,11 +329,7 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
-          "page": 38
-        },
-        {
-          "documentId": "confined_space_safety_guide_2022",
-          "page": 39
+          "page": 46
         }
       ],
       "passed": true
@@ -446,6 +354,10 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 27
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 46
         }
       ],
       "passed": true
@@ -469,6 +381,10 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 29
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 21
         }
       ],
       "passed": true
@@ -492,6 +408,10 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 35
+        },
+        {
+          "documentId": "confined_space_checklist_2026",
+          "page": 2
         }
       ],
       "passed": true
@@ -560,10 +480,14 @@
         },
         {
           "documentId": "confined_space_safety_guide_2022",
+          "page": 33
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
           "page": 63
         }
       ],
-      "passed": false
+      "passed": true
     },
     {
       "question": "관리감독자 점검 및 긴급구조훈련",
@@ -584,6 +508,10 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 39
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 40
         }
       ],
       "passed": true
@@ -608,6 +536,10 @@
         {
           "documentId": "confined_space_safety_guide_2022",
           "page": 45
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 46
         }
       ],
       "passed": true

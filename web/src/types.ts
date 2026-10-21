@@ -13,6 +13,7 @@ export interface Chat {
   id: string; question: string; answer: string; citationIds: string[];
   mode: 'source' | 'ai' | 'cancelled'; createdAt: string; notice?: string;
   tokenUsage?:import('./ai/protocol').TokenUsage;
+  includesEvidence?:boolean;
 }
 export interface Checklist { id: string; checked: number[]; site: string; note: string; createdAt: string }
 export interface Asset { path: string; size: number; sha256: string; group: 'knowledge' | 'pdf' | 'runtime' }

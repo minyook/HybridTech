@@ -1,7 +1,7 @@
 import type { MLCEngine } from '@mlc-ai/web-llm';
 import { LIGHT_MODEL, lightModelInstalled } from './light-model';
 import { boundedLightPrompt } from './light-prompt';
-import { visibleLightAnswer } from './light-output';
+import { cleanLightSummary } from './light-output';
 import type { AIReply, AIRequest } from './protocol';
 
 interface Device {destroy:()=>void;addEventListener:(type:string,listener:(event:{error?:{constructor?:{name?:string}}})=>void)=>void;lost:Promise<{reason:string}>}
@@ -42,15 +42,17 @@ export class LightWorkerEngine {
         const prompt=boundedLightPrompt(message.question??message.prompt,message.sources??[],count,budget);
         progress('prefill','문서 근거를 작은 묶음으로 처리하고 있어요');memory('light-prefill');
         const stream=await engine.chat.completions.create({messages:[{role:'system',content:system},{role:'user',content:prompt}],stream:true,stream_options:{include_usage:true},temperature:0,max_tokens:maxOutputTokens,extra_body:{enable_thinking:false}});
-        let raw='',answer='',usage:import('@mlc-ai/web-llm').CompletionUsage|undefined,started=false;
+        let raw='',answer='',usage:import('@mlc-ai/web-llm').CompletionUsage|undefined,started=false,truncated=false;
         for await(const part of stream){
           if(part.usage)usage=part.usage;
+          if(part.choices[0]?.finish_reason==='length')truncated=true;
           const text=part.choices[0]?.delta.content;
-          if(text){if(!started){started=true;progress('decode','AI가 답변을 작성하고 있어요');memory('light-decode');}raw+=text;answer=visibleLightAnswer(raw);if(answer)reply({id,type:'text',answer});}
+          if(text){if(!started){started=true;progress('decode','AI가 답변을 작성하고 있어요');memory('light-decode');}raw+=text;answer=cleanLightSummary(raw);if(answer)reply({id,type:'text',answer});}
         }
+        answer=cleanLightSummary(raw,truncated);
         memory('light-complete');progress('cleanup','다음 질문을 위해 AI 메모리를 정리하고 있어요');
         await this.dispose();
-        reply({id,type:'done',result:{answer,usage:{inputTokens:usage?.prompt_tokens,outputTokens:usage?.completion_tokens,totalTokens:usage?.total_tokens,maxOutputTokens,contextTokens:2048}}});
+        reply({id,type:'done',result:{answer,truncated,usage:{inputTokens:usage?.prompt_tokens,outputTokens:usage?.completion_tokens,totalTokens:usage?.total_tokens,maxOutputTokens,contextTokens:2048}}});
       }
     }catch(error){
       await this.dispose().catch(()=>{});

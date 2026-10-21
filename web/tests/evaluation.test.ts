@@ -14,6 +14,6 @@ it('18개 단일·8개 복합·4개 문서 밖 질문의 원문 페이지 회귀
   });
   const failed=results.filter(item=>!item.passed);
   console.log(JSON.stringify({total:30,passed:30-failed.length,failed},null,2));
-  expect(results.slice(0,26).filter(item=>item.passed).length/26).toBeGreaterThanOrEqual(.9);
+  expect(failed).toEqual([]);
   expect(results.slice(26).every(item=>item.passed)).toBe(true);
 });

@@ -1,4 +1,5 @@
 import type { Chunk, Source } from '../types';
+import { compactText, genericTerms, pageBody, queryTerms } from './text';
 
 export function javaHash(text: string): number {
   let hash = 0;
@@ -19,46 +20,64 @@ export function embed(text: string): Float32Array {
 export function aspects(question: string): string[] {
   return question.trim().split(/(?<![결효성경교학분])(?<=[0-9a-z가-힣])과\s+|(?<=[0-9a-z가-힣])와\s+|\s+(?:그리고|및)\s+|[,，]/).map(value => value.trim()).filter(Boolean);
 }
-const requests = new Set(['알려줘','알려주세요','설명해줘','설명해주세요','말해줘','말해주세요','방법은','어떻게','뭐야','무엇인가요','궁금해','기준은']);
-export function terms(question: string): string[] {
-  return [...new Set(question.toLowerCase().replace(/측정법/g,' 측정 방법').replace(/산소측정/g,'산소 측정').split(/[^0-9a-z가-힣]+/).map(term => term.replace(/(에서|으로|은|는|이|가|을|를|의|에|로|도|만)$/,'')).filter(term => term.length >= 2 && !requests.has(term)))];
-}
-const textOf = (chunk: Chunk) => `${chunk.heading} ${chunk.body}`.toLowerCase();
-const vectors = new WeakMap<Chunk, Float32Array>();
+export const terms=queryTerms;
+const textCache=new WeakMap<Chunk,{text:string;opening:string;body:string}>();
+function indexed(chunk:Chunk){let value=textCache.get(chunk);if(!value){const body=pageBody(chunk);value={body,text:compactText(body),opening:compactText(body.slice(0,180))};textCache.set(chunk,value);}return value;}
 export function rank(question: string, chunks: Chunk[]): Source[] {
   const tokens = terms(question);
   if (!tokens.length) return [];
-  const query = embed(question);
-  return chunks.flatMap(chunk => {
-    const text = textOf(chunk); const matched = tokens.filter(token => text.includes(token));
+  const pages=chunks.map(chunk=>({chunk,...indexed(chunk)}));
+  const weights=tokens.map(token=>Math.log(1+chunks.length/(1+pages.filter(page=>page.text.includes(token)).length))*(genericTerms.has(token)?.35:1));
+  const total=weights.reduce((a,b)=>a+b,0);
+  const subjects=tokens.filter(token=>!genericTerms.has(token));
+  return pages.flatMap(({chunk,text,opening,body}) => {
+    const matched=tokens.filter(token=>text.includes(token));
     // Hash collisions alone cannot establish a document citation.
     if (!matched.length) return [];
-    const coverage = matched.length / tokens.length;
-    if (coverage < .45) return [];
-    let vector = vectors.get(chunk); if (!vector) { vector = embed(text); vectors.set(chunk, vector); }
-    const semantic = query.reduce((sum,value,index) => sum + value * vector![index],0);
-    const compact = text.replace(/[^0-9a-z가-힣]+/g,'');
-    let phrase = 0;
-    for (let i=0; i<tokens.length-1; i++) if (compact.includes(tokens[i]+tokens[i+1])) phrase += tokens[i+1] === '방법' ? 4 : 2;
-    const repetitions = matched.reduce((sum,token) => sum + Math.min(text.split(token).length-1,3),0);
-    // A subject near a page's opening is stronger evidence than the same phrase
-    // appearing once in a long appendix or general checklist.
-    const opening = chunk.body.slice(0,350).toLowerCase();
-    const openingCoverage = matched.filter(token => opening.includes(token)).length / tokens.length;
-    return [{chunk, score: coverage*10 + repetitions*.2 + phrase + semantic*.72 + openingCoverage*2}];
-  }).sort((a,b) => b.score-a.score || b.chunk.body.length-a.chunk.body.length || a.chunk.pageNumber-b.chunk.pageNumber);
+    if(subjects.length&&!subjects.some(token=>text.includes(token)))return [];
+    const coverage=tokens.reduce((sum,token,i)=>sum+(text.includes(token)?weights[i]:0),0)/total;
+    if(coverage<.48)return [];
+    let score=0;
+    for(let i=0;i<tokens.length;i++){
+      const occurrences=text.split(tokens[i]).length-1;if(!occurrences)continue;
+      score+=weights[i]*(occurrences/(occurrences+.8*(.3+.7*text.length/700))+(opening.includes(tokens[i])?.7:0));
+      if(i&&new RegExp(`${tokens[i-1]}[가-힣]{0,8}${tokens[i]}`).test(text))score+=(weights[i-1]+weights[i])*.7;
+    }
+    if(/기준|범위|수치|몇|얼마/.test(question)&&/적정\s*공기/.test(body)&&/\d+(?:\.\d+)?\s*(?:%|ppm)\s*(?:이상|이하|미만)/i.test(body))score*=1.8;
+    if((body.match(/제\d장/g)?.length??0)>=3&&!question.includes('목차'))score*=.15;
+    if((body.match(/\(\s*\)/g)?.length??0)>=4&&!/허가|양식|신청|작성/.test(question))score*=.6;
+    if(/점검표/.test(chunk.sourceKind)&&!/점검표|체크리스트|준수사항/.test(question))score*=.65;
+    if(/확인\s*부탁|(?:^|\s)질의(?:\s|[:：])|문의드립니다/.test(body)&&!/사례|질의|해석|여부|반드시|항상|무조건/.test(question))score*=.65;
+    // A contents page naming a topic is not a substitute for its procedures.
+    return [{chunk,score:score*coverage*(text.length<100?.3:1)}];
+  }).sort((a,b)=>b.score-a.score||a.chunk.pageNumber-b.chunk.pageNumber);
 }
 export function retrieve(question: string, chunks: Chunk[], limit = 3): Source[] {
-  const subjects = aspects(question).slice(0,8);
+  let subjects = aspects(question).slice(0,8);
+  if(subjects.length>1&&subjects.slice(0,-1).every(subject=>/^(?:산소|유해가스|일산화탄소|이산화탄소|황화수소)$/.test(compactText(subject)))&&terms(subjects.at(-1)!).some(term=>['측정','농도','기준'].includes(term)))subjects=[question];
   const rankings = subjects.map(subject => rank(subject,chunks));
   const selected = new Map<string, Source>();
   for (const ranking of rankings) if (ranking[0]) selected.set(ranking[0].chunk.id,ranking[0]);
-  if (subjects.length > 1) return [...selected.values()];
-  for (const source of rank(question,chunks)) {
+  const table=(source:Source)=>/^순\s*서\s*실\s*시\s*방\s*법/.test(pageBody(source.chunk));
+  for(const ranking of rankings){
+    const first=ranking[0];if(!first||!table(first))continue;
+    const continuation=ranking.find(source=>source.chunk.documentId===first.chunk.documentId&&Math.abs(source.chunk.pageNumber-first.chunk.pageNumber)===1&&table(source));
+    if(continuation&&selected.size<Math.max(limit,subjects.length))selected.set(continuation.chunk.id,continuation);
+  }
+  for (const source of [...rank(question,chunks),...rankings.flatMap(ranking=>ranking.slice(1))]) {
     if (selected.size >= Math.max(limit,subjects.length)) break;
+    const best=rankings.find(ranking=>ranking.some(item=>item.chunk.id===source.chunk.id))?.[0]?.score??source.score;
+    if(source.score<best*.65||indexed(source.chunk).text.length<100)continue;
     selected.set(source.chunk.id,source);
   }
-  return [...selected.values()];
+  const result=[...selected.values()];
+  // Keep a procedure's consecutive pages in reading order even when the shorter
+  // continuation page ranks first. Do not globally reorder separate subjects.
+  for(let i=0;i<result.length;i++){
+    const previous=table(result[i])?result.findIndex((source,j)=>j>i&&table(source)&&source.chunk.documentId===result[i].chunk.documentId&&source.chunk.pageNumber===result[i].chunk.pageNumber-1):-1;
+    if(previous>=0)[result[i],result[previous]]=[result[previous],result[i]];
+  }
+  return result;
 }
 export function missingAspects(question: string, chunks: Chunk[]) { return aspects(question).filter(subject => rank(subject,chunks).length === 0); }
 export function sourceAnswer(sources: Source[]): string {
@@ -68,6 +87,6 @@ export function sourceAnswer(sources: Source[]): string {
 }
 export function contradictsSources(question: string, answer: string, sources: Source[]): boolean {
   if (!sources.length) return false;
-  if (question.includes('심폐소생술') && /알려|방법|어떻게|설명/.test(question) && sources.some(source => source.chunk.body.includes('심폐소생술')) && !/압박|가슴을|가슴 중앙|흉부/.test(answer)) return true;
+  if (terms(question).includes('심폐소생술') && !/기도|인공호흡|회복자세|호흡 확인|신고|정의|뜻/.test(question) && sources.some(source => compactText(source.chunk.body).includes('심폐소생술')) && !/압박|가슴을|가슴 중앙|흉부/.test(answer)) return true;
   return aspects(question).length > 1 && sources.length >= aspects(question).length && /(?:문서|자료)[^.!?\n]{0,40}(?:찾을 수 없|확인할 수 없|확인되지 않|없습니다|없어요)/.test(answer);
 }

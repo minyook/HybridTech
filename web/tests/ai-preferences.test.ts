@@ -21,13 +21,15 @@ it('복구용 2,048 문맥도 명시적으로 저장하고 답변 한도를 검�
   expect(normalizeAISettings({contextTokens:2048,maxOutputTokens:4096}).maxOutputTokens).toBe(1024);
 });
 it('아이폰은 경량 전용 한도를 사용하고 기존 Gemma 설정을 덮어쓰지 않는다',async()=>{
-  const previous={contextTokens:8192,maxOutputTokens:1536};await setSetting('ai-settings',previous);await setSetting('ai-settings-light-v1',undefined);
+  const previous={contextTokens:8192,maxOutputTokens:1536};await setSetting('ai-settings',previous);await setSetting('ai-settings-light-v1',{contextTokens:2048,maxOutputTokens:256});await setSetting('ai-settings-light-v2',undefined);
   vi.stubGlobal('navigator',{userAgent:'iPhone',maxTouchPoints:5});
   try{
-    expect(await loadAISettings()).toEqual({contextTokens:2048,maxOutputTokens:256});
-    expect(normalizeAISettings(previous)).toEqual({contextTokens:2048,maxOutputTokens:256});
+    expect(await loadAISettings()).toEqual({contextTokens:2048,maxOutputTokens:512});
+    expect(normalizeAISettings(previous)).toEqual({contextTokens:2048,maxOutputTokens:512});
     expect(await saveAISettings({contextTokens:16384,maxOutputTokens:512})).toEqual({contextTokens:2048,maxOutputTokens:512});
     expect(await loadAISettings()).toEqual({contextTokens:2048,maxOutputTokens:512});expect(await getSetting('ai-settings')).toEqual(previous);
+    expect(await getSetting('ai-settings-light-v1')).toEqual({contextTokens:2048,maxOutputTokens:256});
+    await saveAISettings({contextTokens:2048,maxOutputTokens:256});expect((await loadAISettings()).maxOutputTokens).toBe(256);
   }
   finally{vi.unstubAllGlobals();}
 });

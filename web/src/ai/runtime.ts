@@ -10,6 +10,7 @@ import { acquireEngineLease } from './engine-lease';
 import { recordAIDiagnostic } from './diagnostics';
 import { LIGHT_MODEL, lightModelInstalled, usesLightAI } from './light-model';
 import { contradictsSources } from '../rag/search';
+import { LIGHT_SYSTEM_INSTRUCTION } from './light-prompt';
 
 export interface AIStatus { phase:'idle'|'checking'|'loading'|'ready'|'generating'|'error'|'unavailable'|'recovery';message:string;startedAt?:number;timing?:InitializationTiming }
 let status:AIStatus={phase:'idle',message:'모델 다운로드 후 자동으로 준비해요'};
@@ -158,7 +159,7 @@ export async function generate(question:string,sources:Source[],onText:(answer:s
     signal.addEventListener('abort',cancel,{once:true});
     publish({phase:'generating',message:'답변에 필요한 작업 공간을 준비하고 있어요',startedAt:Date.now()});
     const referenceText=[question,...sources.map(source=>source.chunk.body)].join('\n');
-    const result=await request(candidate,{id:++nextId,type:'generate',prompt:usesLightAI()?'':buildPrompt(question,sources),...(usesLightAI()?{question,sources}:{}),systemInstruction:SYSTEM_INSTRUCTION,settings},answer=>{
+    const result=await request(candidate,{id:++nextId,type:'generate',prompt:usesLightAI()?'':buildPrompt(question,sources),...(usesLightAI()?{question,sources}:{}),systemInstruction:usesLightAI()?LIGHT_SYSTEM_INSTRUCTION:SYSTEM_INSTRUCTION,settings},answer=>{
       // Do not keep streaming visibly corrupted text while waiting for completion.
       onText(outputIssue(answer,referenceText)||(usesLightAI()&&contradictsSources(question,answer,sources))?'생성된 문장을 확인하고 있어요…':answer);
     });

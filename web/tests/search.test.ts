@@ -34,4 +34,12 @@ describe('Android 검색 이식',() => {
   it('검색 결과는 질문마다 동일하다',() => {
     expect(rank('산소측정법 알려줘',chunks).map(source=>source.chunk.id)).toEqual(rank('산소측정법 알려줘',chunks).map(source=>source.chunk.id));
   });
+  it('사용자가 보낸 두 질문은 방법 쪽과 이어지는 심폐소생술 쪽을 우선 반환한다',()=>{
+    expect(retrieve('산소 및 유해가스 측정방법',chunks)[0].chunk.pageNumber).toBe(27);
+    expect(retrieve('심폐소생술',chunks).map(source=>source.chunk.pageNumber)).toEqual([45,46]);
+    expect(contradictsSources('심폐소생술','기도를 개방합니다.',retrieve('심폐소생술',chunks))).toBe(true);
+  });
+  it.each([['심폐 소생술 알려줘',45],['CPR 방법 알려줘',45],['산소농도는 몇 퍼센트여야해?',24],['CO2 농도 기준 알려줘',24],['밀폐 공간 작업허가 절차 자세히 알려줘',20]] as const)('띄어쓰기·약어·조사가 달라도 올바른 쪽을 찾는다: %s',(question,page)=>{
+    expect(retrieve(question,chunks)[0].chunk.pageNumber).toBe(page);
+  });
 });
