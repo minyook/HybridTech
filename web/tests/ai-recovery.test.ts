@@ -27,3 +27,9 @@ it('엔진 정리 도중 종료된 기록도 다시 실행할 때 자동 적재�
   vi.resetModules();guard=await import('../src/ai/recovery');expect(guard.unfinishedAIOperation()).toMatchObject({stage:'cleanup',contextTokens:2048});
   expect(guard.recoveryMessage('cleanup')).toContain('AI 메모리 정리');
 });
+it('강제 종료 상태는 finally의 완료 처리와 재접속을 지나도 유지된다',async()=>{
+  let guard=await import('../src/ai/recovery');guard.beginAIOperation('decode',2048,{revision:'test-runtime',model:'test-model'});guard.markAIUncertain('stop-timeout');guard.finishAIOperation();
+  expect(guard.unfinishedAIOperation()).toMatchObject({state:'uncertain',reason:'stop-timeout',revision:'test-runtime',model:'test-model'});
+  vi.resetModules();guard=await import('../src/ai/recovery');expect(guard.unfinishedAIOperation()?.state).toBe('uncertain');
+  guard.resetAIRecovery();expect(guard.unfinishedAIOperation()).toBeUndefined();
+});

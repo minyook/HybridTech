@@ -1,5 +1,5 @@
 import type { Chunk, Source } from '../types';
-import { compactText, genericTerms, pageBody, queryTerms } from './text';
+import { compactText, domainTerms, genericTerms, pageBody, queryTerms } from './text';
 
 export function javaHash(text: string): number {
   let hash = 0;
@@ -18,7 +18,9 @@ export function embed(text: string): Float32Array {
   return vector;
 }
 export function aspects(question: string): string[] {
-  return question.trim().split(/(?<![결효성경교학분])(?<=[0-9a-z가-힣])과\s+|(?<=[0-9a-z가-힣])와\s+|\s+(?:그리고|및)\s+|[,，]/).map(value => value.trim()).filter(Boolean);
+  const parts=question.trim().split(/(?<![결효성경교학분])(?<=[0-9a-z가-힣])과\s+|(?<=[0-9a-z가-힣])와\s+|\s+(?:그리고|및)\s+|[,，]/).map(value => value.trim()).filter(Boolean);
+  if(parts.length>1&&parts.slice(1).some(part=>queryTerms(part).every(term=>genericTerms.has(term)||['체적','길이','시간','수치','깊이','횟수'].includes(term))))return [question.trim()];
+  return parts;
 }
 export const terms=queryTerms;
 const textCache=new WeakMap<Chunk,{text:string;opening:string;body:string}>();
@@ -27,7 +29,10 @@ export function rank(question: string, chunks: Chunk[]): Source[] {
   const tokens = terms(question);
   if (!tokens.length) return [];
   const pages=chunks.map(chunk=>({chunk,...indexed(chunk)}));
-  const weights=tokens.map(token=>Math.log(1+chunks.length/(1+pages.filter(page=>page.text.includes(token)).length))*(genericTerms.has(token)?.35:1));
+  // Colloquial endings and words absent from the corpus cannot dominate the
+  // coverage denominator merely because their document frequency is zero.
+  const anchored=tokens.some(token=>domainTerms.has(token)&&!genericTerms.has(token));
+  const weights=tokens.map(token=>{const frequency=pages.filter(page=>page.text.includes(token)).length;return Math.log(1+chunks.length/(1+frequency))*(frequency?genericTerms.has(token)?.35:1:anchored?.05:1);});
   const total=weights.reduce((a,b)=>a+b,0);
   const subjects=tokens.filter(token=>!genericTerms.has(token));
   return pages.flatMap(({chunk,text,opening,body}) => {
@@ -53,6 +58,7 @@ export function rank(question: string, chunks: Chunk[]): Source[] {
   }).sort((a,b)=>b.score-a.score||a.chunk.pageNumber-b.chunk.pageNumber);
 }
 export function retrieve(question: string, chunks: Chunk[], limit = 3): Source[] {
+  if(/(?:우리|현재|지금).*(?:승인|허가).*(?:됐|되었|받았|상태)/.test(question))return [];
   let subjects = aspects(question).slice(0,8);
   if(subjects.length>1&&subjects.slice(0,-1).every(subject=>/^(?:산소|유해가스|일산화탄소|이산화탄소|황화수소)$/.test(compactText(subject)))&&terms(subjects.at(-1)!).some(term=>['측정','농도','기준'].includes(term)))subjects=[question];
   const rankings = subjects.map(subject => rank(subject,chunks));
@@ -64,6 +70,9 @@ export function retrieve(question: string, chunks: Chunk[], limit = 3): Source[]
     const continuation=ranking.find(source=>source.chunk.documentId===first.chunk.documentId&&Math.abs(source.chunk.pageNumber-first.chunk.pageNumber)===1&&table(source));
     if(continuation&&selected.size<Math.max(limit,subjects.length))selected.set(continuation.chunk.id,continuation);
   }
+  // Near ties can be complementary definitions/timing pages. Preserve them
+  // before unrelated global matches displace the second half of a condition.
+  for(const ranking of rankings){const alternative=ranking[1];if(alternative&&alternative.score>=ranking[0].score*.98&&selected.size<Math.max(limit,subjects.length))selected.set(alternative.chunk.id,alternative);}
   for (const source of [...rank(question,chunks),...rankings.flatMap(ranking=>ranking.slice(1))]) {
     if (selected.size >= Math.max(limit,subjects.length)) break;
     const best=rankings.find(ranking=>ranking.some(item=>item.chunk.id===source.chunk.id))?.[0]?.score??source.score;

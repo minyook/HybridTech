@@ -1,86 +1,84 @@
 import type { MLCEngine } from '@mlc-ai/web-llm';
 import { LIGHT_MODEL, lightModelInstalled } from './light-model';
-import { boundedLightPrompt } from './light-prompt';
-import { cleanLightSummary } from './light-output';
-import { explainLightPart, joinLightAnswer, lightAnswerParts } from './light-answer';
+import { acceptedSupplement, composeAnswer, createAnswerPlan, supplementPrompt, SUPPLEMENT_SYSTEM } from '../rag/answer-plan';
 import type { AIReply, AIRequest } from './protocol';
 
 interface Device {destroy:()=>void;addEventListener:(type:string,listener:(event:{error?:{constructor?:{name?:string}}})=>void)=>void;lost:Promise<{reason:string}>}
 interface Hooks {__fieldguardCountTokens?:(text:string)=>number;__fieldguardWasmBytes?:()=>number;__fieldguardDevice?:Device}
-const hooks=globalThis as Hooks;
-type Engine=Pick<MLCEngine,'reload'|'unload'|'resetChat'|'chat'>;
+type Engine=Pick<MLCEngine,'reload'|'unload'|'interruptGenerate'|'chat'>;
 export class LightWorkerEngine {
   private engine?:Engine;
   private busy=false;
-  constructor(private create:()=>Engine,private installed=lightModelInstalled,private bridge:Hooks=hooks){}
+  private stopping=false;
+  private disposal?:Promise<void>;
+  private stops:{id:number;reply:(message:AIReply)=>void}[]=[];
+  constructor(private create:()=>Engine,private installed=lightModelInstalled,private bridge:Hooks=globalThis as Hooks){}
   async handle(message:AIRequest,reply:(message:AIReply)=>void){
+    // This bypasses the busy gate, not the Worker's event loop. The parent owns
+    // the watchdog so a blocked Worker cannot disable its own timeout.
+    if(message.type==='stop'){
+      this.stopping=true;this.stops.push({id:message.id,reply});
+      void this.engine?.interruptGenerate().catch(()=>{});
+      if(!this.busy){let clean=false;try{await this.dispose();clean=true;}catch{/* Acknowledge uncertainty without a second unhandled rejection. */}finally{this.ackStops(clean);}}
+      return;
+    }
     const id=message.id;
-    if(this.busy){reply({id,type:'error',message:'앞선 AI 작업을 처리하고 있어요.'});return;}
-    this.busy=true;
-    const progress=(stage:'engine'|'prefill'|'decode'|'cleanup',text:string)=>reply({id,type:'progress',stage,message:text});
+    if(this.busy||this.stopping){reply({id,type:'error',message:'앞선 AI 작업을 정리하고 있어요.'});return;}
+    this.busy=true;let clean=false;
+    const progress=(stage:'engine'|'prefill'|'decode'|'cleanup',text:string)=>{if(!this.stopping)reply({id,type:'progress',stage,message:text});};
     const memory=(stage:string)=>{const bytes=this.bridge.__fieldguardWasmBytes?.();if(bytes)reply({id,type:'diagnostic',sample:{stage,kind:'memory',wasmHeapBytes:bytes}});};
     try{
       if(message.type==='initialize'){
-        if(message.provider!=='light')throw Error('경량 AI 실행 구성이 달라요. 앱을 다시 열어 주세요.');
-        if(message.settings.contextTokens!==2048)throw Error('아이폰 경량 AI는 문맥 2,048 토큰을 사용해요.');
+        if(message.provider!=='light'||message.settings.contextTokens!==2048)throw Error('아이폰 경량 AI 실행 구성을 다시 확인해 주세요.');
         const start=performance.now();if(!await this.installed())throw Error('경량 모델 파일이 없어요. 설정에서 다운로드해 주세요.');
+        if(this.stopping)return;
         const verified=performance.now();progress('engine','경량 AI를 기기 메모리에 준비하고 있어요');
-        const engine=this.create();this.engine=engine;
+        const engine=this.create();this.engine=engine;this.disposal=undefined;
         await engine.reload(LIGHT_MODEL.id,{context_window_size:2048});
         const device=this.bridge.__fieldguardDevice;
         device?.addEventListener('uncapturederror',event=>{const name=event.error?.constructor?.name;reply({id,type:'diagnostic',sample:{stage:'light-gpu',kind:'gpu-error',gpuError:name==='GPUOutOfMemoryError'?'out-of-memory':name==='GPUValidationError'?'validation':'unknown'}});});
         void device?.lost.then(info=>{if(info.reason!=='destroyed')reply({id,type:'diagnostic',sample:{stage:'light-gpu',kind:'gpu-lost'}});});
         memory('light-ready');
-        reply({id,type:'done',initialization:{verification:'cached',verificationMs:verified-start,runtimeMs:0,engineMs:performance.now()-verified,totalMs:performance.now()-start}});
+        if(!this.stopping)reply({id,type:'done',initialization:{verification:'cached',verificationMs:verified-start,runtimeMs:0,engineMs:performance.now()-verified,totalMs:performance.now()-start}});
       }else{
         const engine=this.engine,count=this.bridge.__fieldguardCountTokens;
         if(!engine||!count)throw Error('경량 AI 준비를 다시 확인해 주세요.');
-        // No previous conversation is sent or retained. All requested output
-        // tokens and chat template overhead are reserved before GPU prefill.
-        const maxOutputTokens=Math.min(message.settings.maxOutputTokens,512);
-        const system=message.systemInstruction??'';
-        const budget=2048-maxOutputTokens-count(system)-96;
-        const question=message.question??message.prompt,sources=message.sources??[];
-        const parts=sources.length?lightAnswerParts(question,sources,count,budget,maxOutputTokens):[{units:[],prompt:boundedLightPrompt(question,[],count,budget),fallback:'',generate:true}];
-        if(!parts.length)throw Error('답변할 문서 근거를 확인하지 못했어요.');
-        const answers:string[]=[],usages:import('@mlc-ai/web-llm').CompletionUsage[]=[];
-        let passes=0,truncated=false,sourceSupplemented=false;
-        for(let index=0;index<parts.length;index++){
-          const part=parts[index];
-          if(!part.generate){answers.push(part.fallback);sourceSupplemented=true;reply({id,type:'text',answer:joinLightAnswer(answers)});continue;}
-          // resetChat clears the conversation and KV sequences. Never carry a
-          // prior paragraph's prompt or generated tokens into the next one.
-          if(passes){await engine.resetChat();memory('light-context-reset');}
-          passes++;
-          progress('prefill',`문서 근거를 반영해 답변을 작성하고 있어요 (${index+1}/${parts.length})`);memory('light-prefill');
-          const stream=await engine.chat.completions.create({messages:[{role:'system',content:system},{role:'user',content:part.prompt}],stream:true,stream_options:{include_usage:true},temperature:0,max_tokens:maxOutputTokens,extra_body:{enable_thinking:false}});
-          let raw='',started=false,length=false,usage:import('@mlc-ai/web-llm').CompletionUsage|undefined;
+        const plan=message.plan??createAnswerPlan(message.question??message.prompt,message.sources??[]);
+        reply({id,type:'text',answer:plan.body});
+        const maxOutputTokens=Math.min(message.settings.maxOutputTokens,256);
+        const prompt=supplementPrompt(plan),budget=2048-maxOutputTokens-count(SUPPLEMENT_SYSTEM)-96;
+        let supplement='',generated=false,skipped:'not-needed'|'budget'|'validation'|undefined;
+        let usage:import('@mlc-ai/web-llm').CompletionUsage|undefined;
+        if(!plan.supplementRequested)skipped='not-needed';
+        else if(count(prompt)>budget)skipped='budget';
+        else if(!this.stopping){
+          generated=true;progress('prefill','표시된 문서 근거로 필요한 보충 설명을 확인하고 있어요');memory('light-prefill');
+          const stream=await engine.chat.completions.create({messages:[{role:'system',content:SUPPLEMENT_SYSTEM},{role:'user',content:prompt}],stream:true,stream_options:{include_usage:true},temperature:0,max_tokens:maxOutputTokens,extra_body:{enable_thinking:false}});
+          let raw='',started=false,truncated=false;
           for await(const chunk of stream){
+            if(this.stopping)break;
             if(chunk.usage)usage=chunk.usage;
-            if(chunk.choices[0]?.finish_reason==='length')length=true;
+            if(chunk.choices[0]?.finish_reason==='length')truncated=true;
             const text=chunk.choices[0]?.delta.content;
-            if(text){if(!started){started=true;progress('decode','문서 근거를 반영해 답변을 작성하고 있어요');memory('light-decode');}raw+=text;const visible=cleanLightSummary(raw);const answer=part.units.length?explainLightPart(visible,part.units,false).answer:visible;if(answer)reply({id,type:'text',answer:joinLightAnswer([...answers,answer])});}
+            if(text){if(!started){started=true;progress('decode','보충 설명을 확인하고 있어요');memory('light-decode');}raw+=text;}
           }
-          if(usage)usages.push(usage);
-          let answer=cleanLightSummary(raw,length);
-          if(part.units.length){const result=explainLightPart(cleanLightSummary(raw),part.units,true,length);answer=result.answer;sourceSupplemented||=result.supplemented;}
-          else if(length)truncated=true;
-          answers.push(answer);reply({id,type:'text',answer:joinLightAnswer(answers)});
+          if(!this.stopping&&!truncated)supplement=acceptedSupplement(raw,plan);
+          if(!supplement)skipped='validation';
         }
-        const answer=joinLightAnswer(answers);
-        const sum=(key:'prompt_tokens'|'completion_tokens'|'total_tokens')=>usages.length===passes&&passes?usages.reduce((total,usage)=>total+usage[key],0):undefined;
-        memory('light-complete');progress('cleanup','다음 질문을 위해 AI 메모리를 정리하고 있어요');
-        await this.dispose();
-        reply({id,type:'done',result:{answer,truncated,sourceSupplemented,usage:{inputTokens:sum('prompt_tokens'),outputTokens:sum('completion_tokens'),totalTokens:sum('total_tokens'),maxOutputTokens:maxOutputTokens*passes,contextTokens:2048,...(sources.length?{passes,perPassMaxOutputTokens:maxOutputTokens}:{})}}});
+        memory('light-complete');progress('cleanup','AI 메모리를 정리하고 있어요');
+        await this.dispose();clean=true;
+        if(!this.stopping)reply({id,type:'done',cleanupComplete:true,result:{answer:composeAnswer(plan,supplement),generated,supplementSkipped:skipped,usage:{...(usage?{inputTokens:usage.prompt_tokens,outputTokens:usage.completion_tokens,totalTokens:usage.total_tokens}:generated?{}:{inputTokens:0,outputTokens:0,totalTokens:0}),maxOutputTokens:generated?maxOutputTokens:0,contextTokens:2048}}});
       }
     }catch(error){
-      await this.dispose().catch(()=>{});
-      const text=error instanceof Error?error.message:'';
-      const message=/shader-f16|ShaderF16/i.test(text)?'이 기기에서 경량 모델에 필요한 16비트 그래픽 연산을 사용할 수 없어요. 문서 검색을 이용해 주세요.':/[가-힣]/u.test(text)?text:'경량 AI 실행을 완료하지 못했어요. 다른 AI 화면을 닫고 설정에서 진단 기록을 저장해 주세요.';
-      reply({id,type:'error',message});
-    }finally{this.busy=false;}
+      try{await this.dispose();clean=true;}catch{/* Never acknowledge failed unload as completed cleanup. */}
+      if(!this.stopping)reply({id,type:'error',cleanupComplete:clean,message:error instanceof Error&&/[가-힣]/.test(error.message)?error.message:'경량 AI 실행을 완료하지 못했어요. 문서 본문은 계속 확인할 수 있어요.'});
+    }finally{
+      if(this.stopping&&!clean)try{await this.dispose();clean=true;}catch{/* Parent guard handles uncertain cleanup. */}
+      this.busy=false;if(this.stopping)this.ackStops(clean);
+    }
   }
-  private async dispose(){
-    try{await this.engine?.unload();}finally{this.engine=undefined;this.bridge.__fieldguardDevice?.destroy();this.bridge.__fieldguardDevice=undefined;this.bridge.__fieldguardCountTokens=undefined;this.bridge.__fieldguardWasmBytes=undefined;}
+  private ackStops(clean:boolean){for(const stop of this.stops.splice(0))stop.reply({id:stop.id,type:'stopped',cleanupComplete:clean});this.stopping=false;}
+  private dispose(){
+    return this.disposal??=(async()=>{try{await this.engine?.unload();}finally{this.engine=undefined;this.bridge.__fieldguardDevice?.destroy();this.bridge.__fieldguardDevice=undefined;this.bridge.__fieldguardCountTokens=undefined;this.bridge.__fieldguardWasmBytes=undefined;}})();
   }
 }

@@ -81,7 +81,7 @@ PC 사이드바, 모바일 하단 메뉴와 320px 이상 반응형 레이아웃�
 
 질문·선택된 근거를 한국어 Markdown 지침과 함께 모델에 전달합니다. 근거 부족, 모델 없음, 초기화/생성 실패 또는 일부 수치 모순이 감지되면 생성 답변 대신 검색 원문과 그 이유를 표시합니다. 이 검사는 모든 의미·수치 오류를 검출하는 완전한 검증기가 아닙니다.
 
-Apple은 `ai/light-answer.ts`에서 전체 원문 단위를 실제 토크나이저 예산으로 나누어 순차 생성하고 하나의 상세 답변으로 연결합니다. 구간 사이 `resetChat()`은 이전 대화/KV를 초기화합니다. 누락된 수치·주요 내용 또는 길이 종료가 감지된 구간은 같은 답변 위치에서 원문 표현으로 보완하며 별도 원문 부록은 붙이지 않습니다. `Chat.answerFormat=integrated`는 기존 IDB 스키마 변경 없이 선택 필드로 저장하고 이전 `includesEvidence` 기록은 그대로 읽습니다.
+Apple은 `rag/answer-plan.ts`의 공통 계획으로 문서 본문을 먼저 표시합니다. 추가 설명 요청에 한해 `ai/light-engine.ts`가 최대 한 번 보충 생성하고 검증된 보충만 같은 답변 끝에 붙입니다. 필수 근거가 예산을 넘으면 생성하지 않습니다. 현재 작업 가능/승인 판정은 문서 질문에서 만들지 않습니다. `Chat.answerFormat=integrated`와 기존 저장 기록은 호환합니다.
 
 `react-markdown`과 GFM으로 제목·강조·목록·표·코드·인용을 표시합니다. HTML 실행과 생성된 원격 이미지 요청은 허용하지 않습니다. 원문 기호는 escape하여 보존하며 단일 물결표가 수치 범위를 취소선으로 바꾸지 않습니다.
 
@@ -92,18 +92,18 @@ PDF 원본은 PDF.js로 렌더링합니다. 두 PDF의 SHA-256을 빌드 때 확
 | 실행 환경 | 모델·엔진 | 저장 방식 | 실제 적용 한도 |
 | --- | --- | --- | --- |
 | PC·Android 브라우저 | Gemma 4 E2B / LiteRT-LM 0.18.0 | 약 2.01GB 단일 .litertlm, OPFS | 기본 문맥 8,192 / 출력 1,536, 사용자 설정 |
-| iPhone·iPad | Qwen3 0.6B q4f16_1 / WebLLM 0.2.86 | 총 353,285,213바이트 13개, Cache API | 문맥 2,048 고정 / 구간별 출력 512 기본·256 선택 / prefill 64 |
+| iPhone·iPad | Qwen3 0.6B q4f16_1 / WebLLM 0.2.86 | 총 353,285,213바이트 13개, Cache API | 문맥 2,048 고정 / 보충 출력 256 기본·128 선택 / prefill 64 |
 | Android 설치형 | 기존 네이티브 Gemma | 기존 Android 모델 저장 | 기존 앱 설정 |
 
-`ai/runtime.ts`는 Apple 모바일에서 **light-ai-worker.js**만 생성합니다. 기존 Gemma가 저장돼 있어도 읽거나 자동 실행하지 않고 경량 다운로드를 안내합니다. 새 다운로드 완료 후 중단 표시를 해제하고 자동 준비하며 기존 Gemma·대화·작업 데이터는 보존합니다. 토큰 설정도 `ai-settings-light-v2`로 분리해 큰 Gemma 설정을 물려받지 않습니다.
+`ai/runtime.ts`는 Apple 모바일에서 **light-ai-worker.js**만 생성합니다. 기존 Gemma가 저장돼 있어도 읽거나 자동 실행하지 않고 경량 다운로드를 안내합니다. 새 다운로드 완료 후 중단 표시를 해제하고 자동 준비하며 기존 Gemma·대화·작업 데이터는 보존합니다. 토큰 설정도 `ai-settings-light-v3`로 분리해 큰 Gemma 설정을 물려받지 않습니다.
 
 `ai/light-manifest.json`은 공식 MLC 모델의 immutable HF 리비전·실행 WASM 커밋·13개 파일의 크기·SHA-256을 고정합니다. `light-model.ts`는 한 파일씩 스트리밍 해시 검증한 뒤 SDK와 같은 `webllm/config`, `webllm/model`, `webllm/wasm` Cache API에 저장합니다. 완료 파일은 취소/재시도에서 재사용하며, 해시/길이 오류 파일은 설치 완료로 남기지 않습니다. 전체 모델 ArrayBuffer/Blob이나 병렬 shard 다운로드를 만들지 않습니다. 모델 바이너리는 Git에 넣지 않습니다.
 
 `light.worker.ts`의 네트워크 fetch와 SDK의 네이티브 Cache.add 경로는 차단합니다. 준비·생성은 저장 파일만 사용하며 누락 시 설정으로 안내합니다. `scripts/light-worker-bridge.mjs`는 고정 SDK의 입력 청크·KV prefill workspace를 최대 64로 제한하고 같은 토크나이저의 토큰 계산·WASM 용량 읽기를 연결합니다. 실제 SDK 버전/연결 지점이 바뀌면 빌드를 실패시킵니다. node_modules·모델·컴파일된 WASM은 수정하지 않습니다.
 
-`light-answer.ts`는 시스템 지침·구간 출력 한도·채팅 템플릿 여유 96토큰을 먼저 빼고 실제 토크나이저로 문장/표 항목 전체를 순서대로 분할합니다. 각 생성 항목은 원문 항목 번호와 대응시키고 수치·단위·주요 내용 누락을 보수적으로 검사합니다. 넘치는 단위와 잘리거나 대응하지 않는 항목은 같은 위치에서 문서 표현을 유지합니다. 같은 제목의 내용은 한 주제로 모으고 출처 카드는 답변 아래에 남깁니다. SDK `resetChat()`은 구간 사이 대화/KV를 초기화하며 이전 답변을 다음 입력에 보내지 않습니다. thinking은 끄고 내부 항목 번호·think 표시는 사용자에게 보여주지 않습니다. 이 검사는 모든 의미·사실 오류를 검출하는 완전한 검증기가 아닙니다.
+`rag/answer-plan.ts`는 본문/모델 입력의 동일 근거와 조건·수치/연산자를 보존합니다. 보충 생성은 실제 토크나이저로 시스템 지침·출력 전체·템플릿 여유 96토큰을 예약하고 전체 필수 근거가 들어갈 때만 수행합니다. 본문 복사·새 수치·출처 누락·일부 조건 생략·작업 허용 표현·길이 종료 보충은 표시하지 않습니다. 이 필터는 완전한 의미 검증기가 아닙니다.
 
-Apple 답변 완료 후 SDK unload·GPU 장치 정리를 기다린 뒤 main이 Worker를 종료하고 다음 엔진 하나만 자동 준비합니다. 준비 중 질문은 같은 Promise를 기다리고 Web Locks가 같은 저장소의 중복 엔진을 막습니다. 중단·삭제·HMR 시 Worker를 종료합니다. 페이지 강제 종료의 중단 표시는 자동 반복을 막고 진단은 로컬에만 보관합니다. 실행·메모리 해제 버튼이나 서버 추론은 추가하지 않습니다.
+Apple의 실제 보충 생성 후 SDK unload·GPU 정리를 기다린 다음 Worker를 종료하고 다음 엔진을 자동 준비합니다. 일반 문서 답변에는 생성이 필요하지 않습니다. 중단은 별도 제어 메시지·정리 완료 응답을 사용하며 parent watchdog의 강제 종료/정리 미확인은 자동 재적재를 잠급니다. 정상 Worker 종료와 구분하고 새로고침 뒤에도 미확인 기록을 유지합니다. 명시적 복구는 Web Locks 확보 후 수행합니다. [자세한 상태 정책](GROUNDED_ANSWER_DESIGN.md).
 
 PC Gemma는 `ai/catalog.ts`의 리비전 `b3ca0d2f076785a8f4b2219ddbd2bdb99954eae1`, 크기 2,008,432,640바이트, SHA-256 `3a08e8d94e23b814ae5414469c370c503813949acb8ceaa17e4ebf8a35af35b5`를 유지합니다. 다운로드 후 OPFS commit·자동 준비, 첫 전체 검증/7일 이내 표본 재검증, 별도 classic `ai-worker.js`, 데스크톱 엔진 재사용도 유지합니다. 이전 Apple Gemma의 파일 구간 읽기·GPU 수명 보완과 Jetsam 이력은 [메모리 분석](IPHONE_MEMORY_ANALYSIS.md)에 보존했습니다.
 
@@ -115,8 +115,8 @@ PC Gemma는 `ai/catalog.ts`의 리비전 `b3ca0d2f076785a8f4b2219ddbd2bdb99954ea
 | --- | --- | --- |
 | 최대 답변 토큰 | 256 / 512 / 1,024 / 1,536 / 2,048 / 4,096 | SDK `sessionConfig.maxOutputTokens` |
 | 문맥 토큰 | 2,048 / 4,096 / 8,192 / 16,384 | SDK `mainExecutorSettings.maxNumTokens` |
-| 새 기본값 | iPhone/iPad 구간별 생성 512 / 문맥 2,048 고정; 데스크톱 1,536 / 8,192 | Apple은 별도 설정 키 v2, 출력 선택은 256/512만 허용 |
-| 명시적 중단 복구 | 답변 256 / 문맥 2,048 | ‘문맥을 줄여 다시 준비’ 선택 시 저장 후 기존 모델 재사용 |
+| 새 기본값 | iPhone/iPad 보충 생성 256 / 문맥 2,048 고정; 데스크톱 1,536 / 8,192 | Apple은 별도 설정 키 v3, 출력 선택은 128/256만 허용 |
+| 명시적 중단 복구 | 답변 256 / 문맥 2,048 | 설정의 명시적 복구에서 잠금 확보 후 기존 모델 재사용 |
 
 답변 한도는 문맥의 절반 이하로 제한합니다. 문맥 변경은 새 엔진을 준비하고, 출력 한도만 변경하면 현재 준비된 엔진을 재사용할 수 있습니다. Apple 모바일은 별도로 각 답변 뒤 엔진을 교체합니다. 준비 도중 설정을 바꿔도 실제 질문은 새 문맥과 일치하는 엔진을 사용합니다. SDK에서 얻은 입력·생성·전체 토큰 수와 사용한 한도를 대화에 보존합니다. SDK 측정이 없으면 글자 수로 임의 추정하지 않습니다. 이 값은 기기 내 추론량이며 API 과금 내역이 아닙니다.
 
@@ -169,7 +169,7 @@ iPhone/iPad WebGPU의 정식 지원은 iOS/iPadOS 26부터입니다. 사용자 �
 
 Node.js 24.15 이상에서 개발 포트 5174와 프로덕션 미리보기 4173을 고정 사용하며 두 서버는 동일한 SQLite 작업 DB를 사용합니다. `.local/`과 서버 소스는 개발 서버 정적 접근에서 차단합니다. 정적 배포 출력은 `web/dist`이며 문서·AI에 HTTPS·COOP/COEP·WASM MIME과 캐시 설정이 필요합니다. 감독관·새 점검은 API 런타임이 필요하므로 `dist` 정적 호스팅만으로 사용할 수 없습니다. Vite 통합 API는 개발/미리보기용이며 실제 외부 운영 배포·계정 연동·DB 백업/복구 운영 구성은 수행하지 않았습니다.
 
-현재 자동 테스트는 35개 파일 **249개 통과**입니다. 검색 정답 쪽 회귀 평가는 **30/30**이며 생성 정확도 평가와 구분합니다. Windows Chromium의 실제 다운로드·초기화·생성·사용량·파일/PDF 오프라인 동작과 세부 조건은 [검증 기록](../../web/docs/validation.md)에 있습니다. 실제 iPhone의 연속 생성과 제조사 센서 검증은 남아 있습니다.
+자동 검사와 실제 화면/기기 검증 결과는 [검증 기록](../../web/docs/validation.md)에 있습니다. 150문항 검색·본문 개발 회귀는 132/150 → 150/150이며 GPU 생성 정확도와 구분합니다. 실제 iPhone의 연속 생성·메모리 압박 시험과 제조사 센서 검증은 남아 있습니다.
 
 ## 주요 코드
 
@@ -178,7 +178,7 @@ Node.js 24.15 이상에서 개발 포트 5174와 프로덕션 미리보기 4173�
 | `src/App.tsx`, `src/ui.tsx` | 화면·대화·탐색·Markdown |
 | `src/chat/` | 사용자 스크롤을 보존하는 자동 이동 |
 | `src/ai/light-manifest.json`, `light-model.ts`, `light.worker.ts`, `light-engine.ts` | Apple 경량 파일·검증·저장 전용 추론 |
-| `src/ai/light-answer.ts`, `light-prompt.ts`, `light-output.ts` | 순차 범위 분할·문맥 예산·답변 연결·템플릿 제거 |
+| `src/ai/light-answer.ts`, `light-prompt.ts`, `light-output.ts` | 이전 답변 호환 유틸리티·답변 병합·템플릿 제거 |
 | `src/ai/catalog.ts`, `model.ts` | 고정 다운로드·무결성·모델 저장 |
 | `src/ai/runtime.ts`, `worker-engine.ts`, `engine.worker.ts` | 자동 준비·워커 통신·SDK 추론 |
 | `src/ai/worker-resources.ts`, `diagnostics.ts` | 명시적 GPU 장치 폐기·WASM/GPU 오류 표본·48개 로컬 진단 |

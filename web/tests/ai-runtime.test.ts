@@ -1,25 +1,26 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-const fixture=vi.hoisted(()=>({settings:{contextTokens:8192,maxOutputTokens:512},installed:true,lightInstalled:true,runtime:true,backend:'idb'}));
+const fixture=vi.hoisted(()=>({settings:{contextTokens:8192,maxOutputTokens:512},installed:true,lightInstalled:true,runtime:true,backend:'idb',forceSupplement:true}));
+vi.mock('../src/rag/answer-plan',async importOriginal=>{const actual=await importOriginal<typeof import('../src/rag/answer-plan')>();return {...actual,createAnswerPlan:(question:string,sources:Parameters<typeof actual.createAnswerPlan>[1])=>({...actual.createAnswerPlan(question,sources),supplementRequested:fixture.forceSupplement})};});
 vi.mock('../src/ai/light-model',async importOriginal=>({...await importOriginal<typeof import('../src/ai/light-model')>(),lightModelInstalled:async()=>fixture.lightInstalled}));
 vi.mock('../src/ai/preferences',()=>({loadAISettings:async()=>({...fixture.settings}),RECOVERY_AI_SETTINGS:{contextTokens:2048,maxOutputTokens:256},saveAISettings:async(value:typeof fixture.settings)=>{fixture.settings={...value};return {...value};}}));
 vi.mock('../src/ai/model',()=>({installedModel:async()=>fixture.installed?{blob:new Blob(['model']),metadata:{sha256:'verified',backend:fixture.backend,storageKey:'stored-model',size:5}}:undefined}));
 vi.mock('../src/offline/assets',()=>({assetUrl:(path:string)=>`https://local.invalid/${path}`,preparedGroups:async()=>({runtime:fixture.runtime})}));
-import { aiIsReady, buildPrompt, generate, getAIStatus, prepareAI, releaseModel, retryAIWithReducedContext, SYSTEM_INSTRUCTION } from '../src/ai/runtime';
-import { AI_OPERATION_KEY } from '../src/ai/recovery';
+import { aiIsReady, buildPrompt, generate, getAIStatus, prepareAI, releaseModel, retryAIWithReducedContext, stopAI, SYSTEM_INSTRUCTION } from '../src/ai/runtime';
+import { AI_OPERATION_KEY, resetAIRecovery } from '../src/ai/recovery';
 import { aiDiagnosticReport } from '../src/ai/diagnostics';
 import type { AIReply, AIRequest } from '../src/ai/protocol';
 
 class FakeWorker {
   static instances:FakeWorker[]=[];
   onmessage?:((event:{data:AIReply})=>void);onerror?:((event:Event)=>void);
-  messages:AIRequest[]=[];terminated=false;
+  messages:AIRequest[]=[];terminated=false;ackStop=true;
   constructor(public url:string){FakeWorker.instances.push(this);}
-  postMessage(message:AIRequest){this.messages.push(message);}
+  postMessage(message:AIRequest){this.messages.push(message);if(message.type==='stop'&&this.ackStop)queueMicrotask(()=>this.reply({id:message.id,type:'stopped',cleanupComplete:true}));}
   terminate(){this.terminated=true;}
-  reply(message:AIReply){this.onmessage?.({data:message});}
+  reply(message:AIReply){this.onmessage?.({data:message.type==='error'||message.type==='done'?{cleanupComplete:true,...message}:message});}
 }
 beforeEach(async()=>{
-  await releaseModel();FakeWorker.instances=[];fixture.settings={contextTokens:8192,maxOutputTokens:512};fixture.installed=true;fixture.lightInstalled=true;fixture.runtime=true;fixture.backend='idb';
+  await releaseModel();localStore();resetAIRecovery();FakeWorker.instances=[];fixture.settings={contextTokens:8192,maxOutputTokens:512};fixture.installed=true;fixture.lightInstalled=true;fixture.runtime=true;fixture.backend='idb';fixture.forceSupplement=true;
   vi.stubGlobal('Worker',FakeWorker);vi.stubGlobal('navigator',{gpu:{}});vi.stubGlobal('isSecureContext',true);
 });
 afterEach(async()=>{await releaseModel();vi.unstubAllGlobals();});
@@ -27,6 +28,43 @@ async function ready(){const promise=prepareAI();await vi.waitFor(()=>expect(Fak
 function localStore(){
   const values=new Map<string,string>();vi.stubGlobal('localStorage',{getItem:(key:string)=>values.get(key)??null,setItem:(key:string,value:string)=>values.set(key,value),removeItem:(key:string)=>values.delete(key)});return values;
 }
+it('아이폰의 일반 질문은 모델 적재를 기다리지 않고 문서 본문과 0 생성 토큰을 반환한다',async()=>{
+  fixture.forceSupplement=false;vi.stubGlobal('navigator',{gpu:{},userAgent:'iPhone'});
+  const sources=[{score:1,chunk:{id:'a',documentId:'g',documentTitle:'문서',sourceKind:'guide',pageNumber:1,chunkIndex:0,heading:'',body:'• 채기관은 1m마다 작은 눈금을 표시합니다.'}}];
+  const onText=vi.fn(),result=await generate('채기관 측정방법',sources,onText,new AbortController().signal);
+  expect(result).toMatchObject({generated:false,usage:{outputTokens:0},answer:expect.stringContaining('1m')});
+  expect(onText).toHaveBeenCalledWith(result.answer);expect(FakeWorker.instances).toHaveLength(0);
+});
+it('복구 상태에서도 아이폰 문서 본문을 즉시 반환하고 자동 적재를 반복하지 않는다',async()=>{
+  const values=localStore();values.set(AI_OPERATION_KEY,JSON.stringify({version:1,id:'old',stage:'engine',contextTokens:2048,startedAt:Date.now()}));
+  vi.stubGlobal('navigator',{gpu:{},userAgent:'iPhone'});
+  const result=await generate('쉽게 설명해줘',[],vi.fn(),new AbortController().signal);
+  expect(result).toMatchObject({generated:false,supplementSkipped:'recovery'});expect(FakeWorker.instances).toHaveLength(0);expect(values.has(AI_OPERATION_KEY)).toBe(true);
+});
+it('중단 시간 초과 후 완료 기록을 지우지 않고 재적재를 잠근다',async()=>{
+  const values=localStore(),worker=await ready();worker.ackStop=false;
+  const controller=new AbortController(),running=generate('질문',[],vi.fn(),controller.signal),rejected=expect(running).rejects.toThrow('중단');
+  await vi.waitFor(()=>expect(worker.messages.at(-1)?.type).toBe('generate'));
+  vi.useFakeTimers();
+  try{controller.abort();await vi.advanceTimersByTimeAsync(2001);await rejected;
+    expect(worker.terminated).toBe(true);expect(JSON.parse(values.get(AI_OPERATION_KEY)!)).toMatchObject({state:'uncertain',reason:'stop-timeout'});
+    expect(await prepareAI()).toBe(false);expect(FakeWorker.instances).toHaveLength(1);expect(getAIStatus().phase).toBe('recovery');
+  }finally{vi.useRealTimers();}
+});
+it('정상 정리 확인을 받은 종료는 잠그지 않고 다음 준비를 허용한다',async()=>{
+  const values=localStore(),worker=await ready();expect(await stopAI()).toBe(true);
+  expect(worker.terminated).toBe(true);expect(values.has(AI_OPERATION_KEY)).toBe(false);
+  const loading=prepareAI();await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(2));const next=FakeWorker.instances[1];next.reply({id:next.messages[0].id,type:'done'});expect(await loading).toBe(true);
+});
+it('아이폰은 복구 기록을 저장할 수 없으면 GPU 초기화 요청을 보내지 않는다',async()=>{
+  vi.stubGlobal('navigator',{gpu:{},userAgent:'iPhone'});vi.stubGlobal('localStorage',{getItem:()=>{throw Error('denied');},setItem:()=>{throw Error('denied');},removeItem:()=>{throw Error('denied');}});
+  expect(await prepareAI()).toBe(false);expect(FakeWorker.instances[0].messages).toHaveLength(0);expect(FakeWorker.instances[0].terminated).toBe(true);expect(getAIStatus().phase).toBe('recovery');
+});
+it('복구를 눌러도 다른 화면이 엔진 잠금을 보유하면 그 작업 기록을 지우지 않는다',async()=>{
+  const values=localStore(),record=JSON.stringify({version:1,id:'other',stage:'engine',contextTokens:2048,startedAt:Date.now()});values.set(AI_OPERATION_KEY,record);
+  vi.stubGlobal('navigator',{gpu:{},locks:{request:async(_name:string,_options:unknown,callback:(lock:null)=>Promise<void>)=>callback(null)}});
+  await retryAIWithReducedContext();expect(values.get(AI_OPERATION_KEY)).toBe(record);expect(FakeWorker.instances).toHaveLength(0);
+});
 it('워커의 메모리 진단을 설정값과 저장하고 생성 완료로 오인하지 않는다',async()=>{
   localStore();const worker=await ready();worker.reply({id:worker.messages[0].id,type:'diagnostic',sample:{stage:'engine-ready',kind:'gpu-lost'}});
   expect(aiDiagnosticReport().events.at(-1)).toMatchObject({stage:'engine-ready',kind:'gpu-lost'});

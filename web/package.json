@@ -13,7 +13,9 @@
     "iphone:test": "node scripts/iphone-test.mjs",
     "supervisor": "node server/manage.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "evaluate:150": "node scripts/evaluate-150.mjs",
+    "package:knowledge": "node scripts/package-knowledge.mjs"
   },
   "dependencies": {
     "@litert-lm/core": "0.18.0",

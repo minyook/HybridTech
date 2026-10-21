@@ -1,0 +1,2677 @@
+{
+  "version": 1,
+  "documentId": "confined_space_safety_guide_2022",
+  "rubricStatus": "engineering-source-checked; domain-owner review pending",
+  "scope": "Supplied 2022 document comprehension, not verification of current law or clinical guidance. Source pages/clauses authored independently of the search implementation. Timing is PC retrieval/composition only unless explicitly stated otherwise.",
+  "cases": [
+    {
+      "id": "guide-01-1",
+      "category": "single",
+      "question": "적정 공기 산소농도 기준",
+      "pages": [
+        [
+          24
+        ]
+      ],
+      "required": [
+        "18% 이상",
+        "23.5% 미만",
+        "1.5% 미만",
+        "30 ppm 미만",
+        "10 ppm 미만"
+      ],
+      "forbidden": [
+        "23.5% 이하"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "guide-01-2",
+      "category": "single",
+      "question": "산소와 이산화탄소 일산화탄소 황화수소 농도 기준 알려줘",
+      "pages": [
+        [
+          24
+        ]
+      ],
+      "required": [
+        "18% 이상",
+        "23.5% 미만",
+        "1.5% 미만",
+        "30 ppm 미만",
+        "10 ppm 미만"
+      ],
+      "forbidden": [
+        "23.5% 이하"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "guide-01-3",
+      "category": "single",
+      "question": "적정공기에서 산소 상한은 23.5% 미만이야 이하야?",
+      "pages": [
+        [
+          24
+        ]
+      ],
+      "required": [
+        "18% 이상",
+        "23.5% 미만",
+        "1.5% 미만",
+        "30 ppm 미만",
+        "10 ppm 미만"
+      ],
+      "forbidden": [
+        "23.5% 이하"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "guide-01-4",
+      "category": "paraphrase",
+      "question": "유해가스 농도 기준 수치를 정리해줘",
+      "pages": [
+        [
+          24
+        ]
+      ],
+      "required": [
+        "18% 이상",
+        "23.5% 미만",
+        "1.5% 미만",
+        "30 ppm 미만",
+        "10 ppm 미만"
+      ],
+      "forbidden": [
+        "23.5% 이하"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "guide-02-1",
+      "category": "single",
+      "question": "산소 유해가스 측정 시기",
+      "pages": [
+        [
+          25
+        ]
+      ],
+      "required": [
+        "작업허가를 받기 전",
+        "점심시간",
+        "수시"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-02-2",
+      "category": "single",
+      "question": "점심시간 후에 가스농도 다시 측정해야 하나요",
+      "pages": [
+        [
+          25
+        ]
+      ],
+      "required": [
+        "작업허가를 받기 전",
+        "점심시간",
+        "수시"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-02-3",
+      "category": "single",
+      "question": "밀폐공간 들어가기 전과 작업 중 측정 시기 알려줘",
+      "pages": [
+        [
+          25
+        ]
+      ],
+      "required": [
+        "작업허가를 받기 전",
+        "점심시간",
+        "수시"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-02-4",
+      "category": "paraphrase",
+      "question": "장시간 작업할 때 유해가스 측정은 언제 해요",
+      "pages": [
+        [
+          25
+        ]
+      ],
+      "required": [
+        "작업허가를 받기 전",
+        "점심시간",
+        "수시"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-03-1",
+      "category": "single",
+      "question": "산소 유해가스 농도 측정자의 자격",
+      "pages": [
+        [
+          25
+        ]
+      ],
+      "required": [
+        "올바른 해석",
+        "관리감독자",
+        "교육 이수자"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-03-2",
+      "category": "single",
+      "question": "가스 측정은 누가 해야 하나요",
+      "pages": [
+        [
+          25
+        ]
+      ],
+      "required": [
+        "올바른 해석",
+        "관리감독자",
+        "교육 이수자"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-03-3",
+      "category": "single",
+      "question": "산소 농도 측정 교육 이수자 자격 알려줘",
+      "pages": [
+        [
+          25
+        ]
+      ],
+      "required": [
+        "올바른 해석",
+        "관리감독자",
+        "교육 이수자"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-03-4",
+      "category": "paraphrase",
+      "question": "관리감독자 말고 유해가스 측정 가능한 사람",
+      "pages": [
+        [
+          25
+        ]
+      ],
+      "required": [
+        "올바른 해석",
+        "관리감독자",
+        "교육 이수자"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-04-1",
+      "category": "single",
+      "question": "센서 및 무선통신 측정 센서부 요건",
+      "pages": [
+        [
+          26
+        ]
+      ],
+      "required": [
+        "실제 작업",
+        "실시간",
+        "검교정"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-04-2",
+      "category": "single",
+      "question": "무선 가스 센서의 정확도와 신뢰성은 어떻게 확보해",
+      "pages": [
+        [
+          26
+        ]
+      ],
+      "required": [
+        "실제 작업",
+        "실시간",
+        "검교정"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-04-3",
+      "category": "single",
+      "question": "밀폐공간 센서가 측정해야 하는 작업공간은 어디야",
+      "pages": [
+        [
+          26
+        ]
+      ],
+      "required": [
+        "실제 작업",
+        "실시간",
+        "검교정"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-04-4",
+      "category": "paraphrase",
+      "question": "산소 유해가스 센서부의 실시간 측정 요건 알려줘",
+      "pages": [
+        [
+          26
+        ]
+      ],
+      "required": [
+        "실제 작업",
+        "실시간",
+        "검교정"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-05-1",
+      "category": "single",
+      "question": "센서 및 무선통신 측정 통신부 요건",
+      "pages": [
+        [
+          26
+        ]
+      ],
+      "required": [
+        "실시간 전송",
+        "장애물",
+        "안정적"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-05-2",
+      "category": "single",
+      "question": "가스 측정 데이터를 통제실로 전송하는 조건",
+      "pages": [
+        [
+          26
+        ]
+      ],
+      "required": [
+        "실시간 전송",
+        "장애물",
+        "안정적"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-05-3",
+      "category": "single",
+      "question": "무선 측정 통신에서 장애물과 전파 방해는 어떻게 고려해",
+      "pages": [
+        [
+          26
+        ]
+      ],
+      "required": [
+        "실시간 전송",
+        "장애물",
+        "안정적"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-05-4",
+      "category": "paraphrase",
+      "question": "가스 센서 통신부가 갖춰야 할 기능 알려줘",
+      "pages": [
+        [
+          26
+        ]
+      ],
+      "required": [
+        "실시간 전송",
+        "장애물",
+        "안정적"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-06-1",
+      "category": "single",
+      "question": "센서 및 무선통신 측정 통제실 요건",
+      "pages": [
+        [
+          26
+        ]
+      ],
+      "required": [
+        "저장하고 표시",
+        "통제 권한"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-06-2",
+      "category": "single",
+      "question": "유해가스 위험상황을 감지한 통제실의 역할",
+      "pages": [
+        [
+          26
+        ]
+      ],
+      "required": [
+        "저장하고 표시",
+        "통제 권한"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-06-3",
+      "category": "single",
+      "question": "가스 측정 통제실 전산시스템 요건 알려줘",
+      "pages": [
+        [
+          26
+        ]
+      ],
+      "required": [
+        "저장하고 표시",
+        "통제 권한"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-06-4",
+      "category": "paraphrase",
+      "question": "작업 중단 재개 대피 통제 권한은 통제실에 어떻게 배치해",
+      "pages": [
+        [
+          26
+        ]
+      ],
+      "required": [
+        "저장하고 표시",
+        "통제 권한"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-07-1",
+      "category": "single",
+      "question": "산소 유해가스 측정 사전준비",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "20.9%",
+        "교정",
+        "표준가스"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-07-2",
+      "category": "single",
+      "question": "가스농도 측정기 이상 유무 확인방법",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "20.9%",
+        "교정",
+        "표준가스"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-07-3",
+      "category": "single",
+      "question": "산소 측정기 센서 교체와 검교정 준비 알려줘",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "20.9%",
+        "교정",
+        "표준가스"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-07-4",
+      "category": "paraphrase",
+      "question": "깨끗한 야외 공기에서 측정기 상태 확인은 어떻게 해",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "20.9%",
+        "교정",
+        "표준가스"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-08-1",
+      "category": "single",
+      "question": "산소 유해가스 측정 위치와 개소",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "수직 및 수평",
+        "3개소 이상"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-08-2",
+      "category": "single",
+      "question": "밀폐공간 면적과 깊이를 고려한 측정방법",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "수직 및 수평",
+        "3개소 이상"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-08-3",
+      "category": "single",
+      "question": "가스 측정은 수직 수평 몇 개소에서 해야 해",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "수직 및 수평",
+        "3개소 이상"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-08-4",
+      "category": "paraphrase",
+      "question": "산소측정법 알려줘",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "수직 및 수평",
+        "3개소 이상"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-09-1",
+      "category": "single",
+      "question": "깊은 탱크 가스 측정 채기관 눈금",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "채기관",
+        "1m",
+        "5m"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-09-2",
+      "category": "single",
+      "question": "산소 측정 호스는 어떻게 연결하고 표시해",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "채기관",
+        "1m",
+        "5m"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-09-3",
+      "category": "single",
+      "question": "채기관은 몇 미터마다 작은 눈금 큰 눈금을 표시해",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "채기관",
+        "1m",
+        "5m"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-09-4",
+      "category": "paraphrase",
+      "question": "깊은 장소의 농도 측정방법 알려줘",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "채기관",
+        "1m",
+        "5m"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-10-1",
+      "category": "single",
+      "question": "산소 유해가스 측정시 주의사항",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "개구면",
+        "공기호흡기",
+        "방폭",
+        "감시인"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-10-2",
+      "category": "single",
+      "question": "밀폐공간 내부 측정할 때 보호구와 감시인",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "개구면",
+        "공기호흡기",
+        "방폭",
+        "감시인"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-10-3",
+      "category": "single",
+      "question": "어두운 밀폐공간 측정 전등은 어떤 걸 써야 해",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "개구면",
+        "공기호흡기",
+        "방폭",
+        "감시인"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-10-4",
+      "category": "paraphrase",
+      "question": "산소 및 유해가스 측정방법",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "개구면",
+        "공기호흡기",
+        "방폭",
+        "감시인"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-11-1",
+      "category": "single",
+      "question": "작업 전 환기 시기",
+      "pages": [
+        [
+          28
+        ]
+      ],
+      "required": [
+        "15분 이상",
+        "10배 이상"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-11-2",
+      "category": "single",
+      "question": "오랫동안 닫혀 있던 밀폐공간은 얼마나 환기해야 해",
+      "pages": [
+        [
+          28
+        ]
+      ],
+      "required": [
+        "15분 이상",
+        "10배 이상"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-11-3",
+      "category": "single",
+      "question": "밀폐공간 최초 출입 전 환기시간과 체적 기준",
+      "pages": [
+        [
+          28
+        ]
+      ],
+      "required": [
+        "15분 이상",
+        "10배 이상"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-11-4",
+      "category": "paraphrase",
+      "question": "가스 측정 전 신선한 공기로 환기하는 시기 알려줘",
+      "pages": [
+        [
+          28
+        ]
+      ],
+      "required": [
+        "15분 이상",
+        "10배 이상"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-12-1",
+      "category": "single",
+      "question": "작업 중 계속 환기가 필요한 경우",
+      "pages": [
+        [
+          28
+        ]
+      ],
+      "required": [
+        "작업하는 동안 계속 환기",
+        "황화수소",
+        "일산화탄소"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-12-2",
+      "category": "single",
+      "question": "오폐수처리장 맨홀 작업 중 환기는 언제 해야 해",
+      "pages": [
+        [
+          28
+        ]
+      ],
+      "required": [
+        "작업하는 동안 계속 환기",
+        "황화수소",
+        "일산화탄소"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-12-3",
+      "category": "single",
+      "question": "용접작업 양수기 작업에서 환기를 계속해야 하는 이유",
+      "pages": [
+        [
+          28
+        ]
+      ],
+      "required": [
+        "작업하는 동안 계속 환기",
+        "황화수소",
+        "일산화탄소"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-12-4",
+      "category": "paraphrase",
+      "question": "질소 아르곤 배관 연결 장소 환기 시기",
+      "pages": [
+        [
+          28
+        ]
+      ],
+      "required": [
+        "작업하는 동안 계속 환기",
+        "황화수소",
+        "일산화탄소"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-13-1",
+      "category": "single",
+      "question": "환기팬 용량 정압",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "40mmAq 이상",
+        "40% 이상",
+        "240m3/min"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-13-2",
+      "category": "single",
+      "question": "밀폐공간 체적 600m3 환기팬 용량 예시 알려줘",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "40mmAq 이상",
+        "40% 이상",
+        "240m3/min"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-13-3",
+      "category": "single",
+      "question": "환기팬 정압과 밀폐공간 체적 대비 용량 기준",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "40mmAq 이상",
+        "40% 이상",
+        "240m3/min"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-13-4",
+      "category": "paraphrase",
+      "question": "환기팬 사전준비 기준 알려줘",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "40mmAq 이상",
+        "40% 이상",
+        "240m3/min"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-14-1",
+      "category": "single",
+      "question": "환기 송풍관 덕트 길이",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "제조사",
+        "15미터",
+        "난연재"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-14-2",
+      "category": "single",
+      "question": "환기팬 제조사가 덕트 길이를 제시하지 않으면",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "제조사",
+        "15미터",
+        "난연재"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-14-3",
+      "category": "single",
+      "question": "송풍관 굽힘과 난연재 주의사항 알려줘",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "제조사",
+        "15미터",
+        "난연재"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-14-4",
+      "category": "paraphrase",
+      "question": "환기 덕트 길이는 얼마나 길게 사용할 수 있어",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "제조사",
+        "15미터",
+        "난연재"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-15-1",
+      "category": "single",
+      "question": "밀폐공간 환기 방법 급기 배기",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "급기방식",
+        "급·배기",
+        "작업근로자 가까이"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-15-2",
+      "category": "single",
+      "question": "급기구와 배기구 배치는 어떻게 해",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "급기방식",
+        "급·배기",
+        "작업근로자 가까이"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-15-3",
+      "category": "single",
+      "question": "밀폐공간 급기방식과 배기방식 적용 차이",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "급기방식",
+        "급·배기",
+        "작업근로자 가까이"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-15-4",
+      "category": "paraphrase",
+      "question": "작업근로자 가까이 급기구는 어떻게 설치해",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "급기방식",
+        "급·배기",
+        "작업근로자 가까이"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-16-1",
+      "category": "single",
+      "question": "환기 중단 응급상황 조치",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "즉시 밀폐공간 외부로 대피",
+        "추가적인 보호조치"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-16-2",
+      "category": "single",
+      "question": "정전으로 환기가 중단되면 어떻게 해야 해",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "즉시 밀폐공간 외부로 대피",
+        "추가적인 보호조치"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-16-3",
+      "category": "single",
+      "question": "환기로 적정공기를 유지하기 어려울 경우 조치",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "즉시 밀폐공간 외부로 대피",
+        "추가적인 보호조치"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-16-4",
+      "category": "paraphrase",
+      "question": "폭발 산화 위험으로 환기를 못 할 때 조치",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "즉시 밀폐공간 외부로 대피",
+        "추가적인 보호조치"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-17-1",
+      "category": "single",
+      "question": "용접 작업 조치",
+      "pages": [
+        [
+          30
+        ]
+      ],
+      "required": [
+        "적정한 공기상태",
+        "공기호흡기 또는 송기마스크"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-17-2",
+      "category": "single",
+      "question": "환기가 불충분한 탱크 내부 용접 조치",
+      "pages": [
+        [
+          30
+        ]
+      ],
+      "required": [
+        "적정한 공기상태",
+        "공기호흡기 또는 송기마스크"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-17-3",
+      "category": "single",
+      "question": "용접 중 환기로 적정공기를 유지하기 어려우면",
+      "pages": [
+        [
+          30
+        ]
+      ],
+      "required": [
+        "적정한 공기상태",
+        "공기호흡기 또는 송기마스크"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-17-4",
+      "category": "paraphrase",
+      "question": "용접작업 가스농도 측정과 보호구 알려줘",
+      "pages": [
+        [
+          30
+        ]
+      ],
+      "required": [
+        "적정한 공기상태",
+        "공기호흡기 또는 송기마스크"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-18-1",
+      "category": "single",
+      "question": "불활성기체 사용시 조치",
+      "pages": [
+        [
+          30
+        ]
+      ],
+      "required": [
+        "차단판",
+        "잠금장치",
+        "임의로 개방",
+        "직접 외부"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-18-2",
+      "category": "single",
+      "question": "불활성가스 배관 밸브 차단과 잠금 조치",
+      "pages": [
+        [
+          30
+        ]
+      ],
+      "required": [
+        "차단판",
+        "잠금장치",
+        "임의로 개방",
+        "직접 외부"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-18-3",
+      "category": "single",
+      "question": "질소 아르곤 배관 잘못된 조작 방지 조치",
+      "pages": [
+        [
+          30
+        ]
+      ],
+      "required": [
+        "차단판",
+        "잠금장치",
+        "임의로 개방",
+        "직접 외부"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-18-4",
+      "category": "paraphrase",
+      "question": "불활성기체 잔류를 방지하는 방법",
+      "pages": [
+        [
+          30
+        ]
+      ],
+      "required": [
+        "차단판",
+        "잠금장치",
+        "임의로 개방",
+        "직접 외부"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-19-1",
+      "category": "single",
+      "question": "가스배관 해체 작업",
+      "pages": [
+        [
+          31
+        ]
+      ],
+      "required": [
+        "해당가스가 들어오지 않도록 차단",
+        "환기"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-19-2",
+      "category": "single",
+      "question": "맨홀 가스배관 부착 작업 조치",
+      "pages": [
+        [
+          31
+        ]
+      ],
+      "required": [
+        "해당가스가 들어오지 않도록 차단",
+        "환기"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-19-3",
+      "category": "single",
+      "question": "통풍이 불충분한 장소의 가스배관 공사 조치",
+      "pages": [
+        [
+          31
+        ]
+      ],
+      "required": [
+        "해당가스가 들어오지 않도록 차단",
+        "환기"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-19-4",
+      "category": "paraphrase",
+      "question": "배관 해체할 때 가스 유입과 적정공기는 어떻게 관리해",
+      "pages": [
+        [
+          31
+        ]
+      ],
+      "required": [
+        "해당가스가 들어오지 않도록 차단",
+        "환기"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-20-1",
+      "category": "single",
+      "question": "설비개조 작업시 조치",
+      "pages": [
+        [
+          31
+        ]
+      ],
+      "required": [
+        "작업방법 및 순서",
+        "황화수소 중독방지",
+        "지휘자"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-20-2",
+      "category": "single",
+      "question": "분뇨 오수에 오염된 펌프 분해 작업 조치",
+      "pages": [
+        [
+          31
+        ]
+      ],
+      "required": [
+        "작업방법 및 순서",
+        "황화수소 중독방지",
+        "지휘자"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-20-3",
+      "category": "single",
+      "question": "부패하기 쉬운 물질에 오염된 배관 청소 작업 조치",
+      "pages": [
+        [
+          31
+        ]
+      ],
+      "required": [
+        "작업방법 및 순서",
+        "황화수소 중독방지",
+        "지휘자"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-20-4",
+      "category": "paraphrase",
+      "question": "황화수소 위험 설비 수리 작업 지휘자와 작업순서",
+      "pages": [
+        [
+          31
+        ]
+      ],
+      "required": [
+        "작업방법 및 순서",
+        "황화수소 중독방지",
+        "지휘자"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-21-1",
+      "category": "single",
+      "question": "자동 CO2 소화설비 유지보수 작업",
+      "pages": [
+        [
+          32
+        ]
+      ],
+      "required": [
+        "수동",
+        "30초",
+        "반드시 산소농도 측정 후 출입"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-21-2",
+      "category": "single",
+      "question": "이산화탄소 소화설비 작업 전 오작동 방지 조치",
+      "pages": [
+        [
+          32
+        ]
+      ],
+      "required": [
+        "수동",
+        "30초",
+        "반드시 산소농도 측정 후 출입"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-21-3",
+      "category": "single",
+      "question": "CO2 소화설비 경보 후 방출 전 대피 안내",
+      "pages": [
+        [
+          32
+        ]
+      ],
+      "required": [
+        "수동",
+        "30초",
+        "반드시 산소농도 측정 후 출입"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-21-4",
+      "category": "paraphrase",
+      "question": "이산화탄소 방출 장소에 들어가기 전 조치",
+      "pages": [
+        [
+          32
+        ]
+      ],
+      "required": [
+        "수동",
+        "30초",
+        "반드시 산소농도 측정 후 출입"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-22-1",
+      "category": "single",
+      "question": "출입문 임의잠김 방지",
+      "pages": [
+        [
+          33
+        ]
+      ],
+      "required": [
+        "임의로 잠기지 않도록",
+        "내부에 작업자가"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-22-2",
+      "category": "single",
+      "question": "냉동실 내부 작업 출입문 잠김 방지 조치",
+      "pages": [
+        [
+          33
+        ]
+      ],
+      "required": [
+        "임의로 잠기지 않도록",
+        "내부에 작업자가"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-22-3",
+      "category": "single",
+      "question": "탱크 작업 끝나고 출입뚜껑을 잠그기 전 확인사항",
+      "pages": [
+        [
+          33
+        ]
+      ],
+      "required": [
+        "임의로 잠기지 않도록",
+        "내부에 작업자가"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-22-4",
+      "category": "paraphrase",
+      "question": "밀폐공간 출입구를 잠글 때 인원 확인해야 하나요",
+      "pages": [
+        [
+          33
+        ]
+      ],
+      "required": [
+        "임의로 잠기지 않도록",
+        "내부에 작업자가"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-23-1",
+      "category": "single",
+      "question": "관리감독자 점검 직무",
+      "pages": [
+        [
+          34
+        ]
+      ],
+      "required": [
+        "작업방법을 결정",
+        "작업시작 전에 점검",
+        "착용상황"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-23-2",
+      "category": "single",
+      "question": "관리감독자가 작업 전에 확인할 장비",
+      "pages": [
+        [
+          34
+        ]
+      ],
+      "required": [
+        "작업방법을 결정",
+        "작업시작 전에 점검",
+        "착용상황"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-23-3",
+      "category": "single",
+      "question": "밀폐공간 관리감독자의 보호구 착용 지도 역할",
+      "pages": [
+        [
+          34
+        ]
+      ],
+      "required": [
+        "작업방법을 결정",
+        "작업시작 전에 점검",
+        "착용상황"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-23-4",
+      "category": "paraphrase",
+      "question": "감독관 점검에서 이상을 발견하면 필요한 조치",
+      "pages": [
+        [
+          34
+        ]
+      ],
+      "required": [
+        "작업방법을 결정",
+        "작업시작 전에 점검",
+        "착용상황"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-24-1",
+      "category": "single",
+      "question": "밀폐공간 출입 인원 점검",
+      "pages": [
+        [
+          35
+        ]
+      ],
+      "required": [
+        "입장시킬 때와 퇴장시킬 때마다",
+        "항상 연락"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-24-2",
+      "category": "single",
+      "question": "작업자가 들어가고 나올 때 인원 확인 시기",
+      "pages": [
+        [
+          35
+        ]
+      ],
+      "required": [
+        "입장시킬 때와 퇴장시킬 때마다",
+        "항상 연락"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-24-3",
+      "category": "single",
+      "question": "감시인 연락 설비",
+      "pages": [
+        [
+          35
+        ]
+      ],
+      "required": [
+        "입장시킬 때와 퇴장시킬 때마다",
+        "항상 연락"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-24-4",
+      "category": "paraphrase",
+      "question": "밀폐공간 작업장과 외부 감시인 연락 방법",
+      "pages": [
+        [
+          35
+        ]
+      ],
+      "required": [
+        "입장시킬 때와 퇴장시킬 때마다",
+        "항상 연락"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-25-1",
+      "category": "single",
+      "question": "호흡용 보호구 착용 장소",
+      "pages": [
+        [
+          36
+        ]
+      ],
+      "required": [
+        "환기만으로 불충분",
+        "송기라인",
+        "정전"
+      ],
+      "forbidden": [],
+      "exceptions": [
+        "환기만으로 불충분"
+      ]
+    },
+    {
+      "id": "guide-25-2",
+      "category": "single",
+      "question": "환기만으로 적정공기를 유지하기 어려울 때 보호구",
+      "pages": [
+        [
+          36
+        ]
+      ],
+      "required": [
+        "환기만으로 불충분",
+        "송기라인",
+        "정전"
+      ],
+      "forbidden": [],
+      "exceptions": [
+        "환기만으로 불충분"
+      ]
+    },
+    {
+      "id": "guide-25-3",
+      "category": "single",
+      "question": "송기마스크 송기라인과 정전 주의사항",
+      "pages": [
+        [
+          36
+        ]
+      ],
+      "required": [
+        "환기만으로 불충분",
+        "송기라인",
+        "정전"
+      ],
+      "forbidden": [],
+      "exceptions": [
+        "환기만으로 불충분"
+      ]
+    },
+    {
+      "id": "guide-25-4",
+      "category": "paraphrase",
+      "question": "공기호흡기 착용이 어려운 좁은 장소의 보호구",
+      "pages": [
+        [
+          36
+        ]
+      ],
+      "required": [
+        "환기만으로 불충분",
+        "송기라인",
+        "정전"
+      ],
+      "forbidden": [],
+      "exceptions": [
+        "환기만으로 불충분"
+      ]
+    },
+    {
+      "id": "guide-26-1",
+      "category": "single",
+      "question": "밀폐공간 특별교육 시간",
+      "pages": [
+        [
+          38
+        ]
+      ],
+      "required": [
+        "최초 작업투입 전",
+        "2시간 이상",
+        "16시간 이상",
+        "3개월 이내"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-26-2",
+      "category": "single",
+      "question": "일용근로자 밀폐공간 특별교육은 몇 시간이야",
+      "pages": [
+        [
+          38
+        ]
+      ],
+      "required": [
+        "최초 작업투입 전",
+        "2시간 이상",
+        "16시간 이상",
+        "3개월 이내"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-26-3",
+      "category": "single",
+      "question": "일용근로자를 제외한 근로자 특별교육 분할 시간",
+      "pages": [
+        [
+          38
+        ]
+      ],
+      "required": [
+        "최초 작업투입 전",
+        "2시간 이상",
+        "16시간 이상",
+        "3개월 이내"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-26-4",
+      "category": "paraphrase",
+      "question": "단기간 간헐적 밀폐공간 작업 특별교육 안내",
+      "pages": [
+        [
+          38
+        ]
+      ],
+      "required": [
+        "최초 작업투입 전",
+        "2시간 이상",
+        "16시간 이상",
+        "3개월 이내"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-27-1",
+      "category": "single",
+      "question": "긴급구조훈련 주기",
+      "pages": [
+        [
+          39
+        ]
+      ],
+      "required": [
+        "6개월에 1회 이상",
+        "사업장 단위",
+        "비상연락"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-27-2",
+      "category": "single",
+      "question": "밀폐공간 긴급구조훈련 대상과 주기",
+      "pages": [
+        [
+          39
+        ]
+      ],
+      "required": [
+        "6개월에 1회 이상",
+        "사업장 단위",
+        "비상연락"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-27-3",
+      "category": "single",
+      "question": "긴급구조훈련과 개별 근로자 특별교육 차이",
+      "pages": [
+        [
+          39
+        ]
+      ],
+      "required": [
+        "6개월에 1회 이상",
+        "사업장 단위",
+        "비상연락"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-27-4",
+      "category": "paraphrase",
+      "question": "비상연락 구조 응급조치 후송 훈련 알려줘",
+      "pages": [
+        [
+          39
+        ]
+      ],
+      "required": [
+        "6개월에 1회 이상",
+        "사업장 단위",
+        "비상연락"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-28-1",
+      "category": "single",
+      "question": "밀폐공간 재해자 구조 절차",
+      "pages": [
+        [
+          44
+        ]
+      ],
+      "required": [
+        "119",
+        "공기호흡기",
+        "밖에서",
+        "기다리"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-28-2",
+      "category": "single",
+      "question": "밀폐공간 동료가 쓰러졌는데 공기호흡기가 없으면",
+      "pages": [
+        [
+          44
+        ]
+      ],
+      "required": [
+        "119",
+        "공기호흡기",
+        "밖에서",
+        "기다리"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-28-3",
+      "category": "single",
+      "question": "공기상태를 모르는 밀폐공간 구조 시 주의사항",
+      "pages": [
+        [
+          44
+        ]
+      ],
+      "required": [
+        "119",
+        "공기호흡기",
+        "밖에서",
+        "기다리"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-28-4",
+      "category": "paraphrase",
+      "question": "보호장비 없이 밀폐공간 재해자를 구조해도 돼",
+      "pages": [
+        [
+          44
+        ]
+      ],
+      "required": [
+        "119",
+        "공기호흡기",
+        "밖에서",
+        "기다리"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "guide-29-1",
+      "category": "single",
+      "question": "심폐소생술 알려줘",
+      "pages": [
+        [
+          45
+        ]
+      ],
+      "required": [
+        "10초 이내",
+        "30회",
+        "100~120회",
+        "인공호흡 방법을 모르거나 꺼리는 경우"
+      ],
+      "forbidden": [],
+      "exceptions": [
+        "인공호흡 방법을 모르거나 꺼리는 경우"
+      ]
+    },
+    {
+      "id": "guide-29-2",
+      "category": "single",
+      "question": "CPR 반응확인 신고 호흡확인 흉부압박 순서",
+      "pages": [
+        [
+          45
+        ]
+      ],
+      "required": [
+        "10초 이내",
+        "30회",
+        "100~120회",
+        "인공호흡 방법을 모르거나 꺼리는 경우"
+      ],
+      "forbidden": [],
+      "exceptions": [
+        "인공호흡 방법을 모르거나 꺼리는 경우"
+      ]
+    },
+    {
+      "id": "guide-29-3",
+      "category": "single",
+      "question": "심폐소생술 압박 깊이와 속도 인공호흡 횟수",
+      "pages": [
+        [
+          45
+        ]
+      ],
+      "required": [
+        "10초 이내",
+        "30회",
+        "100~120회",
+        "인공호흡 방법을 모르거나 꺼리는 경우"
+      ],
+      "forbidden": [],
+      "exceptions": [
+        "인공호흡 방법을 모르거나 꺼리는 경우"
+      ]
+    },
+    {
+      "id": "guide-29-4",
+      "category": "paraphrase",
+      "question": "인공호흡 방법을 모르거나 꺼리는 경우 심폐소생술",
+      "pages": [
+        [
+          45
+        ]
+      ],
+      "required": [
+        "10초 이내",
+        "30회",
+        "100~120회",
+        "인공호흡 방법을 모르거나 꺼리는 경우"
+      ],
+      "forbidden": [],
+      "exceptions": [
+        "인공호흡 방법을 모르거나 꺼리는 경우"
+      ]
+    },
+    {
+      "id": "guide-30-1",
+      "category": "single",
+      "question": "심폐소생술 반복과 회복자세",
+      "pages": [
+        [
+          46
+        ]
+      ],
+      "required": [
+        "119구급대가 도착할 때까지",
+        "호흡이 회복되었다면",
+        "옆으로"
+      ],
+      "forbidden": [],
+      "exceptions": [
+        "119구급대가 도착할 때까지",
+        "호흡이 회복되었다면"
+      ]
+    },
+    {
+      "id": "guide-30-2",
+      "category": "single",
+      "question": "심폐소생술은 언제까지 반복해야 해",
+      "pages": [
+        [
+          46
+        ]
+      ],
+      "required": [
+        "119구급대가 도착할 때까지",
+        "호흡이 회복되었다면",
+        "옆으로"
+      ],
+      "forbidden": [],
+      "exceptions": [
+        "119구급대가 도착할 때까지",
+        "호흡이 회복되었다면"
+      ]
+    },
+    {
+      "id": "guide-30-3",
+      "category": "single",
+      "question": "심폐소생술 중 움직이면 바로 회복자세를 취해도 돼",
+      "pages": [
+        [
+          46
+        ]
+      ],
+      "required": [
+        "119구급대가 도착할 때까지",
+        "호흡이 회복되었다면",
+        "옆으로"
+      ],
+      "forbidden": [],
+      "exceptions": [
+        "119구급대가 도착할 때까지",
+        "호흡이 회복되었다면"
+      ]
+    },
+    {
+      "id": "guide-30-4",
+      "category": "paraphrase",
+      "question": "호흡이 회복되었을 때 회복자세 알려줘",
+      "pages": [
+        [
+          46
+        ]
+      ],
+      "required": [
+        "119구급대가 도착할 때까지",
+        "호흡이 회복되었다면",
+        "옆으로"
+      ],
+      "forbidden": [],
+      "exceptions": [
+        "119구급대가 도착할 때까지",
+        "호흡이 회복되었다면"
+      ]
+    },
+    {
+      "id": "compound-1",
+      "category": "compound",
+      "question": "적정 공기 산소농도 기준 그리고 산소 유해가스 측정 시기",
+      "pages": [
+        [
+          24
+        ],
+        [
+          25
+        ]
+      ],
+      "required": [
+        "18% 이상",
+        "23.5% 미만",
+        "1.5% 미만",
+        "30 ppm 미만",
+        "10 ppm 미만",
+        "작업허가를 받기 전",
+        "점심시간",
+        "수시"
+      ],
+      "forbidden": [
+        "23.5% 이하"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "compound-2",
+      "category": "compound",
+      "question": "산소 유해가스 측정 사전준비 그리고 산소 유해가스 측정시 주의사항",
+      "pages": [
+        [
+          27
+        ],
+        [
+          27
+        ]
+      ],
+      "required": [
+        "20.9%",
+        "교정",
+        "표준가스",
+        "개구면",
+        "공기호흡기",
+        "방폭",
+        "감시인"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-3",
+      "category": "compound",
+      "question": "산소 유해가스 측정 위치와 개소 그리고 깊은 탱크 가스 측정 채기관 눈금",
+      "pages": [
+        [
+          27
+        ],
+        [
+          27
+        ]
+      ],
+      "required": [
+        "수직 및 수평",
+        "3개소 이상",
+        "채기관",
+        "1m",
+        "5m"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-4",
+      "category": "compound",
+      "question": "작업 전 환기 시기 그리고 환기팬 용량 정압",
+      "pages": [
+        [
+          28
+        ],
+        [
+          29
+        ]
+      ],
+      "required": [
+        "15분 이상",
+        "10배 이상",
+        "40mmAq 이상",
+        "40% 이상",
+        "240m3/min"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-5",
+      "category": "compound",
+      "question": "환기팬 용량 정압 그리고 환기 송풍관 덕트 길이",
+      "pages": [
+        [
+          29
+        ],
+        [
+          29
+        ]
+      ],
+      "required": [
+        "40mmAq 이상",
+        "40% 이상",
+        "240m3/min",
+        "제조사",
+        "15미터",
+        "난연재"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-6",
+      "category": "compound",
+      "question": "밀폐공간 환기 방법 급기 배기 그리고 환기 중단 응급상황 조치",
+      "pages": [
+        [
+          29
+        ],
+        [
+          29
+        ]
+      ],
+      "required": [
+        "급기방식",
+        "급·배기",
+        "작업근로자 가까이",
+        "즉시 밀폐공간 외부로 대피",
+        "추가적인 보호조치"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-7",
+      "category": "compound",
+      "question": "용접 작업 조치 그리고 불활성기체 사용시 조치",
+      "pages": [
+        [
+          30
+        ],
+        [
+          30
+        ]
+      ],
+      "required": [
+        "적정한 공기상태",
+        "공기호흡기 또는 송기마스크",
+        "차단판",
+        "잠금장치",
+        "임의로 개방",
+        "직접 외부"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-8",
+      "category": "compound",
+      "question": "가스배관 해체 작업 그리고 설비개조 작업시 조치",
+      "pages": [
+        [
+          31
+        ],
+        [
+          31
+        ]
+      ],
+      "required": [
+        "해당가스가 들어오지 않도록 차단",
+        "환기",
+        "작업방법 및 순서",
+        "황화수소 중독방지",
+        "지휘자"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-9",
+      "category": "compound",
+      "question": "자동 CO2 소화설비 유지보수 작업 그리고 출입문 임의잠김 방지",
+      "pages": [
+        [
+          32
+        ],
+        [
+          33
+        ]
+      ],
+      "required": [
+        "수동",
+        "30초",
+        "반드시 산소농도 측정 후 출입",
+        "임의로 잠기지 않도록",
+        "내부에 작업자가"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-10",
+      "category": "compound",
+      "question": "관리감독자 점검 직무 그리고 밀폐공간 출입 인원 점검",
+      "pages": [
+        [
+          34
+        ],
+        [
+          35
+        ]
+      ],
+      "required": [
+        "작업방법을 결정",
+        "작업시작 전에 점검",
+        "착용상황",
+        "입장시킬 때와 퇴장시킬 때마다",
+        "항상 연락"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-11",
+      "category": "compound",
+      "question": "호흡용 보호구 착용 장소 그리고 밀폐공간 특별교육 시간",
+      "pages": [
+        [
+          36
+        ],
+        [
+          38
+        ]
+      ],
+      "required": [
+        "환기만으로 불충분",
+        "송기라인",
+        "정전",
+        "최초 작업투입 전",
+        "2시간 이상",
+        "16시간 이상",
+        "3개월 이내"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-12",
+      "category": "compound",
+      "question": "긴급구조훈련 주기 그리고 밀폐공간 재해자 구조 절차",
+      "pages": [
+        [
+          39
+        ],
+        [
+          44
+        ]
+      ],
+      "required": [
+        "6개월에 1회 이상",
+        "사업장 단위",
+        "비상연락",
+        "119",
+        "공기호흡기",
+        "밖에서",
+        "기다리"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-13",
+      "category": "compound",
+      "question": "심폐소생술 알려줘 그리고 심폐소생술 반복과 회복자세",
+      "pages": [
+        [
+          45
+        ],
+        [
+          46
+        ]
+      ],
+      "required": [
+        "10초 이내",
+        "30회",
+        "100~120회",
+        "인공호흡 방법을 모르거나 꺼리는 경우",
+        "119구급대가 도착할 때까지",
+        "호흡이 회복되었다면",
+        "옆으로"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-14",
+      "category": "compound",
+      "question": "산소 유해가스 측정 시기 그리고 밀폐공간 출입 인원 점검",
+      "pages": [
+        [
+          25
+        ],
+        [
+          35
+        ]
+      ],
+      "required": [
+        "작업허가를 받기 전",
+        "점심시간",
+        "수시",
+        "입장시킬 때와 퇴장시킬 때마다",
+        "항상 연락"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-15",
+      "category": "compound",
+      "question": "산소 유해가스 측정시 주의사항 그리고 밀폐공간 재해자 구조 절차",
+      "pages": [
+        [
+          27
+        ],
+        [
+          44
+        ]
+      ],
+      "required": [
+        "개구면",
+        "공기호흡기",
+        "방폭",
+        "감시인",
+        "119",
+        "공기호흡기",
+        "밖에서",
+        "기다리"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-16",
+      "category": "compound",
+      "question": "적정 공기 산소농도 기준 그리고 호흡용 보호구 착용 장소",
+      "pages": [
+        [
+          24
+        ],
+        [
+          36
+        ]
+      ],
+      "required": [
+        "18% 이상",
+        "23.5% 미만",
+        "1.5% 미만",
+        "30 ppm 미만",
+        "10 ppm 미만",
+        "환기만으로 불충분",
+        "송기라인",
+        "정전"
+      ],
+      "forbidden": [
+        "23.5% 이하"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "compound-17",
+      "category": "compound",
+      "question": "작업 전 환기 시기 그리고 환기 중단 응급상황 조치",
+      "pages": [
+        [
+          28
+        ],
+        [
+          29
+        ]
+      ],
+      "required": [
+        "15분 이상",
+        "10배 이상",
+        "즉시 밀폐공간 외부로 대피",
+        "추가적인 보호조치"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-18",
+      "category": "compound",
+      "question": "불활성기체 사용시 조치 그리고 가스배관 해체 작업",
+      "pages": [
+        [
+          30
+        ],
+        [
+          31
+        ]
+      ],
+      "required": [
+        "차단판",
+        "잠금장치",
+        "임의로 개방",
+        "직접 외부",
+        "해당가스가 들어오지 않도록 차단",
+        "환기"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-19",
+      "category": "compound",
+      "question": "밀폐공간 특별교육 시간 그리고 긴급구조훈련 주기",
+      "pages": [
+        [
+          38
+        ],
+        [
+          39
+        ]
+      ],
+      "required": [
+        "최초 작업투입 전",
+        "2시간 이상",
+        "16시간 이상",
+        "3개월 이내",
+        "6개월에 1회 이상",
+        "사업장 단위",
+        "비상연락"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "compound-20",
+      "category": "compound",
+      "question": "산소 유해가스 측정 사전준비 그리고 심폐소생술 알려줘",
+      "pages": [
+        [
+          27
+        ],
+        [
+          45
+        ]
+      ],
+      "required": [
+        "20.9%",
+        "교정",
+        "표준가스",
+        "10초 이내",
+        "30회",
+        "100~120회",
+        "인공호흡 방법을 모르거나 꺼리는 경우"
+      ],
+      "forbidden": [],
+      "exceptions": []
+    },
+    {
+      "id": "unknown-1",
+      "category": "out-of-scope",
+      "question": "오늘 서울 날씨 알려줘",
+      "pages": [],
+      "required": [],
+      "forbidden": [
+        "작업 가능합니다",
+        "작업해도 됩니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "unknown-2",
+      "category": "out-of-scope",
+      "question": "비트코인 투자 전망",
+      "pages": [],
+      "required": [],
+      "forbidden": [
+        "작업 가능합니다",
+        "작업해도 됩니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "unknown-3",
+      "category": "out-of-scope",
+      "question": "파스타 레시피 추천",
+      "pages": [],
+      "required": [],
+      "forbidden": [
+        "작업 가능합니다",
+        "작업해도 됩니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "unknown-4",
+      "category": "out-of-scope",
+      "question": "아이폰 배터리 교체 가격",
+      "pages": [],
+      "required": [],
+      "forbidden": [
+        "작업 가능합니다",
+        "작업해도 됩니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "unknown-5",
+      "category": "out-of-scope",
+      "question": "오늘 점심 메뉴 추천",
+      "pages": [],
+      "required": [],
+      "forbidden": [
+        "작업 가능합니다",
+        "작업해도 됩니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "unknown-6",
+      "category": "out-of-scope",
+      "question": "축구 경기 결과 알려줘",
+      "pages": [],
+      "required": [],
+      "forbidden": [
+        "작업 가능합니다",
+        "작업해도 됩니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "unknown-7",
+      "category": "out-of-scope",
+      "question": "회사 와이파이 암호 알려줘",
+      "pages": [],
+      "required": [],
+      "forbidden": [
+        "작업 가능합니다",
+        "작업해도 됩니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "unknown-8",
+      "category": "out-of-scope",
+      "question": "내일 부산 비 예보",
+      "pages": [],
+      "required": [],
+      "forbidden": [
+        "작업 가능합니다",
+        "작업해도 됩니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "unknown-9",
+      "category": "out-of-scope",
+      "question": "노트북 구매 추천",
+      "pages": [],
+      "required": [],
+      "forbidden": [
+        "작업 가능합니다",
+        "작업해도 됩니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "unknown-10",
+      "category": "out-of-scope",
+      "question": "우리 현장 현재 작업 승인됐어?",
+      "pages": [],
+      "required": [],
+      "forbidden": [
+        "작업 가능합니다",
+        "작업해도 됩니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    }
+  ]
+}

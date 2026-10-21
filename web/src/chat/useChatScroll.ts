@@ -27,7 +27,7 @@ export function useChatScroll(enabled:boolean,requestId:string|undefined){
       // Repeated smooth animations compete with wheel/touch scrolling. Follow
       // layout changes once per frame with an immediate, cancellable move.
       scroll:top=>{if(pane&&paneActive())pane.scrollTo({top,behavior:'instant'});else window.scrollTo({top,behavior:'instant'});},
-      requestFrame:callback=>requestAnimationFrame(callback),cancelFrame:cancelAnimationFrame,
+      requestFrame:callback=>window.requestAnimationFrame(callback),cancelFrame:id=>window.cancelAnimationFrame(id),
       showLatest:visible=>setShowLatest(visible&&Boolean(messagesRef.current?.querySelector('.exchange'))),
     });
     controller.current=chatScroll;

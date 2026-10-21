@@ -1,0 +1,3908 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-21T06:35:47.086Z",
+  "variant": "grounded-answer-plan",
+  "corpusSha256": "2c8e9edcc986c9e0c65f66d9a4784d88462656702669ba5a7182c98a86bfebae",
+  "rubricSha256": "d2083c4b22e6eb5b6967ce73eb5722a318d52072050b2c9516d73a19bd6f2ecb",
+  "rubricStatus": "engineering-source-checked; domain-owner review pending",
+  "measurement": "PC retrieval and deterministic source-body composition only. No GPU generation, iPhone execution, or clinical/legal certification.",
+  "total": 150,
+  "retrievalPassed": 150,
+  "bodyPassed": 150,
+  "results": [
+    {
+      "id": "guide-01-1",
+      "question": "적정 공기 산소농도 기준",
+      "category": "single",
+      "expectedPages": [
+        [
+          24
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 24
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 7.239599999999996,
+      "compositionMs": 1.558499999999981,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-01-2",
+      "question": "산소와 이산화탄소 일산화탄소 황화수소 농도 기준 알려줘",
+      "category": "single",
+      "expectedPages": [
+        [
+          24
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 24
+        },
+        {
+          "documentId": "confined_space_checklist_2026",
+          "page": 2
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 60
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 3.5668000000000006,
+      "compositionMs": 0.685799999999972,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-01-3",
+      "question": "적정공기에서 산소 상한은 23.5% 미만이야 이하야?",
+      "category": "single",
+      "expectedPages": [
+        [
+          24
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 24
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.6299000000000206,
+      "compositionMs": 0.07389999999998054,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-01-4",
+      "question": "유해가스 농도 기준 수치를 정리해줘",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          24
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 24
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.4802000000000248,
+      "compositionMs": 0.07009999999996808,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-02-1",
+      "question": "산소 유해가스 측정 시기",
+      "category": "single",
+      "expectedPages": [
+        [
+          25
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 24
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 63
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.3208999999999946,
+      "compositionMs": 0.17650000000003274,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-02-2",
+      "question": "점심시간 후에 가스농도 다시 측정해야 하나요",
+      "category": "single",
+      "expectedPages": [
+        [
+          25
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.9074999999999704,
+      "compositionMs": 0.07429999999999382,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-02-3",
+      "question": "밀폐공간 들어가기 전과 작업 중 측정 시기 알려줘",
+      "category": "single",
+      "expectedPages": [
+        [
+          25
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 2
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.9350999999999772,
+      "compositionMs": 0.08999999999997499,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-02-4",
+      "question": "장시간 작업할 때 유해가스 측정은 언제 해요",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          25
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.3461000000000354,
+      "compositionMs": 0.06890000000004193,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-03-1",
+      "question": "산소 유해가스 농도 측정자의 자격",
+      "category": "single",
+      "expectedPages": [
+        [
+          25
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.3219000000000278,
+      "compositionMs": 0.07409999999998718,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-03-2",
+      "question": "가스 측정은 누가 해야 하나요",
+      "category": "single",
+      "expectedPages": [
+        [
+          25
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.9600000000000364,
+      "compositionMs": 0.07150000000001455,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-03-3",
+      "question": "산소 농도 측정 교육 이수자 자격 알려줘",
+      "category": "single",
+      "expectedPages": [
+        [
+          25
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.8448000000000206,
+      "compositionMs": 0.18080000000003338,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-03-4",
+      "question": "관리감독자 말고 유해가스 측정 가능한 사람",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          25
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 64
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 2.022800000000018,
+      "compositionMs": 0.2913000000000352,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-04-1",
+      "question": "센서 및 무선통신 측정 센서부 요건",
+      "category": "single",
+      "expectedPages": [
+        [
+          26
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 26
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 69
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.987700000000018,
+      "compositionMs": 0.21059999999999945,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-04-2",
+      "question": "무선 가스 센서의 정확도와 신뢰성은 어떻게 확보해",
+      "category": "single",
+      "expectedPages": [
+        [
+          26
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 26
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.0001000000000317,
+      "compositionMs": 0.06459999999998445,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-04-3",
+      "question": "밀폐공간 센서가 측정해야 하는 작업공간은 어디야",
+      "category": "single",
+      "expectedPages": [
+        [
+          26
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 26
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.9350000000000023,
+      "compositionMs": 0.041600000000016735,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-04-4",
+      "question": "산소 유해가스 센서부의 실시간 측정 요건 알려줘",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          26
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 26
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.9191999999999894,
+      "compositionMs": 0.04059999999998354,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-05-1",
+      "question": "센서 및 무선통신 측정 통신부 요건",
+      "category": "single",
+      "expectedPages": [
+        [
+          26
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 26
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 69
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.5007999999999697,
+      "compositionMs": 0.13769999999999527,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-05-2",
+      "question": "가스 측정 데이터를 통제실로 전송하는 조건",
+      "category": "single",
+      "expectedPages": [
+        [
+          26
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 26
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.8731999999999971,
+      "compositionMs": 0.04149999999998499,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-05-3",
+      "question": "무선 측정 통신에서 장애물과 전파 방해는 어떻게 고려해",
+      "category": "single",
+      "expectedPages": [
+        [
+          26
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 26
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.0120000000000005,
+      "compositionMs": 0.04210000000000491,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-05-4",
+      "question": "가스 센서 통신부가 갖춰야 할 기능 알려줘",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          26
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 26
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.807200000000023,
+      "compositionMs": 0.045400000000029195,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-06-1",
+      "question": "센서 및 무선통신 측정 통제실 요건",
+      "category": "single",
+      "expectedPages": [
+        [
+          26
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 26
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 69
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.5027000000000044,
+      "compositionMs": 0.14240000000000919,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-06-2",
+      "question": "유해가스 위험상황을 감지한 통제실의 역할",
+      "category": "single",
+      "expectedPages": [
+        [
+          26
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 26
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.0255000000000223,
+      "compositionMs": 0.039199999999993906,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-06-3",
+      "question": "가스 측정 통제실 전산시스템 요건 알려줘",
+      "category": "single",
+      "expectedPages": [
+        [
+          26
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 26
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.6852999999999838,
+      "compositionMs": 0.04230000000001155,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-06-4",
+      "question": "작업 중단 재개 대피 통제 권한은 통제실에 어떻게 배치해",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          26
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 26
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.2349999999999568,
+      "compositionMs": 0.12239999999997053,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-07-1",
+      "question": "산소 유해가스 측정 사전준비",
+      "category": "single",
+      "expectedPages": [
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.049199999999928,
+      "compositionMs": 0.12889999999993051,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-07-2",
+      "question": "가스농도 측정기 이상 유무 확인방법",
+      "category": "single",
+      "expectedPages": [
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 2.5856999999999744,
+      "compositionMs": 0.10760000000004766,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-07-3",
+      "question": "산소 측정기 센서 교체와 검교정 준비 알려줘",
+      "category": "single",
+      "expectedPages": [
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 69
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.2612000000000307,
+      "compositionMs": 0.11099999999999,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-07-4",
+      "question": "깨끗한 야외 공기에서 측정기 상태 확인은 어떻게 해",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.8916000000000395,
+      "compositionMs": 0.06700000000000728,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-08-1",
+      "question": "산소 유해가스 측정 위치와 개소",
+      "category": "single",
+      "expectedPages": [
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 21
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        },
+        {
+          "documentId": "confined_space_checklist_2026",
+          "page": 2
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.3912000000000262,
+      "compositionMs": 0.17669999999998254,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-08-2",
+      "question": "밀폐공간 면적과 깊이를 고려한 측정방법",
+      "category": "single",
+      "expectedPages": [
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 18
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 67
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.7087999999999965,
+      "compositionMs": 0.12319999999999709,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-08-3",
+      "question": "가스 측정은 수직 수평 몇 개소에서 해야 해",
+      "category": "single",
+      "expectedPages": [
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.9876000000000431,
+      "compositionMs": 0.07049999999992451,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-08-4",
+      "question": "산소측정법 알려줘",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.6060999999999694,
+      "compositionMs": 0.06340000000000146,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-09-1",
+      "question": "깊은 탱크 가스 측정 채기관 눈금",
+      "category": "single",
+      "expectedPages": [
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.6411999999999125,
+      "compositionMs": 0.06749999999999545,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-09-2",
+      "question": "산소 측정 호스는 어떻게 연결하고 표시해",
+      "category": "single",
+      "expectedPages": [
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.5226000000000113,
+      "compositionMs": 0.06570000000010623,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-09-3",
+      "question": "채기관은 몇 미터마다 작은 눈금 큰 눈금을 표시해",
+      "category": "single",
+      "expectedPages": [
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.4012000000000171,
+      "compositionMs": 0.06730000000004566,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-09-4",
+      "question": "깊은 장소의 농도 측정방법 알려줘",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 30
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 32
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.8422999999999092,
+      "compositionMs": 0.15260000000000673,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-10-1",
+      "question": "산소 유해가스 측정시 주의사항",
+      "category": "single",
+      "expectedPages": [
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.0891000000000304,
+      "compositionMs": 0.06740000000002055,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-10-2",
+      "question": "밀폐공간 내부 측정할 때 보호구와 감시인",
+      "category": "single",
+      "expectedPages": [
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 35
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 64
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.231899999999996,
+      "compositionMs": 0.1655999999999267,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-10-3",
+      "question": "어두운 밀폐공간 측정 전등은 어떤 걸 써야 해",
+      "category": "single",
+      "expectedPages": [
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.6260999999999513,
+      "compositionMs": 0.19480000000010023,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-10-4",
+      "question": "산소 및 유해가스 측정방법",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 24
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 2.1807999999999765,
+      "compositionMs": 0.29570000000001073,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-11-1",
+      "question": "작업 전 환기 시기",
+      "category": "single",
+      "expectedPages": [
+        [
+          28
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.0510000000000446,
+      "compositionMs": 0.05700000000001637,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-11-2",
+      "question": "오랫동안 닫혀 있던 밀폐공간은 얼마나 환기해야 해",
+      "category": "single",
+      "expectedPages": [
+        [
+          28
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.2545000000000073,
+      "compositionMs": 0.05380000000002383,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-11-3",
+      "question": "밀폐공간 최초 출입 전 환기시간과 체적 기준",
+      "category": "single",
+      "expectedPages": [
+        [
+          28
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 65
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.9802999999999429,
+      "compositionMs": 0.17079999999998563,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-11-4",
+      "question": "가스 측정 전 신선한 공기로 환기하는 시기 알려줘",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          28
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.7746999999999389,
+      "compositionMs": 0.053599999999960346,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-12-1",
+      "question": "작업 중 계속 환기가 필요한 경우",
+      "category": "single",
+      "expectedPages": [
+        [
+          28
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.9460000000000264,
+      "compositionMs": 0.06000000000005912,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-12-2",
+      "question": "오폐수처리장 맨홀 작업 중 환기는 언제 해야 해",
+      "category": "single",
+      "expectedPages": [
+        [
+          28
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.6398000000000366,
+      "compositionMs": 0.04570000000001073,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-12-3",
+      "question": "용접작업 양수기 작업에서 환기를 계속해야 하는 이유",
+      "category": "single",
+      "expectedPages": [
+        [
+          28
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.9889000000000578,
+      "compositionMs": 0.04510000000004766,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-12-4",
+      "question": "질소 아르곤 배관 연결 장소 환기 시기",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          28
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.0635999999999513,
+      "compositionMs": 0.048800000000028376,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-13-1",
+      "question": "환기팬 용량 정압",
+      "category": "single",
+      "expectedPages": [
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.45680000000004384,
+      "compositionMs": 0.051300000000082946,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-13-2",
+      "question": "밀폐공간 체적 600m3 환기팬 용량 예시 알려줘",
+      "category": "single",
+      "expectedPages": [
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.7232999999999947,
+      "compositionMs": 0.05190000000004602,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-13-3",
+      "question": "환기팬 정압과 밀폐공간 체적 대비 용량 기준",
+      "category": "single",
+      "expectedPages": [
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.9469000000000278,
+      "compositionMs": 0.05099999999993088,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-13-4",
+      "question": "환기팬 사전준비 기준 알려줘",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.49249999999995,
+      "compositionMs": 0.048499999999989996,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-14-1",
+      "question": "환기 송풍관 덕트 길이",
+      "category": "single",
+      "expectedPages": [
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.6167000000000371,
+      "compositionMs": 0.06720000000007076,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-14-2",
+      "question": "환기팬 제조사가 덕트 길이를 제시하지 않으면",
+      "category": "single",
+      "expectedPages": [
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.1971999999999525,
+      "compositionMs": 0.08820000000002892,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-14-3",
+      "question": "송풍관 굽힘과 난연재 주의사항 알려줘",
+      "category": "single",
+      "expectedPages": [
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.7572000000000116,
+      "compositionMs": 0.1333999999999378,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-14-4",
+      "question": "환기 덕트 길이는 얼마나 길게 사용할 수 있어",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.5104000000000042,
+      "compositionMs": 0.21620000000007167,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-15-1",
+      "question": "밀폐공간 환기 방법 급기 배기",
+      "category": "single",
+      "expectedPages": [
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.077600000000075,
+      "compositionMs": 0.09559999999999036,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-15-2",
+      "question": "급기구와 배기구 배치는 어떻게 해",
+      "category": "single",
+      "expectedPages": [
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.6425999999999021,
+      "compositionMs": 0.08569999999997435,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-15-3",
+      "question": "밀폐공간 급기방식과 배기방식 적용 차이",
+      "category": "single",
+      "expectedPages": [
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.7489000000000487,
+      "compositionMs": 0.06529999999997926,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-15-4",
+      "question": "작업근로자 가까이 급기구는 어떻게 설치해",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.1758000000000948,
+      "compositionMs": 0.06820000000004711,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-16-1",
+      "question": "환기 중단 응급상황 조치",
+      "category": "single",
+      "expectedPages": [
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.9503999999999451,
+      "compositionMs": 0.05489999999997508,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-16-2",
+      "question": "정전으로 환기가 중단되면 어떻게 해야 해",
+      "category": "single",
+      "expectedPages": [
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.542699999999968,
+      "compositionMs": 0.05299999999999727,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-16-3",
+      "question": "환기로 적정공기를 유지하기 어려울 경우 조치",
+      "category": "single",
+      "expectedPages": [
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 36
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.5182000000000926,
+      "compositionMs": 0.10649999999998272,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-16-4",
+      "question": "폭발 산화 위험으로 환기를 못 할 때 조치",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.244100000000003,
+      "compositionMs": 0.05769999999995434,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-17-1",
+      "question": "용접 작업 조치",
+      "category": "single",
+      "expectedPages": [
+        [
+          30
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 76
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 30
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 74
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.637299999999982,
+      "compositionMs": 0.11610000000007403,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-17-2",
+      "question": "환기가 불충분한 탱크 내부 용접 조치",
+      "category": "single",
+      "expectedPages": [
+        [
+          30
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 30
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 34
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.1830999999999676,
+      "compositionMs": 0.07749999999998636,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-17-3",
+      "question": "용접 중 환기로 적정공기를 유지하기 어려우면",
+      "category": "single",
+      "expectedPages": [
+        [
+          30
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 30
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.3063000000000784,
+      "compositionMs": 0.17050000000006094,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-17-4",
+      "question": "용접작업 가스농도 측정과 보호구 알려줘",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          30
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 30
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 36
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 44
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.540300000000002,
+      "compositionMs": 0.16440000000000055,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-18-1",
+      "question": "불활성기체 사용시 조치",
+      "category": "single",
+      "expectedPages": [
+        [
+          30
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 30
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.6306000000000722,
+      "compositionMs": 0.04589999999996053,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-18-2",
+      "question": "불활성가스 배관 밸브 차단과 잠금 조치",
+      "category": "single",
+      "expectedPages": [
+        [
+          30
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 30
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 33
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.4198000000000093,
+      "compositionMs": 0.07519999999999527,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-18-3",
+      "question": "질소 아르곤 배관 잘못된 조작 방지 조치",
+      "category": "single",
+      "expectedPages": [
+        [
+          30
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 30
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.3351000000000113,
+      "compositionMs": 0.10500000000001819,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-18-4",
+      "question": "불활성기체 잔류를 방지하는 방법",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          30
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 30
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.9235999999999649,
+      "compositionMs": 0.049999999999954525,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-19-1",
+      "question": "가스배관 해체 작업",
+      "category": "single",
+      "expectedPages": [
+        [
+          31
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 31
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.1510999999999285,
+      "compositionMs": 0.05570000000000164,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-19-2",
+      "question": "맨홀 가스배관 부착 작업 조치",
+      "category": "single",
+      "expectedPages": [
+        [
+          31
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 31
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.054300000000012,
+      "compositionMs": 0.04719999999997526,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-19-3",
+      "question": "통풍이 불충분한 장소의 가스배관 공사 조치",
+      "category": "single",
+      "expectedPages": [
+        [
+          31
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 31
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.4178000000000566,
+      "compositionMs": 0.050299999999992906,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-19-4",
+      "question": "배관 해체할 때 가스 유입과 적정공기는 어떻게 관리해",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          31
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 31
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 30
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.6870000000000118,
+      "compositionMs": 0.08770000000004075,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-20-1",
+      "question": "설비개조 작업시 조치",
+      "category": "single",
+      "expectedPages": [
+        [
+          31
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 31
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.5516000000000076,
+      "compositionMs": 0.04090000000007876,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-20-2",
+      "question": "분뇨 오수에 오염된 펌프 분해 작업 조치",
+      "category": "single",
+      "expectedPages": [
+        [
+          31
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 31
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.0821999999999434,
+      "compositionMs": 0.04319999999995616,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-20-3",
+      "question": "부패하기 쉬운 물질에 오염된 배관 청소 작업 조치",
+      "category": "single",
+      "expectedPages": [
+        [
+          31
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 31
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.3815000000000737,
+      "compositionMs": 0.051899999999932334,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-20-4",
+      "question": "황화수소 위험 설비 수리 작업 지휘자와 작업순서",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          31
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 31
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 46
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 2.387499999999932,
+      "compositionMs": 0.18729999999993652,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-21-1",
+      "question": "자동 CO2 소화설비 유지보수 작업",
+      "category": "single",
+      "expectedPages": [
+        [
+          32
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 32
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.971400000000017,
+      "compositionMs": 0.09789999999998145,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-21-2",
+      "question": "이산화탄소 소화설비 작업 전 오작동 방지 조치",
+      "category": "single",
+      "expectedPages": [
+        [
+          32
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 32
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 77
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 61
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.4043000000000347,
+      "compositionMs": 0.16690000000005512,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-21-3",
+      "question": "CO2 소화설비 경보 후 방출 전 대피 안내",
+      "category": "single",
+      "expectedPages": [
+        [
+          32
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 32
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.6222000000000207,
+      "compositionMs": 0.06509999999991578,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-21-4",
+      "question": "이산화탄소 방출 장소에 들어가기 전 조치",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          32
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 32
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.3225999999999658,
+      "compositionMs": 0.058300000000031105,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-22-1",
+      "question": "출입문 임의잠김 방지",
+      "category": "single",
+      "expectedPages": [
+        [
+          33
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 33
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 63
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.631900000000087,
+      "compositionMs": 0.07729999999992287,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-22-2",
+      "question": "냉동실 내부 작업 출입문 잠김 방지 조치",
+      "category": "single",
+      "expectedPages": [
+        [
+          33
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 33
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.296199999999999,
+      "compositionMs": 0.01749999999992724,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-22-3",
+      "question": "탱크 작업 끝나고 출입뚜껑을 잠그기 전 확인사항",
+      "category": "single",
+      "expectedPages": [
+        [
+          33
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 33
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.9645000000000437,
+      "compositionMs": 0.018100000000004002,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-22-4",
+      "question": "밀폐공간 출입구를 잠글 때 인원 확인해야 하나요",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          33
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 33
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.060699999999997,
+      "compositionMs": 0.016799999999989268,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-23-1",
+      "question": "관리감독자 점검 직무",
+      "category": "single",
+      "expectedPages": [
+        [
+          34
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 34
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.4914999999999736,
+      "compositionMs": 0.04809999999997672,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-23-2",
+      "question": "관리감독자가 작업 전에 확인할 장비",
+      "category": "single",
+      "expectedPages": [
+        [
+          34
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 34
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 44
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.939200000000028,
+      "compositionMs": 0.08270000000004529,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-23-3",
+      "question": "밀폐공간 관리감독자의 보호구 착용 지도 역할",
+      "category": "single",
+      "expectedPages": [
+        [
+          34
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 34
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.6213000000000193,
+      "compositionMs": 0.047400000000038744,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-23-4",
+      "question": "감독관 점검에서 이상을 발견하면 필요한 조치",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          34
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 34
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.7372000000000298,
+      "compositionMs": 0.10980000000006385,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-24-1",
+      "question": "밀폐공간 출입 인원 점검",
+      "category": "single",
+      "expectedPages": [
+        [
+          35
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 35
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.527400000000057,
+      "compositionMs": 0.05129999999996926,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-24-2",
+      "question": "작업자가 들어가고 나올 때 인원 확인 시기",
+      "category": "single",
+      "expectedPages": [
+        [
+          35
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 35
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.952099999999973,
+      "compositionMs": 0.047100000000000364,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-24-3",
+      "question": "감시인 연락 설비",
+      "category": "single",
+      "expectedPages": [
+        [
+          35
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 35
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.8609000000000151,
+      "compositionMs": 0.025100000000065847,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-24-4",
+      "question": "밀폐공간 작업장과 외부 감시인 연락 방법",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          35
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 41
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 35
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 64
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 2.1549999999999727,
+      "compositionMs": 0.2604999999999791,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-25-1",
+      "question": "호흡용 보호구 착용 장소",
+      "category": "single",
+      "expectedPages": [
+        [
+          36
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 36
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.3076999999999543,
+      "compositionMs": 0.06409999999993943,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-25-2",
+      "question": "환기만으로 적정공기를 유지하기 어려울 때 보호구",
+      "category": "single",
+      "expectedPages": [
+        [
+          36
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 36
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.0810000000000173,
+      "compositionMs": 0.09849999999994452,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-25-3",
+      "question": "송기마스크 송기라인과 정전 주의사항",
+      "category": "single",
+      "expectedPages": [
+        [
+          36
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 36
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.7653999999999996,
+      "compositionMs": 0.09640000000001692,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-25-4",
+      "question": "공기호흡기 착용이 어려운 좁은 장소의 보호구",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          36
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 30
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 36
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.0652000000000044,
+      "compositionMs": 0.12789999999995416,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-26-1",
+      "question": "밀폐공간 특별교육 시간",
+      "category": "single",
+      "expectedPages": [
+        [
+          38
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 38
+        },
+        {
+          "documentId": "confined_space_checklist_2026",
+          "page": 3
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.38580000000001746,
+      "compositionMs": 0.08210000000008222,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-26-2",
+      "question": "일용근로자 밀폐공간 특별교육은 몇 시간이야",
+      "category": "single",
+      "expectedPages": [
+        [
+          38
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 38
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.7142000000000053,
+      "compositionMs": 0.03819999999996071,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-26-3",
+      "question": "일용근로자를 제외한 근로자 특별교육 분할 시간",
+      "category": "single",
+      "expectedPages": [
+        [
+          38
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 38
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.0421999999999798,
+      "compositionMs": 0.03780000000006112,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-26-4",
+      "question": "단기간 간헐적 밀폐공간 작업 특별교육 안내",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          38
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 38
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.1639999999999873,
+      "compositionMs": 0.16049999999995634,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-27-1",
+      "question": "긴급구조훈련 주기",
+      "category": "single",
+      "expectedPages": [
+        [
+          39
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 39
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.565300000000093,
+      "compositionMs": 0.07720000000006166,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-27-2",
+      "question": "밀폐공간 긴급구조훈련 대상과 주기",
+      "category": "single",
+      "expectedPages": [
+        [
+          39
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 39
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 66
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.128500000000031,
+      "compositionMs": 0.1912000000000944,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-27-3",
+      "question": "긴급구조훈련과 개별 근로자 특별교육 차이",
+      "category": "single",
+      "expectedPages": [
+        [
+          39
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 39
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 66
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 40
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.2093999999999596,
+      "compositionMs": 0.22059999999999036,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-27-4",
+      "question": "비상연락 구조 응급조치 후송 훈련 알려줘",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          39
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 39
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.3378000000000156,
+      "compositionMs": 0.047300000000063847,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-28-1",
+      "question": "밀폐공간 재해자 구조 절차",
+      "category": "single",
+      "expectedPages": [
+        [
+          44
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 44
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.9411000000000058,
+      "compositionMs": 0.047899999999913234,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-28-2",
+      "question": "밀폐공간 동료가 쓰러졌는데 공기호흡기가 없으면",
+      "category": "single",
+      "expectedPages": [
+        [
+          44
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 44
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.5126000000000204,
+      "compositionMs": 0.04390000000000782,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-28-3",
+      "question": "공기상태를 모르는 밀폐공간 구조 시 주의사항",
+      "category": "single",
+      "expectedPages": [
+        [
+          44
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 44
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 36
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.6449999999999818,
+      "compositionMs": 0.14010000000007494,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-28-4",
+      "question": "보호장비 없이 밀폐공간 재해자를 구조해도 돼",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          44
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 44
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.7830999999999904,
+      "compositionMs": 0.04330000000004475,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-29-1",
+      "question": "심폐소생술 알려줘",
+      "category": "single",
+      "expectedPages": [
+        [
+          45
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 46
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.20830000000000837,
+      "compositionMs": 0.07230000000004111,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-29-2",
+      "question": "CPR 반응확인 신고 호흡확인 흉부압박 순서",
+      "category": "single",
+      "expectedPages": [
+        [
+          45
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.6342999999999392,
+      "compositionMs": 0.05480000000000018,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-29-3",
+      "question": "심폐소생술 압박 깊이와 속도 인공호흡 횟수",
+      "category": "single",
+      "expectedPages": [
+        [
+          45
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 46
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.8714999999999691,
+      "compositionMs": 0.07619999999997162,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-29-4",
+      "question": "인공호흡 방법을 모르거나 꺼리는 경우 심폐소생술",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          45
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.0643999999999778,
+      "compositionMs": 0.05730000000005475,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-30-1",
+      "question": "심폐소생술 반복과 회복자세",
+      "category": "single",
+      "expectedPages": [
+        [
+          46
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 46
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.3793999999999187,
+      "compositionMs": 0.023199999999974352,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-30-2",
+      "question": "심폐소생술은 언제까지 반복해야 해",
+      "category": "single",
+      "expectedPages": [
+        [
+          46
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 46
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.4755999999999858,
+      "compositionMs": 0.07110000000000127,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-30-3",
+      "question": "심폐소생술 중 움직이면 바로 회복자세를 취해도 돼",
+      "category": "single",
+      "expectedPages": [
+        [
+          46
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 46
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.35800000000006094,
+      "compositionMs": 0.022699999999986176,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "guide-30-4",
+      "question": "호흡이 회복되었을 때 회복자세 알려줘",
+      "category": "paraphrase",
+      "expectedPages": [
+        [
+          46
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 46
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.3061999999999898,
+      "compositionMs": 0.023000000000024556,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-1",
+      "question": "적정 공기 산소농도 기준 그리고 산소 유해가스 측정 시기",
+      "category": "compound",
+      "expectedPages": [
+        [
+          24
+        ],
+        [
+          25
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 24
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 2.0067999999999984,
+      "compositionMs": 0.10159999999996217,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-2",
+      "question": "산소 유해가스 측정 사전준비 그리고 산소 유해가스 측정시 주의사항",
+      "category": "compound",
+      "expectedPages": [
+        [
+          27
+        ],
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.6202999999999292,
+      "compositionMs": 0.12259999999992033,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-3",
+      "question": "산소 유해가스 측정 위치와 개소 그리고 깊은 탱크 가스 측정 채기관 눈금",
+      "category": "compound",
+      "expectedPages": [
+        [
+          27
+        ],
+        [
+          27
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 21
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        },
+        {
+          "documentId": "confined_space_checklist_2026",
+          "page": 2
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 2.3876999999999953,
+      "compositionMs": 0.24490000000002965,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-4",
+      "question": "작업 전 환기 시기 그리고 환기팬 용량 정압",
+      "category": "compound",
+      "expectedPages": [
+        [
+          28
+        ],
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.1171999999999116,
+      "compositionMs": 0.11029999999993834,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-5",
+      "question": "환기팬 용량 정압 그리고 환기 송풍관 덕트 길이",
+      "category": "compound",
+      "expectedPages": [
+        [
+          29
+        ],
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.9379000000000133,
+      "compositionMs": 0.059499999999957254,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-6",
+      "question": "밀폐공간 환기 방법 급기 배기 그리고 환기 중단 응급상황 조치",
+      "category": "compound",
+      "expectedPages": [
+        [
+          29
+        ],
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.517500000000041,
+      "compositionMs": 0.05600000000004002,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-7",
+      "question": "용접 작업 조치 그리고 불활성기체 사용시 조치",
+      "category": "compound",
+      "expectedPages": [
+        [
+          30
+        ],
+        [
+          30
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 76
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 30
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 74
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.0356999999999061,
+      "compositionMs": 0.11180000000001655,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-8",
+      "question": "가스배관 해체 작업 그리고 설비개조 작업시 조치",
+      "category": "compound",
+      "expectedPages": [
+        [
+          31
+        ],
+        [
+          31
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 31
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.3710999999999558,
+      "compositionMs": 0.04630000000008749,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-9",
+      "question": "자동 CO2 소화설비 유지보수 작업 그리고 출입문 임의잠김 방지",
+      "category": "compound",
+      "expectedPages": [
+        [
+          32
+        ],
+        [
+          33
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 32
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 33
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 63
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 2.1376999999999953,
+      "compositionMs": 0.1313000000000102,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-10",
+      "question": "관리감독자 점검 직무 그리고 밀폐공간 출입 인원 점검",
+      "category": "compound",
+      "expectedPages": [
+        [
+          34
+        ],
+        [
+          35
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 34
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 35
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.397199999999998,
+      "compositionMs": 0.05769999999995434,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-11",
+      "question": "호흡용 보호구 착용 장소 그리고 밀폐공간 특별교육 시간",
+      "category": "compound",
+      "expectedPages": [
+        [
+          36
+        ],
+        [
+          38
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 36
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 38
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 66
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.1480000000000246,
+      "compositionMs": 0.15219999999999345,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-12",
+      "question": "긴급구조훈련 주기 그리고 밀폐공간 재해자 구조 절차",
+      "category": "compound",
+      "expectedPages": [
+        [
+          39
+        ],
+        [
+          44
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 39
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 44
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.8830000000000382,
+      "compositionMs": 0.15439999999989595,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-13",
+      "question": "심폐소생술 알려줘 그리고 심폐소생술 반복과 회복자세",
+      "category": "compound",
+      "expectedPages": [
+        [
+          45
+        ],
+        [
+          46
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 46
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.6802000000000135,
+      "compositionMs": 0.14740000000006148,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-14",
+      "question": "산소 유해가스 측정 시기 그리고 밀폐공간 출입 인원 점검",
+      "category": "compound",
+      "expectedPages": [
+        [
+          25
+        ],
+        [
+          35
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 24
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 35
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 2.393199999999979,
+      "compositionMs": 0.14019999999993615,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-15",
+      "question": "산소 유해가스 측정시 주의사항 그리고 밀폐공간 재해자 구조 절차",
+      "category": "compound",
+      "expectedPages": [
+        [
+          27
+        ],
+        [
+          44
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 44
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.9035000000000082,
+      "compositionMs": 0.1150000000000091,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-16",
+      "question": "적정 공기 산소농도 기준 그리고 호흡용 보호구 착용 장소",
+      "category": "compound",
+      "expectedPages": [
+        [
+          24
+        ],
+        [
+          36
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 24
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 36
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.8121000000001004,
+      "compositionMs": 0.10509999999999309,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-17",
+      "question": "작업 전 환기 시기 그리고 환기 중단 응급상황 조치",
+      "category": "compound",
+      "expectedPages": [
+        [
+          28
+        ],
+        [
+          29
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 28
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 29
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 36
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.3292999999999893,
+      "compositionMs": 0.14400000000000546,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-18",
+      "question": "불활성기체 사용시 조치 그리고 가스배관 해체 작업",
+      "category": "compound",
+      "expectedPages": [
+        [
+          30
+        ],
+        [
+          31
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 30
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 31
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 1.3099999999999454,
+      "compositionMs": 0.07639999999992142,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-19",
+      "question": "밀폐공간 특별교육 시간 그리고 긴급구조훈련 주기",
+      "category": "compound",
+      "expectedPages": [
+        [
+          38
+        ],
+        [
+          39
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 38
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 39
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 66
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.5395999999999503,
+      "compositionMs": 0.12799999999992906,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "compound-20",
+      "question": "산소 유해가스 측정 사전준비 그리고 심폐소생술 알려줘",
+      "category": "compound",
+      "expectedPages": [
+        [
+          27
+        ],
+        [
+          45
+        ]
+      ],
+      "retrieved": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 27
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 46
+        }
+      ],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.8642999999999574,
+      "compositionMs": 0.14459999999996853,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "unknown-1",
+      "question": "오늘 서울 날씨 알려줘",
+      "category": "out-of-scope",
+      "expectedPages": [],
+      "retrieved": [],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.3772000000000162,
+      "compositionMs": 0.003199999999992542,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "unknown-2",
+      "question": "비트코인 투자 전망",
+      "category": "out-of-scope",
+      "expectedPages": [],
+      "retrieved": [],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.23879999999996926,
+      "compositionMs": 0.0007999999999128704,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "unknown-3",
+      "question": "파스타 레시피 추천",
+      "category": "out-of-scope",
+      "expectedPages": [],
+      "retrieved": [],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.21450000000004366,
+      "compositionMs": 0.0008000000000265572,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "unknown-4",
+      "question": "아이폰 배터리 교체 가격",
+      "category": "out-of-scope",
+      "expectedPages": [],
+      "retrieved": [],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.9578999999999951,
+      "compositionMs": 0.0024000000000796717,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "unknown-5",
+      "question": "오늘 점심 메뉴 추천",
+      "category": "out-of-scope",
+      "expectedPages": [],
+      "retrieved": [],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.4348000000001093,
+      "compositionMs": 0.0009999999999763531,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "unknown-6",
+      "question": "축구 경기 결과 알려줘",
+      "category": "out-of-scope",
+      "expectedPages": [],
+      "retrieved": [],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.4578999999999951,
+      "compositionMs": 0.0039000000000442014,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "unknown-7",
+      "question": "회사 와이파이 암호 알려줘",
+      "category": "out-of-scope",
+      "expectedPages": [],
+      "retrieved": [],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.5424999999999045,
+      "compositionMs": 0.0013000000000147338,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "unknown-8",
+      "question": "내일 부산 비 예보",
+      "category": "out-of-scope",
+      "expectedPages": [],
+      "retrieved": [],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.439200000000028,
+      "compositionMs": 0.0014999999999645297,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "unknown-9",
+      "question": "노트북 구매 추천",
+      "category": "out-of-scope",
+      "expectedPages": [],
+      "retrieved": [],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.2644000000000233,
+      "compositionMs": 0.0009999999999763531,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    },
+    {
+      "id": "unknown-10",
+      "question": "우리 현장 현재 작업 승인됐어?",
+      "category": "out-of-scope",
+      "expectedPages": [],
+      "retrieved": [],
+      "retrievalPassed": true,
+      "bodyPassed": true,
+      "missing": [],
+      "forbidden": [],
+      "retrievalMs": 0.002100000000041291,
+      "compositionMs": 0.015499999999974534,
+      "generatedAnswer": "not-run",
+      "humanSemanticReview": "pending"
+    }
+  ]
+}

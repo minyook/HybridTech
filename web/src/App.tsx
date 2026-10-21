@@ -8,7 +8,7 @@ import { useWorkSession } from './workflow/access';
 import { isAndroidEmbedded } from './workflow/native';
 import { allChats, allChecklists, deleteChat, getSetting, saveChat, setSetting } from './storage/db';
 import { contradictsSources, missingAspects, rank, retrieve, sourceAnswer } from './rag/search';
-import { evidenceAnswer } from './rag/evidence';
+import { createAnswerPlan } from './rag/answer-plan';
 import { usesLightAI } from './ai/light-model';
 import { loadKnowledge, preparedGroups } from './offline/assets';
 import { formatDate, go, Icon, Notice, PageHead, TextContent } from './ui';
@@ -84,15 +84,19 @@ export default function App() {
     const sources = retrieve(trimmed,chunks); const missing = missingAspects(trimmed,chunks);
     const chat: Chat = { id:crypto.randomUUID(),question:trimmed,answer:'',citationIds:sources.map(source => source.chunk.id),mode:'source',createdAt:new Date().toISOString() };
     const detailed=usesLightAI();if(detailed)chat.answerFormat='integrated';
-    const documentAnswer=()=>detailed?evidenceAnswer(sources):sourceAnswer(sources);
+    const plan=detailed?createAnswerPlan(trimmed,sources):undefined;
+    if(plan?.evidence.some(unit=>unit.requiresFigure))chat.notice='도식의 위치 기호(X·①~③)는 아래 출처의 원문 그림과 함께 확인해 주세요.';
+    const documentAnswer=()=>plan?.body??sourceAnswer(sources);
+    if(plan){chat.answer=plan.body;setStream(plan.body);}
     controller.current = new AbortController(); const signal = controller.current.signal;
     setCurrent(chat); setActiveIds(previous => [...previous,chat.id]);
     try {
       if (supportsAI() && sources.length && !missing.length) {
         try {
-          const result = await generate(trimmed,sources,setStream,signal);
+          const result = await generate(trimmed,sources,setStream,signal,plan);
           if (contradictsSources(trimmed,result.answer,sources)) throw new Error('생성된 답변이 선택한 근거와 맞지 않아 원문을 표시해요.');
-          chat.answer = result.answer; chat.mode = 'ai';chat.tokenUsage=result.usage;
+          chat.answer = result.answer; chat.mode = result.generated===false?'source':'ai';chat.tokenUsage=result.usage;
+          if(result.supplementSkipped==='recovery')chat.notice='AI 복구가 필요해 문서 근거로 답변했어요. 설정에서 상태를 확인할 수 있어요.';
           if(result.truncated||(!detailed&&result.usage.outputTokens!==undefined&&result.usage.outputTokens>=result.usage.maxOutputTokens))chat.notice='설정한 답변 토큰 한도에 도달했어요. 내용이 더 필요하면 질문을 나누어 주세요.';
         } catch (error) {
           chat.answer = documentAnswer(); chat.mode = signal.aborted?'cancelled':'source';
@@ -128,9 +132,9 @@ export default function App() {
     <div className="messages" ref={messagesRef}>{exchanges.map(chat=>{
       const writing=chat.id===current?.id;
       return <article className="exchange" key={chat.id}><div className="user-message">{chat.question}</div><div className="answer" aria-busy={writing||undefined}>
-        <div className="answer-label">{writing?<><span className="answer-progress"><span className="spinner"/></span><strong>{stream?'AI가 답변을 작성하고 있어요':['checking','loading','generating'].includes(ai.phase)?ai.message:'문서 근거를 확인하고 있어요'}</strong></>:<><div className="mini-brand">O₂</div><strong>{chat.mode==='ai'?'AI 답변':'관련 문서 원문'}</strong><span>{savedIds.has(chat.id)?'기기 저장됨':'저장되지 않음'}</span></>}</div>
+        <div className="answer-label">{writing?<><span className="answer-progress"><span className="spinner"/></span><strong>{stream?(chat.answerFormat==='integrated'?'문서 본문을 표시했어요 · 필요한 보충 설명 확인 중':'AI가 답변을 작성하고 있어요'):['checking','loading','generating'].includes(ai.phase)?ai.message:'문서 근거를 확인하고 있어요'}</strong></>:<><div className="mini-brand">O₂</div><strong>{chat.answerFormat==='integrated'?(chat.mode==='ai'?'문서 근거 · AI 보충':'문서 근거 답변'):(chat.mode==='ai'?'AI 답변':'관련 문서 원문')}</strong><span>{savedIds.has(chat.id)?'기기 저장됨':'저장되지 않음'}</span></>}</div>
         {chat.notice&&<Notice>{chat.notice}</Notice>}<TextContent text={writing?stream:chat.answer}/>
-        {!writing&&<>{chat.tokenUsage&&<p className="token-usage">{chat.includesEvidence&&'AI 정리 사용량(문서 발췌 제외) · '}{chat.tokenUsage.inputTokens!==undefined&&`입력 ${chat.tokenUsage.inputTokens.toLocaleString()} · `}{chat.tokenUsage.outputTokens!==undefined&&`생성 ${chat.tokenUsage.outputTokens.toLocaleString()} · `}{chat.tokenUsage.totalTokens!==undefined&&`전체 ${chat.tokenUsage.totalTokens.toLocaleString()} · `}{chat.tokenUsage.passes!==undefined?`순차 작성 ${chat.tokenUsage.passes}회 · 회당 한도 ${chat.tokenUsage.perPassMaxOutputTokens?.toLocaleString()} 토큰`:`답변 한도 ${chat.tokenUsage.maxOutputTokens.toLocaleString()} 토큰`}</p>}{renderSources(chat.citationIds.flatMap(id=>{const chunk=chunks.find(chunk=>chunk.id===id);return chunk?[{chunk,score:0}]:[];}))}</>}
+        {!writing&&<>{chat.tokenUsage&&<p className="token-usage">{chat.tokenUsage.maxOutputTokens===0?'문서 근거 답변 · AI 생성 0토큰':<>{chat.includesEvidence&&'AI 정리 사용량(문서 발췌 제외) · '}{chat.tokenUsage.inputTokens!==undefined&&`입력 ${chat.tokenUsage.inputTokens.toLocaleString()} · `}{chat.tokenUsage.outputTokens!==undefined&&`생성 ${chat.tokenUsage.outputTokens.toLocaleString()} · `}{chat.tokenUsage.totalTokens!==undefined&&`전체 ${chat.tokenUsage.totalTokens.toLocaleString()} · `}{chat.tokenUsage.passes!==undefined?`순차 작성 ${chat.tokenUsage.passes}회 · 회당 한도 ${chat.tokenUsage.perPassMaxOutputTokens?.toLocaleString()} 토큰`:`답변 한도 ${chat.tokenUsage.maxOutputTokens.toLocaleString()} 토큰`}</>}</p>}{renderSources(chat.citationIds.flatMap(id=>{const chunk=chunks.find(chunk=>chunk.id===id);return chunk?[{chunk,score:0}]:[];}))}</>}
       </div></article>;
     })}</div>
     </div><form className="composer-wrap" ref={composerRef} onSubmit={event => {event.preventDefault(); void ask();}}>{showLatest&&<button type="button" className="jump-latest" onClick={scrollToLatest}><Icon name="arrow"/>최신 답변으로 이동</button>}<div className="composer"><textarea aria-label="문서에 질문하기" placeholder={chunks.length?'궁금한 절차나 기준을 입력해 주세요':'문서를 불러오고 있어요'} maxLength={1500} value={question} disabled={busy||!chunks.length} rows={chatViewport.keyboardOpen?1:2} onChange={event => setQuestion(event.target.value)} onKeyDown={event => {if(event.key==='Enter'&&!event.shiftKey&&!event.nativeEvent.isComposing){event.preventDefault(); void ask();}}}/>{busy?<button type="button" className="send-button stop" aria-label="답변 생성 중단" onClick={() => controller.current?.abort()}><span/></button>:<button className="send-button" type="submit" aria-label="질문 보내기" disabled={!question.trim()||!chunks.length}><Icon name="arrow"/></button>}</div><p>생성 답변의 수치와 조건은 원문에서 확인해 주세요. 실제 측정은 Android 앱을 사용해 주세요.</p></form></div>; }

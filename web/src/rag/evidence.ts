@@ -10,10 +10,10 @@ export function evidenceUnits(source:Source):EvidenceUnit[]{
   for(let i=0;i<lines.length;i++){
     const line=lines[i];
     const marked=/^[•◆※☞①-⑳*\-]/.test(line);
-    const text=line.replace(/^[▶•◆※☞*\-]\s*/,'').trim();
+    const text=line.replace(/^[▶•◆※☞*\-]\s*/,'').replace(/^산업안전보건기준에\s*관한\s*규칙\s*제\d+조(?:의\d+)?(?:\s*제\d+항)?\s*/,'').trim();
     if(!text)continue;
     const followedByItem=/^[•◆※☞①-⑳*\-]/.test(lines[i+1]??'');
-    if(followedByItem&&(line.startsWith('▶')||(!marked&&text.length<55&&!/[.!?。]/.test(text)&&!/(?:이상|미만|이하|초과)/.test(text)))){section=text.replace(/^순\s*서\s*실\s*시\s*방\s*법\s*/,'');continue;}
+    if(followedByItem&&text.length<55&&!/[:：>]/.test(text)&&(line.startsWith('▶')||(!marked&&!/[.!?。]/.test(text)&&!/(?:이상|미만|이하|초과)/.test(text)))){section=text.replace(/^순\s*서\s*실\s*시\s*방\s*법\s*/,'');continue;}
     units.push({text,section,order:units.length});
   }
   if(!units.length){const text=pageBody(source.chunk);if(text)units.push({text,section:'',order:0});}

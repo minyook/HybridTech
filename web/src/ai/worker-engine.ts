@@ -20,12 +20,20 @@ export class WorkerEngine {
   private engine?:Engine;
   private loaded=false;
   private busy=false;
+  private stopping=false;
+  private stops:{id:number;reply:(message:AIReply)=>void}[]=[];
   private freshEnginePerAnswer=false;
   private diagnosticReply?:(sample:AIDiagnostic)=>void;
   private readonly resources=new WorkerResources(getGlobalLiteRtLm,sample=>this.diagnosticReply?.(sample));
   async handle(request:AIRequest,reply:(message:AIReply)=>void) {
+    if(request.type==='stop'){
+      this.stopping=true;this.stops.push({id:request.id,reply});
+      if(!this.busy)await this.completeStop();
+      return;
+    }
     if(this.busy){reply({id:request.id,type:'error',message:'AI가 앞선 작업을 처리하고 있어요.'});return;}
     this.busy=true;
+    let cleanupFailed=false;
     this.diagnosticReply=sample=>reply({id:request.id,type:'diagnostic',sample});
     const resources=this.resources;
     try {
@@ -55,7 +63,7 @@ export class WorkerEngine {
         const reads=localModelReadStats(input);
         const initialization={verification,verificationMs:Math.round(verifiedAt-started),runtimeMs:Math.round(runtimeLoadedAt-verifiedAt),engineMs:Math.round(completedAt-runtimeLoadedAt),totalMs:Math.round(completedAt-started),...(reads?{modelRead:{mode:'file-range' as const,...reads}}:{})};
         console.info('AI initialization timing',initialization);
-        reply({id:request.id,type:'done',initialization});
+        if(!this.stopping)reply({id:request.id,type:'done',initialization});
       } else {
         if(!this.engine)throw new Error('AI 준비를 완료하지 못했어요. 질문을 다시 시도해 주세요.');
         const currentEngine=this.engine;
@@ -80,6 +88,7 @@ export class WorkerEngine {
             try {
               while(true){
                 const {value,done}=await reader.read();if(done)break;
+                if(this.stopping)break;
                 if(typeof value.content==='string')answer+=value.content;
                 else for(const part of value.content??[])if('text'in part&&typeof part.text==='string')answer+=part.text;
                 if(answer&&!decoding){decoding=true;reply({id:request.id,type:'progress',stage:'decode',message:'Gemma가 답변을 작성하고 있어요'});}
@@ -87,7 +96,7 @@ export class WorkerEngine {
                 reply({id:request.id,type:'text',answer});
               }
             } finally { await reader.cancel().catch(()=>{}); }
-            if(!answer.trim())throw new Error('AI가 답변을 반환하지 않았어요.');
+            if(!answer.trim()&&!this.stopping)throw new Error('AI가 답변을 반환하지 않았어요.');
             const usage:TokenUsage={maxOutputTokens:request.settings.maxOutputTokens,contextTokens:request.settings.contextTokens};
             resources.sample('metrics');
             // These are SDK measurements, never estimates from character lengths.
@@ -106,18 +115,28 @@ export class WorkerEngine {
           if(this.freshEnginePerAnswer){
             this.engine=undefined;
             reply({id:request.id,type:'progress',stage:'cleanup',message:'답변을 마무리하고 AI 메모리를 정리하고 있어요'});
-            try{await currentEngine.delete();}finally{resources.sample('cleanup');resources.destroyGPU();}
+            try{await currentEngine.delete();}catch(error){cleanupFailed=true;throw error;}finally{resources.sample('cleanup');resources.destroyGPU();}
           }
         }
-        reply({id:request.id,type:'done',result});
+        if(!this.stopping)reply({id:request.id,type:'done',result,...(this.freshEnginePerAnswer?{cleanupComplete:true}:{})});
       }
     } catch(error){
-      if(this.freshEnginePerAnswer)resources.destroyGPU();
       console.error('AI worker failed:',error);
       const detail=error instanceof Error?error.message:'';
       const message=/[가-힣]/.test(detail)?detail:request.type==='initialize'?'이 기기에서 AI를 준비하지 못했어요. 문맥 토큰을 줄이고 다시 질문해 주세요.':/token|context|length|capacity/i.test(detail)?'질문과 문서 근거가 문맥 한도를 넘었어요. 문맥 토큰을 늘리거나 질문을 나누어 주세요.':'AI 답변을 완성하지 못했어요. 다시 질문해 주세요.';
-      reply({id:request.id,type:'error',message});
+      let clean=false;
+      try{const engine=this.engine;this.engine=undefined;await engine?.delete();this.resources.destroyGPU();clean=!cleanupFailed;}catch{cleanupFailed=true;}
+      if(!this.stopping)reply({id:request.id,type:'error',message,cleanupComplete:clean});
     }
-    finally{this.busy=false;}
+    finally{this.busy=false;if(this.stopping)await this.completeStop(!cleanupFailed);}
+  }
+  private stopCleanup?:Promise<void>;
+  private completeStop(previousClean=true){
+    return this.stopCleanup??=(async()=>{
+    let clean=false;
+    try{const engine=this.engine;this.engine=undefined;await engine?.delete();this.resources.destroyGPU();clean=previousClean;}catch{/* The page applies its recovery latch. */}
+    for(const stop of this.stops.splice(0))stop.reply({id:stop.id,type:'stopped',cleanupComplete:clean});
+    this.stopping=false;
+    })().finally(()=>{this.stopCleanup=undefined;});
   }
 }
