@@ -12,12 +12,12 @@ const listeners = new Set<() => void>();
 let pending: Promise<WorkSession> | undefined;
 let channel: BroadcastChannel | undefined;
 function publish(value: AccessState) { state = value; listeners.forEach(listener => listener()); }
-async function request<T>(path: string, payload?: unknown): Promise<T> {
+async function request<T>(path: string, payload?: unknown,extraHeaders?:Record<string,string>): Promise<T> {
   let response: Response;
   try {
     response = await fetch(`/api/${path}`, {
       method: payload === undefined ? 'GET' : 'POST', credentials: 'same-origin', cache: 'no-store',
-      headers: payload === undefined ? undefined : { 'Content-Type': 'application/json', 'X-Fieldguard-Csrf': state.session?.csrf ?? '' },
+      headers: payload === undefined ? extraHeaders : { 'Content-Type': 'application/json', 'X-Fieldguard-Csrf': state.session?.csrf ?? '',...extraHeaders },
       body: payload === undefined ? undefined : JSON.stringify(payload), signal: AbortSignal.timeout(12_000),
     });
   } catch {
@@ -36,6 +36,7 @@ async function request<T>(path: string, payload?: unknown): Promise<T> {
   }
   return value as T;
 }
+export {request as workRequest};
 export function refreshWorkSession(): Promise<WorkSession> {
   if (pending) return pending;
   pending = (async () => {
@@ -81,6 +82,16 @@ export async function registerSupervisor(code: string) {
   if (!state.session) await refreshWorkSession();
   const session = await request<WorkSession>('supervisor/register', { code });
   publish({ session, loading: false, error: '' }); channel?.postMessage('changed');
+}
+export interface SupervisorInvitation {id:string;token:string;name:string;expiresAt:string;grantExpiresAt:string}
+export interface SupervisorInvitationRecord {id:string;name:string;expiresAt:string;used:boolean;revoked:boolean}
+export async function listSupervisorInvitations(){return request<SupervisorInvitationRecord[]>('supervisor/invitations');}
+export async function issueSupervisorInvitation(name:string){return request<SupervisorInvitation>('supervisor/invitations',{name});}
+export async function revokeSupervisorInvitation(id:string){return request('supervisor/revoke-invitation',{id});}
+export async function redeemSupervisorInvitation(token:string){
+  if(!state.session)await refreshWorkSession();
+  const session=await request<WorkSession>('supervisor/redeem',{token});
+  publish({session,loading:false,error:''});channel?.postMessage('changed');
 }
 export async function lockSupervisor() {
   sessionStorage.setItem('fieldguard-lock-pending', '1');

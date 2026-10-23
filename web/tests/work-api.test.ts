@@ -58,6 +58,28 @@ async function events(who:Client,view='worker') {
 }
 
 describe('작업자 ↔ 감독관 실시간 요청·승인',()=>{
+  it('QR 발급·교환 API는 CSRF·역할·일회성·회전한 쿠키를 확인한다',async()=>{
+    const admin=await client(),worker=await client(),other=await client();
+    expect((await post(worker,'supervisor/invitations',{name:'위조 감독관'})).status).toBe(403);
+    await grant(admin);
+    expect((await post(admin,'supervisor/invitations',{name:'QR 감독관'},{'X-Fieldguard-Csrf':'wrong'})).status).toBe(403);
+    const issue=await post(admin,'supervisor/invitations',{name:'QR 감독관'});expect(issue.status).toBe(201);expect(issue.headers.get('cache-control')).toBe('no-store');const invite=await issue.json();
+    const results=await Promise.all([post(worker,'supervisor/redeem',{token:invite.token}),post(other,'supervisor/redeem',{token:invite.token})]);
+    expect(results.map(value=>value.status).sort()).toEqual([200,403]);const accepted=results.find(value=>value.status===200)!;
+    const updated:Client={cookie:accepted.headers.get('set-cookie')!.split(';')[0],session:await accepted.json()};expect(updated.session.supervisor?.name).toBe('QR 감독관');expect((await get(updated,'supervisor')).status).toBe(200);
+    expect((await post(admin,'supervisor/revoke-invitation',{id:invite.id})).status).toBe(200);expect((await get(updated,'supervisor')).status).toBe(403);
+  });
+  it('측정 공유 API의 읽기 키로 승인·쓰기 권한을 얻을 수 없다',async()=>{
+    const sender=await client(),viewer=await client();const start=await post(sender,'sensor-streams',{});expect(start.status).toBe(201);const stream=await start.json();
+    const sample={o2:20.9,h2s:0,co:0,co2:null,lel:1,device:'테스트',receivedAt:new Date(time).toISOString()};
+    expect((await post(viewer,`sensor-streams/${stream.id}/update`,{sample})).status).toBe(403);
+    expect((await post(sender,`sensor-streams/${stream.id}/update`,{sample},{'X-Fieldguard-Csrf':'bad'})).status).toBe(403);
+    expect((await post(sender,`sensor-streams/${stream.id}/update`,{sample})).status).toBe(200);
+    expect((await fetch(`${base}/api/sensor-streams/${stream.id}`,{headers:{Cookie:viewer.cookie}})).status).toBe(403);
+    const read=await fetch(`${base}/api/sensor-streams/${stream.id}`,{headers:{Cookie:viewer.cookie,'X-Fieldguard-Sensor':stream.readKey}});expect(read.status).toBe(200);expect((await read.json()).sample).toEqual(sample);
+    expect((await post(viewer,'supervisor/redeem',{token:stream.readKey})).status).toBe(403);expect((await get(viewer,'supervisor')).status).toBe(403);
+    expect((await post(sender,`sensor-streams/${stream.id}/stop`,{})).status).toBe(200);
+  });
   it('서비스 워커를 우회하는 복구 페이지는 모델·기록을 지우거나 GPU를 적재하지 않는다',async()=>{
     const response=await fetch(`${base}/api/ai-recovery`);const html=await response.text();
     expect(response.status).toBe(200);expect(response.headers.get('content-type')).toContain('text/html');expect(response.headers.get('cache-control')).toBe('no-store');

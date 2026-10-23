@@ -4,6 +4,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createWork, inspectionItems, transitionWork, type Actor, type Inspection, type WorkAction, type WorkOrder } from '../src/workflow/work.ts';
+import {validateSample} from '../src/sensor/sample.ts';
 
 export const defaultDatabasePath = fileURLToPath(new URL('../.local/workflow.sqlite', import.meta.url));
 const SESSION_MS = 30 * 24 * 60 * 60 * 1000;
@@ -20,6 +21,7 @@ export interface WorkSession {
 }
 interface SessionRow { token: string; worker_id: string; csrf: string; expires: number; invite_id: string | null; supervisor_name: string | null; grant_expires: number | null }
 interface DailyCodeRow { day: string; generation: string; expires: number; revoked: number | null }
+interface InviteRow { id:string;hash:string;name:string;expires:number;used:number|null;revoked:number|null;generation:string;issuer_id:string }
 export function koreanDay(time: number) {
   const day = new Date(time + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
   return { day, expires: Date.parse(`${day}T15:00:00.000Z`) };
@@ -77,7 +79,15 @@ export function createWorkStore(filename = defaultDatabasePath, now = () => Date
     CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, worker_id TEXT NOT NULL, revision INTEGER NOT NULL, updated_at TEXT NOT NULL, body TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS order_changes (sequence INTEGER PRIMARY KEY AUTOINCREMENT, worker_id TEXT NOT NULL);
     CREATE INDEX IF NOT EXISTS order_changes_worker ON order_changes(worker_id, sequence);
+    CREATE TABLE IF NOT EXISTS sensor_streams (id TEXT PRIMARY KEY, owner TEXT NOT NULL, read_hash TEXT NOT NULL, expires INTEGER NOT NULL, active INTEGER NOT NULL, updated_at TEXT, sample TEXT);
     CREATE TABLE IF NOT EXISTS attempts (identity TEXT PRIMARY KEY, failures INTEGER NOT NULL, reset_at INTEGER NOT NULL);`);
+  db.exec('BEGIN IMMEDIATE');
+  try{
+    const inviteColumns=db.prepare('PRAGMA table_info(invites)').all().map(row=>row.name);
+    if(!inviteColumns.includes('generation'))db.exec("ALTER TABLE invites ADD COLUMN generation TEXT NOT NULL DEFAULT ''");
+    if(!inviteColumns.includes('issuer_id'))db.exec("ALTER TABLE invites ADD COLUMN issuer_id TEXT NOT NULL DEFAULT ''");
+    db.exec('COMMIT');
+  }catch(error){db.exec('ROLLBACK');db.close();throw error;}
   function transaction<T>(action: () => T): T {
     db.exec('BEGIN IMMEDIATE');
     try { const result = action(); db.exec('COMMIT'); return result; } catch (error) { db.exec('ROLLBACK'); throw error; }
@@ -107,6 +117,11 @@ export function createWorkStore(filename = defaultDatabasePath, now = () => Date
   function supervisor(row: SessionRow) {
     if (!row.invite_id || !row.grant_expires || row.grant_expires <= now()) return undefined;
     const daily = today();
+    if(row.invite_id.startsWith('qr:')){
+      const invite=db.prepare('SELECT * FROM invites WHERE id = ?').get(row.invite_id.slice(3)) as unknown as InviteRow|undefined;
+      if(!invite||invite.used===null||invite.revoked!==null||daily.revoked!==null||invite.generation!==`${daily.day}:${daily.generation}`)return undefined;
+      return {id:`${row.invite_id}:${row.worker_id}`,name:row.supervisor_name!,expiresAt:new Date(row.grant_expires).toISOString()};
+    }
     if (daily.revoked !== null || row.invite_id !== `daily:${daily.day}:${daily.generation}`) return undefined;
     return { id: `${row.invite_id}:${row.worker_id}`, name: row.supervisor_name!, expiresAt: new Date(row.grant_expires).toISOString() };
   }
@@ -143,6 +158,72 @@ export function createWorkStore(filename = defaultDatabasePath, now = () => Date
       const updated = today(); return { day: updated.day, code: codeFor(updated), expiresAt: new Date(updated.expires).toISOString() };
     },
     revokeDailyCode() { const row = today(); db.prepare('UPDATE daily_codes SET revoked = ? WHERE day = ?').run(now(), row.day); },
+    createSensorStream(token:string|undefined){
+      const owner=requireSession(token).worker_id;
+      const recent=db.prepare('SELECT COUNT(*) AS count FROM sensor_streams WHERE owner=? AND expires>?').get(owner,now()+29*60*1000);
+      if(Number(recent?.count??0)>=10)throw new ApiError(429,'공유 생성이 많아요. 1분 후 다시 시도해 주세요.');
+      db.prepare('DELETE FROM sensor_streams WHERE expires <= ?').run(now());
+      db.prepare('UPDATE sensor_streams SET active=0,sample=NULL WHERE owner=?').run(owner);
+      const id=randomUUID(),readKey=secret(),expires=now()+30*60*1000;
+      db.prepare('INSERT INTO sensor_streams VALUES (?,?,?,?,1,NULL,NULL)').run(id,owner,digest(readKey),expires);
+      return {id,readKey,expiresAt:new Date(expires).toISOString()};
+    },
+    updateSensorStream(token:string|undefined,id:string,value:unknown){
+      const owner=requireSession(token).worker_id;
+      let sample;try{sample=value===null?null:validateSample(value,now());}catch(error){throw new ApiError(400,(error as Error).message);}
+      const changed=db.prepare('UPDATE sensor_streams SET sample=?,updated_at=? WHERE id=? AND owner=? AND expires>? AND active=1').run(sample?JSON.stringify(sample):null,new Date(now()).toISOString(),id,owner,now());
+      if(changed.changes!==1)throw new ApiError(403,'공유 권한이 만료되었어요. 다시 공유를 시작해 주세요.');
+    },
+    stopSensorStream(token:string|undefined,id:string){
+      const owner=requireSession(token).worker_id;
+      const changed=db.prepare('UPDATE sensor_streams SET active=0,sample=NULL WHERE id=? AND owner=?').run(id,owner);
+      if(changed.changes!==1)throw new ApiError(403,'본인이 시작한 공유만 중지할 수 있어요.');
+    },
+    readSensorStream(token:string|undefined,id:string,key:unknown){
+      requireSession(token);
+      const row=db.prepare('SELECT * FROM sensor_streams WHERE id=?').get(id) as {read_hash:string;expires:number;active:number;updated_at:string|null;sample:string|null}|undefined;
+      if(!row||typeof key!=='string'||key.length!==43||!timingSafeEqual(Buffer.from(row.read_hash),Buffer.from(digest(key))))throw new ApiError(403,'측정값 공유 링크를 확인해 주세요.');
+      if(row.expires<=now())throw new ApiError(410,'측정값 공유가 만료되었어요. 새 링크를 전달받아 주세요.');
+      return {active:row.active===1,updatedAt:row.updated_at,expiresAt:new Date(row.expires).toISOString(),sample:row.active&&row.sample?JSON.parse(row.sample):null};
+    },
+    issueInvite(token:string|undefined,name:unknown){
+      const row=requireSession(token);requireSupervisor(row);
+      const label=text(name,60);const daily=today();const invite=secret();const id=randomUUID();
+      const count=db.prepare('SELECT COUNT(*) AS count FROM invites WHERE issuer_id=? AND generation=?').get(row.worker_id,`${daily.day}:${daily.generation}`);
+      if(Number(count?.count??0)>=100)throw new ApiError(429,'오늘 이 기기에서 QR을 100개 발급했어요. 운영 담당자에게 문의해 주세요.');
+      const expires=Math.min(now()+5*60*1000,daily.expires);
+      db.prepare('INSERT INTO invites (id,hash,name,expires,used,revoked,generation,issuer_id) VALUES (?,?,?,?,NULL,NULL,?,?)').run(id,digest(invite),label,expires,`${daily.day}:${daily.generation}`,row.worker_id);
+      return {id,token:invite,name:label,expiresAt:new Date(expires).toISOString(),grantExpiresAt:new Date(daily.expires).toISOString()};
+    },
+    listInvites(token:string|undefined){
+      const row=requireSession(token);requireSupervisor(row);const daily=today();
+      return (db.prepare('SELECT id,name,expires,used,revoked FROM invites WHERE issuer_id=? AND generation=? ORDER BY rowid DESC LIMIT 100').all(row.worker_id,`${daily.day}:${daily.generation}`) as unknown as Pick<InviteRow,'id'|'name'|'expires'|'used'|'revoked'>[]).map(invite=>({id:invite.id,name:invite.name,expiresAt:new Date(invite.expires).toISOString(),used:invite.used!==null,revoked:invite.revoked!==null}));
+    },
+    revokeInvite(token:string|undefined,id:unknown){
+      const row=requireSession(token);requireSupervisor(row);
+      const invite=db.prepare('SELECT * FROM invites WHERE id = ?').get(text(id,64)) as unknown as InviteRow|undefined;
+      if(!invite||invite.issuer_id!==row.worker_id)throw new ApiError(403,'이 기기에서 발급한 QR만 취소할 수 있어요.');
+      db.prepare('UPDATE invites SET revoked = ? WHERE id = ?').run(now(),invite.id);
+    },
+    redeemInvite(token:string|undefined,value:unknown,remoteIdentity:string){
+      const row=requireSession(token),key=attemptKey(`qr:${remoteIdentity}`);
+      const failures=db.prepare('SELECT failures,reset_at FROM attempts WHERE identity = ?').get(key) as {failures:number;reset_at:number}|undefined;
+      if(failures&&failures.failures>=15&&failures.reset_at>now())throw new ApiError(429,'인증 시도가 많아요. 15분 후 다시 시도해 주세요.');
+      const normalized=typeof value==='string'&&/^[A-Za-z0-9_-]{43}$/.test(value)?value:'';
+      const candidate=db.prepare('SELECT * FROM invites WHERE hash = ?').get(digest(normalized)) as unknown as InviteRow|undefined;
+      const daily=today();
+      if(!candidate||candidate.used!==null||candidate.revoked!==null||candidate.expires<=now()||daily.revoked!==null||candidate.generation!==`${daily.day}:${daily.generation}`){
+        db.prepare('INSERT INTO attempts VALUES (?,1,?) ON CONFLICT(identity) DO UPDATE SET failures=CASE WHEN reset_at<=? THEN 1 ELSE failures+1 END,reset_at=CASE WHEN reset_at<=? THEN excluded.reset_at ELSE reset_at END').run(key,now()+15*60*1000,now(),now());
+        throw new ApiError(403,'만료되었거나 이미 사용·취소된 QR이에요. 새 QR을 전달받아 주세요.');
+      }
+      return transaction(()=>{
+        const current=today();
+        if(current.revoked!==null||candidate.generation!==`${current.day}:${current.generation}`)throw new ApiError(403,'새 QR을 전달받아 주세요.');
+        const changed=db.prepare('UPDATE invites SET used = ? WHERE id = ? AND used IS NULL AND revoked IS NULL AND expires > ?').run(now(),candidate.id,now());
+        if(changed.changes!==1)throw new ApiError(403,'이미 사용·취소되었거나 만료된 QR이에요.');
+        return rotate(row,{id:`qr:${candidate.id}`,name:candidate.name,expires:current.expires});
+      });
+    },
     unlock(token: string | undefined, code: unknown, remoteIdentity: string) {
       const row = requireSession(token);
       const keys = [{ key: attemptKey(`${koreanDay(now()).day}:${remoteIdentity}`), maximum: 30 }, { key: attemptKey(`${koreanDay(now()).day}:${row.worker_id}`), maximum: 5 }];

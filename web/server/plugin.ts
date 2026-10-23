@@ -6,12 +6,12 @@ export function workApi(): Plugin {
   return {
     name: 'fieldguard-work-api',
     configureServer(server) {
-      const store = createWorkStore();
+      const store = createWorkStore(process.env.FIELDGUARD_WORK_DB);
       server.middlewares.use(createWorkMiddleware(store));
       server.httpServer?.once('close', () => store.close());
     },
     configurePreviewServer(server) {
-      const store = createWorkStore();
+      const store = createWorkStore(process.env.FIELDGUARD_WORK_DB);
       server.middlewares.use(createWorkMiddleware(store));
       server.httpServer.once('close', () => store.close());
     },
