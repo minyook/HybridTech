@@ -5,6 +5,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
@@ -22,7 +24,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -53,28 +54,28 @@ fun MarkdownText(markdown: String, modifier: Modifier = Modifier) {
             val original=(block as MarkdownBlock.Line).text
             val line = original.trimEnd()
             when {
-                line.isBlank() -> Text("", modifier = Modifier.padding(vertical = 2.dp))
+                line.isBlank() -> Spacer(Modifier.padding(vertical = 3.dp))
                 line.startsWith(">") || line.startsWith("※") -> Text(
                     inlineMarkdown(if (line.startsWith(">")) line.removePrefix(">").trim() else line),
                     modifier = Modifier.fillMaxWidth().background(Color(0xFFEEF5FF)).padding(horizontal = 17.dp, vertical = 12.dp),
                     style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFF5A7294)),
                 )
-                line.startsWith("### ") -> Text(inlineMarkdown(line.removePrefix("### ")), fontSize=17.sp,lineHeight=26.sp,fontWeight=FontWeight.Bold,color=Color(0xFF24344B), modifier = Modifier.padding(top = 20.dp, bottom = 9.dp))
-                line.startsWith("## ") -> { Text(inlineMarkdown(line.removePrefix("## ")),fontSize=20.sp,lineHeight=31.sp,fontWeight=FontWeight.Bold,color=Color(0xFF24344B), modifier = Modifier.padding(top = 22.dp, bottom = 11.dp));HorizontalDivider(color=Color(0xFFE6EDF5),modifier=Modifier.padding(bottom=12.dp)) }
+                line.startsWith("### ") -> Text(inlineMarkdown(line.removePrefix("### ")), fontSize=15.sp,lineHeight=24.sp,fontWeight=FontWeight.Bold,color=Color(0xFF24344B), modifier = Modifier.padding(top = 12.dp, bottom = 6.dp))
+                line.startsWith("## ") -> Text(inlineMarkdown(line.removePrefix("## ")),fontSize=18.sp,lineHeight=28.sp,fontWeight=FontWeight.Bold,color=Color(0xFF24344B), modifier = Modifier.padding(top = 14.dp, bottom = 8.dp))
                 line.startsWith("# ") -> Text(inlineMarkdown(line.removePrefix("# ")),fontSize=23.sp,lineHeight=35.sp,fontWeight=FontWeight.Bold,color=Color(0xFF24344B), modifier = Modifier.padding(top = 24.dp, bottom = 13.dp))
-                line.startsWith("- ") || line.startsWith("* ") -> Text(
-                    inlineMarkdown("• " + line.replaceFirst(Regex("^(?:[-*]|\\d+[.)])\\s+"), "")),
-                    style = MaterialTheme.typography.bodyLarge.copy(textIndent = TextIndent(firstLine = 0.sp, restLine = 14.sp)),
-                    modifier = Modifier.padding(vertical = 1.dp),
-                )
-                line.matches(Regex("^\\d+[.)]\\s+.*")) || (line.isNotEmpty() && line[0] in "•□○●❶❷❸❹❺❻❼❽❾❿①②③④⑤⑥⑦⑧⑨⑩") -> Text(
-                    inlineMarkdown(line),
-                    style = MaterialTheme.typography.bodyLarge.copy(textIndent = TextIndent(firstLine = 0.sp, restLine = 14.sp)),
-                    modifier = Modifier.padding(vertical = 1.dp),
-                )
+                line.startsWith("- ") || line.startsWith("* ") -> MarkdownListItem("•", line.drop(2))
+                line.matches(Regex("^\\d+[.)]\\s+.*")) -> MarkdownListItem(line.takeWhile { !it.isWhitespace() }, line.substringAfter(' '))
+                line.isNotEmpty() && line[0] in "•□○●❶❷❸❹❺❻❼❽❾❿①②③④⑤⑥⑦⑧⑨⑩" -> MarkdownListItem(line.take(1), line.drop(1).trim())
                 else -> Text(inlineMarkdown(line), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(vertical = 1.dp))
             }
         }
+    }
+}
+
+@Composable private fun MarkdownListItem(marker: String, body: String) {
+    Row(Modifier.fillMaxWidth().padding(vertical=3.dp), horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+        Text(marker, fontSize=13.sp,lineHeight=24.sp,color=Color(0xFF6B7F98),modifier=Modifier.width(22.dp))
+        Text(inlineMarkdown(body), fontSize=14.sp,lineHeight=24.sp,color=Color(0xFF38485B),modifier=Modifier.weight(1f))
     }
 }
 

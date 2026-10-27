@@ -106,17 +106,17 @@ import java.util.Locale
         Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(9.dp)){
             if(message.pending)CircularProgressIndicator(Modifier.size(22.dp),strokeWidth=2.dp)
             else Surface(color=WorkspaceDesign.Blue,shape=RoundedCornerShape(9.dp)){Text("O₂",color=Color.White,fontSize=14.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(6.dp))}
-            Text(if(message.pending){if(message.text.isBlank())"문서 근거를 확인하고 있어요" else "Gemma가 답변을 작성하고 있어요"}else "문서 근거 답변",fontSize=13.sp,fontWeight=FontWeight.SemiBold,modifier=Modifier.weight(1f))
+            Text(if(message.pending){if(message.text.isBlank())"문서 근거를 확인하고 있어요" else "문서 근거 답변 · 보충 확인 중"}else "문서 근거 답변",fontSize=13.sp,fontWeight=FontWeight.SemiBold,modifier=Modifier.weight(1f))
             if(!message.pending)Text("기기 저장됨",fontSize=10.sp,color=Color(0xFF9BA5B3))
         }
         if(message.text.isNotBlank())MarkdownText(message.text)
-        if(!message.pending&&message.sourceIds.isNotEmpty()){
+        if(message.sourceIds.isNotEmpty()){
             HorizontalDivider(color=WorkspaceDesign.Border)
             Text("참조한 문서",fontSize=11.sp,color=WorkspaceDesign.Muted)
             FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){
                 message.sourceIds.forEachIndexed{index,id->
                     Surface(color=Color.White,shape=RoundedCornerShape(11.dp),border=BorderStroke(1.dp,Color(0xFFE2EAF5)),modifier=Modifier.clickable{actions.onOpenSource(id)}){
-                        Row(Modifier.padding(12.dp),horizontalArrangement=Arrangement.spacedBy(9.dp),verticalAlignment=Alignment.CenterVertically){WorkspaceBadge("${index+1}",blue=true);Text("근거 ${index+1} 원문 보기",fontSize=11.sp,color=Color(0xFF526D93));WorkspaceIcon(WorkspaceSymbol.CHEVRON,Modifier.size(14.dp))}
+                        Row(Modifier.padding(12.dp),horizontalArrangement=Arrangement.spacedBy(9.dp),verticalAlignment=Alignment.CenterVertically){WorkspaceBadge("${index+1}",blue=true);Text(message.sourceLabels[id]?:"근거 ${index+1} 원문 보기",fontSize=11.sp,color=Color(0xFF526D93));WorkspaceIcon(WorkspaceSymbol.CHEVRON,Modifier.size(14.dp))}
                     }
                 }
             }

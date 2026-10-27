@@ -1,0 +1,2726 @@
+{
+  "mode": "baseline",
+  "scope": "retrieval + selected source body; no generation\/audio; development regression, not unseen holdout",
+  "hashes": {
+    "evaluation-150.json": "d2083c4b22e6eb5b6967ce73eb5722a318d52072050b2c9516d73a19bd6f2ecb",
+    "focused-retrieval.json": "92a24f37096fd3de710e081f3259b3304c75b1f3a39a7ec656b5ee6ce3e79816",
+    "corpus": "2c8e9edcc986c9e0c65f66d9a4784d88462656702669ba5a7182c98a86bfebae"
+  },
+  "groups": {
+    "evaluation-150.json": {
+      "total": 150,
+      "pagePass": 105,
+      "bodyPass": 118,
+      "pass": 105
+    },
+    "focused-retrieval.json": {
+      "total": 33,
+      "pagePass": 15,
+      "bodyPass": 10,
+      "pass": 6
+    }
+  },
+  "results": [
+    {
+      "set": "evaluation-150.json",
+      "question": "적정 공기 산소농도 기준",
+      "pages": [
+        24
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1772,
+      "millis": 14.813646
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소와 이산화탄소 일산화탄소 황화수소 농도 기준 알려줘",
+      "pages": [
+        62,
+        60
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 18% 이상",
+        "missing: 23.5% 미만"
+      ],
+      "chars": 2594,
+      "millis": 66.381927
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "적정공기에서 산소 상한은 23.5% 미만이야 이하야?",
+      "pages": [
+        24,
+        23
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1595,
+      "millis": 5.713802
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "유해가스 농도 기준 수치를 정리해줘",
+      "pages": [
+        24,
+        22
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1104,
+      "millis": 4.890833
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소 유해가스 측정 시기",
+      "pages": [
+        25,
+        24
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1491,
+      "millis": 4.26375
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "점심시간 후에 가스농도 다시 측정해야 하나요",
+      "pages": [
+        25,
+        22
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1338,
+      "millis": 5.615416
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 들어가기 전과 작업 중 측정 시기 알려줘",
+      "pages": [
+        28,
+        25
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1854,
+      "millis": 31.812188
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "장시간 작업할 때 유해가스 측정은 언제 해요",
+      "pages": [
+        25,
+        13
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1890,
+      "millis": 5.638958
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소 유해가스 농도 측정자의 자격",
+      "pages": [
+        25,
+        27
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1976,
+      "millis": 4.83849
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "가스 측정은 누가 해야 하나요",
+      "pages": [
+        28,
+        20
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 올바른 해석",
+        "missing: 관리감독자",
+        "missing: 교육 이수자"
+      ],
+      "chars": 1415,
+      "millis": 5.163385
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소 농도 측정 교육 이수자 자격 알려줘",
+      "pages": [
+        25
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1511,
+      "millis": 5.756354
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "관리감독자 말고 유해가스 측정 가능한 사람",
+      "pages": [
+        25
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2006,
+      "millis": 5.513698
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "센서 및 무선통신 측정 센서부 요건",
+      "pages": [
+        26
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 453,
+      "millis": 12.664844
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "무선 가스 센서의 정확도와 신뢰성은 어떻게 확보해",
+      "pages": [
+        26
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 453,
+      "millis": 17.817968
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 센서가 측정해야 하는 작업공간은 어디야",
+      "pages": [
+        58,
+        64
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 실제 작업",
+        "missing: 실시간",
+        "missing: 검교정"
+      ],
+      "chars": 2065,
+      "millis": 5.420104
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소 유해가스 센서부의 실시간 측정 요건 알려줘",
+      "pages": [
+        25,
+        26
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1310,
+      "millis": 5.91474
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "센서 및 무선통신 측정 통신부 요건",
+      "pages": [
+        26
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 453,
+      "millis": 12.378802
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "가스 측정 데이터를 통제실로 전송하는 조건",
+      "pages": [
+        26,
+        63
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1674,
+      "millis": 5.473542
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "무선 측정 통신에서 장애물과 전파 방해는 어떻게 고려해",
+      "pages": [
+        26
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 453,
+      "millis": 13.23177
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "가스 센서 통신부가 갖춰야 할 기능 알려줘",
+      "pages": [
+        79,
+        81
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 실시간 전송",
+        "missing: 장애물",
+        "missing: 안정적"
+      ],
+      "chars": 1854,
+      "millis": 5.605781
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "센서 및 무선통신 측정 통제실 요건",
+      "pages": [
+        26
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 453,
+      "millis": 12.171666
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "유해가스 위험상황을 감지한 통제실의 역할",
+      "pages": [
+        25,
+        24
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 저장하고 표시",
+        "missing: 통제 권한"
+      ],
+      "chars": 1491,
+      "millis": 4.92849
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "가스 측정 통제실 전산시스템 요건 알려줘",
+      "pages": [
+        26,
+        25
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1310,
+      "millis": 5.356614
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "작업 중단 재개 대피 통제 권한은 통제실에 어떻게 배치해",
+      "pages": [
+        64,
+        65
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 저장하고 표시",
+        "missing: 통제 권한"
+      ],
+      "chars": 2603,
+      "millis": 6.769583
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소 유해가스 측정 사전준비",
+      "pages": [
+        27,
+        25
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1976,
+      "millis": 4.273907
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "가스농도 측정기 이상 유무 확인방법",
+      "pages": [
+        27,
+        59
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2573,
+      "millis": 5.100052
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소 측정기 센서 교체와 검교정 준비 알려줘",
+      "pages": [
+        27
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1119,
+      "millis": 19.571614
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "깨끗한 야외 공기에서 측정기 상태 확인은 어떻게 해",
+      "pages": [
+        27,
+        29
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2102,
+      "millis": 6.003855
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소 유해가스 측정 위치와 개소",
+      "pages": [
+        27
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2257,
+      "millis": 19.123177
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 면적과 깊이를 고려한 측정방법",
+      "pages": [
+        27
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1119,
+      "millis": 19.31625
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "가스 측정은 수직 수평 몇 개소에서 해야 해",
+      "pages": [
+        27,
+        36
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2005,
+      "millis": 5.242083
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소측정법 알려줘",
+      "pages": [
+        27,
+        15
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1765,
+      "millis": 3.473646
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "깊은 탱크 가스 측정 채기관 눈금",
+      "pages": [
+        27,
+        59
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2573,
+      "millis": 4.946563
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소 측정 호스는 어떻게 연결하고 표시해",
+      "pages": [
+        27,
+        25
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1976,
+      "millis": 5.127813
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "채기관은 몇 미터마다 작은 눈금 큰 눈금을 표시해",
+      "pages": [
+        69,
+        77
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 채기관",
+        "missing: 1m",
+        "missing: 5m"
+      ],
+      "chars": 2677,
+      "millis": 5.296875
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "깊은 장소의 농도 측정방법 알려줘",
+      "pages": [
+        27,
+        59
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2573,
+      "millis": 4.791666
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소 유해가스 측정시 주의사항",
+      "pages": [
+        27,
+        25
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1976,
+      "millis": 4.160312
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 내부 측정할 때 보호구와 감시인",
+      "pages": [
+        27
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2257,
+      "millis": 20.963854
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "어두운 밀폐공간 측정 전등은 어떤 걸 써야 해",
+      "pages": [
+        27,
+        58
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2079,
+      "millis": 4.985104
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소 및 유해가스 측정방법",
+      "pages": [
+        62,
+        27
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2508,
+      "millis": 21.388802
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "작업 전 환기 시기",
+      "pages": [
+        28,
+        21
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1993,
+      "millis": 3.596771
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "오랫동안 닫혀 있던 밀폐공간은 얼마나 환기해야 해",
+      "pages": [
+        56,
+        60
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 15분 이상",
+        "missing: 10배 이상"
+      ],
+      "chars": 1914,
+      "millis": 5.317552
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 최초 출입 전 환기시간과 체적 기준",
+      "pages": [
+        62,
+        65
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 15분 이상",
+        "missing: 10배 이상"
+      ],
+      "chars": 2898,
+      "millis": 25.149427
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "가스 측정 전 신선한 공기로 환기하는 시기 알려줘",
+      "pages": [
+        28,
+        59
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2451,
+      "millis": 5.593021
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "작업 중 계속 환기가 필요한 경우",
+      "pages": [
+        28,
+        34
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1759,
+      "millis": 4.354895
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "오폐수처리장 맨홀 작업 중 환기는 언제 해야 해",
+      "pages": [
+        28,
+        67
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1979,
+      "millis": 4.963125
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "용접작업 양수기 작업에서 환기를 계속해야 하는 이유",
+      "pages": [
+        28,
+        59
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2451,
+      "millis": 5.709427
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "질소 아르곤 배관 연결 장소 환기 시기",
+      "pages": [
+        28,
+        10
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1715,
+      "millis": 5.498697
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "환기팬 용량 정압",
+      "pages": [
+        29
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2132,
+      "millis": 3.884843
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 체적 600m3 환기팬 용량 예시 알려줘",
+      "pages": [
+        29,
+        18
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1509,
+      "millis": 5.451615
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "환기팬 정압과 밀폐공간 체적 대비 용량 기준",
+      "pages": [
+        29
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 994,
+      "millis": 21.229948
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "환기팬 사전준비 기준 알려줘",
+      "pages": [
+        29,
+        22
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1464,
+      "millis": 4.210625
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "환기 송풍관 덕트 길이",
+      "pages": [
+        29,
+        34
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1756,
+      "millis": 4.163802
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "환기팬 제조사가 덕트 길이를 제시하지 않으면",
+      "pages": [
+        29
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2132,
+      "millis": 5.097031
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "송풍관 굽힘과 난연재 주의사항 알려줘",
+      "pages": [
+        29
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 994,
+      "millis": 6.595156
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "환기 덕트 길이는 얼마나 길게 사용할 수 있어",
+      "pages": [
+        29
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2132,
+      "millis": 5.642031
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 환기 방법 급기 배기",
+      "pages": [
+        29,
+        28
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1980,
+      "millis": 4.31151
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "급기구와 배기구 배치는 어떻게 해",
+      "pages": [
+        29
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 994,
+      "millis": 6.845364
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 급기방식과 배기방식 적용 차이",
+      "pages": [
+        29,
+        51
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1949,
+      "millis": 18.51448
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "작업근로자 가까이 급기구는 어떻게 설치해",
+      "pages": [
+        39,
+        64
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 급기방식",
+        "missing: 급·배기",
+        "missing: 작업근로자 가까이"
+      ],
+      "chars": 1892,
+      "millis": 4.7525
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "환기 중단 응급상황 조치",
+      "pages": [
+        29,
+        36
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1880,
+      "millis": 4.071198
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "정전으로 환기가 중단되면 어떻게 해야 해",
+      "pages": [
+        36,
+        52
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 즉시 밀폐공간 외부로 대피",
+        "missing: 추가적인 보호조치"
+      ],
+      "chars": 2285,
+      "millis": 4.775938
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "환기로 적정공기를 유지하기 어려울 경우 조치",
+      "pages": [
+        36,
+        29
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1880,
+      "millis": 4.860573
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "폭발 산화 위험으로 환기를 못 할 때 조치",
+      "pages": [
+        29,
+        30
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1791,
+      "millis": 4.457344
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "용접 작업 조치",
+      "pages": [
+        21,
+        59
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 적정한 공기상태"
+      ],
+      "chars": 2461,
+      "millis": 3.22625
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "환기가 불충분한 탱크 내부 용접 조치",
+      "pages": [
+        34,
+        30
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1570,
+      "millis": 4.606614
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "용접 중 환기로 적정공기를 유지하기 어려우면",
+      "pages": [
+        30,
+        59
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2262,
+      "millis": 4.753021
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "용접작업 가스농도 측정과 보호구 알려줘",
+      "pages": [
+        59,
+        36
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 적정한 공기상태"
+      ],
+      "chars": 2351,
+      "millis": 12.584375
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "불활성기체 사용시 조치",
+      "pages": [
+        30,
+        31
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1665,
+      "millis": 3.598438
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "불활성가스 배관 밸브 차단과 잠금 조치",
+      "pages": [
+        30,
+        21
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1804,
+      "millis": 19.381094
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "질소 아르곤 배관 잘못된 조작 방지 조치",
+      "pages": [
+        75,
+        10
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 차단판",
+        "missing: 잠금장치",
+        "missing: 임의로 개방",
+        "missing: 직접 외부"
+      ],
+      "chars": 2007,
+      "millis": 5.361927
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "불활성기체 잔류를 방지하는 방법",
+      "pages": [
+        27,
+        50
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 차단판",
+        "missing: 잠금장치",
+        "missing: 임의로 개방",
+        "missing: 직접 외부"
+      ],
+      "chars": 2060,
+      "millis": 4.158958
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "가스배관 해체 작업",
+      "pages": [
+        74,
+        64
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 해당가스가 들어오지 않도록 차단"
+      ],
+      "chars": 2381,
+      "millis": 3.504531
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "맨홀 가스배관 부착 작업 조치",
+      "pages": [
+        31
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2006,
+      "millis": 4.138646
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "통풍이 불충분한 장소의 가스배관 공사 조치",
+      "pages": [
+        31,
+        53
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2040,
+      "millis": 4.774792
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "배관 해체할 때 가스 유입과 적정공기는 어떻게 관리해",
+      "pages": [
+        28,
+        59
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 해당가스가 들어오지 않도록 차단"
+      ],
+      "chars": 2451,
+      "millis": 18.939063
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "설비개조 작업시 조치",
+      "pages": [
+        31,
+        17
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1046,
+      "millis": 3.50526
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "분뇨 오수에 오염된 펌프 분해 작업 조치",
+      "pages": [
+        31,
+        21
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1864,
+      "millis": 4.911354
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "부패하기 쉬운 물질에 오염된 배관 청소 작업 조치",
+      "pages": [
+        31,
+        64
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1962,
+      "millis": 5.360156
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "황화수소 위험 설비 수리 작업 지휘자와 작업순서",
+      "pages": [
+        80,
+        18
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 작업방법 및 순서",
+        "missing: 황화수소 중독방지",
+        "missing: 지휘자"
+      ],
+      "chars": 1756,
+      "millis": 24.042969
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "자동 CO2 소화설비 유지보수 작업",
+      "pages": [
+        77,
+        74
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 수동",
+        "missing: 30초",
+        "missing: 반드시 산소농도 측정 후 출입"
+      ],
+      "chars": 2542,
+      "millis": 4.344323
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "이산화탄소 소화설비 작업 전 오작동 방지 조치",
+      "pages": [
+        61,
+        32
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2367,
+      "millis": 4.589219
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "CO2 소화설비 경보 후 방출 전 대피 안내",
+      "pages": [
+        32,
+        61
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2367,
+      "millis": 5.112083
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "이산화탄소 방출 장소에 들어가기 전 조치",
+      "pages": [
+        32,
+        61
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2367,
+      "millis": 4.361614
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "출입문 임의잠김 방지",
+      "pages": [
+        33,
+        63
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1586,
+      "millis": 3.639167
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "냉동실 내부 작업 출입문 잠김 방지 조치",
+      "pages": [
+        33,
+        31
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1222,
+      "millis": 4.778802
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "탱크 작업 끝나고 출입뚜껑을 잠그기 전 확인사항",
+      "pages": [
+        74,
+        59
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 임의로 잠기지 않도록",
+        "missing: 내부에 작업자가"
+      ],
+      "chars": 2741,
+      "millis": 4.544479
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 출입구를 잠글 때 인원 확인해야 하나요",
+      "pages": [
+        58
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 임의로 잠기지 않도록",
+        "missing: 내부에 작업자가"
+      ],
+      "chars": 2109,
+      "millis": 4.751614
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "관리감독자 점검 직무",
+      "pages": [
+        34,
+        72
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1981,
+      "millis": 3.580573
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "관리감독자가 작업 전에 확인할 장비",
+      "pages": [
+        64,
+        34
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1867,
+      "millis": 4.204531
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 관리감독자의 보호구 착용 지도 역할",
+      "pages": [
+        34,
+        64
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1867,
+      "millis": 4.630833
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "감독관 점검에서 이상을 발견하면 필요한 조치",
+      "pages": [
+        34,
+        40
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1126,
+      "millis": 4.738125
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 출입 인원 점검",
+      "pages": [
+        35
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1462,
+      "millis": 3.588906
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "작업자가 들어가고 나올 때 인원 확인 시기",
+      "pages": [
+        67
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 입장시킬 때와 퇴장시킬 때마다",
+        "missing: 항상 연락"
+      ],
+      "chars": 2131,
+      "millis": 4.889218
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "감시인 연락 설비",
+      "pages": [
+        39,
+        64
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 입장시킬 때와 퇴장시킬 때마다",
+        "missing: 항상 연락"
+      ],
+      "chars": 1892,
+      "millis": 3.605521
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 작업장과 외부 감시인 연락 방법",
+      "pages": [
+        59,
+        21
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 입장시킬 때와 퇴장시킬 때마다",
+        "missing: 항상 연락"
+      ],
+      "chars": 2461,
+      "millis": 22.437239
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "호흡용 보호구 착용 장소",
+      "pages": [
+        36,
+        27
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2005,
+      "millis": 4.053854
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "환기만으로 적정공기를 유지하기 어려울 때 보호구",
+      "pages": [
+        36,
+        34
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1659,
+      "millis": 4.57974
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "송기마스크 송기라인과 정전 주의사항",
+      "pages": [
+        36,
+        27
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2005,
+      "millis": 8.386875
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "공기호흡기 착용이 어려운 좁은 장소의 보호구",
+      "pages": [
+        34,
+        59
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 환기만으로 불충분",
+        "missing: 송기라인",
+        "missing: 정전"
+      ],
+      "chars": 2227,
+      "millis": 5.031458
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 특별교육 시간",
+      "pages": [
+        38,
+        66
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1633,
+      "millis": 3.278125
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "일용근로자 밀폐공간 특별교육은 몇 시간이야",
+      "pages": [
+        38,
+        41
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1384,
+      "millis": 3.6825
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "일용근로자를 제외한 근로자 특별교육 분할 시간",
+      "pages": [
+        52,
+        56
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 최초 작업투입 전",
+        "missing: 2시간 이상",
+        "missing: 16시간 이상",
+        "missing: 3개월 이내"
+      ],
+      "chars": 2108,
+      "millis": 4.881666
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "단기간 간헐적 밀폐공간 작업 특별교육 안내",
+      "pages": [
+        64
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 최초 작업투입 전",
+        "missing: 2시간 이상",
+        "missing: 16시간 이상",
+        "missing: 3개월 이내"
+      ],
+      "chars": 1748,
+      "millis": 4.448646
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "긴급구조훈련 주기",
+      "pages": [
+        66,
+        39
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1924,
+      "millis": 3.136145
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 긴급구조훈련 대상과 주기",
+      "pages": [
+        39,
+        66
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1924,
+      "millis": 19.120677
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "긴급구조훈련과 개별 근로자 특별교육 차이",
+      "pages": [
+        66
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 1137,
+      "millis": 14.051718
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "비상연락 구조 응급조치 후송 훈련 알려줘",
+      "pages": [
+        39,
+        66
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1924,
+      "millis": 4.631771
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 재해자 구조 절차",
+      "pages": [
+        41,
+        44
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1755,
+      "millis": 3.255156
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 동료가 쓰러졌는데 공기호흡기가 없으면",
+      "pages": [
+        44,
+        41
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1755,
+      "millis": 4.045416
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "공기상태를 모르는 밀폐공간 구조 시 주의사항",
+      "pages": [
+        40,
+        21
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 119",
+        "missing: 밖에서",
+        "missing: 기다리"
+      ],
+      "chars": 1360,
+      "millis": 3.899583
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "보호장비 없이 밀폐공간 재해자를 구조해도 돼",
+      "pages": [
+        44,
+        63
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2099,
+      "millis": 4.01349
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "심폐소생술 알려줘",
+      "pages": [
+        45,
+        46
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1182,
+      "millis": 3.848125
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "CPR 반응확인 신고 호흡확인 흉부압박 순서",
+      "pages": [
+        45,
+        31
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1750,
+      "millis": 4.771771
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "심폐소생술 압박 깊이와 속도 인공호흡 횟수",
+      "pages": [
+        45
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 893,
+      "millis": 6.488021
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "인공호흡 방법을 모르거나 꺼리는 경우 심폐소생술",
+      "pages": [
+        45,
+        27
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2001,
+      "millis": 13.775886
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "심폐소생술 반복과 회복자세",
+      "pages": [
+        46
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 300,
+      "millis": 6.005782
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "심폐소생술은 언제까지 반복해야 해",
+      "pages": [
+        13,
+        65
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 119구급대가 도착할 때까지",
+        "missing: 호흡이 회복되었다면",
+        "missing: 옆으로"
+      ],
+      "chars": 2531,
+      "millis": 8.095781
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "심폐소생술 중 움직이면 바로 회복자세를 취해도 돼",
+      "pages": [
+        46,
+        45
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1182,
+      "millis": 5.64323
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "호흡이 회복되었을 때 회복자세 알려줘",
+      "pages": [
+        46,
+        45
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1182,
+      "millis": 4.078854
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "적정 공기 산소농도 기준 그리고 산소 유해가스 측정 시기",
+      "pages": [
+        24,
+        25
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1491,
+      "millis": 26.354479
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소 유해가스 측정 사전준비 그리고 산소 유해가스 측정시 주의사항",
+      "pages": [
+        27
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1119,
+      "millis": 29.346406
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소 유해가스 측정 위치와 개소 그리고 깊은 탱크 가스 측정 채기관 눈금",
+      "pages": [
+        27
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2257,
+      "millis": 32.520781
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "작업 전 환기 시기 그리고 환기팬 용량 정압",
+      "pages": [
+        28,
+        29
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1980,
+      "millis": 19.161354
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "환기팬 용량 정압 그리고 환기 송풍관 덕트 길이",
+      "pages": [
+        29
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 994,
+      "millis": 12.948594
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 환기 방법 급기 배기 그리고 환기 중단 응급상황 조치",
+      "pages": [
+        29
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 994,
+      "millis": 30.369636
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "용접 작업 조치 그리고 불활성기체 사용시 조치",
+      "pages": [
+        59,
+        30
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2262,
+      "millis": 26.914635
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "가스배관 해체 작업 그리고 설비개조 작업시 조치",
+      "pages": [
+        31
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 868,
+      "millis": 27.208437
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "자동 CO2 소화설비 유지보수 작업 그리고 출입문 임의잠김 방지",
+      "pages": [
+        32,
+        63
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 임의로 잠기지 않도록",
+        "missing: 내부에 작업자가"
+      ],
+      "chars": 2267,
+      "millis": 22.354062
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "관리감독자 점검 직무 그리고 밀폐공간 출입 인원 점검",
+      "pages": [
+        34
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 입장시킬 때와 퇴장시킬 때마다",
+        "missing: 항상 연락"
+      ],
+      "chars": 1911,
+      "millis": 23.426198
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "호흡용 보호구 착용 장소 그리고 밀폐공간 특별교육 시간",
+      "pages": [
+        36,
+        38
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1393,
+      "millis": 26.097343
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "긴급구조훈련 주기 그리고 밀폐공간 재해자 구조 절차",
+      "pages": [
+        66,
+        44
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 2004,
+      "millis": 20.628437
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "심폐소생술 알려줘 그리고 심폐소생술 반복과 회복자세",
+      "pages": [
+        45,
+        46
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1182,
+      "millis": 8.340313
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소 유해가스 측정 시기 그리고 밀폐공간 출입 인원 점검",
+      "pages": [
+        25
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 입장시킬 때와 퇴장시킬 때마다",
+        "missing: 항상 연락"
+      ],
+      "chars": 2006,
+      "millis": 32.984011
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소 유해가스 측정시 주의사항 그리고 밀폐공간 재해자 구조 절차",
+      "pages": [
+        27,
+        44
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1986,
+      "millis": 31.024791
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "적정 공기 산소농도 기준 그리고 호흡용 보호구 착용 장소",
+      "pages": [
+        24,
+        36
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1520,
+      "millis": 21.878177
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "작업 전 환기 시기 그리고 환기 중단 응급상황 조치",
+      "pages": [
+        28,
+        29
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1980,
+      "millis": 28.303646
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "불활성기체 사용시 조치 그리고 가스배관 해체 작업",
+      "pages": [
+        30,
+        31
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1665,
+      "millis": 26.191041
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "밀폐공간 특별교육 시간 그리고 긴급구조훈련 주기",
+      "pages": [
+        38,
+        66
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 1633,
+      "millis": 19.769688
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "산소 유해가스 측정 사전준비 그리고 심폐소생술 알려줘",
+      "pages": [
+        27,
+        45
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 2001,
+      "millis": 17.483437
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "오늘 서울 날씨 알려줘",
+      "pages": [
+        26
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 767,
+      "millis": 4.099635
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "비트코인 투자 전망",
+      "pages": [
+        65,
+        55
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 2727,
+      "millis": 3.688802
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "파스타 레시피 추천",
+      "pages": [
+        17,
+        20
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 607,
+      "millis": 3.525416
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "아이폰 배터리 교체 가격",
+      "pages": [
+        27,
+        11
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 1842,
+      "millis": 4.014739
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "오늘 점심 메뉴 추천",
+      "pages": [
+        30,
+        38
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 1304,
+      "millis": 3.949115
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "축구 경기 결과 알려줘",
+      "pages": [
+        52,
+        8
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 2852,
+      "millis": 3.938906
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "회사 와이파이 암호 알려줘",
+      "pages": [
+        57,
+        16
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 1151,
+      "millis": 4.19526
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "내일 부산 비 예보",
+      "pages": [
+        7,
+        27
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 1831,
+      "millis": 6.066666
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "노트북 구매 추천",
+      "pages": [
+        63,
+        76
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 2395,
+      "millis": 3.453906
+    },
+    {
+      "set": "evaluation-150.json",
+      "question": "우리 현장 현재 작업 승인됐어?",
+      "pages": [
+        18,
+        65
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 2024,
+      "millis": 3.94323
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "어두운 밀폐공간 측정 전등은 어떤 걸 써야해",
+      "pages": [
+        27,
+        58
+      ],
+      "pagePass": true,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "unrelated\/forbidden: ### 사전준비",
+        "unrelated\/forbidden: 수직 및 수평",
+        "no direct answer in first 400: 방폭구조의 전등"
+      ],
+      "chars": 2079,
+      "millis": 4.378906
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "밀폐공간 측정할 때 조명은 어떤 걸 사용해야 해?",
+      "pages": [
+        5,
+        7
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 가연성가스",
+        "no direct answer in first 400: 방폭구조의 전등"
+      ],
+      "chars": 921,
+      "millis": 3.897396
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "가스 측정용 랜턴은 아무거나 써도 돼?",
+      "pages": [
+        25,
+        13
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 가연성가스",
+        "no direct answer in first 400: 방폭구조의 전등"
+      ],
+      "chars": 1890,
+      "millis": 4.022708
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "전등 종류 알려줘",
+      "pages": [
+        36,
+        32
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 측정을 위해",
+        "no direct answer in first 400: 방폭구조의 전등"
+      ],
+      "chars": 1932,
+      "millis": 3.424792
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "방폭 전등을 쓰는 이유를 쉽게 설명해줘",
+      "pages": [
+        54,
+        32
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 가연성가스",
+        "no direct answer in first 400: 방폭구조의 전등"
+      ],
+      "chars": 2024,
+      "millis": 4.640938
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "산소 측정할 때 머리를 맨홀 안에 넣고 봐도 돼?",
+      "pages": [
+        76,
+        74
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 유독가스",
+        "no direct answer in first 400: 개구면 안쪽"
+      ],
+      "chars": 2450,
+      "millis": 4.901719
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "깊은 탱크에서 쓰는 채기관 눈금은 어떻게 표시해?",
+      "pages": [
+        27,
+        51
+      ],
+      "pagePass": true,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "unrelated\/forbidden: ### 사전준비",
+        "no direct answer in first 400: 1m"
+      ],
+      "chars": 2074,
+      "millis": 5.079948
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "측정기를 야외에서 확인했는데 산소 20.9%가 아니면?",
+      "pages": [
+        61,
+        13
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 표준가스",
+        "no direct answer in first 400: 교정 또는 센서교체"
+      ],
+      "chars": 2354,
+      "millis": 4.39375
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "덕트 길이를 제조사가 안 알려주면 얼마나 길게 써?",
+      "pages": [
+        29,
+        19
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1539,
+      "millis": 4.675364
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "환기팬이 정전으로 멈추면 작업자는 어떻게 해?",
+      "pages": [
+        14,
+        53
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 정전",
+        "no direct answer in first 400: 즉시 밀폐공간 외부로 대피"
+      ],
+      "chars": 1708,
+      "millis": 4.369323
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "안에 사람이 있는지 확인하는 건 출입문을 잠그기 전이야?",
+      "pages": [
+        32,
+        63
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 임의로 잠기지 않도록",
+        "no direct answer in first 400: 내부에 작업자가"
+      ],
+      "chars": 2267,
+      "millis": 5.174844
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "출입금지 표지판의 최소 가로 세로 크기 알려줘",
+      "pages": [
+        19
+      ],
+      "pagePass": true,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "no direct answer in first 400: 21센티미터"
+      ],
+      "chars": 1199,
+      "millis": 5.217656
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "밀폐공간 표지판 바탕색과 글씨색은?",
+      "pages": [
+        23,
+        12
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 검정색",
+        "missing: 노란색",
+        "missing: 빨간색",
+        "no direct answer in first 400: 흰색"
+      ],
+      "chars": 1798,
+      "millis": 20.03151
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "평소에 출입할 필요가 없는 밀폐공간은 출입을 어떻게 제한해?",
+      "pages": [
+        19,
+        61
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1877,
+      "millis": 5.609531
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "작업허가서를 언제까지 어디에 게시해야 해?",
+      "pages": [
+        65,
+        21
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 작업이 종료될 때까지",
+        "no direct answer in first 400: 작업장 출입구"
+      ],
+      "chars": 2505,
+      "millis": 4.045625
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "허가서와 다른 상황을 발견했으면 누구에게 알려?",
+      "pages": [
+        64,
+        22
+      ],
+      "pagePass": true,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "no direct answer in first 400: 즉시 허가권자"
+      ],
+      "chars": 1575,
+      "millis": 10.857083
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "작업허가 유효기간은 다음날에도 유지돼?",
+      "pages": [
+        21,
+        23
+      ],
+      "pagePass": true,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "no direct answer in first 400: 당일 작업"
+      ],
+      "chars": 1968,
+      "millis": 4.015625
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "소화설비 자동 수동 전환스위치는 작업할 때 어디로?",
+      "pages": [
+        61,
+        70
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "no direct answer in first 400: 수동"
+      ],
+      "chars": 2458,
+      "millis": 4.724219
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "소화설비 경보 후 이산화탄소 방출 전 대피 시간은?",
+      "pages": [
+        32,
+        61
+      ],
+      "pagePass": true,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "no direct answer in first 400: 30초"
+      ],
+      "chars": 2367,
+      "millis": 4.74651
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "송기마스크 송기라인이 꼬이거나 끊어지면 안 되지?",
+      "pages": [
+        36,
+        34
+      ],
+      "pagePass": true,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "no direct answer in first 400: 송기라인"
+      ],
+      "chars": 1659,
+      "millis": 4.343802
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "밀폐공간 내려가는 사다리 미끄러움에 대비할 장비는?",
+      "pages": [
+        73,
+        60
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 구명 밧줄"
+      ],
+      "chars": 2579,
+      "millis": 4.524115
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "구조용 삼각대 말고 어떤 구조장비를 준비해?",
+      "pages": [
+        37,
+        8
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1918,
+      "millis": 4.792552
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "도급인은 수급인에게 어떤 안전 정보를 줘야 해?",
+      "pages": [
+        40,
+        65
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1862,
+      "millis": 4.463385
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "밀폐공간 작업 프로그램은 누가 함께 만들고 뭘 적어?",
+      "pages": [
+        41,
+        65
+      ],
+      "pagePass": true,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "no direct answer in first 400: 모든 부서가 함께 참여"
+      ],
+      "chars": 2386,
+      "millis": 4.451198
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "일용직 특별교육 몇 시간 받아야 해?",
+      "pages": [
+        38,
+        56
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1216,
+      "millis": 3.875625
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "밀폐공간 동료가 쓰러졌는데 호흡용 보호구 없이 들어가 구해도 돼?",
+      "pages": [
+        44,
+        36
+      ],
+      "pagePass": true,
+      "bodyPass": true,
+      "pass": true,
+      "failures": [],
+      "chars": 1764,
+      "millis": 5.087604
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "환기만으로 충분하지 않은 곳에서 보호구는?",
+      "pages": [
+        59,
+        36
+      ],
+      "pagePass": true,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "no direct answer in first 400: 환기"
+      ],
+      "chars": 2351,
+      "millis": 4.353906
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "감시인은 밀폐공간 안과 밖 중 어디에 배치해?",
+      "pages": [
+        18
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 관리감독자에게 통보",
+        "no direct answer in first 400: 밀폐 공간 외부"
+      ],
+      "chars": 1664,
+      "millis": 19.228333
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "측정 전등 종류 그리고 출입금지 표지판 크기 알려줘",
+      "pages": [
+        27,
+        23
+      ],
+      "pagePass": false,
+      "bodyPass": false,
+      "pass": false,
+      "failures": [
+        "missing: 21센티미터",
+        "missing: 29.7센티미터",
+        "unrelated\/forbidden: 수직 및 수평",
+        "no direct answer in first 400: 방폭구조의 전등"
+      ],
+      "chars": 2080,
+      "millis": 12.475781
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "전등 전압은 몇 볼트여야 해?",
+      "pages": [
+        8,
+        73
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 2838,
+      "millis": 3.670573
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "밀폐공간용 랜턴 방수 IP 등급 알려줘",
+      "pages": [
+        37,
+        62
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 1854,
+      "millis": 4.758386
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "밀폐공간 측정기 블루투스 비밀번호가 뭐야?",
+      "pages": [
+        63,
+        41
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 2109,
+      "millis": 3.987136
+    },
+    {
+      "set": "focused-retrieval.json",
+      "question": "전등 모델명과 가격 추천해줘",
+      "pages": [
+        27,
+        46
+      ],
+      "pagePass": false,
+      "bodyPass": true,
+      "pass": false,
+      "failures": [],
+      "chars": 1408,
+      "millis": 9.028125
+    }
+  ]
+}

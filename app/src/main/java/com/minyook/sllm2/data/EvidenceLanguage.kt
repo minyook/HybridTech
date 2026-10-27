@@ -1,0 +1,53 @@
+package com.minyook.sllm2.data
+
+import java.text.Normalizer
+import java.util.Locale
+
+/** Shared domain spelling/request lexicon from web/src/rag/text.ts; no question-to-page lookup. */
+internal object EvidenceLanguage {
+    val vocabulary = setOf("밀폐공간","관리감독자","이산화탄소","일산화탄소","황화수소","심폐소생술","자동심장충격기","흉부압박","인공호흡","공기호흡기","송기마스크","소화설비","불활성가스","불활성기체","환기장치","환기팬","유해가스","감시인","출입뚜껑","출입문","출입구","임의잠김","긴급구조훈련","채기관","눈금","덕트","송풍관","회복자세","재해자","보호구","방폭","인원","입장","퇴장","해체","부착","출입","산소","농도","측정","허가","절차","환기","점검","방지","직무","자격","시기","방법","기준","조치","작업")
+    private val stops = setOf("알려줘","알려주세요","설명해줘","설명해주세요","말해줘","말해주세요","물어볼게","가르쳐줘","정리해줘","어떻게","뭐야","무엇","무엇인가요","궁금해","자세히","자세하게","상세히","상세하게","대해서","대해","관련","좀","알고","싶어","싶어요","필요","해야","하나요","해야하나요","해야해","되나요","되는지","얼마","얼마면","몇","어떤","있는","있나요","있어","있어요","문서","내용","나와","나오는","알려","설명","부탁해","전체","순서대로","가능해","정도","여야해","퍼센트","쉽게","의미","뜻","이유","차이","비교","풀어","어디","어디야","어디까지","언제까지","뭘","무슨","누구","누구에게","걸","그걸","안에","밖에","안과","전","후","얼마나","어느","아무거나","말고","함께","대비할","있는지","없으면","아니면","다른","다음","오늘","어제","용","작업자","사람","까지","전과","가능한","길게","들어","구해","취해")
+    val generic = setOf("작업","방법","기준","조치","확인","확인해야","절차","마련","방지","측정","농도","시기","직무","자격","주의사항","최초","시간","모르","밀폐공간","가스","장소","내부","종류","상황","경우","장비","수치","상한","하한","범위","이상","이하","미만","초과","단위","크기","유무","공간","확인사항")
+    private val wordPattern = Regex(vocabulary.sortedByDescending { it.length }.joinToString("|"))
+    private val nonWord = Regex("[^0-9a-z가-힣]+")
+    private val suffix = Regex("(?:인가요|입니까|하는지|으로|에서|에게|이랑|하고|이야|이냐|인지|까요|은|는|이|가|을|를|의|에|로|도|만)$")
+    private val dialogue = Regex("^(?:써야|써도|쓰는|사용해야|사용해|사용할|준비해|알려주|확보해|갖춰야|받아야|유지돼|넣고|봐도|돼|되지|전이야|줘야|잠그기|내려가|끊어지면|꼬이거나|모르는|모르겠|어떡|적어|만들고|끝나고)")
+    fun aliases(value: String): String = Normalizer.normalize(value, Normalizer.Form.NFKC).lowercase(Locale.ROOT)
+        .replace(Regex("심\\s*폐\\s*소\\s*생\\s*술|(?<![0-9a-z])cpr(?![0-9a-z])"), "심폐소생술")
+        .replace(Regex("밀폐\\s*공간"), "밀폐공간")
+        .replace(Regex("유해\\s*가스"), "유해가스")
+        .replace(Regex("이산화\\s*탄소|탄산\\s*가스|(?<![0-9a-z])co2(?![0-9a-z])"), "이산화탄소")
+        .replace(Regex("일산화\\s*탄소|(?<![0-9a-z])co(?![0-9a-z])"), "일산화탄소")
+        .replace(Regex("(?<![0-9a-z])h2s(?![0-9a-z])"), "황화수소")
+        .replace(Regex("(?<![0-9a-z])o2(?![0-9a-z])"), "산소")
+        .replace(Regex("감독관"), "관리감독자")
+        .replace(Regex("감시자"), "감시인")
+        .replace(Regex("질소|아르곤|불활성가스"), "불활성기체")
+        .replace(Regex("잠글|잠그|잠기"), "잠금")
+        .replace(Regex("들어가고|입장시킬"), "입장")
+        .replace(Regex("나올|퇴장시킬"), "퇴장")
+        .replace(Regex("들어가기"), "출입")
+        .replace(Regex("공기호흡기"), "공기호흡기 보호구")
+        .replace(Regex("송기마스크"), "송기마스크 보호구")
+        .replace(Regex("측정법"), "측정 방법")
+        .replace(Regex("정상\\s*(?:범위|수치)"), "적정 기준")
+        .replace(Regex("조명|랜턴|램프|손전등"), "전등")
+        .replace(Regex("표지판"), "표지")
+        .replace(Regex("바탕색"), "바탕 색")
+        .replace(Regex("글씨색"), "글씨 색")
+        .replace(Regex("일용직"), "일용근로자")
+        .replace(Regex("구조장비"), "구조 장비")
+        .replace(Regex("미끄러움"), "미끄러")
+        .replace(Regex("충분하지\\s*않은|충분하지\\s*않"), "불충분")
+        .replace(Regex("잠금기"), "잠금")
+        .replace(Regex("오\\s*[·ㆍ]\\s*폐수"), "오폐수")
+        .replace(Regex("평소"), "통상")
+        .replace(Regex("좁은|협소한"), "협소")
+        .replace(Regex("몇\\s*(?:퍼센트|%)"), "농도 기준")
+    fun compact(value: String) = aliases(value).replace(nonWord, "")
+    fun searchable(value: String) = aliases(value).replace(Regex("[^0-9a-z가-힣\\s]"), " ").replace(Regex("\\s+"), " ")
+    fun terms(question: String): List<String> = aliases(question).replace("언제", "시기").replace("누가", "자격")
+        .replace(wordPattern) { " "+it.value+" " }.split(nonWord)
+        .map { if(it in vocabulary) it else it.replace(suffix, "") }
+        .filter { it.length >= 2 && it !in stops && !dialogue.containsMatchIn(it) }.distinct()
+}

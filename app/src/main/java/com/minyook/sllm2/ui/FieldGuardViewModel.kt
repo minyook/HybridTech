@@ -20,7 +20,8 @@ import com.minyook.sllm2.data.ChatHistoryStore
 import com.minyook.sllm2.data.KnowledgeRepository
 import com.minyook.sllm2.data.KnowledgeSeeder
 import com.minyook.sllm2.data.KnowledgeChunk
-import com.minyook.sllm2.data.QuestionAnswerVerifier
+import com.minyook.sllm2.data.DocumentAnswerPlan
+import com.minyook.sllm2.data.AnswerSupplementVerifier
 import com.minyook.sllm2.gas.BleGasClient
 import com.minyook.sllm2.gas.GasMonitoringService
 import com.minyook.sllm2.gas.GasReading
@@ -72,6 +73,7 @@ data class ChatMessageUi(
     val pending: Boolean = false,
     val startedAtElapsedRealtime: Long = 0L,
     val sourceIds: List<Long> = emptyList(),
+    val sourceLabels: Map<Long, String> = emptyMap(),
 )
 
 data class BleDeviceUi(
@@ -262,7 +264,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
                 destination = AppDestination.CHAT,
                 activeChatId = session.id,
                 messages = session.turns.map { turn ->
-                    ChatMessageUi(text = turn.text, fromWorker = turn.role == ChatHistoryStore.Role.USER, sourceIds = turn.sourceIds)
+                    ChatMessageUi(text = turn.text, fromWorker = turn.role == ChatHistoryStore.Role.USER, sourceIds = turn.sourceIds, sourceLabels = turn.sourceIds.mapNotNull { id -> repository.chunk(id)?.let { id to (it.sourceKind+" · "+it.pageNumber+"쪽") } }.toMap())
                 },
                 input = "",
                 inputError = null,
@@ -373,38 +375,24 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
             try {
             history.append(chatId, ChatHistoryStore.Role.USER, asked)
             val sources = repository.retrieveForQuestion(asked)
-            val sourceIds = sources.map { it.chunk.id }
-            val fallback = repository.answerWithoutModel(sources)
-            val candidateAnswer = if (modelPreferences.status().phase == ModelPhase.READY) {
+            val plan = DocumentAnswerPlan.create(asked, sources, repository.documentCount() > 0)
+            val sourceIds = plan.sourceIds
+            withContext(Dispatchers.Main) {
+                updateState { state -> state.copy(messages = state.messages.map { message -> if (message.id == pending.id) message.copy(text = plan.body, sourceIds = sourceIds, sourceLabels = plan.sourceLabels) else message }) }
+            }
+            val supplement = if (plan.supplementRequested && modelPreferences.status().phase == ModelPhase.READY) {
                 try {
-                    val generated = runtime.generate(asked, repository.contextForModel(sources), compactVoiceAnswer) { partialAnswer ->
-                        updateState { state ->
-                            if (state.activeChatId != chatId || state.messages.none { it.id == pending.id }) state
-                            else state.copy(messages = state.messages.map { message ->
-                                if (message.id == pending.id) message.copy(text = partialAnswer) else message
-                            })
-                        }
-                    }
-                    generated.takeIf { it.isNotBlank() }
-                } catch (cancelled: CancellationException) {
-                    throw cancelled
-                } catch (_: Exception) {
-                    null
-                }
-            } else null
-            val evidenceConflict = candidateAnswer != null &&
-                QuestionAnswerVerifier.contradictsSources(asked, candidateAnswer, sources)
-            val modelAnswer = candidateAnswer.takeUnless { evidenceConflict }
-            val response = modelAnswer ?: if (evidenceConflict) {
-                "$fallback\n\n> 생성된 답변이 검색된 문서 근거와 맞지 않아 원문을 표시합니다."
-            } else if (modelPreferences.status().phase == ModelPhase.READY) {
-                "$fallback\n\n> 생성 모델 응답을 받지 못해 문서 근거를 우선 보여드립니다."
-            } else fallback
+                    val raw = runtime.generate(asked, plan.context(), compactVoiceAnswer, supplementOnly = true)
+                    AnswerSupplementVerifier.fromJson(raw, plan)
+                } catch (cancelled: CancellationException) { throw cancelled }
+                catch (_: Exception) { "" }
+            } else ""
+            val response = AnswerSupplementVerifier.compose(plan, supplement)
             history.append(chatId, ChatHistoryStore.Role.ASSISTANT, response, sourceIds)
             withContext(Dispatchers.Main) {
                 updateState { state ->
                     state.copy(
-                        messages = state.messages.map { if (it.id == pending.id) pending.copy(text = response, pending = false, sourceIds = sourceIds) else it },
+                        messages = state.messages.map { if (it.id == pending.id) pending.copy(text = response, pending = false, sourceIds = sourceIds, sourceLabels = plan.sourceLabels) else it },
                         isAnswering = false,
                         histories = history.list(),
                     )
