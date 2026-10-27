@@ -2,7 +2,6 @@ import {afterEach,beforeEach,expect,it} from 'vitest';
 import QRCode from 'qrcode';import jsQR from 'jsqr';
 import {createWorkStore,type WorkStore} from '../server/store';
 import {invitationURL,parseInvitation} from '../src/workflow/invitation';
-import {parseSensorURL,sensorURL} from '../src/sensor/sample';
 let store:WorkStore,time:number;
 beforeEach(()=>{time=Date.parse('2026-10-23T01:00:00Z');store=createWorkStore(':memory:',()=>time);});
 afterEach(()=>store.close());
@@ -40,7 +39,6 @@ it('만료된 감독관은 새 QR을 발급하지 못하며 인증 실패를 제
 it('QR은 서버에 노출되는 query 대신 fragment로 전달하며 다른 사이트·측정 공유 QR과 구분한다',()=>{
   const origin='https://field.test',token='A'.repeat(43),link=invitationURL(origin,token);expect(new URL(link).search).toBe('');expect(parseInvitation(link,origin)).toBe(token);
   expect(()=>parseInvitation(link,'https://other.test')).toThrow();expect(()=>parseInvitation('javascript:alert(1)',origin)).toThrow();
-  const share=sensorURL(origin,{id:'00000000-0000-0000-0000-000000000000',readKey:token});expect(()=>parseInvitation(share,origin)).toThrow();expect(()=>parseSensorURL(link,origin)).toThrow();
 });
 it('로컬 QR 생성 결과를 jsQR로 다시 판독하여 링크를 온전히 보존한다',()=>{
   const content=invitationURL('https://field.test','A'.repeat(43)),qr=QRCode.create(content,{errorCorrectionLevel:'M'}),scale=5,size=(qr.modules.size+8)*scale,pixels=new Uint8ClampedArray(size*size*4).fill(255);

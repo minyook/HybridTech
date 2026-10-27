@@ -6,7 +6,7 @@ const dist = fileURLToPath(new URL('../dist/', import.meta.url));
 async function walk(directory) {
   return (await Promise.all((await readdir(directory,{withFileTypes:true})).map(entry => entry.isDirectory() ? walk(path.join(directory,entry.name)) : [path.join(directory,entry.name)]))).flat();
 }
-const files = (await walk(dist)).filter(file => !/[/\\](runtime|source-pdfs|pdfjs|knowledge)[/\\]/.test(file) && !file.endsWith('sw.js'));
+const files = (await walk(dist)).filter(file => !/[/\\](runtime|voice-runtime|source-pdfs|pdfjs|knowledge)[/\\]/.test(file) && !/[/\\]ort-.*\.wasm$/.test(file) && !file.endsWith('sw.js'));
 const digest = createHash('sha256');
 for (const file of files) digest.update(await readFile(file));
 const template = await readFile(new URL('./sw-template.js',import.meta.url),'utf8');

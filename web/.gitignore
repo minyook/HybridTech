@@ -3,6 +3,7 @@ dist/
 public/knowledge/
 public/source-pdfs/
 public/runtime/
+public/voice-runtime/
 public/ai-worker.js
 public/light-ai-worker.js
 public/pdfjs/

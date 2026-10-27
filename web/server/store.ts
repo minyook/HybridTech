@@ -4,7 +4,6 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createWork, inspectionItems, transitionWork, type Actor, type Inspection, type WorkAction, type WorkOrder } from '../src/workflow/work.ts';
-import {validateSample} from '../src/sensor/sample.ts';
 
 export const defaultDatabasePath = fileURLToPath(new URL('../.local/workflow.sqlite', import.meta.url));
 const SESSION_MS = 30 * 24 * 60 * 60 * 1000;
@@ -79,7 +78,6 @@ export function createWorkStore(filename = defaultDatabasePath, now = () => Date
     CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, worker_id TEXT NOT NULL, revision INTEGER NOT NULL, updated_at TEXT NOT NULL, body TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS order_changes (sequence INTEGER PRIMARY KEY AUTOINCREMENT, worker_id TEXT NOT NULL);
     CREATE INDEX IF NOT EXISTS order_changes_worker ON order_changes(worker_id, sequence);
-    CREATE TABLE IF NOT EXISTS sensor_streams (id TEXT PRIMARY KEY, owner TEXT NOT NULL, read_hash TEXT NOT NULL, expires INTEGER NOT NULL, active INTEGER NOT NULL, updated_at TEXT, sample TEXT);
     CREATE TABLE IF NOT EXISTS attempts (identity TEXT PRIMARY KEY, failures INTEGER NOT NULL, reset_at INTEGER NOT NULL);`);
   db.exec('BEGIN IMMEDIATE');
   try{
@@ -158,34 +156,6 @@ export function createWorkStore(filename = defaultDatabasePath, now = () => Date
       const updated = today(); return { day: updated.day, code: codeFor(updated), expiresAt: new Date(updated.expires).toISOString() };
     },
     revokeDailyCode() { const row = today(); db.prepare('UPDATE daily_codes SET revoked = ? WHERE day = ?').run(now(), row.day); },
-    createSensorStream(token:string|undefined){
-      const owner=requireSession(token).worker_id;
-      const recent=db.prepare('SELECT COUNT(*) AS count FROM sensor_streams WHERE owner=? AND expires>?').get(owner,now()+29*60*1000);
-      if(Number(recent?.count??0)>=10)throw new ApiError(429,'공유 생성이 많아요. 1분 후 다시 시도해 주세요.');
-      db.prepare('DELETE FROM sensor_streams WHERE expires <= ?').run(now());
-      db.prepare('UPDATE sensor_streams SET active=0,sample=NULL WHERE owner=?').run(owner);
-      const id=randomUUID(),readKey=secret(),expires=now()+30*60*1000;
-      db.prepare('INSERT INTO sensor_streams VALUES (?,?,?,?,1,NULL,NULL)').run(id,owner,digest(readKey),expires);
-      return {id,readKey,expiresAt:new Date(expires).toISOString()};
-    },
-    updateSensorStream(token:string|undefined,id:string,value:unknown){
-      const owner=requireSession(token).worker_id;
-      let sample;try{sample=value===null?null:validateSample(value,now());}catch(error){throw new ApiError(400,(error as Error).message);}
-      const changed=db.prepare('UPDATE sensor_streams SET sample=?,updated_at=? WHERE id=? AND owner=? AND expires>? AND active=1').run(sample?JSON.stringify(sample):null,new Date(now()).toISOString(),id,owner,now());
-      if(changed.changes!==1)throw new ApiError(403,'공유 권한이 만료되었어요. 다시 공유를 시작해 주세요.');
-    },
-    stopSensorStream(token:string|undefined,id:string){
-      const owner=requireSession(token).worker_id;
-      const changed=db.prepare('UPDATE sensor_streams SET active=0,sample=NULL WHERE id=? AND owner=?').run(id,owner);
-      if(changed.changes!==1)throw new ApiError(403,'본인이 시작한 공유만 중지할 수 있어요.');
-    },
-    readSensorStream(token:string|undefined,id:string,key:unknown){
-      requireSession(token);
-      const row=db.prepare('SELECT * FROM sensor_streams WHERE id=?').get(id) as {read_hash:string;expires:number;active:number;updated_at:string|null;sample:string|null}|undefined;
-      if(!row||typeof key!=='string'||key.length!==43||!timingSafeEqual(Buffer.from(row.read_hash),Buffer.from(digest(key))))throw new ApiError(403,'측정값 공유 링크를 확인해 주세요.');
-      if(row.expires<=now())throw new ApiError(410,'측정값 공유가 만료되었어요. 새 링크를 전달받아 주세요.');
-      return {active:row.active===1,updatedAt:row.updated_at,expiresAt:new Date(row.expires).toISOString(),sample:row.active&&row.sample?JSON.parse(row.sample):null};
-    },
     issueInvite(token:string|undefined,name:unknown){
       const row=requireSession(token);requireSupervisor(row);
       const label=text(name,60);const daily=today();const invite=secret();const id=randomUUID();

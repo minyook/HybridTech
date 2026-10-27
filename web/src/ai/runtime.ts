@@ -28,6 +28,7 @@ let nextId=0;
 let preparing:Promise<boolean>|undefined;
 let generating=false;
 let recoveryRequested=false;
+let audioHolds=0;
 let stopFlight:Promise<boolean>|undefined;
 let stoppedReply:((message:Extract<AIReply,{type:'stopped'}>)=>void)|undefined;
 let diagnosticSettings:AISettings|undefined;
@@ -112,6 +113,7 @@ function abortable<T>(promise:Promise<T>,signal?:AbortSignal):Promise<T>{
   });
 }
 export function prepareAI(signal?:AbortSignal):Promise<boolean>{
+  if(audioHolds)return Promise.resolve(false);
   if(!preparing){
     const startedEpoch=epoch;
     const operation=(async()=>{
@@ -126,7 +128,7 @@ export function prepareAI(signal?:AbortSignal):Promise<boolean>{
       const unfinished=unfinishedAIOperation();
       if(unfinished&&!recoveryRequested){publish({phase:'recovery',message:recoveryMessage(unfinished.stage)});return false;}
       const settings=await loadAISettings();
-      if(startedEpoch!==epoch)throw abortError();
+      if(startedEpoch!==epoch||audioHolds)throw abortError();
       if(aiIsReady()&&contextTokens===settings.contextTokens)return true;
       publish({phase:'checking',message:'저장된 AI 모델을 확인하고 있어요',startedAt:Date.now()});
       const installed=usesLightAI()?undefined:await installedModel();
@@ -138,7 +140,7 @@ export function prepareAI(signal?:AbortSignal):Promise<boolean>{
       const leaseEpoch=epoch;
       let lease:(()=>void)|undefined;
       try{lease=await acquireEngineLease();}catch(error){if(leaseEpoch===epoch)publish({phase:'error',message:'AI 메모리 사용 권한을 확인하지 못했어요. 다른 AI 화면을 닫고 다시 시도해 주세요.'});throw error;}
-      if(leaseEpoch!==epoch){lease?.();throw abortError();}
+      if(leaseEpoch!==epoch||audioHolds){lease?.();throw abortError();}
       if(!lease){publish({phase:'recovery',message:'다른 Safari 화면이나 홈 화면 앱에서 AI를 사용 중이에요. 해당 화면을 닫은 뒤 다시 준비해 주세요. 저장된 모델은 유지돼요.'});return false;}
       releaseEngineLease=lease;
       if(recoveryRequested){resetAIRecovery();recoveryRequested=false;}
@@ -223,6 +225,19 @@ export async function generate(question:string,sources:Source[],onText:(answer:s
   }
 }
 export async function releaseModel(){if(worker)await stopAI();preparing=undefined;if(!unfinishedAIOperation())publish({phase:'idle',message:'모델 다운로드 후 자동으로 준비해요'});}
+// An ASR worker uses the same cross-tab engine lease as the answer model.
+// Pause warmup BEFORE releasing the answer engine, including in-flight startup.
+export async function holdAIForAudio(){
+  audioHolds++;let released=false;
+  const release=()=>{if(!released){released=true;audioHolds--;}};
+  try{
+    if(worker){if(!await stopAI())throw Error('AI 메모리 정리를 확인하지 못했어요. 설정에서 복구 후 음성 대화를 시작해 주세요.');}
+    else epoch++;
+    preparing=undefined;
+    if(unfinishedAIOperation())throw Error('이전 AI 작업 완료를 확인하지 못했어요. 설정에서 복구 후 다시 시도해 주세요.');
+    return release;
+  }catch(error){release();throw error;}
+}
 export async function retryAIWithReducedContext(onSettings?:(settings:AISettings)=>void){
   await releaseModel();
   const settings=await saveAISettings(RECOVERY_AI_SETTINGS);

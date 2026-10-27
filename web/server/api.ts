@@ -69,14 +69,9 @@ export function createWorkMiddleware(store: WorkStore) {
       }
       if (request.method === 'GET' && url.pathname === '/api/work-orders') return send(200, store.listOrders(token, url.searchParams.get('view') ?? 'worker'));
       if(request.method==='GET'&&url.pathname==='/api/supervisor/invitations')return send(200,store.listInvites(token));
-      const sensor=url.pathname.match(/^\/api\/sensor-streams\/([a-f0-9-]{36})(?:\/(update|stop))?$/);
-      if(request.method==='GET'&&sensor&&!sensor[2])return send(200,store.readSensorStream(token,sensor[1],request.headers['x-fieldguard-sensor']));
       if (request.method !== 'POST') throw new ApiError(404, '요청 경로를 찾지 못했어요.');
       store.verifyCsrf(token, request.headers['x-fieldguard-csrf'] as string | undefined);
       const payload = await body(request);
-      if(url.pathname==='/api/sensor-streams')return send(201,store.createSensorStream(token));
-      if(sensor?.[2]==='update'){store.updateSensorStream(token,sensor[1],payload?.sample);return send(200,{updated:true});}
-      if(sensor?.[2]==='stop'){store.stopSensorStream(token,sensor[1]);return send(200,{stopped:true});}
       if(url.pathname==='/api/supervisor/invitations')return send(201,store.issueInvite(token,payload?.name));
       if(url.pathname==='/api/supervisor/redeem'){
         const result=store.redeemInvite(token,payload?.token,request.socket.remoteAddress??'unknown');

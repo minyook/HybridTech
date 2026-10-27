@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "prepare:assets": "node scripts/prepare-assets.mjs && node scripts/build-ai-worker.mjs",
+    "prepare:assets": "node scripts/prepare-assets.mjs && node scripts/build-ai-worker.mjs && node scripts/prepare-voice.mjs",
     "predev": "npm run prepare:assets",
     "dev": "vite --host 0.0.0.0",
     "build": "npm run prepare:assets && tsc -b && vite build && node scripts/build-pwa.mjs",
@@ -19,6 +19,7 @@
     "package:knowledge": "node scripts/package-knowledge.mjs"
   },
   "dependencies": {
+    "@huggingface/transformers": "3.8.1",
     "@litert-lm/core": "0.18.0",
     "@mlc-ai/web-llm": "0.2.86",
     "@noble/hashes": "2.0.1",

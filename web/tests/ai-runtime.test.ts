@@ -5,7 +5,7 @@ vi.mock('../src/ai/light-model',async importOriginal=>({...await importOriginal<
 vi.mock('../src/ai/preferences',()=>({loadAISettings:async()=>({...fixture.settings}),RECOVERY_AI_SETTINGS:{contextTokens:2048,maxOutputTokens:256},saveAISettings:async(value:typeof fixture.settings)=>{fixture.settings={...value};return {...value};}}));
 vi.mock('../src/ai/model',()=>({installedModel:async()=>fixture.installed?{blob:new Blob(['model']),metadata:{sha256:'verified',backend:fixture.backend,storageKey:'stored-model',size:5}}:undefined}));
 vi.mock('../src/offline/assets',()=>({assetUrl:(path:string)=>`https://local.invalid/${path}`,preparedGroups:async()=>({runtime:fixture.runtime})}));
-import { aiIsReady, buildPrompt, generate, getAIStatus, prepareAI, releaseModel, retryAIWithReducedContext, stopAI, SYSTEM_INSTRUCTION } from '../src/ai/runtime';
+import { aiIsReady, buildPrompt, generate, getAIStatus, prepareAI, releaseModel, retryAIWithReducedContext, stopAI, SYSTEM_INSTRUCTION, holdAIForAudio } from '../src/ai/runtime';
 import { AI_OPERATION_KEY, resetAIRecovery } from '../src/ai/recovery';
 import { aiDiagnosticReport } from '../src/ai/diagnostics';
 import type { AIReply, AIRequest } from '../src/ai/protocol';
@@ -25,6 +25,13 @@ beforeEach(async()=>{
 });
 afterEach(async()=>{await releaseModel();vi.unstubAllGlobals();});
 async function ready(){const promise=prepareAI();await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(1));const worker=FakeWorker.instances[0];worker.reply({id:worker.messages[0].id,type:'done'});await promise;return worker;}
+it('음성 인식이 메모리를 사용할 때 답변 모델을 정리하고 자동 적재를 막는다',async()=>{
+  const worker=await ready(),release=await holdAIForAudio();expect(worker.terminated).toBe(true);expect(await prepareAI()).toBe(false);expect(FakeWorker.instances).toHaveLength(1);release();release();
+  const next=prepareAI();await vi.waitFor(()=>expect(FakeWorker.instances).toHaveLength(2));const current=FakeWorker.instances[1];current.reply({id:current.messages[0].id,type:'done'});expect(await next).toBe(true);
+});
+it('답변 모델 준비 중 음성 인식을 시작하면 늦은 적재가 겹치지 않는다',async()=>{
+  const warming=prepareAI();const release=await holdAIForAudio();await expect(warming).rejects.toMatchObject({name:'AbortError'});expect(FakeWorker.instances).toHaveLength(0);expect(await prepareAI()).toBe(false);release();
+});
 function localStore(){
   const values=new Map<string,string>();vi.stubGlobal('localStorage',{getItem:(key:string)=>values.get(key)??null,setItem:(key:string,value:string)=>values.set(key,value),removeItem:(key:string)=>values.delete(key)});return values;
 }
