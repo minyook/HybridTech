@@ -75,11 +75,21 @@ import java.util.Locale
             }
             if(!follow&&messages.isNotEmpty())TextButton(onClick={follow=true;scope.launch{list.scrollToItem(messages.size)}},modifier=Modifier.align(Alignment.CenterHorizontally).testTag("scrollLatest")){Text("최신 답변으로 이동 ↓",fontSize=11.sp)}
             if(state.inputError!=null)WorkspaceNotice(state.inputError,true)
+            Surface(color=if(voice.conversationEnabled)WorkspaceDesign.BlueWeak else Color.White,shape=RoundedCornerShape(14.dp),border=BorderStroke(1.dp,WorkspaceDesign.Border),modifier=Modifier.fillMaxWidth().padding(bottom=8.dp).testTag("voiceConversationBar")) {
+                Column(Modifier.padding(horizontal=12.dp,vertical=8.dp),verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                    Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                        Text(voice.status,fontSize=11.sp,lineHeight=17.sp,color=WorkspaceDesign.Ink,modifier=Modifier.weight(1f))
+                        TextButton(onClick=if(voice.conversationEnabled)actions.onStopVoice else actions.onVoiceClick,enabled=voice.conversationEnabled||!state.isAnswering,modifier=Modifier.testTag("toggleVoiceConversation")){Text(if(voice.conversationEnabled)"대화 종료" else "음성 대화 시작",fontSize=11.sp)}
+                        TextButton(onClick={actions.onNavigate(AppDestination.VOICE)},modifier=Modifier.testTag("voiceSettings")){Text("설정",fontSize=11.sp)}
+                    }
+                    if(voice.conversationEnabled&&voice.lastHeard.isNotBlank())Text("인식: "+voice.lastHeard,fontSize=10.sp,color=Color(0xFF71819A),maxLines=2)
+                }
+            }
             Surface(color=Color.White,shape=RoundedCornerShape(18.dp),border=BorderStroke(1.dp,Color(0xFFDCE5F1)),modifier=Modifier.fillMaxWidth().testTag("chatComposer")){
                 Row(Modifier.padding(start=20.dp,end=14.dp,top=12.dp,bottom=12.dp),horizontalArrangement=Arrangement.spacedBy(10.dp),verticalAlignment=Alignment.CenterVertically){
-                    BasicTextField(value=state.input,onValueChange=actions.onInputChange,maxLines=4,textStyle=TextStyle(fontSize=14.sp,lineHeight=24.sp,color=Color(0xFF303D50)),modifier=Modifier.weight(1f).heightIn(min=if(imeVisible)24.dp else 46.dp,max=if(imeVisible)96.dp else 130.dp).testTag("chatInput"),decorationBox={inner->if(state.input.isEmpty())Text("궁금한 절차나 기준을 입력해 주세요",fontSize=14.sp,color=Color(0xFFA1ACBB));inner()})
-                    IconButton(onClick={actions.onNavigate(AppDestination.VOICE);actions.onVoiceClick()},modifier=Modifier.size(37.dp).testTag("voiceQuestion").semantics{contentDescription="음성 질문"}){TossMicrophoneIcon()}
-                    Surface(color=if(state.isAnswering||state.input.isBlank())Color(0xFFDEE7F4) else WorkspaceDesign.Blue,shape=RoundedCornerShape(12.dp),modifier=Modifier.size(41.dp).clickable(enabled=!state.isAnswering&&state.input.isNotBlank()){actions.onSubmit()}.testTag("sendMessage").semantics{contentDescription="메시지 전송"}){
+                    BasicTextField(enabled=!voice.conversationEnabled,value=state.input,onValueChange=actions.onInputChange,maxLines=4,textStyle=TextStyle(fontSize=14.sp,lineHeight=24.sp,color=Color(0xFF303D50)),modifier=Modifier.weight(1f).heightIn(min=if(imeVisible)24.dp else 46.dp,max=if(imeVisible)96.dp else 130.dp).testTag("chatInput"),decorationBox={inner->if(state.input.isEmpty())Text("궁금한 절차나 기준을 입력해 주세요",fontSize=14.sp,color=Color(0xFFA1ACBB));inner()})
+                    IconButton(onClick={if(voice.conversationEnabled)actions.onStopVoice() else actions.onVoiceClick()},enabled=voice.conversationEnabled||!state.isAnswering,modifier=Modifier.size(37.dp).testTag("voiceQuestion").semantics{contentDescription="음성 질문"}){TossMicrophoneIcon()}
+                    Surface(color=if(state.isAnswering||state.input.isBlank())Color(0xFFDEE7F4) else WorkspaceDesign.Blue,shape=RoundedCornerShape(12.dp),modifier=Modifier.size(41.dp).clickable(enabled=!voice.conversationEnabled&&!state.isAnswering&&state.input.isNotBlank()){actions.onSubmit()}.testTag("sendMessage").semantics{contentDescription="메시지 전송"}){
                         Box(contentAlignment=Alignment.Center){WorkspaceIcon(WorkspaceSymbol.ARROW,Modifier.size(21.dp).graphicsLayer{rotationZ=-90f},if(state.isAnswering||state.input.isBlank())Color(0xFFA9B9D1) else Color.White)}
                     }
                 }

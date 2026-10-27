@@ -1,0 +1,8 @@
+model=SM-S928N
+api=36
+onDeviceRecognition=true
+installed=[ko-KR]
+pending=[]
+supported=[en-US, de-DE, es-ES, fr-FR, it-IT, en-AU, en-GB, en-IE, en-SG, ja-JP, de-AT, de-BE, de-CH, en-CA, en-IN, es-US, fr-BE, fr-CA, fr-CH, hi-IN, id-ID, it-CH, pt-BR, th-TH, cmn-Hans-CN, cmn-Hant-TW, pl-PL, ru-RU, tr-TR, vi-VN]
+ttsInit=0
+installedLocalKoreanVoices=[ko-kr-x-ism-local, ko-KR-language, ko-kr-x-kob-local, ko-kr-x-kod-local, ko-kr-x-koc-local]

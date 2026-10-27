@@ -104,6 +104,8 @@ data class FieldGuardActions(
     val onVoiceLongClick: () -> Unit,
     val onAutomaticAnswerLength: (Boolean) -> Unit = {},
     val onStopVoice: () -> Unit = {},
+    val onPrepareVoice: () -> Unit = {},
+    val onVoiceReadAnswers: (Boolean) -> Unit = {},
     val onCompleteOnboarding: () -> Unit = {},
     val onOpenSource: (Long) -> Unit = {},
     val onOpenDocument: (String) -> Unit = {},

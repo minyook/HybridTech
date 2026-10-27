@@ -278,10 +278,11 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
         submitQuestion()
     }
 
-    fun submitVoiceQuestion(question: String, onAnswer: ((String) -> Unit)? = null) {
+    fun submitVoiceQuestion(question: String, onAnswer: ((String) -> Unit)? = null, onFailure: ((String) -> Unit)? = null) {
+        if (_uiState.value.isAnswering) { onFailure?.invoke("앞선 답변이 끝난 뒤 다시 시작해 주세요."); return }
         navigate(AppDestination.CHAT)
         changeInput(normalizeVoiceQuestion(question))
-        submitQuestion(compactVoiceAnswer = true, speakAnswer = true, onAnswer = onAnswer)
+        submitQuestion(compactVoiceAnswer = true, speakAnswer = true, onAnswer = onAnswer, onFailure = onFailure)
     }
 
     fun showInputError(message: String) = updateState { it.copy(inputError = message) }
@@ -343,11 +344,12 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
         updateState { it.copy(histories = emptyList(), activeChatId = null, messages = listOf(ChatMessageUi(text = WELCOME, fromWorker = false))) }
     }
 
-    fun submitQuestion(compactVoiceAnswer: Boolean = false, speakAnswer: Boolean = false, onAnswer: ((String) -> Unit)? = null) {
+    fun submitQuestion(compactVoiceAnswer: Boolean = false, speakAnswer: Boolean = false, onAnswer: ((String) -> Unit)? = null, onFailure: ((String) -> Unit)? = null) {
         if (_uiState.value.isAnswering) return
         val asked = _uiState.value.input.trim()
         if (asked.isBlank()) {
             updateState { it.copy(inputError = "확인할 내용을 입력해 주세요") }
+            onFailure?.invoke("질문을 정확히 인식하지 못했어요. 다시 시작해 주세요.")
             return
         }
         val chatId = _uiState.value.activeChatId ?: history.create(asked).id
@@ -367,9 +369,9 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
                 histories = history.list(),
             )
         }
-        history.append(chatId, ChatHistoryStore.Role.USER, asked)
-
         viewModelScope.launch(Dispatchers.IO) {
+            try {
+            history.append(chatId, ChatHistoryStore.Role.USER, asked)
             val sources = repository.retrieveForQuestion(asked)
             val sourceIds = sources.map { it.chunk.id }
             val fallback = repository.answerWithoutModel(sources)
@@ -398,13 +400,6 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
             } else if (modelPreferences.status().phase == ModelPhase.READY) {
                 "$fallback\n\n> 생성 모델 응답을 받지 못해 문서 근거를 우선 보여드립니다."
             } else fallback
-            val spokenResponse = if (evidenceConflict) {
-                "생성된 답변이 문서 근거와 맞지 않아 화면에 원문을 표시했습니다."
-            } else if (modelAnswer != null) response else if (sourceIds.isEmpty()) {
-                "제공 문서를 준비하고 있어요. 잠시 후 다시 질문해 주세요."
-            } else {
-                "로컬 AI 답변을 사용할 수 없어요. 관련 문서 근거를 화면에 표시했으니 확인해 주세요."
-            }
             history.append(chatId, ChatHistoryStore.Role.ASSISTANT, response, sourceIds)
             withContext(Dispatchers.Main) {
                 updateState { state ->
@@ -414,8 +409,14 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
                         histories = history.list(),
                     )
                 }
-                if (speakAnswer) onAnswer?.invoke(spokenResponse)
+                if (speakAnswer) onAnswer?.invoke(response)
             }
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { withContext(Dispatchers.Main) {
+                val message = "문서 답변 처리에 실패했어요. 다시 시작해 주세요."
+                updateState { state -> state.copy(isAnswering = false, inputError = message, messages = state.messages.map { if (it.id == pending.id) it.copy(text = message, pending = false) else it }) }
+                onFailure?.invoke(message)
+            } }
         }
     }
 

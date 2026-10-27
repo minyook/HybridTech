@@ -1,6 +1,14 @@
 # 웹앱 검증 기록
 
-최종 기록 갱신: **2026-10-27** (웹 BLE 철회·로컬 연속 음성 대화). 아래 이전 분리 표시·Gemma/Jetsam/Android 결과는 날짜별 이력입니다. PC와 실제 iPhone의 결과를 구분합니다.
+최종 기록 갱신: **2026-10-27** (Android 네이티브 음성 대화 추가). 아래 이전 분리 표시·Gemma/Jetsam/Android 결과는 날짜별 이력입니다. PC와 실제 iPhone의 결과를 구분합니다.
+
+## 2026-10-27 Android 설치형 앱의 연속 음성 대화
+
+- 앞선 f92d3a5는 웹 음성 구현이었으며 이번에는 Android APK에 별도로 적용했다. 네이티브 SpeechRecognizer.createOnDeviceSpeechRecognizer와 비네트워크 한국어 TTS를 사용하며 Whisper/WASM을 앱에 포장하지 않았다. 한 번 시작 후 읽기 완료로 재대기하고 전경 이탈 시 종료한다. 기존 두 문장 읽기와 문서 폴백의 일반 안내 대신 화면의 실제 본문·표·조건을 읽는다.
+- **JVM 32개 통과**, :app:testDebugUnitTest·:app:assembleDebug·:app:assembleDebugAndroidTest 빌드 성공. 최초 샌드박스 실행은 Gradle 로컬 데몬 접속 제한으로 실패했으며 정상 권한으로 통과했다. 새 루프 검사는 여러 턴, TTS 재입력 금지, 중단·늦은 결과, 침묵·제한된 busy 재시도, 호출어와 같은 문장의 질문 보존, 읽기 끄기·실패를 검사한다.
+- 연결된 **S24 Ultra SM-S928N / Android 16 API 36**에서 계측 **4개 통과**. 로컬 인식 서비스 true, 설치 언어 ko-KR, 로컬 한국어 TTS 5개를 조회했다. [실제 지원 결과](../../docs/android-voice-support-2026-10-27.txt). 조회만 수행하며 실제 마이크를 켜거나 권한을 강제로 부여하거나 모델을 다운로드하지 않았다.
+- 기존 APK를 tmp/native-voice/previous-app.apk에 보관하고 adb install -r로 앱/테스트 APK를 업데이트했다. 최종 APK SHA-256은 308a8c706e2385cec2b5356987183ffcb85d38d85ae2bd444e7a5c68bf1c57bc이며 마지막 수정 뒤 기기 검사 4개도 재통과했다. 앱 삭제·데이터 초기화·기존 AI 모델 재다운로드는 하지 않았다. Compose의 실제 버튼 시작/종료, 입력 잠금, 읽기 상태의 종료 버튼, 한국어 설정 UI를 가상 상태로 렌더링해 확인했다. [설정 화면](../../docs/screenshots/android-native-voice-settings.png), [대화 표시](../../docs/screenshots/android-native-voice-listening.png). 이 캡처를 실제 녹음 장면으로 간주하지 않는다.
+- 실제 발화→로컬 인식→문서/AI→TTS의 연속 왕복, 비행기 모드 반복 질문, 소음/잠금/발열·장시간 안정성은 미검증이다. 웹/아이폰의 음성 상태와 구분한다. [네이티브 소스 경로·사용법·설계](../../docs/ANDROID_VOICE.md).
 
 ## 2026-10-27 웹 BLE 철회·로컬 연속 음성 대화
 

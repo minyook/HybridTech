@@ -473,25 +473,28 @@ private fun TossSource(state:FieldGuardUiState,actions:FieldGuardActions){Worksp
 @Composable
 private fun TossVoice(voice: VoiceUiState, actions: FieldGuardActions) {
     TossScrollPage {
-        TossPageTitle(if (voice.listening) "말씀해 주세요" else "음성으로 질문해요", "말씀한 질문을 문서에서 찾고 기기에서 답해요.")
-        Spacer(Modifier.height(28.dp))
-        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            Surface(color = TossBlueWeak, shape = CircleShape, modifier = Modifier.size(150.dp)) {
-                Box(contentAlignment = Alignment.Center) { Text(if (voice.listening) "듣는 중" else "마이크", color = TossBlue, fontWeight = FontWeight.Bold, fontSize = 19.sp) }
-            }
+        TossPageTitle("로컬 음성 대화", "한 번 시작하면 듣기 → 문서 답변 → 읽기 → 다시 듣기를 반복해요.")
+        TossPanel {
+            Text(voice.status, style = MaterialTheme.typography.titleMedium)
+            if (voice.lastHeard.isNotBlank()) Text("인식한 질문: "+voice.lastHeard, style = MaterialTheme.typography.bodyMedium)
+            voice.error?.let { Text(it, color = TossRed, style = MaterialTheme.typography.bodySmall) }
         }
-        Spacer(Modifier.height(26.dp))
-        TossPanel { Text(if (voice.listening) "질문을 듣고 있어요. 말을 마치면 자동으로 문서 검색이 시작돼요." else "마이크를 누르고 질문을 말씀해 주세요.", style = MaterialTheme.typography.bodyMedium) }
-        voice.error?.let { Text(it, color = TossRed, style = MaterialTheme.typography.bodySmall) }
+        TossPrimaryButton(if (voice.conversationEnabled) "음성 대화 종료" else "음성 대화 시작", if (voice.conversationEnabled) actions.onStopVoice else actions.onVoiceClick)
+        TossPanel {
+            Text("이 기기의 음성 준비", style = MaterialTheme.typography.titleMedium)
+            Text(voice.localSpeechStatus, style = MaterialTheme.typography.bodyMedium)
+            Text(if (voice.ttsAvailable) "로컬 한국어 답변 읽기 준비됨" else "로컬 한국어 읽기 음성 확인 필요 · 읽기를 끄면 화면 답변을 사용할 수 있어요.", style = MaterialTheme.typography.bodySmall)
+            TossSecondaryButton(if (voice.languagePreparing) "한국어 음성 준비 중" else "한국어 음성 준비·다시 확인", { if (!voice.languagePreparing) actions.onPrepareVoice() })
+        }
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text("‘오투야’ 호출 대기", style = MaterialTheme.typography.titleMedium)
-                Text("앱을 보고 있을 때만 작동해요.", style = MaterialTheme.typography.bodySmall)
-            }
+            Column(Modifier.weight(1f)) { Text("답변 읽기", style = MaterialTheme.typography.titleMedium); Text("기기에 설치된 한국어 로컬 음성만 사용해요.", style = MaterialTheme.typography.bodySmall) }
+            Switch(checked = voice.readAnswers, onCheckedChange = actions.onVoiceReadAnswers)
+        }
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) { Text("‘오투야’로 대화 시작", style = MaterialTheme.typography.titleMedium); Text("호출 뒤에는 다시 부르지 않아도 이어서 대화해요.", style = MaterialTheme.typography.bodySmall) }
             Switch(checked = voice.wakeWordEnabled, onCheckedChange = { actions.onVoiceLongClick() })
         }
-        TossSecondaryButton(if (voice.listening) "듣기 중단" else "음성 질문 시작", if (voice.listening) actions.onStopVoice else actions.onVoiceClick)
-        Text("기기에 로컬 한국어 음성 인식기가 있어야 작동해요. 사용할 수 없으면 네트워크 음성 입력으로 전환하지 않아요.", style = MaterialTheme.typography.bodySmall)
+        Text("앱 화면을 열어둔 동안만 들어요. 화면을 벗어나거나 잠그면 종료돼요. 한국어 데이터 최초 준비에는 인터넷이 필요할 수 있지만 질문 음성은 원격 인식으로 보내지 않아요.", style = MaterialTheme.typography.bodySmall)
     }
 }
 
