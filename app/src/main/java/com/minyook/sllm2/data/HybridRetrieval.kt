@@ -15,6 +15,7 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
         SemanticPassage(p.getString("id"),p.getString("documentId"),p.getInt("page"),p.getInt("chunkIndex"),p.getString("section"),p.getString("text"),(0 until orders.length()).map{orders.getInt(it)},(0 until units.length()).map{j->val u=units.getJSONObject(j);EvidencePassage(u.getString("text"),u.getString("section"),10000+u.getInt("order"),u.optInt("group",j))},p.getString("searchText"),p.getString("sourceBody"),FloatArray(v.length()){v.getDouble(it).toFloat()})
     }.filter { p -> chunks.any { it.documentId==p.documentId && it.pageNumber==p.page && it.chunkIndex==p.chunkIndex && it.body==p.sourceBody } } }
     private val lexical = FocusedRetriever(chunks)
+    private val equipment = EquipmentOverview(chunks)
     private val specification = Regex("방수|IP\\s*등급|배터리|전압|볼트|가격|구매|무게|제조사|모델명|충전|유효기간|유효\\s*기간",RegexOption.IGNORE_CASE)
     private data class Candidate(val p:SemanticPassage,val dense:Double,val lex:Double,var fused:Double=0.0)
     private fun completeScope(p:SemanticPassage,chunk:KnowledgeChunk):List<EvidencePassage>{
@@ -32,6 +33,7 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
             if(found.isNotEmpty()&&missing.isNotEmpty())return result.copy(status="partial",sources=found.flatMap{it.sources}.groupBy{it.chunk.id}.values.map{group->group.first().copy(evidence=group.flatMap{FocusedEvidence.selected(it)}.distinctBy{it.text})},message="질문 중 ‘${missing.joinToString(" / "){it.question}}’ 부분은 아직 직접 근거를 확인하지 못했어요. 이 부분에서 궁금한 대상이나 조건을 더 알려 주세요.",suggestions=missing.take(3).map{SearchSuggestion(it.question,it.question)})
         }
         val tokens=EvidenceLanguage.terms(question).filterNot{Regex("^(그거|그건|그것|그러면|그럼|후속|질문)").containsMatchIn(it)}
+        equipment.resolve(question)?.let { return it }
         val sources=lexical.retrieve(question)
         val unknown=specification.findAll(question).map{it.value}.distinct().filter{s->chunks.none{EvidenceLanguage.compact(s) in EvidenceLanguage.compact(it.body)}}.toList()
         val vague=tokens.size<=1&&tokens.none{it !in EvidenceLanguage.generic}
