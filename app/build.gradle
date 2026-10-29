@@ -72,6 +72,7 @@ dependencies {
     implementation libs.androidx.compose.ui.tooling.preview
     implementation libs.androidx.compose.material3
     implementation libs.litertlm.android
+    implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.22.0'
     testImplementation libs.junit
     testImplementation 'org.json:json:20250517'
     androidTestImplementation libs.androidx.espresso.core
@@ -81,3 +82,19 @@ dependencies {
     debugImplementation libs.androidx.compose.ui.tooling
     debugImplementation libs.androidx.compose.ui.test.manifest
 }
+
+tasks.register('verifySemanticAssets') {
+    doLast {
+        def metadata = new groovy.json.JsonSlurper().parse(rootProject.file('tools/semantic-model-files.json'))
+        metadata.each { name, expected ->
+            def asset = file("src/main/assets/semantic-model/${name}")
+            if (!asset.exists() || asset.length() != expected.size) throw new GradleException('Run: cd web && npm ci && npm run prepare:assets (prepares pinned local embedding assets)')
+            def digest = java.security.MessageDigest.getInstance('SHA-256')
+            asset.withInputStream { input -> byte[] buffer = new byte[65536]; int count; while ((count = input.read(buffer)) != -1) digest.update(buffer, 0, count) }
+            if (digest.digest().encodeHex().toString() != expected.sha256) throw new GradleException("Semantic asset integrity: ${name}")
+        }
+        def index = new groovy.json.JsonSlurper().parse(file('src/main/assets/knowledge/semantic-index-v1.json'))
+        if (index.modelRevision != '5090578d9565bb06545b4552f76e6bc2c93e4a66' || index.dimensions != 768) throw new GradleException('Rebuild the semantic document index with npm run prepare:assets in web/')
+    }
+}
+tasks.named('preBuild').configure { dependsOn 'verifySemanticAssets' }

@@ -46,6 +46,7 @@ object FocusedEvidence {
             var section = ""
             buildList {
                 selected(source).forEach { unit ->
+                    if(Regex("^[,\\s]*제\\d+조(?:의\\d+)?\\s*(?:\\d+\\s*)?(?:작업시\\s*안전보건\\s*조치)?$").matches(unit.text.trim()))return@forEach
                     val key = unit.text.replace(Regex("\\s+"), " ")
                     if (!seen.add(key)) return@forEach
                     if (unit.section.isNotBlank() && unit.section != section) { section = unit.section; add("**${unit.section}**") }

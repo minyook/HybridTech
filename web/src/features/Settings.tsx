@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { prepareAI, releaseModel, retryAIWithReducedContext } from '../ai/runtime';
+import { prepareAI, releaseModel, retryAIWithReducedContext, holdAIForAudio } from '../ai/runtime';
+import {acquireEngineLease} from '../ai/engine-lease';
 import { getAISupport } from '../ai/capabilities';
 import { useAIStatus } from '../ai/useAIStatus';
 import { CONTEXT_TOKEN_OPTIONS, loadAISettings, normalizeAISettings, OUTPUT_TOKEN_OPTIONS, RECOVERY_AI_SETTINGS, saveAISettings, type AISettings } from '../ai/preferences';
@@ -13,11 +14,15 @@ import type { Asset, AssetManifest, ModelRecord } from '../types';
 import { aiDiagnosticReport, AI_RUNTIME_REVISION } from '../ai/diagnostics';
 import { downloadLightModel, LIGHT_MODEL, lightModelInstalled, removeLightModel, usesLightAI } from '../ai/light-model';
 import { resetAIRecovery } from '../ai/recovery';
+import {prepareSemantic,semanticInstalled,semanticRecovery} from '../rag/semantic-assets';
 
 const preparationDuration=(milliseconds:number)=>milliseconds<100?'0.1초 미만':`${(milliseconds/1000).toFixed(1)}초`;
 
 export default function Settings({ notify, changed }: { notify: (message: string) => void; changed: () => Promise<void> }) {
   const [groups,setGroups] = useState({ knowledge:false,pdf:false,runtime:false });
+  const [semanticReady,setSemanticReady]=useState(false);
+  const [semanticIncomplete,setSemanticIncomplete]=useState(semanticRecovery);
+  useEffect(()=>{void semanticInstalled().then(setSemanticReady).catch(()=>{});},[]);
   const [catalog,setCatalog] = useState<AssetManifest>(); const [info,setInfo] = useState({usage:0,quota:0,persisted:false});
   const [model,setModel] = useState<ModelRecord>(); const ai=useAIStatus();
   const support=getAISupport();const light=usesLightAI();const [lightInstalled,setLightInstalled]=useState(false);
@@ -63,6 +68,7 @@ export default function Settings({ notify, changed }: { notify: (message: string
   return <>
     <PageHead eyebrow="YOUR WORKSPACE" title="현장에 가기 전, 준비해요" description="문서와 AI를 이 기기에 저장하면 인터넷 없이 사용할 수 있어요."/>
     {!isSecureContext && <Notice kind="warning">PWA 설치와 기기 저장에는 HTTPS가 필요해요. PC 개발 환경에서는 localhost를 사용할 수 있어요.</Notice>}
+    <section className="card settings-card"><h2>문장 의미 검색</h2><p>문서와 다른 표현도 찾도록 다국어 검색 모델을 기기에 저장해요. 모델 약 220MB와 CPU 실행 파일이 필요해요. 질문은 서버로 보내지 않으며, 검색이 끝나면 모델 메모리를 정리해요.</p>{semanticIncomplete&&<Notice>이전 검색 작업의 완료를 확인하지 못해 자동 재시도를 멈췄어요. 아래 확인·복구로 다시 시도할 수 있어요.</Notice>}<button className="btn secondary" disabled={!!busy} onClick={()=>void task('semantic',async signal=>{const release=await holdAIForAudio();let unlock:(()=>void)|undefined;try{unlock=await acquireEngineLease();if(!unlock)throw Error('다른 AI 화면을 닫은 뒤 준비해 주세요.');await prepareSemantic(signal,setStatus);setSemanticReady(true);setSemanticIncomplete(false);}finally{unlock?.();release();}})}>{semanticReady?'의미 검색 파일 확인·복구':'문장 의미 검색 준비'}</button><p>{semanticReady?'기기 저장됨 · 오프라인 검색 가능':'기본 문서 검색 사용 가능 · 의미 검색은 준비 후 사용해요'}</p></section>
     <div className="settings-grid"><section className="card"><div className="card-title"><div className="tile-icon"><Icon name="download"/></div><div><h2>오프라인 준비</h2><p>파일 크기와 SHA-256 검증 후 저장해요</p></div></div>
       {([['knowledge','문서 검색','87개 페이지의 검색 데이터'],['pdf','PDF 원본','문서 2종과 PDF 표시 파일'],['runtime','AI 실행 파일',`LiteRT-LM ${catalog?.sdkVersion ?? '…'} · Safari 호환 빌드 포함`]] as const).filter(([id])=>!light||id!=='runtime').map(([id,label,description]) => <div className="setting-row" key={id}><div><strong>{label}</strong><p>{description} · {groupSize(id)}</p></div><button className={`btn small ${groups[id] ? 'secondary' : 'primary'}`} disabled={Boolean(busy)} onClick={() => prepare([id])}>{groups[id] ? '다시 확인' : '준비하기'}</button></div>)}
       <div className="ready-list">{Object.entries(groups).filter(([key])=>!light||key!=='runtime').map(([key,value]) => <span key={key} className={`badge ${value ? 'green' : ''}`}>{value ? '✓' : '○'} {key==='knowledge'?'검색':key==='pdf'?'PDF':'AI 파일'} {value?'준비됨':'미준비'}</span>)}</div>

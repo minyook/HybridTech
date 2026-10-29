@@ -26,6 +26,7 @@ class KnowledgeRepository {
         return index!!
     }
     fun retrieveForQuestion(question: String): List<RetrievedChunk> = if (question.isBlank()) emptyList() else retriever().retrieve(question)
+    fun resolveQuestion(question: String, semanticIndex: String, vector: FloatArray?): SearchResolution = HybridRetrieval(box.all, semanticIndex).resolve(question, vector)
     fun retrieve(question: String, limit: Int = 4): List<RetrievedChunk> = if (question.isBlank()) emptyList() else retriever().rank(question).take(limit.coerceAtLeast(1))
     fun answerWithoutModel(sources: List<RetrievedChunk>): String = FocusedEvidence.format(sources)
     fun contextForModel(sources: List<RetrievedChunk>): String = sources.joinToString("\n\n") { source ->

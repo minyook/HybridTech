@@ -17,4 +17,5 @@
 .externalNativeBuild
 .cxx
 *.apk
+app/src/main/assets/semantic-model/
 local.properties

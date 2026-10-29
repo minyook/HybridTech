@@ -22,6 +22,9 @@ import com.minyook.sllm2.data.KnowledgeSeeder
 import com.minyook.sllm2.data.KnowledgeChunk
 import com.minyook.sllm2.data.DocumentAnswerPlan
 import com.minyook.sllm2.data.AnswerSupplementVerifier
+import com.minyook.sllm2.data.HybridRetrieval
+import com.minyook.sllm2.data.SemanticEncoder
+import com.minyook.sllm2.data.SearchSuggestion
 import com.minyook.sllm2.gas.BleGasClient
 import com.minyook.sllm2.gas.GasMonitoringService
 import com.minyook.sllm2.gas.GasReading
@@ -74,6 +77,8 @@ data class ChatMessageUi(
     val startedAtElapsedRealtime: Long = 0L,
     val sourceIds: List<Long> = emptyList(),
     val sourceLabels: Map<Long, String> = emptyMap(),
+    val suggestions: List<SearchSuggestion> = emptyList(),
+    val resolvedQuestion: String? = null,
 )
 
 data class BleDeviceUi(
@@ -264,7 +269,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
                 destination = AppDestination.CHAT,
                 activeChatId = session.id,
                 messages = session.turns.map { turn ->
-                    ChatMessageUi(text = turn.text, fromWorker = turn.role == ChatHistoryStore.Role.USER, sourceIds = turn.sourceIds, sourceLabels = turn.sourceIds.mapNotNull { id -> repository.chunk(id)?.let { id to (it.sourceKind+" · "+it.pageNumber+"쪽") } }.toMap())
+                    ChatMessageUi(text = turn.text, fromWorker = turn.role == ChatHistoryStore.Role.USER, sourceIds = turn.sourceIds, suggestions=turn.suggestions, resolvedQuestion=turn.resolvedQuestion, sourceLabels = turn.sourceIds.mapNotNull { id -> repository.chunk(id)?.let { id to (it.sourceKind+" · "+it.pageNumber+"쪽") } }.toMap())
                 },
                 input = "",
                 inputError = null,
@@ -354,6 +359,9 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
             onFailure?.invoke("질문을 정확히 인식하지 못했어요. 다시 시작해 주세요.")
             return
         }
+        val previousTurn = _uiState.value.messages.lastOrNull { it.fromWorker }
+        val previous = previousTurn?.resolvedQuestion ?: previousTurn?.text.orEmpty()
+        val resolved = HybridRetrieval.contextualQuestion(asked, previous)
         val chatId = _uiState.value.activeChatId ?: history.create(asked).id
         val pending = ChatMessageUi(
             text = "",
@@ -364,7 +372,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
         updateState {
             it.copy(
                 activeChatId = chatId,
-                messages = it.messages + ChatMessageUi(text = asked, fromWorker = true) + pending,
+                messages = it.messages + ChatMessageUi(text = asked, fromWorker = true, resolvedQuestion=resolved) + pending,
                 input = "",
                 inputError = null,
                 isAnswering = true,
@@ -373,14 +381,24 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
         }
         viewModelScope.launch(Dispatchers.IO) {
             try {
-            history.append(chatId, ChatHistoryStore.Role.USER, asked)
-            val sources = repository.retrieveForQuestion(asked)
-            val plan = DocumentAnswerPlan.create(asked, sources, repository.documentCount() > 0)
+            history.append(chatId, ChatHistoryStore.Role.USER, asked, resolvedQuestion=resolved)
+            val searchIndex = appContext.assets.open("knowledge/semantic-index-v1.json").bufferedReader().use { it.readText() }
+            val initial = repository.resolveQuestion(resolved, searchIndex, null)
+            val resolution = if(initial.status=="unconfirmed") {
+                // Do not overlap generator and encoder; ordinary source answers
+                // and explicit clarification choices need no neural allocation.
+                runtime.release()
+                val vector=runCatching { SemanticEncoder(appContext).encode(resolved) }.getOrNull()
+                repository.resolveQuestion(resolved,searchIndex,vector)
+            } else initial
+            val sources = resolution.sources
+            val basePlan = DocumentAnswerPlan.create(resolved, sources, repository.documentCount() > 0)
+            val plan = if(sources.isEmpty()) basePlan.copy(body=resolution.message) else if(resolution.message.isNotBlank())basePlan.copy(body=basePlan.body+"\n\n"+resolution.message) else basePlan
             val sourceIds = plan.sourceIds
             withContext(Dispatchers.Main) {
                 updateState { state -> state.copy(messages = state.messages.map { message -> if (message.id == pending.id) message.copy(text = plan.body, sourceIds = sourceIds, sourceLabels = plan.sourceLabels) else message }) }
             }
-            val supplement = if (plan.supplementRequested && modelPreferences.status().phase == ModelPhase.READY) {
+            val supplement = if (resolution.status=="answered" && plan.supplementRequested && modelPreferences.status().phase == ModelPhase.READY) {
                 try {
                     val raw = runtime.generate(asked, plan.context(), compactVoiceAnswer, supplementOnly = true)
                     AnswerSupplementVerifier.fromJson(raw, plan)
@@ -388,11 +406,11 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
                 catch (_: Exception) { "" }
             } else ""
             val response = AnswerSupplementVerifier.compose(plan, supplement)
-            history.append(chatId, ChatHistoryStore.Role.ASSISTANT, response, sourceIds)
+            history.append(chatId, ChatHistoryStore.Role.ASSISTANT, response, sourceIds, suggestions=resolution.suggestions)
             withContext(Dispatchers.Main) {
                 updateState { state ->
                     state.copy(
-                        messages = state.messages.map { if (it.id == pending.id) pending.copy(text = response, pending = false, sourceIds = sourceIds, sourceLabels = plan.sourceLabels) else it },
+                        messages = state.messages.map { if (it.id == pending.id) pending.copy(text = response, pending = false, sourceIds = sourceIds, sourceLabels = plan.sourceLabels, suggestions = resolution.suggestions) else it },
                         isAnswering = false,
                         histories = history.list(),
                     )

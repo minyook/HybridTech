@@ -59,6 +59,16 @@ export async function loadKnowledge() {
   const data = JSON.parse(new TextDecoder().decode(buffer));
   return data.chunks.map((chunk: Record<string, unknown>) => ({ ...chunk, id: `${chunk.documentId}:${chunk.pageNumber}:${chunk.chunkIndex}` }));
 }
+export async function loadSemanticIndex():Promise<import('../rag/hybrid').SemanticIndex>{
+  const catalog=await manifest(),asset=catalog.assets.find(a=>a.path==='knowledge/semantic-index-v1.json');
+  if(!asset)throw Error('의미 검색 문서 인덱스가 없어요.');
+  const cache=await caches.open(cacheName(catalog.version));let response=await cache.match(assetUrl(asset.path));
+  if(!response)response=await fetch(assetUrl(asset.path));if(!response.ok)throw Error('의미 검색 문서를 읽지 못했어요.');
+  const buffer=await response.arrayBuffer();await verifyAsset(asset,buffer);await cache.put(assetUrl(asset.path),new Response(buffer,{headers:{'Content-Type':'application/json','X-FieldGuard-SHA256':asset.sha256,'X-FieldGuard-Size':String(asset.size)}}));
+  const data=JSON.parse(new TextDecoder().decode(buffer));
+  if(data.modelRevision!=='5090578d9565bb06545b4552f76e6bc2c93e4a66'||data.dimensions!==768)throw Error('의미 검색 문서 버전이 다릅니다.');
+  return data;
+}
 export async function storageInfo() {
   const estimate = await navigator.storage?.estimate();
   return { usage: estimate?.usage ?? 0, quota: estimate?.quota ?? 0, persisted: await navigator.storage?.persisted?.() ?? false };

@@ -8,13 +8,15 @@ export interface Chunk {
   heading: string;
   body: string;
 }
-export interface Source { chunk: Chunk; score: number; evidenceOrders?:number[] }
+export interface Source { chunk: Chunk; score: number; evidenceOrders?:number[]; evidence?:import('./rag/evidence').EvidenceUnit[] }
 export interface Chat {
   id: string; question: string; answer: string; citationIds: string[];
   mode: 'source' | 'ai' | 'cancelled'; createdAt: string; notice?: string;
   tokenUsage?:import('./ai/protocol').TokenUsage;
   includesEvidence?:boolean;
   answerFormat?:'integrated';
+  suggestions?:{label:string;question:string}[];
+  resolvedQuestion?:string;
 }
 export interface Checklist { id: string; checked: number[]; site: string; note: string; createdAt: string }
 export interface Asset { path: string; size: number; sha256: string; group: 'knowledge' | 'pdf' | 'runtime' }

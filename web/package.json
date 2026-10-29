@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "prepare:assets": "node scripts/prepare-assets.mjs && node scripts/build-ai-worker.mjs && node scripts/prepare-voice.mjs",
+    "prepare:semantic": "node ../tools/prepare-semantic.mjs && node scripts/build-semantic-index.mjs",
+    "prepare:assets": "npm run prepare:semantic && node scripts/prepare-assets.mjs && node scripts/build-ai-worker.mjs && node scripts/prepare-voice.mjs",
     "predev": "npm run prepare:assets",
     "dev": "vite --host 0.0.0.0",
     "build": "npm run prepare:assets && tsc -b && vite build && node scripts/build-pwa.mjs",
@@ -16,6 +17,7 @@
     "test:watch": "vitest",
     "evaluate:150": "node scripts/evaluate-150.mjs",
     "evaluate:focused": "node scripts/evaluate-focused.mjs",
+    "evaluate:semantic": "node scripts/evaluate-semantic.mjs",
     "package:knowledge": "node scripts/package-knowledge.mjs"
   },
   "dependencies": {
@@ -38,6 +40,7 @@
     "@types/react": "19.2.0",
     "@types/react-dom": "19.2.0",
     "fake-indexeddb": "6.2.4",
+    "onnxruntime-node": "1.21.0",
     "typescript": "5.9.3",
     "vite": "8.3.4",
     "vitest": "4.1.11"

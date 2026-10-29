@@ -70,7 +70,7 @@ import java.util.Locale
                     }
                 }
                 items(messages,key={it.id}){message->
-                    Box(Modifier.fillMaxWidth(),contentAlignment=Alignment.TopCenter){Column(Modifier.widthIn(max=820.dp).fillMaxWidth()){WorkspaceMessage(message,actions)}}
+                    Box(Modifier.fillMaxWidth(),contentAlignment=Alignment.TopCenter){Column(Modifier.widthIn(max=820.dp).fillMaxWidth()){WorkspaceMessage(message,actions,!state.isAnswering&&!voice.conversationEnabled)}}
                 }
             }
             if(!follow&&messages.isNotEmpty())TextButton(onClick={follow=true;scope.launch{list.scrollToItem(messages.size)}},modifier=Modifier.align(Alignment.CenterHorizontally).testTag("scrollLatest")){Text("최신 답변으로 이동 ↓",fontSize=11.sp)}
@@ -99,7 +99,7 @@ import java.util.Locale
     }
 }
 @OptIn(ExperimentalLayoutApi::class)
-@Composable private fun WorkspaceMessage(message:ChatMessageUi,actions:FieldGuardActions){
+@Composable private fun WorkspaceMessage(message:ChatMessageUi,actions:FieldGuardActions,choicesEnabled:Boolean){
     if(message.fromWorker){
         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.End){Surface(color=Color(0xFFE8F2FF),shape=RoundedCornerShape(topStart=17.dp,topEnd=17.dp,bottomStart=17.dp,bottomEnd=4.dp),modifier=Modifier.widthIn(max=700.dp)){Text(message.text,fontSize=14.sp,lineHeight=24.sp,color=Color(0xFF316BB9),modifier=Modifier.padding(horizontal=19.dp,vertical=14.dp))}}
     }else Column(Modifier.fillMaxWidth().padding(top=2.dp),verticalArrangement=Arrangement.spacedBy(20.dp)){
@@ -110,6 +110,9 @@ import java.util.Locale
             if(!message.pending)Text("기기 저장됨",fontSize=10.sp,color=Color(0xFF9BA5B3))
         }
         if(message.text.isNotBlank())MarkdownText(message.text)
+        if(!message.pending && message.suggestions.isNotEmpty())FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){
+            message.suggestions.forEach{suggestion->OutlinedButton(enabled=choicesEnabled,onClick={actions.onPreset(suggestion.question)}){Text(suggestion.label,fontSize=12.sp)}}
+        }
         if(message.sourceIds.isNotEmpty()){
             HorizontalDivider(color=WorkspaceDesign.Border)
             Text("참조한 문서",fontSize=11.sp,color=WorkspaceDesign.Muted)

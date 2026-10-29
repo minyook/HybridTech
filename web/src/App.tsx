@@ -8,10 +8,11 @@ import { useChatViewport } from './chat/useChatViewport';
 import { useWorkSession } from './workflow/access';
 import { isAndroidEmbedded } from './workflow/native';
 import { allChats, allChecklists, deleteChat, getSetting, saveChat, setSetting } from './storage/db';
-import { contradictsSources, missingAspects, rank, retrieve, sourceAnswer } from './rag/search';
+import { rank } from './rag/search';
 import { createAnswerPlan } from './rag/answer-plan';
-import { usesLightAI } from './ai/light-model';
-import { loadKnowledge, preparedGroups } from './offline/assets';
+import {contextualQuestion,resolveHybrid,type SemanticIndex} from './rag/hybrid';
+import {queryVector} from './rag/semantic-runtime';
+import { loadKnowledge, loadSemanticIndex, preparedGroups } from './offline/assets';
 import { formatDate, go, Icon, Notice, PageHead, TextContent } from './ui';
 
 const Settings = lazy(() => import('./features/Settings'));
@@ -30,6 +31,7 @@ export default function App() {
   const ai=useAIStatus();
   const workAccess=useWorkSession();
   const route = useRoute(); const section = '/'+(route.split('/')[1]?.split('?')[0] ?? '');
+  const [semanticIndex,setSemanticIndex]=useState<SemanticIndex>();
   const [chunks,setChunks] = useState<Chunk[]>([]); const [loading,setLoading] = useState(true); const [loadError,setLoadError] = useState('');
   const [chats,setChats] = useState<Chat[]>([]); const [checks,setChecks] = useState<Checklist[]>([]); const [savedIds,setSavedIds] = useState<Set<string>>(new Set());
   const [activeIds,setActiveIds] = useState<string[]>([]); const [question,setQuestion] = useState(''); const [search,setSearch] = useState(''); const [filter,setFilter] = useState('all');
@@ -66,6 +68,7 @@ export default function App() {
         if(active&&!ready&&getAIStatus().phase==='recovery'&&['/','/ask'].includes(initialRoute)&&(location.hash.slice(1)||'/')===initialRoute)go('/settings');
       }).catch(()=>{});
     }
+    void loadSemanticIndex().then(value=>{if(active)setSemanticIndex(value);}).catch(()=>{});
     loadKnowledge().then(value => { if (active) setChunks(value); }).catch(error => { if (active) setLoadError(error.message); }).finally(() => { if (active) setLoading(false); });
     void refresh();
     getSetting<typeof draft>('checklist-draft').then(value => { if (active && value) setDraft(value); }).catch(() => notify('점검 초안을 복원하지 못했어요.')).finally(() => { if (active) setDraftLoaded(true); });
@@ -84,36 +87,33 @@ export default function App() {
     const trimmed = value.trim(); if (!trimmed || busy || !chunks.length || (voiceActive&&!voiceSignal)) return '';
     voiceSignal?.throwIfAborted();
     setQuestion(''); setBusy(true); setStream(''); go('/ask');
-    const sources = retrieve(trimmed,chunks); const missing = missingAspects(trimmed,chunks);
-    const chat: Chat = { id:crypto.randomUUID(),question:trimmed,answer:'',citationIds:sources.map(source => source.chunk.id),mode:'source',createdAt:new Date().toISOString() };
-    const detailed=usesLightAI();if(detailed)chat.answerFormat='integrated';
-    const plan=detailed?createAnswerPlan(trimmed,sources):undefined;
-    if(plan?.evidence.some(unit=>unit.requiresFigure))chat.notice='도식의 위치 기호(X·①~③)는 아래 출처의 원문 그림과 함께 확인해 주세요.';
-    const documentAnswer=()=>plan?.body??sourceAnswer(sources);
-    if(plan){chat.answer=plan.body;setStream(plan.body);}
-    controller.current = new AbortController(); const signal = controller.current.signal;
+    const previous=chats.find(c=>c.id===activeIds.at(-1));
+    const resolved=contextualQuestion(trimmed,previous?.resolvedQuestion??previous?.question);
+    const chat:Chat={id:crypto.randomUUID(),question:trimmed,resolvedQuestion:resolved,answer:'',citationIds:[],mode:'source',createdAt:new Date().toISOString(),answerFormat:'integrated'};
+    controller.current=new AbortController();const signal=controller.current.signal;
     const abortVoice=()=>controller.current?.abort();voiceSignal?.addEventListener('abort',abortVoice,{once:true});
-    setCurrent(chat); setActiveIds(previous => [...previous,chat.id]);
-    try {
-      if (supportsAI() && sources.length && !missing.length) {
-        try {
-          const result = await generate(trimmed,sources,setStream,signal,plan);
-          if (contradictsSources(trimmed,result.answer,sources)) throw new Error('생성된 답변이 선택한 근거와 맞지 않아 원문을 표시해요.');
-          chat.answer = result.answer; chat.mode = result.generated===false?'source':'ai';chat.tokenUsage=result.usage;
-          if(result.supplementSkipped==='recovery')chat.notice='AI 복구가 필요해 문서 근거로 답변했어요. 설정에서 상태를 확인할 수 있어요.';
-          if(result.truncated||(!detailed&&result.usage.outputTokens!==undefined&&result.usage.outputTokens>=result.usage.maxOutputTokens))chat.notice='설정한 답변 토큰 한도에 도달했어요. 내용이 더 필요하면 질문을 나누어 주세요.';
-        } catch (error) {
-          chat.answer = documentAnswer(); chat.mode = signal.aborted?'cancelled':'source';
-          chat.notice = signal.aborted ? '답변 생성을 중단했어요. 검색된 원문은 확인할 수 있어요.' : `${error instanceof Error?error.message:'AI 답변 생성에 실패했어요.'} 검색 원문을 표시해요.`;
-        }
-      } else {
-        chat.answer = documentAnswer();
-        if (sources.length) chat.notice = missing.length ? `근거를 찾지 못한 주제: ${missing.join(', ')}. 확인된 문서 원문만 표시해요.` : 'AI가 실행되지 않아 검색된 문서 원문을 표시해요.';
+    setCurrent(chat);setActiveIds(previous=>[...previous,chat.id]);
+    try{
+      let vector:number[]|undefined;const initial=resolveHybrid(resolved,chunks,semanticIndex);
+      if(initial.status==='unconfirmed')try{vector=await queryVector(resolved,signal);}catch(error){if(signal.aborted)throw error;chat.notice=error instanceof Error?error.message:'문장 의미 검색을 완료하지 못해 기본 검색을 사용해요.';}
+      signal.throwIfAborted();
+      const resolution=vector?resolveHybrid(resolved,chunks,semanticIndex,vector):initial;
+      const sources=resolution.sources;
+      chat.citationIds=sources.map(s=>s.chunk.id);chat.suggestions=resolution.suggestions;
+      const plan=createAnswerPlan(resolved,sources);if(!sources.length)plan.body=resolution.message;
+      else if(resolution.message)plan.body+='\n\n'+resolution.message;
+      chat.answer=plan.body;setStream(plan.body);setCurrent({...chat});
+      // Stable source answer first. Optional supplements are validated by the
+      // lightweight plan path; a missing generator never changes the evidence.
+      if(resolution.status==='answered'&&plan.supplementRequested&&supportsAI()&&sources.length){
+        try{const result=await generate(resolved,sources,setStream,signal,plan);chat.answer=result.answer;chat.mode=result.generated===false?'source':'ai';chat.tokenUsage=result.usage;}
+        catch(error){chat.answer=plan.body;chat.mode=signal.aborted?'cancelled':'source';if(!signal.aborted)chat.notice=error instanceof Error?error.message:'보충 설명을 완료하지 못해 문서 본문을 유지해요.';}
       }
-      setChats(previous => [chat,...previous]);
-      try { await saveChat(chat); setSavedIds(previous => new Set(previous).add(chat.id)); }
-      catch { notify('답변을 기기에 저장하지 못했어요. 화면의 내용을 복사해 보관해 주세요.'); }
-    } finally { voiceSignal?.removeEventListener('abort',abortVoice);setCurrent(undefined); setStream(''); setBusy(false); controller.current = undefined; }
+      if(plan.evidence.some(unit=>unit.requiresFigure))chat.notice='도식의 위치 기호는 아래 출처의 원문 그림과 함께 확인해 주세요.';
+      setChats(previous=>[chat,...previous]);
+      try{await saveChat(chat);setSavedIds(previous=>new Set(previous).add(chat.id));}catch{notify('답변을 기기에 저장하지 못했어요.');}
+    }catch(error){if(!signal.aborted)notify(error instanceof Error?error.message:'문서 검색을 완료하지 못했어요.');}
+    finally{voiceSignal?.removeEventListener('abort',abortVoice);setCurrent(undefined);setStream('');setBusy(false);controller.current=undefined;}
     return chat.answer;
   }
   const sourceLink = (source: Chunk) => go(`/sources/${source.documentId}/${source.pageNumber}`);
@@ -139,7 +139,7 @@ export default function App() {
       return <article className="exchange" key={chat.id}><div className="user-message">{chat.question}</div><div className="answer" aria-busy={writing||undefined}>
         <div className="answer-label">{writing?<><span className="answer-progress"><span className="spinner"/></span><strong>{stream?(chat.answerFormat==='integrated'?'문서 본문을 표시했어요 · 필요한 보충 설명 확인 중':'AI가 답변을 작성하고 있어요'):['checking','loading','generating'].includes(ai.phase)?ai.message:'문서 근거를 확인하고 있어요'}</strong></>:<><div className="mini-brand">O₂</div><strong>{chat.answerFormat==='integrated'?(chat.mode==='ai'?'문서 근거 · AI 보충':'문서 근거 답변'):(chat.mode==='ai'?'AI 답변':'관련 문서 원문')}</strong><span>{savedIds.has(chat.id)?'기기 저장됨':'저장되지 않음'}</span></>}</div>
         {chat.notice&&<Notice>{chat.notice}</Notice>}<TextContent text={writing?stream:chat.answer}/>
-        {!writing&&<>{chat.tokenUsage&&<p className="token-usage">{chat.tokenUsage.maxOutputTokens===0?'문서 근거 답변 · AI 생성 0토큰':<>{chat.includesEvidence&&'AI 정리 사용량(문서 발췌 제외) · '}{chat.tokenUsage.inputTokens!==undefined&&`입력 ${chat.tokenUsage.inputTokens.toLocaleString()} · `}{chat.tokenUsage.outputTokens!==undefined&&`생성 ${chat.tokenUsage.outputTokens.toLocaleString()} · `}{chat.tokenUsage.totalTokens!==undefined&&`전체 ${chat.tokenUsage.totalTokens.toLocaleString()} · `}{chat.tokenUsage.passes!==undefined?`순차 작성 ${chat.tokenUsage.passes}회 · 회당 한도 ${chat.tokenUsage.perPassMaxOutputTokens?.toLocaleString()} 토큰`:`답변 한도 ${chat.tokenUsage.maxOutputTokens.toLocaleString()} 토큰`}</>}</p>}{renderSources(chat.citationIds.flatMap(id=>{const chunk=chunks.find(chunk=>chunk.id===id);return chunk?[{chunk,score:0}]:[];}))}</>}
+        {!writing&&<>{!!chat.suggestions?.length&&<div className="prompt-chips">{chat.suggestions.map(item=><button key={item.question} disabled={busy||voiceActive} onClick={()=>void ask(item.question)}>{item.label}</button>)}</div>}{chat.tokenUsage&&<p className="token-usage">{chat.tokenUsage.maxOutputTokens===0?'문서 근거 답변 · AI 생성 0토큰':<>{chat.includesEvidence&&'AI 정리 사용량(문서 발췌 제외) · '}{chat.tokenUsage.inputTokens!==undefined&&`입력 ${chat.tokenUsage.inputTokens.toLocaleString()} · `}{chat.tokenUsage.outputTokens!==undefined&&`생성 ${chat.tokenUsage.outputTokens.toLocaleString()} · `}{chat.tokenUsage.totalTokens!==undefined&&`전체 ${chat.tokenUsage.totalTokens.toLocaleString()} · `}{chat.tokenUsage.passes!==undefined?`순차 작성 ${chat.tokenUsage.passes}회 · 회당 한도 ${chat.tokenUsage.perPassMaxOutputTokens?.toLocaleString()} 토큰`:`답변 한도 ${chat.tokenUsage.maxOutputTokens.toLocaleString()} 토큰`}</>}</p>}{renderSources(chat.citationIds.flatMap(id=>{const chunk=chunks.find(chunk=>chunk.id===id);return chunk?[{chunk,score:0}]:[];}))}</>}
       </div></article>;
     })}</div>
     </div><VoicePanel answer={(text,signal)=>ask(text,signal)} busy={busy||!chunks.length} onActive={setVoiceActive}/><form className="composer-wrap" ref={composerRef} onSubmit={event => {event.preventDefault(); void ask();}}>{showLatest&&<button type="button" className="jump-latest" onClick={scrollToLatest}><Icon name="arrow"/>최신 답변으로 이동</button>}<div className="composer"><textarea aria-label="문서에 질문하기" placeholder={chunks.length?'궁금한 절차나 기준을 입력해 주세요':'문서를 불러오고 있어요'} maxLength={1500} value={question} disabled={busy||voiceActive||!chunks.length} rows={chatViewport.keyboardOpen?1:2} onChange={event => setQuestion(event.target.value)} onKeyDown={event => {if(event.key==='Enter'&&!event.shiftKey&&!event.nativeEvent.isComposing){event.preventDefault(); void ask();}}}/>{busy?<button type="button" className="send-button stop" aria-label="답변 생성 중단" onClick={() => controller.current?.abort()}><span/></button>:<button className="send-button" type="submit" aria-label="질문 보내기" disabled={voiceActive||!question.trim()||!chunks.length}><Icon name="arrow"/></button>}</div><p>생성 답변의 수치와 조건은 원문에서 확인해 주세요. 실제 측정은 Android 앱을 사용해 주세요.</p></form></div>; }

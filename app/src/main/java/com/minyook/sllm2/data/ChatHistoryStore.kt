@@ -13,7 +13,7 @@ import java.util.UUID
 class ChatHistoryStore(context: Context) {
     private val preferences = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
 
-    data class Turn(val role: Role, val text: String, val sourceIds: List<Long> = emptyList())
+    data class Turn(val role: Role, val text: String, val sourceIds: List<Long> = emptyList(), val suggestions: List<SearchSuggestion> = emptyList(), val resolvedQuestion: String? = null)
     enum class Role { USER, ASSISTANT }
     data class Session(
         val id: String,
@@ -41,12 +41,12 @@ class ChatHistoryStore(context: Context) {
     fun find(id: String): Session? = read().firstOrNull { it.id == id }
 
     @Synchronized
-    fun append(id: String, role: Role, text: String, sourceIds: List<Long> = emptyList()) {
+    fun append(id: String, role: Role, text: String, sourceIds: List<Long> = emptyList(), suggestions: List<SearchSuggestion> = emptyList(), resolvedQuestion: String? = null) {
         val updated = read().map { session ->
             if (session.id == id) {
                 session.copy(
                     updatedAtMillis = System.currentTimeMillis(),
-                    turns = (session.turns + Turn(role, text, sourceIds)).takeLast(MAX_TURNS),
+                    turns = (session.turns + Turn(role, text, sourceIds, suggestions, resolvedQuestion)).takeLast(MAX_TURNS),
                 )
             } else session
         }
@@ -77,7 +77,10 @@ class ChatHistoryStore(context: Context) {
                                 val sourceIds = turn.optJSONArray("sourceIds") ?: JSONArray()
                                 add(Turn(role, turn.optString("text"), buildList {
                                     for (sourceIndex in 0 until sourceIds.length()) add(sourceIds.optLong(sourceIndex))
-                                }.filter { it > 0L }))
+                                }.filter { it > 0L }, buildList {
+                                    val choices=turn.optJSONArray("suggestions") ?: JSONArray()
+                                    for(choiceIndex in 0 until choices.length()){val choice=choices.getJSONObject(choiceIndex);add(SearchSuggestion(choice.getString("label"),choice.getString("question")))}
+                                },turn.optString("resolvedQuestion").takeIf{it.isNotBlank()}))
                             }
                         },
                     ),
@@ -102,6 +105,8 @@ class ChatHistoryStore(context: Context) {
                                 put(JSONObject().apply {
                                     put("role", turn.role.name)
                                     put("text", turn.text)
+                                    turn.resolvedQuestion?.let{put("resolvedQuestion",it)}
+                                    put("suggestions",JSONArray().apply{turn.suggestions.forEach{choice->put(JSONObject().put("label",choice.label).put("question",choice.question))}})
                                     put("sourceIds", JSONArray().apply { turn.sourceIds.forEach { put(it) } })
                                 })
                             }

@@ -1,5 +1,7 @@
 # 완전 오프라인 밀폐공간 안전 RAG 설계
 
+2026-10-29 현행 경로: [문장 의미 검색·확인 대화 설계](SEMANTIC_RAG_DESIGN.md). 검색 모델 준비, 소스 경로, 실제 평가와 기기 한계를 확인하세요.
+
 > 이 문서는 Android 검색·모델 경로의 상세 설계입니다. 2026-10-14 추가한 별도 웹/PWA의 자동 AI·Worker·토큰·스크롤·저장 구조는 [웹 현행 설계서](webapp/TARGET_ARCHITECTURE.md), 현재 Android 동작은 [Android 현행 설계서](ANDROID_APP_SPEC.md)를 기준으로 확인하세요.
 
 ## 2026-10-27 현행 질문 경로

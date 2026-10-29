@@ -24,6 +24,7 @@ export function evidenceUnits(source:Source):EvidenceUnit[]{
 }
 
 export function selectedEvidence(source:Source):EvidenceUnit[]{
+  if(source.evidence)return source.evidence;
   const units=evidenceUnits(source);
   return source.evidenceOrders?source.evidenceOrders.flatMap(order=>units.filter(unit=>unit.order===order)):units;
 }
@@ -45,6 +46,7 @@ const escapeMarkdown=(text:string)=>text.replace(/[\\`*_{}\[\]<>#|~]/g,'\\$&');
 export function formatEvidenceUnits(units:EvidenceUnit[]){
   let section='';const lines:string[]=[];
   for(const unit of units){
+    if(/^[,\s]*제\d+조(?:의\d+)?\s*(?:\d+\s*)?(?:작업시\s*안전보건\s*조치)?$/.test(unit.text.trim()))continue;
     if(unit.section&&unit.section!==section){section=unit.section;lines.push(`### ${escapeMarkdown(section)}`);}
     lines.push(`- ${escapeMarkdown(unit.text)}`);
   }
