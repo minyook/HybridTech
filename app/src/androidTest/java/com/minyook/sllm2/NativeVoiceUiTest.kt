@@ -22,31 +22,40 @@ class NativeVoiceUiTest {
             compose.activity.setShowWhenLocked(true); compose.activity.setTurnScreenOn(true)
         }
     }
-    private fun actions(start: () -> Unit = {}, stop: () -> Unit = {}) = FieldGuardActions(
-        onNavigate = {}, onNewChat = {}, onLoadChat = {}, onInputChange = {}, onSubmit = {}, onPreset = {}, onDownloadModel = {}, onBackend = {}, onContextTokens = {}, onResponseTokens = {}, onSaveSettings = {}, onScanBluetooth = {}, onConnectDevice = {}, onDisconnectDevice = {}, onVoiceClick = start, onVoiceLongClick = {}, onStopVoice = stop,
+    private fun actions(start: () -> Unit = {}, stop: () -> Unit = {}, navigate: (AppDestination) -> Unit = {}) = FieldGuardActions(
+        onNavigate = navigate, onNewChat = {}, onLoadChat = {}, onInputChange = {}, onSubmit = {}, onPreset = {}, onDownloadModel = {}, onBackend = {}, onContextTokens = {}, onResponseTokens = {}, onSaveSettings = {}, onScanBluetooth = {}, onConnectDevice = {}, onDisconnectDevice = {}, onVoiceClick = start, onVoiceLongClick = {}, onStopVoice = stop,
     )
-    @Test fun chatStartsAndStopsConversationWithoutOpeningWebOrHoldingTheButton() {
+    @Test fun microphoneOpensDedicatedConversationAndStartsOnce() {
         val voice = mutableStateOf(VoiceUiState(available = true))
-        compose.setContent { TossFieldGuardApp(FieldGuardUiState(destination = AppDestination.CHAT), voice.value, actions(
-            start = { voice.value = voice.value.copy(conversationEnabled = true, listening = true, status = "듣고 있어요. 말을 마치면 자동으로 질문해요.") },
+        val state=mutableStateOf(FieldGuardUiState(destination=AppDestination.CHAT))
+        var starts=0
+        compose.setContent { TossFieldGuardApp(state.value, voice.value, actions(
+            start = { starts++;voice.value = voice.value.copy(conversationEnabled = true, listening = true, status = "듣고 있어요. 말을 마치면 자동으로 질문해요.") },
             stop = { voice.value = voice.value.copy(conversationEnabled = false, listening = false, status = "음성 대화가 꺼져 있어요.") },
+            navigate={state.value=state.value.copy(destination=it)},
         )) }
-        compose.onNodeWithTag("toggleVoiceConversation").performClick()
-        compose.onNodeWithText("대화 종료").assertIsDisplayed()
-        compose.onNodeWithTag("chatInput").assertIsNotEnabled()
+        compose.onNodeWithTag("voiceConversationBar").assertDoesNotExist()
+        compose.onNodeWithTag("voiceQuestion").performClick()
+        compose.runOnIdle { org.junit.Assert.assertEquals(AppDestination.VOICE,state.value.destination);org.junit.Assert.assertEquals(1,starts) }
+        compose.onNodeWithText("음성 대화 종료").assertIsDisplayed()
+        compose.onNodeWithTag("chatInput").assertDoesNotExist()
         capture("android-native-voice-listening.png")
-        compose.onNodeWithTag("toggleVoiceConversation").performClick()
+        compose.onNodeWithTag("returnToTextChat").performClick()
         compose.onNodeWithTag("chatInput").assertIsEnabled()
+        compose.onNodeWithTag("voiceConversationBar").assertDoesNotExist()
+        compose.onNodeWithTag("voiceQuestion").performClick()
+        compose.onNodeWithTag("toggleVoiceConversation").performClick()
         compose.onNodeWithText("음성 대화 시작").assertIsDisplayed()
     }
     @Test fun readingStateKeepsStopButtonAvailable() {
-        compose.setContent { TossFieldGuardApp(FieldGuardUiState(destination = AppDestination.CHAT), VoiceUiState(available = true, conversationEnabled = true, speaking = true, status = "답변을 읽고 있어요. 마이크는 쉬고 있어요.", lastHeard = "산소 측정 방법 알려줘"), actions()) }
-        compose.onNodeWithText("대화 종료").assertIsDisplayed()
-        compose.onNodeWithTag("chatInput").assertIsNotEnabled()
+        compose.setContent { TossFieldGuardApp(FieldGuardUiState(destination = AppDestination.VOICE), VoiceUiState(available = true, conversationEnabled = true, speaking = true, status = "답변을 읽고 있어요. 마이크는 쉬고 있어요.", lastHeard = "산소 측정 방법 알려줘"), actions()) }
+        compose.onNodeWithText("음성 대화 종료").assertIsDisplayed()
+        compose.onNodeWithTag("chatInput").assertDoesNotExist()
         compose.onNodeWithTag("voiceSettings").assertIsDisplayed()
     }
     @Test fun nativeVoicePageShowsOfflineReadinessAndPreparation() {
         compose.setContent { TossFieldGuardApp(FieldGuardUiState(destination = AppDestination.VOICE), VoiceUiState(available = true, ttsAvailable = true, localSpeechStatus = "한국어 기기 내 인식 데이터 준비됨"), actions()) }
+        compose.onNodeWithTag("voiceSettings").performClick()
         compose.onNodeWithText("한국어 기기 내 인식 데이터 준비됨").assertIsDisplayed()
         compose.onNodeWithText("로컬 한국어 답변 읽기 준비됨").assertIsDisplayed()
         compose.onNodeWithText("한국어 음성 준비·다시 확인").assertIsDisplayed()

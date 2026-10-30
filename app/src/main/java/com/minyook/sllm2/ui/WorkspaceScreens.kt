@@ -3,6 +3,7 @@ package com.minyook.sllm2.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,6 +24,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -47,9 +49,12 @@ import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalLayoutApi::class)
-@Composable internal fun WorkspaceChat(state:FieldGuardUiState,voice:VoiceUiState,actions:FieldGuardActions,imeVisible:Boolean){
+@Composable internal fun WorkspaceChat(state:FieldGuardUiState,voice:VoiceUiState,actions:FieldGuardActions,imeVisible:Boolean,voiceMode:Boolean=false){
     val list=key(state.activeChatId){rememberLazyListState()}
     var follow by rememberSaveable(state.activeChatId){mutableStateOf(true)}
+    var jumpRequest by remember(state.activeChatId){mutableIntStateOf(0)}
+    var viewportHeight by remember(list){mutableIntStateOf(0)}
+    var voiceSettings by remember{mutableStateOf(false)}
     val messages=if(state.activeChatId!=null||state.messages.size>1)state.messages else emptyList()
     val timelineBuilder=remember{ChatTimelineBuilder()}
     val rows=remember(messages){timelineBuilder.build(messages)}
@@ -57,7 +62,8 @@ import java.util.Locale
     val focus=LocalFocusManager.current
     val canSend=!voice.conversationEnabled&&!state.isAnswering&&state.input.isNotBlank()
     val submit:()->Unit={if(canSend){follow=true;keyboard?.hide();focus.clearFocus();actions.onSubmit()}}
-    val toggleVoice:()->Unit={if(voice.conversationEnabled)actions.onStopVoice() else {keyboard?.hide();focus.clearFocus();actions.onVoiceClick()}}
+    val openVoice:()->Unit={keyboard?.hide();focus.clearFocus();actions.onNavigate(AppDestination.VOICE);if(!voice.conversationEnabled)actions.onVoiceClick()}
+    val toggleVoice:()->Unit={if(voice.conversationEnabled)actions.onStopVoice() else actions.onVoiceClick()}
     // Only actual upward input pauses following. Programmatic scrolls and
     // changing answer height must not be mistaken for the reader scrolling up.
     val scrollConnection=remember(list){object:NestedScrollConnection{
@@ -67,15 +73,26 @@ import java.util.Locale
         }
     }}
     LaunchedEffect(list){snapshotFlow{Triple(list.layoutInfo.totalItemsCount,list.isScrollInProgress,list.canScrollForward)}.collectLatest{(count,moving,forward)->if(count>0&&!moving&&!forward)follow=true}}
-    // The final anchor reaches the end even when one answer exceeds a screen.
-    LaunchedEffect(list,rows,imeVisible,follow){if(follow&&rows.isNotEmpty())list.scrollToItem(rows.size+1)}
+    LaunchedEffect(imeVisible){if(imeVisible){follow=true;jumpRequest++}}
+    // IME animation changes the actual viewport after visibility first flips.
+    // Each explicit jump runs even if following was already enabled. Wait for
+    // layout, target the end, then consume any remaining bottom padding.
+    LaunchedEffect(list,rows,viewportHeight,follow,jumpRequest){
+        if(follow&&rows.isNotEmpty()&&viewportHeight>0){
+            withFrameNanos{}
+            list.scrollToItem(rows.size+1)
+            withFrameNanos{}
+            if(list.canScrollForward)list.scrollBy(viewportHeight.toFloat())
+        }
+    }
+    val awayFromEnd by remember(list){derivedStateOf{list.canScrollForward}}
     Box(Modifier.fillMaxSize(),contentAlignment=Alignment.TopCenter){
         Column(Modifier.widthIn(max=1260.dp).fillMaxSize().padding(horizontal=workspacePadding()).padding(bottom=if(imeVisible)8.dp else 0.dp)){
             Box(Modifier.weight(1f)){
-            LazyColumn(state=list,modifier=Modifier.fillMaxSize().nestedScroll(scrollConnection).testTag("conversationList"),contentPadding=PaddingValues(top=if(imeVisible)12.dp else 26.dp,bottom=16.dp)){
+            LazyColumn(state=list,modifier=Modifier.fillMaxSize().onSizeChanged{viewportHeight=it.height}.nestedScroll(scrollConnection).testTag("conversationList"),contentPadding=PaddingValues(top=if(imeVisible)12.dp else 26.dp,bottom=16.dp)){
                 item(key="heading"){
                     Column(verticalArrangement=Arrangement.spacedBy(18.dp)){
-                        if(!imeVisible)WorkspaceHeading("LOCAL DOCUMENT ASSISTANT","현장에서 궁금한 점을 물어보세요","문서에서 근거를 찾고, 같은 쪽의 원문까지 연결해요.",action={WorkspaceButton("새 대화",actions.onNewChat,primary=false,icon=WorkspaceSymbol.PLUS,enabled=!state.isAnswering)})
+                        if(!imeVisible)WorkspaceHeading(if(voiceMode)"LOCAL VOICE CONVERSATION" else "LOCAL DOCUMENT ASSISTANT",if(voiceMode)"말로 질문하고, 근거를 확인해요" else "현장에서 궁금한 점을 물어보세요",if(voiceMode)"질문과 답변을 이 화면에서 이어 볼 수 있어요." else "문서에서 근거를 찾고, 같은 쪽의 원문까지 연결해요.",action={WorkspaceButton("새 대화",actions.onNewChat,primary=false,icon=WorkspaceSymbol.PLUS,enabled=!state.isAnswering&&!voice.conversationEnabled)})
                         FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalArrangement=Arrangement.spacedBy(6.dp)){
                             WorkspaceBadge("● 문서 ${state.documents.sumOf{it.chunkCount}}개 쪽",green=true)
                             WorkspaceBadge(if(state.modelStatus.phase==ModelPhase.READY)"Gemma 모델 저장됨" else "문서 원문 검색 모드")
@@ -86,7 +103,7 @@ import java.util.Locale
                 if(messages.isEmpty()&&imeVisible)item(key="inputHint"){
                     Text("궁금한 내용을 입력해 주세요.",fontSize=14.sp,lineHeight=22.sp,color=Color(0xFF8B95A1),textAlign=TextAlign.Center,modifier=Modifier.fillMaxWidth().padding(vertical=16.dp).testTag("chatInputHint"))
                 }
-                if(messages.isEmpty()&&!imeVisible)item(key="empty"){
+                if(messages.isEmpty()&&!imeVisible&&!voiceMode)item(key="empty"){
                     Column(Modifier.fillMaxWidth().padding(vertical=24.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(15.dp)){
                         Surface(color=WorkspaceDesign.BlueWeak,shape=RoundedCornerShape(22.dp)){Box(Modifier.size(66.dp),contentAlignment=Alignment.Center){WorkspaceIcon(WorkspaceSymbol.CHAT,Modifier.size(32.dp),WorkspaceDesign.Blue)}}
                         Text("질문은 편하게,\n근거는 정확하게.",fontSize=26.sp,lineHeight=39.sp,fontWeight=FontWeight.Bold,textAlign=TextAlign.Center)
@@ -110,31 +127,32 @@ import java.util.Locale
                 }
                 if(rows.isNotEmpty())item(key="conversationEnd",contentType="end"){Spacer(Modifier.height(1.dp).testTag("conversationEnd"))}
             }
-            if(!follow&&messages.isNotEmpty())FilledTonalButton(onClick={follow=true},modifier=Modifier.align(Alignment.BottomCenter).padding(bottom=8.dp).testTag("scrollLatest")){Text("최신 답변으로 이동 ↓",fontSize=12.sp)}
+            if(awayFromEnd&&messages.isNotEmpty())FilledTonalButton(onClick={follow=true;jumpRequest++},modifier=Modifier.align(Alignment.BottomCenter).padding(bottom=8.dp).testTag("scrollLatest")){Text("최근 답변으로 이동 ↓",fontSize=12.sp)}
             }
-            if(state.inputError!=null)WorkspaceNotice(state.inputError,true)
-            if(!imeVisible||voice.conversationEnabled){
-            Surface(color=if(voice.conversationEnabled)WorkspaceDesign.BlueWeak else Color.White,shape=RoundedCornerShape(14.dp),border=BorderStroke(1.dp,WorkspaceDesign.Border),modifier=Modifier.fillMaxWidth().padding(bottom=8.dp).testTag("voiceConversationBar")) {
-                Column(Modifier.padding(horizontal=12.dp,vertical=8.dp),verticalArrangement=Arrangement.spacedBy(4.dp)) {
-                    Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                        Text(voice.status,fontSize=11.sp,lineHeight=17.sp,color=WorkspaceDesign.Ink,modifier=Modifier.weight(1f))
-                        TextButton(onClick=toggleVoice,enabled=voice.conversationEnabled||!state.isAnswering,modifier=Modifier.testTag("toggleVoiceConversation")){Text(if(voice.conversationEnabled)"대화 종료" else "음성 대화 시작",fontSize=11.sp)}
-                        TextButton(onClick={actions.onNavigate(AppDestination.VOICE)},modifier=Modifier.testTag("voiceSettings")){Text("설정",fontSize=11.sp)}
+            if(state.inputError!=null&&(!voiceMode||state.inputError!=voice.error))WorkspaceNotice(state.inputError,true)
+            if(voiceMode){
+                Column(Modifier.fillMaxWidth().padding(vertical=8.dp).testTag("voiceControls"),verticalArrangement=Arrangement.spacedBy(6.dp)){
+                    Text(voice.status,fontSize=12.sp,lineHeight=19.sp,color=WorkspaceDesign.Ink,modifier=Modifier.semantics{liveRegion=LiveRegionMode.Polite})
+                    voice.error?.let{Text(it,fontSize=11.sp,color=MaterialTheme.colorScheme.error)}
+                    Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)){
+                        WorkspaceButton(if(voice.conversationEnabled)"음성 대화 종료" else "음성 대화 시작",toggleVoice,enabled=voice.conversationEnabled||!state.isAnswering,modifier=Modifier.weight(1f).testTag("toggleVoiceConversation"))
+                        TextButton(onClick={voiceSettings=true},modifier=Modifier.testTag("voiceSettings")){Text("음성 설정")}
                     }
-                    if(voice.conversationEnabled&&voice.lastHeard.isNotBlank())Text("인식: "+voice.lastHeard,fontSize=10.sp,color=Color(0xFF71819A),maxLines=2)
+                    TextButton(onClick={actions.onStopVoice();actions.onNavigate(AppDestination.CHAT)},modifier=Modifier.align(Alignment.CenterHorizontally).testTag("returnToTextChat")){Text("텍스트 채팅으로 돌아가기",fontSize=12.sp)}
                 }
-            }
-            }
+            }else{
             Surface(color=Color.White,shape=RoundedCornerShape(18.dp),border=BorderStroke(1.dp,Color(0xFFDCE5F1)),modifier=Modifier.fillMaxWidth().testTag("chatComposer")){
                 Row(Modifier.padding(start=20.dp,end=14.dp,top=12.dp,bottom=12.dp),horizontalArrangement=Arrangement.spacedBy(10.dp),verticalAlignment=Alignment.CenterVertically){
                     BasicTextField(enabled=!voice.conversationEnabled,value=state.input,onValueChange=actions.onInputChange,maxLines=4,keyboardOptions=KeyboardOptions(capitalization=KeyboardCapitalization.Sentences,imeAction=ImeAction.Send),keyboardActions=KeyboardActions(onSend={submit()}),textStyle=TextStyle(fontSize=14.sp,lineHeight=24.sp,color=Color(0xFF303D50)),modifier=Modifier.weight(1f).heightIn(min=if(imeVisible)24.dp else 46.dp,max=if(imeVisible)96.dp else 130.dp).testTag("chatInput"),decorationBox={inner->if(state.input.isEmpty())Text("궁금한 절차나 기준을 입력해 주세요",fontSize=14.sp,color=Color(0xFFA1ACBB));inner()})
-                    IconButton(onClick=toggleVoice,enabled=voice.conversationEnabled||!state.isAnswering,modifier=Modifier.size(48.dp).testTag("voiceQuestion").semantics{contentDescription=if(voice.conversationEnabled)"음성 대화 종료" else "음성 질문"}){TossMicrophoneIcon()}
+                    IconButton(onClick=openVoice,enabled=voice.conversationEnabled||!state.isAnswering,modifier=Modifier.size(48.dp).testTag("voiceQuestion").semantics{contentDescription="음성 대화 화면 열기"}){TossMicrophoneIcon()}
                     FilledIconButton(onClick=submit,enabled=canSend,shape=RoundedCornerShape(12.dp),colors=IconButtonDefaults.filledIconButtonColors(containerColor=WorkspaceDesign.Blue,contentColor=Color.White,disabledContainerColor=Color(0xFFDEE7F4),disabledContentColor=Color(0xFFA9B9D1)),modifier=Modifier.size(48.dp).testTag("sendMessage").semantics{contentDescription="메시지 전송"}){WorkspaceIcon(WorkspaceSymbol.ARROW,Modifier.size(21.dp).graphicsLayer{rotationZ=-90f},if(canSend)Color.White else Color(0xFFA9B9D1))}
                 }
+            }
             }
             if(!imeVisible)Text("생성 답변의 수치와 조건은 원문에서 확인해 주세요.",fontSize=9.sp,color=Color(0xFFA0AABA),textAlign=TextAlign.Center,modifier=Modifier.fillMaxWidth().padding(top=10.dp,bottom=18.dp))
         }
     }
+    if(voiceSettings)AlertDialog(onDismissRequest={voiceSettings=false},title={Text("음성 설정")},text={Column(Modifier.heightIn(max=440.dp).verticalScroll(rememberScrollState())){WorkspaceVoiceSettings(voice,actions)}},confirmButton={TextButton(onClick={voiceSettings=false}){Text("닫기")}})
 }
 @Composable private fun WorkspaceQuestion(message:ChatMessageUi){
     Box(Modifier.padding(top=20.dp,bottom=12.dp)){

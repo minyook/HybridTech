@@ -23,18 +23,24 @@ class ChatScreenTest {
     private val answer = ChatMessageUi(id = "answer", text = (1..120).joinToString("\n\n") { "- 문서 항목 $it: 사용 조건과 출처를 함께 확인합니다." }, fromWorker = false, pending = true)
     private val ui = mutableStateOf(FieldGuardUiState(activeChatId = "chat", messages = listOf(ChatMessageUi(id = "question", text = "장비 알려줘", fromWorker = true), answer), isAnswering = true))
     private val ime = mutableStateOf(false)
+    private val viewport = mutableStateOf(720)
 
     private fun actions(submit: () -> Unit = {}, openSource: (Long) -> Unit = {}) = FieldGuardActions(onNavigate={},onNewChat={},onLoadChat={},onInputChange={value->ui.value=ui.value.copy(input=value)},onSubmit=submit,onPreset={},onDownloadModel={},onBackend={},onContextTokens={},onResponseTokens={},onSaveSettings={},onScanBluetooth={},onConnectDevice={},onDisconnectDevice={},onVoiceClick={},onVoiceLongClick={},onOpenSource=openSource)
 
     private fun show(actions: FieldGuardActions = actions(), voice: VoiceUiState = VoiceUiState(available=false)) {
         compose.setContent {
             androidx.compose.material3.MaterialTheme {
-                Box(Modifier.width(390.dp).height(720.dp)) { WorkspaceChat(ui.value, voice, actions, ime.value) }
+                Box(Modifier.width(390.dp).height(viewport.value.dp)) { WorkspaceChat(ui.value, voice, actions, ime.value) }
             }
         }
         compose.waitForIdle()
     }
     private fun position(): Float = compose.onNodeWithTag("conversationList").fetchSemanticsNode().config[SemanticsProperties.VerticalScrollAxisRange].value()
+    private fun assertAtBottom() {
+        compose.onNodeWithTag("conversationEnd").assertIsDisplayed()
+        val range=compose.onNodeWithTag("conversationList").fetchSemanticsNode().config[SemanticsProperties.VerticalScrollAxisRange]
+        assertEquals(range.maxValue(),range.value(),.5f)
+    }
 
     @Test fun aLongAnswerStartsAtItsEndAndComposesOnlyAViewport() {
         show()
@@ -54,7 +60,7 @@ class ChatScreenTest {
         assertEquals(before, position(), 1f)
         assertEquals(composer, compose.onNodeWithTag("chatComposer").fetchSemanticsNode().boundsInRoot)
         compose.onNodeWithTag("scrollLatest").performClick()
-        compose.onNodeWithTag("conversationEnd").assertIsDisplayed()
+        assertAtBottom()
         compose.onNodeWithTag("scrollLatest").assertDoesNotExist()
         compose.runOnIdle { ui.value=ui.value.copy(messages=listOf(ui.value.messages.first(),answer.copy(text=answer.text+"\n\n다음 보충 답변"))) }
         compose.onNodeWithText("다음 보충 답변").assertIsDisplayed()
@@ -85,13 +91,48 @@ class ChatScreenTest {
         compose.onNodeWithTag("sendMessage").assertIsNotEnabled()
     }
 
-    @Test fun activeVoiceKeepsStopAvailableAndBlocksTextSendWithImeOpen() {
+    @Test fun textChatNeverShowsAVoiceStatusBoxEvenIfVoiceStateIsActive() {
         ime.value=true
         show(voice=VoiceUiState(available=true,conversationEnabled=true))
         compose.onNodeWithTag("chatInput").assertIsNotEnabled()
         compose.onNodeWithTag("sendMessage").assertIsNotEnabled()
-        compose.onNodeWithTag("toggleVoiceConversation").assertIsEnabled()
-        compose.onNodeWithTag("voiceConversationBar").assertIsDisplayed()
+        compose.onNodeWithTag("voiceQuestion").assertIsEnabled()
+        compose.onNodeWithTag("voiceConversationBar").assertDoesNotExist()
+        compose.onNodeWithTag("voiceControls").assertDoesNotExist()
+    }
+
+    @Test fun explicitLatestJumpWorksEvenWhenFollowingWasAlreadyEnabled() {
+        show()
+        repeat(2) {
+            compose.onNodeWithTag("conversationList").performScrollToIndex(25)
+            compose.onNodeWithTag("scrollLatest").assertIsDisplayed().performClick()
+            assertAtBottom()
+        }
+    }
+
+    @Test fun keyboardResizeTracksTheActualViewportAfterVisibilityChanges() {
+        show()
+        val closed=compose.onNodeWithTag("chatComposer").fetchSemanticsNode().boundsInRoot
+        compose.runOnIdle { ime.value=true }
+        for(height in listOf(650,540,430,360)) {
+            compose.runOnIdle { viewport.value=height }
+            assertAtBottom()
+            val input=compose.onNodeWithTag("chatComposer").fetchSemanticsNode().boundsInRoot
+            val conversation=compose.onNodeWithTag("conversationList").fetchSemanticsNode().boundsInRoot
+            assertTrue(conversation.bottom<=input.top)
+            assertTrue(input.bottom<closed.bottom)
+        }
+        compose.runOnIdle { ime.value=false;viewport.value=720 }
+        assertAtBottom()
+    }
+
+    @Test fun openingTheKeyboardReturnsFromOlderTextToTheLatestAnswer() {
+        show()
+        compose.onNodeWithTag("conversationList").performTouchInput { swipeDown() }
+        compose.onNodeWithTag("scrollLatest").assertIsDisplayed()
+        compose.runOnIdle { ime.value=true;viewport.value=420 }
+        assertAtBottom()
+        compose.onNodeWithTag("scrollLatest").assertDoesNotExist()
     }
 
     @Test fun sourceAndCopyUseTheOriginalFullAnswerAfterBlockSplitting() {

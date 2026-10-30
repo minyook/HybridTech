@@ -287,7 +287,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
 
     fun submitVoiceQuestion(question: String, onAnswer: ((String) -> Unit)? = null, onFailure: ((String) -> Unit)? = null) {
         if (_uiState.value.isAnswering) { onFailure?.invoke("앞선 답변이 끝난 뒤 다시 시작해 주세요."); return }
-        navigate(AppDestination.CHAT)
+        if (_uiState.value.destination != AppDestination.VOICE) navigate(AppDestination.CHAT)
         changeInput(normalizeVoiceQuestion(question))
         submitQuestion(compactVoiceAnswer = true, speakAnswer = true, onAnswer = onAnswer, onFailure = onFailure)
     }
@@ -299,7 +299,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
             updateState {
                 it.copy(
                     selectedSource = source,
-                    sourceReturnDestination = if (it.destination == AppDestination.LIBRARY) AppDestination.LIBRARY else AppDestination.CHAT,
+                    sourceReturnDestination = when(it.destination){AppDestination.LIBRARY->AppDestination.LIBRARY;AppDestination.VOICE->AppDestination.VOICE;else->AppDestination.CHAT},
                     destination = AppDestination.SOURCE,
                 )
             }

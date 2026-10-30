@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-30",
+  "baseCommit": "98b4b2e",
+  "platform": "Android",
+  "jvm": {
+    "tests": 64,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "builds": {
+    "result": "passed",
+    "offline": true,
+    "tasks": [
+      ":app:testDebugUnitTest",
+      ":app:assembleDebug",
+      ":app:assembleDebugAndroidTest"
+    ],
+    "apk": "app/build/outputs/apk/debug/app-debug.apk",
+    "copy": "tmp/chat-voice-20261030/fieldguard-chat-voice-20261030.apk",
+    "bytes": 324656697,
+    "sha256": "1b511574e0206f49ae4e3f8c45122cc5d7a1f98d43463dd66afc00ba34b515ef"
+  },
+  "instrumentedUi": {
+    "chatCases": 9,
+    "voiceCases": 3,
+    "compile": "passed",
+    "execution": "not_run",
+    "reason": "No connected Android device; no available AVD",
+    "simulatedResizeDp": [
+      650,
+      540,
+      430,
+      360
+    ],
+    "scenarios": [
+      "repeat explicit end jump while following already enabled",
+      "actual conversation viewport height changes after IME visible",
+      "open keyboard while reading old content",
+      "no voice status box in text chat",
+      "microphone navigates and starts dedicated voice once",
+      "stop/return to text and voice settings dialog"
+    ],
+    "physicalKeyboardAndAudioTest": false
+  },
+  "changes": [
+    "end request counter, layout frame and remaining bottom scroll",
+    "onSizeChanged viewport tracking and latest on keyboard open",
+    "text voice status box removed",
+    "shared block transcript in dedicated voice screen; voice questions keep VOICE destination",
+    "source return destination preserves VOICE; no automatic microphone resume",
+    "native speech recognition/generation/foreground lifecycle policy preserved"
+  ],
+  "webFilesChanged": false,
+  "modelOrCorpusChanged": false,
+  "installedOnDevice": false,
+  "limitations": [
+    "UI instrumentation compiled only",
+    "physical IME, drag, speech recognition and TTS not executed this run",
+    "no device performance or new answer accuracy measurements"
+  ]
+}

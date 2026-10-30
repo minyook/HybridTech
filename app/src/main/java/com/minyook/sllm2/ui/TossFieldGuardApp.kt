@@ -192,7 +192,7 @@ fun TossFieldGuardApp(state: FieldGuardUiState, voice: VoiceUiState, actions: Fi
                     AppDestination.CHAT -> TossChat(state, voice, actions, imeVisible)
                     AppDestination.HISTORY -> TossHistory(state, actions)
                     AppDestination.SOURCE -> TossSource(state, actions)
-                    AppDestination.VOICE -> TossVoice(voice, actions)
+                    AppDestination.VOICE -> WorkspaceChat(state, voice, actions, imeVisible=false, voiceMode=true)
                     AppDestination.SENSOR -> TossSensor(state, actions)
                     AppDestination.SENSOR_DISCONNECTED -> TossSensorDisconnected(state, actions)
                     AppDestination.CHECKLIST, AppDestination.SUPERVISOR -> key(destination) { NativeWorkPage(state, actions) }
@@ -217,7 +217,7 @@ private fun TossTopBar(destination:AppDestination,parent:AppDestination?,state:F
     val title=when(destination){
         AppDestination.HOME->"홈";AppDestination.CHAT->"문서 질문";AppDestination.LIBRARY->"문서 보관함";AppDestination.HISTORY->"대화 기록"
         AppDestination.CHECKLIST->"작업 전 점검";AppDestination.SUPERVISOR->"감독관 인증";AppDestination.SOURCE->"근거 문서"
-        AppDestination.VOICE->"음성 질문";AppDestination.SENSOR,AppDestination.SENSOR_DISCONNECTED->"가스 측정"
+        AppDestination.VOICE->"음성 대화";AppDestination.SENSOR,AppDestination.SENSOR_DISCONNECTED->"가스 측정"
         AppDestination.LOCAL_CHECKLIST->"이전 기기 점검";AppDestination.WORK_SERVER->"작업 서버"
         else->"설정"
     }
@@ -471,15 +471,8 @@ private enum class SourceViewMode { PDF, FORMATTED, RAW }
 private fun TossSource(state:FieldGuardUiState,actions:FieldGuardActions){WorkspaceSource(state,actions)}
 
 @Composable
-private fun TossVoice(voice: VoiceUiState, actions: FieldGuardActions) {
-    TossScrollPage {
-        TossPageTitle("로컬 음성 대화", "한 번 시작하면 듣기 → 문서 답변 → 읽기 → 다시 듣기를 반복해요.")
-        TossPanel {
-            Text(voice.status, style = MaterialTheme.typography.titleMedium)
-            if (voice.lastHeard.isNotBlank()) Text("인식한 질문: "+voice.lastHeard, style = MaterialTheme.typography.bodyMedium)
-            voice.error?.let { Text(it, color = TossRed, style = MaterialTheme.typography.bodySmall) }
-        }
-        TossPrimaryButton(if (voice.conversationEnabled) "음성 대화 종료" else "음성 대화 시작", if (voice.conversationEnabled) actions.onStopVoice else actions.onVoiceClick)
+internal fun WorkspaceVoiceSettings(voice: VoiceUiState, actions: FieldGuardActions) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         TossPanel {
             Text("이 기기의 음성 준비", style = MaterialTheme.typography.titleMedium)
             Text(voice.localSpeechStatus, style = MaterialTheme.typography.bodyMedium)
