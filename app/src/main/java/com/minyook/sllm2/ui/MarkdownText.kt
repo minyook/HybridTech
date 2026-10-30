@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -30,13 +31,18 @@ import androidx.compose.ui.unit.sp
 /** Small offline Markdown renderer for model and RAG answers. */
 @Composable
 fun MarkdownText(markdown: String, modifier: Modifier = Modifier) {
+    val blocks = remember(markdown) { markdownBlocks(markdown) }
     Column(modifier = modifier) {
-        markdownBlocks(markdown).forEach { block ->
+        blocks.forEach { MarkdownBlockText(it) }
+    }
+}
+
+@Composable internal fun MarkdownBlockText(block: MarkdownBlock) {
             if(block is MarkdownBlock.Code) {
                 Surface(color=Color(0xFF202B3E),shape=RoundedCornerShape(13.dp),modifier=Modifier.fillMaxWidth().padding(vertical=15.dp)) {
                     Text(block.text,fontFamily=FontFamily.Monospace,fontSize=12.sp,lineHeight=21.sp,color=Color(0xFFE2EAF8),modifier=Modifier.horizontalScroll(rememberScrollState()).padding(horizontal=19.dp,vertical=17.dp))
                 }
-                return@forEach
+                return
             }
             if(block is MarkdownBlock.Table) {
                 Surface(color=Color.White,shape=RoundedCornerShape(12.dp),border=BorderStroke(1.dp,Color(0xFFE1E8F2)),modifier=Modifier.fillMaxWidth().padding(vertical=15.dp)) {
@@ -49,7 +55,7 @@ fun MarkdownText(markdown: String, modifier: Modifier = Modifier) {
                         }
                     }
                 }
-                return@forEach
+                return
             }
             val original=(block as MarkdownBlock.Line).text
             val line = original.trimEnd()
@@ -68,8 +74,6 @@ fun MarkdownText(markdown: String, modifier: Modifier = Modifier) {
                 line.isNotEmpty() && line[0] in "•□○●❶❷❸❹❺❻❼❽❾❿①②③④⑤⑥⑦⑧⑨⑩" -> MarkdownListItem(line.take(1), line.drop(1).trim())
                 else -> Text(inlineMarkdown(line), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(vertical = 1.dp))
             }
-        }
-    }
 }
 
 @Composable private fun MarkdownListItem(marker: String, body: String) {
@@ -79,10 +83,10 @@ fun MarkdownText(markdown: String, modifier: Modifier = Modifier) {
     }
 }
 
-private fun inlineMarkdown(source: String): AnnotatedString = buildAnnotatedString {
-    val token = Regex("(\\*\\*.+?\\*\\*)|(`.+?`)")
+private val inlineToken = Regex("(\\*\\*.+?\\*\\*)|(`.+?`)")
+@Composable private fun inlineMarkdown(source: String): AnnotatedString = remember(source) { buildAnnotatedString {
     var cursor = 0
-    token.findAll(source).forEach { match ->
+    inlineToken.findAll(source).forEach { match ->
         append(source.substring(cursor, match.range.first))
         val value = match.value
         val start = length
@@ -99,4 +103,4 @@ private fun inlineMarkdown(source: String): AnnotatedString = buildAnnotatedStri
         cursor = match.range.last + 1
     }
     append(source.substring(cursor))
-}
+} }

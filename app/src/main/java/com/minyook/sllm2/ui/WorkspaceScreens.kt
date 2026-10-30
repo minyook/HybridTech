@@ -10,40 +10,69 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.minyook.sllm2.data.ChatHistoryStore
 import com.minyook.sllm2.model.ModelPhase
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable internal fun WorkspaceChat(state:FieldGuardUiState,voice:VoiceUiState,actions:FieldGuardActions,imeVisible:Boolean){
-    val list=rememberLazyListState()
-    val scope=rememberCoroutineScope()
-    var follow by remember(state.activeChatId){mutableStateOf(true)}
+    val list=key(state.activeChatId){rememberLazyListState()}
+    var follow by rememberSaveable(state.activeChatId){mutableStateOf(true)}
     val messages=if(state.activeChatId!=null||state.messages.size>1)state.messages else emptyList()
-    LaunchedEffect(list){snapshotFlow{list.isScrollInProgress to list.canScrollForward}.collectLatest{(moving,forward)->if(moving)follow=false else if(!forward)follow=true}}
-    LaunchedEffect(messages.size,messages.lastOrNull()?.text,imeVisible){if(follow&&messages.isNotEmpty())list.scrollToItem(messages.size)}
+    val timelineBuilder=remember{ChatTimelineBuilder()}
+    val rows=remember(messages){timelineBuilder.build(messages)}
+    val keyboard=LocalSoftwareKeyboardController.current
+    val focus=LocalFocusManager.current
+    val canSend=!voice.conversationEnabled&&!state.isAnswering&&state.input.isNotBlank()
+    val submit:()->Unit={if(canSend){follow=true;keyboard?.hide();focus.clearFocus();actions.onSubmit()}}
+    val toggleVoice:()->Unit={if(voice.conversationEnabled)actions.onStopVoice() else {keyboard?.hide();focus.clearFocus();actions.onVoiceClick()}}
+    // Only actual upward input pauses following. Programmatic scrolls and
+    // changing answer height must not be mistaken for the reader scrolling up.
+    val scrollConnection=remember(list){object:NestedScrollConnection{
+        override fun onPreScroll(available:Offset,source:NestedScrollSource):Offset{
+            if(source==NestedScrollSource.UserInput&&available.y>0f&&list.canScrollBackward)follow=false
+            return Offset.Zero
+        }
+    }}
+    LaunchedEffect(list){snapshotFlow{Triple(list.layoutInfo.totalItemsCount,list.isScrollInProgress,list.canScrollForward)}.collectLatest{(count,moving,forward)->if(count>0&&!moving&&!forward)follow=true}}
+    // The final anchor reaches the end even when one answer exceeds a screen.
+    LaunchedEffect(list,rows,imeVisible,follow){if(follow&&rows.isNotEmpty())list.scrollToItem(rows.size+1)}
     Box(Modifier.fillMaxSize(),contentAlignment=Alignment.TopCenter){
         Column(Modifier.widthIn(max=1260.dp).fillMaxSize().padding(horizontal=workspacePadding()).padding(bottom=if(imeVisible)8.dp else 0.dp)){
-            LazyColumn(state=list,modifier=Modifier.weight(1f).testTag("conversationList"),verticalArrangement=Arrangement.spacedBy(if(imeVisible)12.dp else 24.dp),contentPadding=PaddingValues(top=if(imeVisible)12.dp else 26.dp,bottom=if(imeVisible)12.dp else 24.dp)){
+            Box(Modifier.weight(1f)){
+            LazyColumn(state=list,modifier=Modifier.fillMaxSize().nestedScroll(scrollConnection).testTag("conversationList"),contentPadding=PaddingValues(top=if(imeVisible)12.dp else 26.dp,bottom=16.dp)){
                 item(key="heading"){
                     Column(verticalArrangement=Arrangement.spacedBy(18.dp)){
                         if(!imeVisible)WorkspaceHeading("LOCAL DOCUMENT ASSISTANT","현장에서 궁금한 점을 물어보세요","문서에서 근거를 찾고, 같은 쪽의 원문까지 연결해요.",action={WorkspaceButton("새 대화",actions.onNewChat,primary=false,icon=WorkspaceSymbol.PLUS,enabled=!state.isAnswering)})
@@ -69,47 +98,62 @@ import java.util.Locale
                         }
                     }
                 }
-                items(messages,key={it.id}){message->
-                    Box(Modifier.fillMaxWidth(),contentAlignment=Alignment.TopCenter){Column(Modifier.widthIn(max=820.dp).fillMaxWidth()){WorkspaceMessage(message,actions,!state.isAnswering&&!voice.conversationEnabled)}}
+                items(rows,key={it.key},contentType={it.contentType}){row->
+                    Box(Modifier.fillMaxWidth().testTag("chatRow:${row.key}"),contentAlignment=Alignment.TopCenter){Column(Modifier.widthIn(max=820.dp).fillMaxWidth()){
+                        when(row){
+                            is ChatTimelineRow.Question->WorkspaceQuestion(row.message)
+                            is ChatTimelineRow.Header->WorkspaceAnswerHeader(row.message)
+                            is ChatTimelineRow.Body->MarkdownBlockText(row.block)
+                            is ChatTimelineRow.Footer->WorkspaceAnswerFooter(row.message,actions,!state.isAnswering&&!voice.conversationEnabled)
+                        }
+                    }}
                 }
+                if(rows.isNotEmpty())item(key="conversationEnd",contentType="end"){Spacer(Modifier.height(1.dp).testTag("conversationEnd"))}
             }
-            if(!follow&&messages.isNotEmpty())TextButton(onClick={follow=true;scope.launch{list.scrollToItem(messages.size)}},modifier=Modifier.align(Alignment.CenterHorizontally).testTag("scrollLatest")){Text("최신 답변으로 이동 ↓",fontSize=11.sp)}
+            if(!follow&&messages.isNotEmpty())FilledTonalButton(onClick={follow=true},modifier=Modifier.align(Alignment.BottomCenter).padding(bottom=8.dp).testTag("scrollLatest")){Text("최신 답변으로 이동 ↓",fontSize=12.sp)}
+            }
             if(state.inputError!=null)WorkspaceNotice(state.inputError,true)
+            if(!imeVisible||voice.conversationEnabled){
             Surface(color=if(voice.conversationEnabled)WorkspaceDesign.BlueWeak else Color.White,shape=RoundedCornerShape(14.dp),border=BorderStroke(1.dp,WorkspaceDesign.Border),modifier=Modifier.fillMaxWidth().padding(bottom=8.dp).testTag("voiceConversationBar")) {
                 Column(Modifier.padding(horizontal=12.dp,vertical=8.dp),verticalArrangement=Arrangement.spacedBy(4.dp)) {
                     Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
                         Text(voice.status,fontSize=11.sp,lineHeight=17.sp,color=WorkspaceDesign.Ink,modifier=Modifier.weight(1f))
-                        TextButton(onClick=if(voice.conversationEnabled)actions.onStopVoice else actions.onVoiceClick,enabled=voice.conversationEnabled||!state.isAnswering,modifier=Modifier.testTag("toggleVoiceConversation")){Text(if(voice.conversationEnabled)"대화 종료" else "음성 대화 시작",fontSize=11.sp)}
+                        TextButton(onClick=toggleVoice,enabled=voice.conversationEnabled||!state.isAnswering,modifier=Modifier.testTag("toggleVoiceConversation")){Text(if(voice.conversationEnabled)"대화 종료" else "음성 대화 시작",fontSize=11.sp)}
                         TextButton(onClick={actions.onNavigate(AppDestination.VOICE)},modifier=Modifier.testTag("voiceSettings")){Text("설정",fontSize=11.sp)}
                     }
                     if(voice.conversationEnabled&&voice.lastHeard.isNotBlank())Text("인식: "+voice.lastHeard,fontSize=10.sp,color=Color(0xFF71819A),maxLines=2)
                 }
             }
+            }
             Surface(color=Color.White,shape=RoundedCornerShape(18.dp),border=BorderStroke(1.dp,Color(0xFFDCE5F1)),modifier=Modifier.fillMaxWidth().testTag("chatComposer")){
                 Row(Modifier.padding(start=20.dp,end=14.dp,top=12.dp,bottom=12.dp),horizontalArrangement=Arrangement.spacedBy(10.dp),verticalAlignment=Alignment.CenterVertically){
-                    BasicTextField(enabled=!voice.conversationEnabled,value=state.input,onValueChange=actions.onInputChange,maxLines=4,textStyle=TextStyle(fontSize=14.sp,lineHeight=24.sp,color=Color(0xFF303D50)),modifier=Modifier.weight(1f).heightIn(min=if(imeVisible)24.dp else 46.dp,max=if(imeVisible)96.dp else 130.dp).testTag("chatInput"),decorationBox={inner->if(state.input.isEmpty())Text("궁금한 절차나 기준을 입력해 주세요",fontSize=14.sp,color=Color(0xFFA1ACBB));inner()})
-                    IconButton(onClick={if(voice.conversationEnabled)actions.onStopVoice() else actions.onVoiceClick()},enabled=voice.conversationEnabled||!state.isAnswering,modifier=Modifier.size(37.dp).testTag("voiceQuestion").semantics{contentDescription="음성 질문"}){TossMicrophoneIcon()}
-                    Surface(color=if(state.isAnswering||state.input.isBlank())Color(0xFFDEE7F4) else WorkspaceDesign.Blue,shape=RoundedCornerShape(12.dp),modifier=Modifier.size(41.dp).clickable(enabled=!voice.conversationEnabled&&!state.isAnswering&&state.input.isNotBlank()){actions.onSubmit()}.testTag("sendMessage").semantics{contentDescription="메시지 전송"}){
-                        Box(contentAlignment=Alignment.Center){WorkspaceIcon(WorkspaceSymbol.ARROW,Modifier.size(21.dp).graphicsLayer{rotationZ=-90f},if(state.isAnswering||state.input.isBlank())Color(0xFFA9B9D1) else Color.White)}
-                    }
+                    BasicTextField(enabled=!voice.conversationEnabled,value=state.input,onValueChange=actions.onInputChange,maxLines=4,keyboardOptions=KeyboardOptions(capitalization=KeyboardCapitalization.Sentences,imeAction=ImeAction.Send),keyboardActions=KeyboardActions(onSend={submit()}),textStyle=TextStyle(fontSize=14.sp,lineHeight=24.sp,color=Color(0xFF303D50)),modifier=Modifier.weight(1f).heightIn(min=if(imeVisible)24.dp else 46.dp,max=if(imeVisible)96.dp else 130.dp).testTag("chatInput"),decorationBox={inner->if(state.input.isEmpty())Text("궁금한 절차나 기준을 입력해 주세요",fontSize=14.sp,color=Color(0xFFA1ACBB));inner()})
+                    IconButton(onClick=toggleVoice,enabled=voice.conversationEnabled||!state.isAnswering,modifier=Modifier.size(48.dp).testTag("voiceQuestion").semantics{contentDescription=if(voice.conversationEnabled)"음성 대화 종료" else "음성 질문"}){TossMicrophoneIcon()}
+                    FilledIconButton(onClick=submit,enabled=canSend,shape=RoundedCornerShape(12.dp),colors=IconButtonDefaults.filledIconButtonColors(containerColor=WorkspaceDesign.Blue,contentColor=Color.White,disabledContainerColor=Color(0xFFDEE7F4),disabledContentColor=Color(0xFFA9B9D1)),modifier=Modifier.size(48.dp).testTag("sendMessage").semantics{contentDescription="메시지 전송"}){WorkspaceIcon(WorkspaceSymbol.ARROW,Modifier.size(21.dp).graphicsLayer{rotationZ=-90f},if(canSend)Color.White else Color(0xFFA9B9D1))}
                 }
             }
             if(!imeVisible)Text("생성 답변의 수치와 조건은 원문에서 확인해 주세요.",fontSize=9.sp,color=Color(0xFFA0AABA),textAlign=TextAlign.Center,modifier=Modifier.fillMaxWidth().padding(top=10.dp,bottom=18.dp))
         }
     }
 }
-@OptIn(ExperimentalLayoutApi::class)
-@Composable private fun WorkspaceMessage(message:ChatMessageUi,actions:FieldGuardActions,choicesEnabled:Boolean){
-    if(message.fromWorker){
+@Composable private fun WorkspaceQuestion(message:ChatMessageUi){
+    Box(Modifier.padding(top=20.dp,bottom=12.dp)){
         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.End){Surface(color=Color(0xFFE8F2FF),shape=RoundedCornerShape(topStart=17.dp,topEnd=17.dp,bottomStart=17.dp,bottomEnd=4.dp),modifier=Modifier.widthIn(max=700.dp)){Text(message.text,fontSize=14.sp,lineHeight=24.sp,color=Color(0xFF316BB9),modifier=Modifier.padding(horizontal=19.dp,vertical=14.dp))}}
-    }else Column(Modifier.fillMaxWidth().padding(top=2.dp),verticalArrangement=Arrangement.spacedBy(20.dp)){
-        Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(9.dp)){
+    }
+}
+@Composable private fun WorkspaceAnswerHeader(message:ChatMessageUi){
+    val context=LocalContext.current
+    var copied by remember(message.id,message.text){mutableStateOf(false)}
+        Row(Modifier.fillMaxWidth().padding(top=20.dp,bottom=12.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(9.dp)){
             if(message.pending)CircularProgressIndicator(Modifier.size(22.dp),strokeWidth=2.dp)
             else Surface(color=WorkspaceDesign.Blue,shape=RoundedCornerShape(9.dp)){Text("O₂",color=Color.White,fontSize=14.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(6.dp))}
-            Text(if(message.pending){if(message.text.isBlank())"문서 근거를 확인하고 있어요" else "문서 근거 답변 · 보충 확인 중"}else "문서 근거 답변",fontSize=13.sp,fontWeight=FontWeight.SemiBold,modifier=Modifier.weight(1f))
-            if(!message.pending)Text("기기 저장됨",fontSize=10.sp,color=Color(0xFF9BA5B3))
+            Text(if(message.pending){if(message.text.isBlank())"문서 근거를 확인하고 있어요" else "문서 근거 답변 · 보충 확인 중"}else "문서 근거 답변",fontSize=13.sp,fontWeight=FontWeight.SemiBold,modifier=Modifier.weight(1f).semantics{liveRegion=LiveRegionMode.Polite})
+            if(!message.pending&&message.text.isNotBlank())TextButton(onClick={context.getSystemService(android.content.ClipboardManager::class.java).setPrimaryClip(android.content.ClipData.newPlainText("Field Guard 답변",message.text));copied=true},modifier=Modifier.testTag("copyAnswer:${message.id}").semantics{contentDescription="답변 복사"}){Text(if(copied)"복사됨" else "복사",fontSize=11.sp)}
         }
-        if(message.text.isNotBlank())MarkdownText(message.text)
+}
+@OptIn(ExperimentalLayoutApi::class)
+@Composable private fun WorkspaceAnswerFooter(message:ChatMessageUi,actions:FieldGuardActions,choicesEnabled:Boolean){
+    Column(Modifier.fillMaxWidth().padding(top=12.dp,bottom=12.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){
         if(!message.pending && message.suggestions.isNotEmpty())FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){
             message.suggestions.forEach{suggestion->OutlinedButton(enabled=choicesEnabled,onClick={actions.onPreset(suggestion.question)}){Text(suggestion.label,fontSize=12.sp)}}
         }

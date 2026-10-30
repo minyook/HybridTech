@@ -1,0 +1,170 @@
+{
+  "date": "2026-10-30",
+  "platform": "Android",
+  "baseCommit": "4b0fa7d",
+  "webChanges": false,
+  "jvm": {
+    "result": "passed",
+    "totals": {
+      "tests": 64,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": [
+      {
+        "name": "com.minyook.sllm2.data.EquipmentOverviewTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.FocusedEvidenceTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.HybridRetrievalTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.NativeAnswerCorpusTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionAnswerVerifierTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionEvidencePlannerTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.SemanticTokenizerTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.SourcePdfCatalogTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ExampleUnitTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "com.minyook.sllm2.gas.GasPacketParserTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "com.minyook.sllm2.gas.GasReadingFreshnessTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.ChatTimelineTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.MarkdownBlocksTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.SourceDocumentFormatterTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.VoiceConversationLoopTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.VoiceResponseFormatterTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.WorkServerAddressTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0
+      }
+    ],
+    "addedChatTimelineTests": 5,
+    "legacyCorpusQuestions": 183,
+    "frozenSemanticQueryVectorCases": 40
+  },
+  "builds": {
+    "result": "passed",
+    "offline": true,
+    "tasks": [
+      ":app:testDebugUnitTest",
+      ":app:assembleDebug",
+      ":app:assembleDebugAndroidTest"
+    ],
+    "apk": "app/build/outputs/apk/debug/app-debug.apk",
+    "localCopy": "tmp/chat-20261030/fieldguard-chat-20261030.apk",
+    "bytes": 324648980,
+    "sha256": "0c1a7b1b67d0c0105aa13540171565d42ca4517d80392e3600d2b0d9cc6d68e1",
+    "instrumentationApk": "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
+  },
+  "instrumentedUi": {
+    "class": "com.minyook.sllm2.ChatScreenTest",
+    "addedTests": 6,
+    "compileResult": "passed",
+    "execution": "not_run",
+    "reason": "No connected Android device or available AVD",
+    "fixtures": "WorkspacePreviewActivity; no production ViewModel, model, BLE or microphone",
+    "imeFixtureIsPhysicalKeyboardTest": false,
+    "cases": [
+      "long answer end anchor and viewport composition",
+      "manual reading position and composer stability during answer append; explicit resume",
+      "return to bottom and switch conversation",
+      "IME send and idle voice panel",
+      "active voice stop and blocked text send",
+      "full answer copy and source ID"
+    ]
+  },
+  "assetPreparation": {
+    "command": "node tools/prepare-semantic.mjs --android-only",
+    "result": "passed",
+    "pinnedSha256Verified": true,
+    "usedExistingLocalCache": true,
+    "webDestinationWritten": false,
+    "documentIndexRebuilt": false
+  },
+  "sourceCorpusSha256": "2c8e9edcc986c9e0c65f66d9a4784d88462656702669ba5a7182c98a86bfebae",
+  "semanticIndexSha256": "12ece1e7e7d1a3e46ace5491f35beddacf945f36b68abba8903d264c6bf9f4cd",
+  "notMeasured": [
+    "physical touch/IME/rotation/font scaling",
+    "device frame time and memory",
+    "new device STT/TTS or BLE validation",
+    "new model generation accuracy"
+  ],
+  "installedOnDevice": false
+}

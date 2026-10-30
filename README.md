@@ -1,5 +1,162 @@
 # HybridTech · O₂ Field Guard
 
+밀폐공간 안전 문서를 기기 안에서 검색하고, 근거와 원문 PDF를 함께 확인하며, 음성 질문·가스 측정·작업 전 점검을 연결하는 **Android 설치형 앱**입니다. 개발 상태는 **프로토타입**이며 현재 개발 대상은 Android입니다. 웹/PWA의 신규 개발은 중단하고 기존 파일은 보존합니다.
+
+**최종 갱신: 2026-10-30.** 문서 검색·답변·대화 기록은 기기 중심으로 동작합니다. 최초 모델/언어 데이터 준비에는 인터넷이 필요할 수 있고, 작업자 요청·감독관 QR 인증·승인 공유에는 별도의 작업 서버가 필요합니다.
+
+[Android 설계서](docs/ANDROID_APP_SPEC.md) · [채팅 최적화](docs/ANDROID_CHAT_OPTIMIZATION.md) · [의미 검색 설계](docs/SEMANTIC_RAG_DESIGN.md) · [장비 검색](docs/ANDROID_EQUIPMENT_SEARCH.md) · [로컬 음성](docs/ANDROID_VOICE.md)
+
+## 현재 앱으로 구현한 범위
+
+| 기능 | 현재 동작 | 구현·검증 경계 |
+|---|---|---|
+| 화면 | Compose 홈·질문·기록·문서·원문·설정·센서 화면, 휴대전화 하단 메뉴와 넓은 화면 사이드바 | 보존된 웹 디자인을 기준으로 한 네이티브 UI. 채팅의 이번 변경은 기기 UI 검사가 남아 있음 |
+| 오프라인 문서 | 2022 밀폐공간 안전작업 가이드와 2026 자율점검표, 쪽별 데이터 87개, 원본 PDF와 쪽 연결 | 기본 문서 2종. 임의 PDF 업로드·현장별 문서 관리 UI는 아직 없음 |
+| 문서 검색 | 엄격한 문단 검색 + 로컬 EmbeddingGemma 300M q4 의미 검색, 393개 항목/절 인덱스 | 직접 근거가 불분명하면 관련 항목 확인 대화. 모든 새 질문에 답할 수준은 아님 |
+| 답변 | 질문과 직접 관련된 본문·조건을 먼저 표시하고 Markdown·출처 제공 | 일반 문서 본문은 추출·조립하며, 필요한 경우에만 LiteRT-LM/Gemma의 짧은 보충을 검사해 추가 |
+| 장비 질문 | 측정·조명·환기·보호·구조·연락 장비의 근거를 모아 목록으로 표시 | 가격·사양·점검 시기·예외 질문을 일반 장비 목록으로 대체하지 않음 |
+| 로컬 AI | Gemma 4 E2B 다운로드·저장·기기 내 실행, 문맥/출력 설정 | 생성 모델과 검색 모델은 별도. 실제 기기별 연속 실행·발열·취소 안정화는 남아 있음 |
+| 음성 | Android 12+ 지원 서비스의 기기 내 한국어 STT, 로컬 TTS, 듣기→답변→읽기→다시 듣기 | OS 로컬 언어 지원 필요. 화면 이탈/잠금 시 종료. 실제 현장 소음·긴 대화의 정확도는 추가 시험 필요 |
+| 기록 | 기기 내 대화·근거·확인 선택지·추론 설정 저장 | 현재 SharedPreferences 기반이며 저장 한도는 대화 20개·대화당 80턴. 계정/기기 간 대화 동기화는 없음 |
+| BLE | 가스 데이터 수신·신선도·연결 끊김 표시, 포그라운드 서비스·알림·위젯, 별도 데모 | 특정 제조사 측정기의 UUID/패킷·교정·현장 정확도 검증은 미완료 |
+| 작업자/감독관 | 요청→감독관 점검·승인→작업자 투입/퇴장, 서버 갱신, 일회용 감독관 QR 인증 | 현재 이 부분은 제한된 WebView와 기존 작업 서버를 사용. 완전한 네이티브 업무 화면·운영 계정/권한 관리로의 전환은 아직 없음 |
+
+앱 전체를 WebView로 만든 구조가 아닙니다. 홈·질문·문서·기록·모델·음성·센서는 네이티브이며 **작업 점검/감독관 인증 부분에만 기존 웹 화면·서버 의존성**이 남아 있습니다. 문서 답변은 실제 현장의 작업허가나 안전 판정을 대신하지 않습니다.
+
+## 기존 문제와 해결 상태
+
+| 확인한 문제 | 반영한 대응 | 아직 남은 과제 |
+|---|---|---|
+| 단어가 비슷한 다른 절을 답하거나 새 표현에 곧바로 문서에 없다고 안내 | 문단 중심 검색, 실제 문장 임베딩, 근거 미확인/확인 질문 구분 | 새로운 표현·복합 질문의 검색 누락과 불필요한 되묻기 개선. 검색 성공과 생성 정확도를 별도 평가 |
+| `작업장비` 질문에 감독관 직무·허가서·교육이 섞이거나 `장비`에 되묻기 | 장비 목록 의도를 구분하고 여러 용도의 실제 문단을 통합 | 현재 범위 밖 표현·추가 장비 분야를 일반 목록으로 뭉개지 않는지 계속 검증 |
+| PDF 페이지 전체·머리말·다른 절차가 붙어 답변이 지저분함 | 항목/조건 단위 선택, 중복·머리말 완화, Markdown 목록·수치·출처 정리 | 표·도식·추출 공백 정제와 전문가 검수; 문서 판본 관리 |
+| 답변 중 스크롤이 읽는 위치를 빼앗거나 자동 따라가기가 끊김 | 사용자 위쪽 탐색에서 일시 정지, 실제 맨 아래로 복귀하면 따라가기, 끝 앵커로 이동 | 2026-10-30 수정. 실제 터치·키보드·회전 검증과 프레임 측정은 미실행 |
+| 긴 답변 한 개가 큰 LazyColumn 항목으로 렌더링되고 Markdown 재분석 발생 | 답변을 블록별 lazy 항목으로 분리, 메시지별 분석 캐시, 안정적인 키 | 매우 큰 표/코드 블록은 한 항목. 실기기 메모리·스크롤 지연 수치 측정 필요 |
+| iPhone 웹 로컬 AI의 메모리 종료·재적재 문제 | 경량 모델·중단 보호 등 기존 대응 이력 보존, 현재 개발을 Android 앱으로 집중 | iPhone 문제를 해결 완료로 판정하지 않음. 웹/PWA 신규 개발은 중단 |
+| 한 번만 인식하거나 답변을 짧게 잘라 읽던 음성 경로 | 네이티브 연속 대화 상태 흐름·로컬 한국어 준비 조회·본문 전체 분할 읽기 | 현장 소음·전문 용어·숫자·권한/오류 복구·장시간 동작 실기기 검증 |
+| 작업자/감독관 화면만 나뉘고 실제 승인 교환이 부족함 | 서버 권한 검사·양방향 상태 갱신·감독관의 명시적 승인·QR 인증 | 앱 전용 업무 UI, 운영 로그인·현장 배정·감사/백업·닫힌 앱 알림 |
+| BLE 연결 기반만으로 실제 측정기 동작을 보장하기 어려움 | 수신 출처·데모/실제·신선도·연결 끊김 구분 | 실제 장비 규격 확보 후 어댑터/경보 검증 |
+
+150개 개발 질문을 통과했다는 사실을 처음 보는 모든 질문의 정확도로 해석하지 않습니다. 현재 확인 대화가 과도하게 나오는 사례도 남아 있으며, 문서 근거가 충분한데 묻는 경우와 정말 추가 조건이 필요한 경우를 계속 분리해야 합니다.
+
+## 이번 채팅 화면 최적화
+
+- **긴 답변:** 헤더·Markdown 블록·출처를 독립 lazy 항목으로 표시합니다. 표와 코드의 내부 구조는 유지합니다.
+- **불필요한 작업 감소:** 본문이 같은 메시지는 Markdown 분석 결과를 재사용하고, 제거된 대화의 캐시는 비웁니다. 입력·상태 변경만으로 이전 본문을 모두 다시 분석하지 않습니다.
+- **스크롤:** 자동 이동을 사용자 드래그로 오인하지 않습니다. 위로 읽을 때는 멈추고, 맨 아래로 돌아오거나 `최신 답변으로 이동`을 누르면 다시 따라갑니다. 이동 버튼은 대화 영역에 떠 있어 입력창을 밀지 않습니다.
+- **입력:** 키보드 전송과 화면 전송에 같은 조건을 적용하고 전송 시 키보드를 닫습니다. 빈 질문·답변 중·음성 대화 중에는 전송을 막으며, 답변 중 다음 질문 작성은 가능합니다.
+- **작은 화면:** 입력 중에는 유휴 음성 안내를 접고 마이크 버튼은 유지합니다. 음성 대화 중에는 종료 버튼을 계속 표시합니다. 전송·마이크 버튼 영역은 48dp입니다.
+- **읽기/재사용:** 답변 전체 복사와 실제 원문 쪽 연결을 제공합니다. 본문을 UI 때문에 요약하거나 잘라 저장하지 않습니다.
+
+[세부 설계·UI 검사 항목·한계](docs/ANDROID_CHAT_OPTIMIZATION.md). 변경 후 실기기 FPS/메모리 개선 수치는 아직 측정하지 않았습니다.
+
+## 앱 내부 흐름
+
+```mermaid
+flowchart TD
+  Q[텍스트 · 로컬 음성 질문] --> VM[FieldGuardViewModel]
+  VM --> R[장비 목록 · 문단 검색 · 필요 시 로컬 의미 검색]
+  R --> D[선택한 원문 · 필수 조건 · 실제 출처]
+  D --> P[DocumentAnswerPlan]
+  P --> UI[Markdown 채팅 · 원문 PDF · 로컬 읽기]
+  P -->|이유·비교 등 필요할 때만| AI[LiteRT-LM Gemma 보충 생성]
+  AI --> V[근거 ID · 수치 · 조건 검사]
+  V -->|통과한 보충만| UI
+  B[BLE 측정기] --> G[수신 · 신선도 · 서비스 · 위젯]
+  W[작업 점검 WebView] <--> S[기존 작업 서버 · QR · 승인 기록]
+```
+
+문서 본문은 생성 모델이 다시 타이핑할 때까지 기다리지 않습니다. 직접 근거가 불분명하면 로컬 검색 인코더를 실행하며, 생성 모델과 동시에 적재하지 않도록 순서를 나눕니다. 답변용 Gemma가 없더라도 준비된 문서 검색과 원문 확인은 사용할 수 있습니다.
+
+## Android 개발·빌드
+
+저장소 루트 `C:\Users\limmi\AndroidStudioProjects\Sllm2`를 Android Studio로 열고 `app` 구성을 실행합니다. 현재 패키지는 `com.minyook.sllm2`, `minSdk 26`, `compileSdk/targetSdk 37`, Kotlin·Compose·ObjectBox·LiteRT-LM·ONNX Runtime을 사용합니다. 이 PC의 Gradle JDK는 `C:\Program Files\Android\Android Studio1\jbr`입니다.
+
+처음 받는 체크아웃은 검색 모델 자산을 준비해야 합니다. **Node.js가 있는 환경에서 루트의 아래 명령을 사용하며 웹 앱 설치·실행은 필요하지 않습니다.** 고정 버전·SHA-256으로 파일을 검증하고, 유효한 로컬 캐시가 없으면 모델 저장소에서 받습니다. `--android-only`는 Android 자산만 준비하며 `web/`에 쓰지 않습니다.
+
+```powershell
+node tools/prepare-semantic.mjs --android-only
+.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest
+```
+
+의존성과 모델이 준비된 뒤에는 Gradle에 `--offline`을 붙여 검사할 수 있습니다. 검색용 약 220MB 모델/토크나이저는 APK에 포함되며 Git에는 포함되지 않습니다. 대형 Gemma 답변 모델은 APK와 별도로 앱에서 다운로드합니다. 이미 설치한 앱은 같은 서명의 APK로 업데이트하며 기존 모델·대화를 유지합니다.
+
+| 생성물 | 경로 |
+|---|---|
+| 앱 APK | `app/build/outputs/apk/debug/app-debug.apk` |
+| 계측 검사 APK | `app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk` |
+| JVM 결과 | `app/build/test-results/testDebugUnitTest/`, `app/build/reports/tests/testDebugUnitTest/` |
+| 최신 채팅 변경 검증 | `docs/validation/android-chat-20261030.json` |
+| 이번 APK 보관 사본 | `tmp/chat-20261030/fieldguard-chat-20261030.apk` (로컬 생성물, Git 제외) |
+
+현재 작업 점검/인증을 사용할 때만 설정 → 현장 작업 서버에 기존 서버의 기본 주소를 지정합니다. 이 기능의 서버 실행·초기 관리자·QR 시험 절차는 [기존 작업 흐름](web/docs/workflow.md)과 아래 접힌 상세 기록에 있습니다. 서버 없이 문서 질문·원문 확인을 실행하는 흐름과 구분합니다.
+
+## 실제 소스와 저장 위치
+
+아래 소스 경로는 저장소 루트 기준입니다. 단말 저장 위치는 PC 프로젝트 폴더가 아닙니다.
+
+| 소스·폴더 | 역할 |
+|---|---|
+| `app/build.gradle`, `gradle/libs.versions.toml` | Android SDK·의존성·모델 자산 검사 |
+| `app/src/main/java/com/minyook/sllm2/MainActivity.kt` | 진입점·권한·생명주기·음성 연결 |
+| `app/src/main/java/com/minyook/sllm2/ui/TossFieldGuardApp.kt` | 공통 화면 틀·이동·키보드 여백 |
+| `app/src/main/java/com/minyook/sllm2/ui/WorkspaceScreens.kt` | 채팅·입력·자동 따라가기·답변/출처·문서/기록 화면 |
+| `app/src/main/java/com/minyook/sllm2/ui/ChatTimeline.kt` | 답변 블록별 lazy 항목·안정 키·메시지 분석 캐시 |
+| `app/src/main/java/com/minyook/sllm2/ui/MarkdownText.kt`, `MarkdownBlocks.kt` | 오프라인 Markdown 분석·블록 표시 |
+| `app/src/main/java/com/minyook/sllm2/ui/FieldGuardViewModel.kt` | 텍스트/음성 질문·검색·본문·보충·기록 조정 |
+| `app/src/main/java/com/minyook/sllm2/data/HybridRetrieval.kt`, `EquipmentOverview.kt`, `FocusedEvidence.kt` | 의미/문단 검색·장비 목록·조건 선택 |
+| `app/src/main/java/com/minyook/sllm2/data/SemanticEncoder.kt`, `SemanticTokenizer.kt` | 기기 내 ONNX 질문 임베딩·토큰 처리 |
+| `app/src/main/java/com/minyook/sllm2/data/DocumentAnswerPlan.kt` | 화면/음성/보충 공통 계획·보충 검사 |
+| `app/src/main/java/com/minyook/sllm2/data/ChatHistoryStore.kt` | 기기 대화·근거·확인 선택지 저장 |
+| `app/src/main/java/com/minyook/sllm2/model/` | LiteRT-LM·모델 다운로드·추론 설정 |
+| `app/src/main/java/com/minyook/sllm2/ui/VoiceConversationController.kt`, `VoiceConversationLoop.kt` | 로컬 STT/TTS·대화 상태·오류/중단 |
+| `app/src/main/java/com/minyook/sllm2/gas/` | BLE·실제/데모·모니터링·경보·위젯 |
+| `app/src/main/java/com/minyook/sllm2/ui/NativeWorkPage.kt`, `WorkServerAddress.kt` | 기존 작업 화면 WebView·서버 주소/출처 제한 |
+| `app/src/main/assets/knowledge/` | 87개 쪽 원문과 393개 의미 인덱스 |
+| `app/src/main/assets/source-pdfs/` | 원본 PDF 2종 |
+| `app/src/main/assets/semantic-model/` | 생성된 검색 모델 자산·Git 제외 |
+| `tools/prepare-semantic.mjs`, `semantic-model-files.json` | 고정 검색 모델 준비·해시 검증 |
+| `app/src/test/`, `app/src/androidTest/` | JVM 회귀와 기기/Compose 검사 |
+| `docs/` | 설계·질문 평가·검증 기록·이전 화면 캡처 |
+| `web/` | 보존된 웹/PWA와 기존 작업 서버. 신규 웹 개발 중단 |
+
+단말의 `noBackupFilesDir/models/`는 생성 모델, `noBackupFilesDir/source-pdfs/`는 원문 사본을 저장합니다. `SharedPreferences`의 `local_chat_history`, `field_guard_ui`, `inference_settings`, `local_model`, `gas_reading`은 대화·UI·추론·모델 상태·측정 기록을 보관합니다. 작업 기록은 별도로 서버의 `web/.local/workflow.sqlite`에 저장합니다. 모델·서버 DB/키·실제 인증 코드·APK·캐시는 Git에 올리지 않습니다.
+
+## 앞으로의 개발 순서
+
+아래는 **다음 개발 계획**이며 완료한 기능 목록이 아닙니다. 웹/PWA 신규 기능보다 Android 앱의 품질을 우선합니다.
+
+| 순서 | 개발할 내용 | 완료 판단 방법 |
+|---|---|---|
+| 1. 채팅·실기기 안정화 | S24/태블릿에서 긴 답변·읽기 중 추가 본문·맨 아래 복귀·키보드/회전·다음 질문·음성 전환 검사. 느린 구간의 프레임/메모리 측정 | 자동 검사와 실제 단말 재현이 모두 통과하고, 측정값을 조건과 함께 기록 |
+| 2. 처음 보는 질문의 검색 품질 | 기존 150+33 회귀와 별도로 새 표현·우회 질문·복합 질문 평가. 검색 누락/잘못된 절/필요 없는 되묻기/모델 오설명을 나눠 개선 | 정답 쪽·필수 조건·금지 답변이 있는 독립 평가표로 전후 비교. 확인 질문을 줄이려고 엉뚱한 근거를 붙이지 않음 |
+| 3. 문서 정제·관리 | 표/도식/조건 연결을 검수하고 PC에서 문서 패키지를 만들며 버전·출처·서명/무결성 정책 정리 | 문서 변경 후 같은 질문 회귀를 수행하고 잘못된/오래된 패키지의 혼용을 방지 |
+| 4. 연속 실행과 중단 | AI/검색/음성의 메모리·취소·시간 초과·화면 이탈·경보 우선 처리 검증. 필요 시 추론 프로세스 격리 검토 | 연속 질의·취소·재시작·메모리 압박에서 종료/자원 회수 결과를 실제 단말로 확인 |
+| 5. 앱 중심 작업·감독관 기능 | 기존 서버/API를 기준으로 WebView 업무 화면을 Compose로 옮기고 QR·계정·현장 권한·승인 이력·재접속 설계 | 작업자 조회/승인 우회 방지, 중복 승인·오프라인/재연결·권한 만료 시험 |
+| 6. 실제 측정기와 운영 배포 | 제조사 UUID/패킷 기반 어댑터·측정 신뢰성·연결 끊김/위험 경보 검증. 운영 인증·백업·서명 배포·기기 운영 정책 정리 | 실제 장비/현장 시나리오 시험과 별도의 출시 검토 |
+
+로컬 실행을 핵심으로 유지합니다. 검색 실패를 감추기 위해 서버 AI로 자동 전환하거나, AI에게 작업 가능 여부를 결정시키는 계획은 없습니다. 품질 평가와 기기 안정성은 각각 통과해야 하며 보호/폴백 화면이 있다는 이유만으로 로컬 AI 실행 안정성을 승인하지 않습니다.
+
+## 검증 결과 읽는 법
+
+이번 변경의 **JVM 검사 64개와 앱/계측 APK 빌드가 통과**했습니다. 최신 실행 수치와 APK 해시는 [2026-10-30 채팅 검증 기록](docs/validation/android-chat-20261030.json)에 남깁니다. JVM 검사와 앱/계측 APK 빌드는 실제 터치·IME·발열 검증과 구분합니다. 현재 연결 기기가 없어 새 Compose 계측 검사 6개는 컴파일만 확인하고 실행하지 않았습니다. 기존 화면 캡처는 과거 디자인 기록이며 이번 수정 화면을 촬영한 자료가 아닙니다.
+
+- [2026-10-29 장비 질문 수정 전후](docs/validation/android-equipment-20261029.json): 같은 12개 대표 질문을 PC Kotlin에서 비교.
+- [2026-10-29 의미 검색 평가](docs/validation/semantic-rag-20261029.json): 심화 34개 중 직접 근거 반환 2→14, 나머지 20개 확인 대화. 새로운 모든 질문의 정확도 수치가 아님.
+- [기존 150+33 문항 평가](docs/ANDROID_ANSWER_QUALITY.md): 정답 쪽·본문·조건 검사. 개발 회귀 집합이며 실기기 생성 답변 전체의 품질 점수가 아님.
+- [Android 앱 설계](docs/ANDROID_APP_SPEC.md), [음성 검증](docs/ANDROID_VOICE.md), [이전 앱 화면](docs/ANDROID_WEB_DESIGN.md): 날짜별 구현·실기기 확인 범위 참고.
+
+## 보존한 이전 상세 안내
+
+아래는 2026-10-29까지의 앱/웹 구현·서버 시험·iPhone 문제 대응 기록입니다. 현재 개발 범위와 최신 상태는 위 Android 설명을 우선합니다. 기존 웹 파일과 문서 링크는 지우지 않았습니다.
+
+<details>
+<summary>이전 앱·웹/PWA 실행, 인증, 디자인, 파일 지도와 검증 기록 펼치기</summary>
+
+<!-- preserved-readme-20261029 -->
+
+# HybridTech · O₂ Field Guard
+
 밀폐공간 안전 문서를 근거로 질문에 답하고, 작업 요청부터 감독관 점검·승인, 현장 투입과 퇴장까지 기록하는 프로젝트입니다. **현재 개발 대상은 Android 설치형 앱입니다. 웹/PWA 개발은 중단하고 기존 파일은 보존합니다.** 질문과 문서 검색은 기기 안에서 처리하며, 기존 작업 요청·승인·감독관 QR 인증은 작업 서버를 사용합니다.
 
 최종 갱신: **2026-10-29**. 이 README는 저장소 첫 화면에서 프로젝트 구조, 실행 주소, 실제 소스 경로, 감독관 코드, 테스트 방법을 확인할 수 있도록 정리한 안내입니다.
@@ -415,3 +572,5 @@ Android의 이전 실기기/APK 결과와 웹의 현재 자동 검사·화면 �
 | [유지보수 기준](docs/webapp/BUILD_PROMPT.md) | 이후 변경에서 보존할 동작 |
 
 현재 BLE 수신 기반과 데모 구분은 구현되어 있지만 특정 제조사 프로토콜·현장 장비 정확도는 검증 전입니다. 실제 작업허가·현장 안전 판단·대피 절차는 담당자의 현장 확인을 따릅니다.
+
+</details>
