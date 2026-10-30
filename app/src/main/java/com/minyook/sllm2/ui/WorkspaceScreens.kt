@@ -42,6 +42,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.minyook.sllm2.data.ChatHistoryStore
+import com.minyook.sllm2.data.GeneralKnowledgeAnswer
 import com.minyook.sllm2.model.ModelPhase
 import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
@@ -162,10 +163,11 @@ import java.util.Locale
 @Composable private fun WorkspaceAnswerHeader(message:ChatMessageUi){
     val context=LocalContext.current
     var copied by remember(message.id,message.text){mutableStateOf(false)}
+    val origin=when{GeneralKnowledgeAnswer.isGeneral(message.text)->"일반 지식 답변";GeneralKnowledgeAnswer.containsGeneral(message.text)->"문서 · 일반 지식 답변";message.sourceIds.isEmpty()&&message.text.isNotBlank()->"문서 검색 안내";else->"문서 근거 답변"}
         Row(Modifier.fillMaxWidth().padding(top=20.dp,bottom=12.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(9.dp)){
             if(message.pending)CircularProgressIndicator(Modifier.size(22.dp),strokeWidth=2.dp)
             else Surface(color=WorkspaceDesign.Blue,shape=RoundedCornerShape(9.dp)){Text("O₂",color=Color.White,fontSize=14.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(6.dp))}
-            Text(if(message.pending){if(message.text.isBlank())"문서 근거를 확인하고 있어요" else "문서 근거 답변 · 보충 확인 중"}else "문서 근거 답변",fontSize=13.sp,fontWeight=FontWeight.SemiBold,modifier=Modifier.weight(1f).semantics{liveRegion=LiveRegionMode.Polite})
+            Text(if(message.pending){if(message.text.isBlank())"문서 근거를 확인하고 있어요" else "$origin · 작성 중"}else origin,fontSize=13.sp,fontWeight=FontWeight.SemiBold,modifier=Modifier.weight(1f).semantics{liveRegion=LiveRegionMode.Polite})
             if(!message.pending&&message.text.isNotBlank())TextButton(onClick={context.getSystemService(android.content.ClipboardManager::class.java).setPrimaryClip(android.content.ClipData.newPlainText("Field Guard 답변",message.text));copied=true},modifier=Modifier.testTag("copyAnswer:${message.id}").semantics{contentDescription="답변 복사"}){Text(if(copied)"복사됨" else "복사",fontSize=11.sp)}
         }
 }

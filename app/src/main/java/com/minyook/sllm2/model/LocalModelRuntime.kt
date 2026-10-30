@@ -3,6 +3,7 @@ package com.minyook.sllm2.model
 import android.content.Context
 import android.os.SystemClock
 import android.util.Log
+import com.minyook.sllm2.data.GeneralKnowledgeAnswer
 import com.google.ai.edge.litertlm.Backend
 import com.google.ai.edge.litertlm.Content
 import com.google.ai.edge.litertlm.Engine
@@ -24,11 +25,12 @@ class LocalModelRuntime(private val context: Context) {
         compactVoiceAnswer: Boolean = false,
         supplementOnly: Boolean = false,
         onPartialAnswer: (String) -> Unit = {},
+        generalKnowledge: Boolean = false,
     ): String = withContext(Dispatchers.Default) {
         val startedAt = SystemClock.elapsedRealtime()
         val settings = InferenceSettingsPreferences(context).load()
-        val outputLimit = if (supplementOnly) minOf(settings.responseTokens, 192) else settings.responseTokens.takeUnless { settings.automaticAnswerLength }
-        val prompt = buildPrompt(
+        val outputLimit = if (supplementOnly) minOf(settings.responseTokens, 192) else if(generalKnowledge)minOf(settings.responseTokens,768) else settings.responseTokens.takeUnless { settings.automaticAnswerLength }
+        val prompt = if(generalKnowledge)GeneralKnowledgeAnswer.prompt(question) else buildPrompt(
             question = question,
             context = evidence,
             compactVoiceAnswer = compactVoiceAnswer,

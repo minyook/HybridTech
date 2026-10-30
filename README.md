@@ -4,6 +4,8 @@
 
 **최종 갱신: 2026-10-30.** 문서 검색·답변·대화 기록은 기기 중심으로 동작합니다. 최초 모델/언어 데이터 준비에는 인터넷이 필요할 수 있고, 작업자 요청·감독관 QR 인증·승인 공유에는 별도의 작업 서버가 필요합니다.
 
+**문서 우선·일반 지식 답변 추가:** 제목이 정확한 질문/장비 목록 외에는 어휘 검색 후보를 의미 검색으로 재검토합니다. 구성된 문서 인덱스를 검색한 뒤 직접 근거를 확인하지 못한 경우 로컬 Gemma가 **일반 지식임을 표시한 Markdown 답변**을 작성합니다. 검색 실패나 대상이 모호한 질문은 문서 부재로 바꾸지 않습니다. 첫 본문을 빠르게 표시하는 것이 목표이며 **긴 답변 완성 1~2초는 보장하지 않습니다.** [현재 검색·일반 답변·속도 설계](docs/ANDROID_REVIEWED_RAG.md).
+
 [Android 설계서](docs/ANDROID_APP_SPEC.md) · [채팅 최적화](docs/ANDROID_CHAT_OPTIMIZATION.md) · [의미 검색 설계](docs/SEMANTIC_RAG_DESIGN.md) · [장비 검색](docs/ANDROID_EQUIPMENT_SEARCH.md) · [로컬 음성](docs/ANDROID_VOICE.md)
 
 **2026-10-30 후속 수정:** `최근 답변으로 이동`은 매번 실제 대화 끝까지 이동하고, 키보드가 올라오는 동안 바뀌는 대화 영역 높이에 맞춰 하단 위치를 다시 맞춥니다. 텍스트 채팅의 음성 상태 박스는 제거했습니다. **마이크 → 음성 전용 화면 이동 + 대화 시작**이며 질문·답변·출처를 그 화면에서 이어 봅니다. 음성 설정은 버튼으로 열고, 종료/텍스트 채팅 복귀는 전용 화면에서 합니다. [후속 검증 기록](docs/validation/android-chat-voice-20261030.json).
@@ -14,8 +16,9 @@
 |---|---|---|
 | 화면 | Compose 홈·질문·기록·문서·원문·설정·센서 화면, 휴대전화 하단 메뉴와 넓은 화면 사이드바 | 보존된 웹 디자인을 기준으로 한 네이티브 UI. 채팅의 이번 변경은 기기 UI 검사가 남아 있음 |
 | 오프라인 문서 | 2022 밀폐공간 안전작업 가이드와 2026 자율점검표, 쪽별 데이터 87개, 원본 PDF와 쪽 연결 | 기본 문서 2종. 임의 PDF 업로드·현장별 문서 관리 UI는 아직 없음 |
-| 문서 검색 | 엄격한 문단 검색 + 로컬 EmbeddingGemma 300M q4 의미 검색, 393개 항목/절 인덱스 | 직접 근거가 불분명하면 관련 항목 확인 대화. 모든 새 질문에 답할 수준은 아님 |
+| 문서 검색 | 문단 후보 + 로컬 EmbeddingGemma 300M q4 의미 재검토, 393개 항목/절 인덱스, 복합 질문별 검색 | 제목/장비 목록은 빠른 경로. 모호성·근거 미확인·검색 실패를 구분. 모든 새 질문에 답할 수준은 아님 |
 | 답변 | 질문과 직접 관련된 본문·조건을 먼저 표시하고 Markdown·출처 제공 | 일반 문서 본문은 추출·조립하며, 필요한 경우에만 LiteRT-LM/Gemma의 짧은 보충을 검사해 추가 |
+| 문서 외 일반 지식 | 검색을 마쳤지만 직접 근거가 확인되지 않은 주제는 로컬 모델이 Markdown으로 작성하며 일부 본문부터 표시 | 문서 근거와 다른 안내를 붙이며 가짜 출처·미확인 사양/작업 가능 단정을 제한. 모델의 일반 지식 전체를 사실 검증하는 기능은 아님 |
 | 장비 질문 | 측정·조명·환기·보호·구조·연락 장비의 근거를 모아 목록으로 표시 | 가격·사양·점검 시기·예외 질문을 일반 장비 목록으로 대체하지 않음 |
 | 로컬 AI | Gemma 4 E2B 다운로드·저장·기기 내 실행, 문맥/출력 설정 | 생성 모델과 검색 모델은 별도. 실제 기기별 연속 실행·발열·취소 안정화는 남아 있음 |
 | 음성 | Android 12+ 지원 서비스의 기기 내 한국어 STT, 로컬 TTS, 듣기→답변→읽기→다시 듣기 | OS 로컬 언어 지원 필요. 화면 이탈/잠금 시 종료. 실제 현장 소음·긴 대화의 정확도는 추가 시험 필요 |
@@ -58,7 +61,9 @@
 flowchart TD
   Q[텍스트 · 로컬 음성 질문] --> VM[FieldGuardViewModel]
   VM --> R[장비 목록 · 문단 검색 · 필요 시 로컬 의미 검색]
-  R --> D[선택한 원문 · 필수 조건 · 실제 출처]
+  R -->|직접 근거| D[선택한 원문 · 필수 조건 · 실제 출처]
+  R -->|검색 완료 · 직접 근거 미확인| K[출처를 구분한 로컬 일반 지식 생성]
+  K --> UI
   D --> P[DocumentAnswerPlan]
   P --> UI[Markdown 채팅 · 원문 PDF · 로컬 읽기]
   P -->|이유·비교 등 필요할 때만| AI[LiteRT-LM Gemma 보충 생성]
@@ -68,7 +73,7 @@ flowchart TD
   W[작업 점검 WebView] <--> S[기존 작업 서버 · QR · 승인 기록]
 ```
 
-문서 본문은 생성 모델이 다시 타이핑할 때까지 기다리지 않습니다. 직접 근거가 불분명하면 로컬 검색 인코더를 실행하며, 생성 모델과 동시에 적재하지 않도록 순서를 나눕니다. 답변용 Gemma가 없더라도 준비된 문서 검색과 원문 확인은 사용할 수 있습니다.
+문서 본문은 생성 모델이 다시 타이핑할 때까지 기다리지 않습니다. 일반 어휘 검색 후보도 의미 재검토를 거치며, 생성 모델과 검색 인코더를 동시에 실행하지 않도록 순서를 나눕니다. 답변용 Gemma가 없어도 문서 검색·원문 확인은 사용하지만 문서 외 일반 지식 생성에는 모델이 필요합니다. 인덱스와 토크나이저는 재사용하고 최근 질문 벡터 16개를 캐시합니다. 실제 기기의 전체 응답 시간과 새 질문 정확도는 별도 확인이 필요합니다.
 
 ## Android 개발·빌드
 
@@ -88,8 +93,8 @@ node tools/prepare-semantic.mjs --android-only
 | 앱 APK | `app/build/outputs/apk/debug/app-debug.apk` |
 | 계측 검사 APK | `app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk` |
 | JVM 결과 | `app/build/test-results/testDebugUnitTest/`, `app/build/reports/tests/testDebugUnitTest/` |
-| 최신 채팅·음성 변경 검증 | `docs/validation/android-chat-voice-20261030.json` |
-| 이번 APK 보관 사본 | `tmp/chat-voice-20261030/fieldguard-chat-voice-20261030.apk` (로컬 생성물, Git 제외) |
+| 최신 검색·일반 지식 변경 검증 | `docs/validation/android-reviewed-rag-20261030.json` |
+| 이번 APK 보관 사본 | `tmp/reviewed-rag-20261030/fieldguard-reviewed-rag-20261030.apk` (로컬 생성물, Git 제외) |
 
 현재 작업 점검/인증을 사용할 때만 설정 → 현장 작업 서버에 기존 서버의 기본 주소를 지정합니다. 이 기능의 서버 실행·초기 관리자·QR 시험 절차는 [기존 작업 흐름](web/docs/workflow.md)과 아래 접힌 상세 기록에 있습니다. 서버 없이 문서 질문·원문 확인을 실행하는 흐름과 구분합니다.
 
@@ -107,6 +112,7 @@ node tools/prepare-semantic.mjs --android-only
 | `app/src/main/java/com/minyook/sllm2/ui/MarkdownText.kt`, `MarkdownBlocks.kt` | 오프라인 Markdown 분석·블록 표시 |
 | `app/src/main/java/com/minyook/sllm2/ui/FieldGuardViewModel.kt` | 텍스트/음성 질문·검색·본문·보충·기록 조정 |
 | `app/src/main/java/com/minyook/sllm2/data/HybridRetrieval.kt`, `EquipmentOverview.kt`, `FocusedEvidence.kt` | 의미/문단 검색·장비 목록·조건 선택 |
+| `app/src/main/java/com/minyook/sllm2/data/QuestionSearchCoordinator.kt`, `GeneralKnowledgeAnswer.kt` | 복합 질문별 검색·어휘 후보 재검토·실패/미확인 구분·일반 지식 안내/표시 제한 |
 | `app/src/main/java/com/minyook/sllm2/data/SemanticEncoder.kt`, `SemanticTokenizer.kt` | 기기 내 ONNX 질문 임베딩·토큰 처리 |
 | `app/src/main/java/com/minyook/sllm2/data/DocumentAnswerPlan.kt` | 화면/음성/보충 공통 계획·보충 검사 |
 | `app/src/main/java/com/minyook/sllm2/data/ChatHistoryStore.kt` | 기기 대화·근거·확인 선택지 저장 |
@@ -141,7 +147,7 @@ node tools/prepare-semantic.mjs --android-only
 
 ## 검증 결과 읽는 법
 
-이번 변경의 **JVM 검사 64개와 앱/계측 APK 빌드가 통과**했습니다. 최신 실행 수치와 APK 해시는 [2026-10-30 채팅·음성 후속 검증 기록](docs/validation/android-chat-voice-20261030.json)에 남깁니다. JVM 검사와 앱/계측 APK 빌드는 실제 터치·IME·발열 검증과 구분합니다. 현재 연결 기기가 없어 관련 Compose 계측 검사 12개(채팅 9·음성 3)는 컴파일만 확인하고 실행하지 않았습니다. 기존 화면 캡처는 과거 디자인 기록이며 이번 수정 화면을 촬영한 자료가 아닙니다.
+이번 변경의 **JVM 검사 76개와 앱/계측 APK 빌드가 통과**했습니다. 최신 실행 수치와 APK 해시는 [2026-10-30 검색·일반 지식 검증 기록](docs/validation/android-reviewed-rag-20261030.json)에 남깁니다. 기존 183문항 어휘 회귀는 새 검색 파이프라인 전체의 정확도 점수가 아닙니다. PC 인덱스 비용 측정에는 휴대전화의 의미 인코더·Gemma 생성 시간이 포함되지 않습니다. 연결 기기가 없어 관련 Compose 계측 검사 13개(채팅 10·음성 3)는 컴파일만 확인하고 실행하지 않았으며, 새 로컬 일반 지식 생성과 전체 응답 지연도 실기기 검증이 남아 있습니다. 기존 화면 캡처는 과거 디자인 기록입니다.
 
 - [2026-10-29 장비 질문 수정 전후](docs/validation/android-equipment-20261029.json): 같은 12개 대표 질문을 PC Kotlin에서 비교.
 - [2026-10-29 의미 검색 평가](docs/validation/semantic-rag-20261029.json): 심화 34개 중 직접 근거 반환 2→14, 나머지 20개 확인 대화. 새로운 모든 질문의 정확도 수치가 아님.

@@ -11,6 +11,7 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.minyook.sllm2.ui.*
+import com.minyook.sllm2.data.GeneralKnowledgeAnswer
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
@@ -147,5 +148,12 @@ class ChatScreenTest {
             val clipboard=compose.activity.getSystemService(android.content.ClipboardManager::class.java)
             assertEquals(text,clipboard.primaryClip!!.getItemAt(0).text.toString())
         }
+    }
+    @Test fun generalKnowledgeIsLabelledWithoutInventedDocumentSources() {
+        ui.value=ui.value.copy(messages=listOf(answer.copy(text=GeneralKnowledgeAnswer.finish("## RAG\n\n문서 검색을 연결하는 방식입니다.","RAG가 뭐야?"),pending=false)),isAnswering=false)
+        show()
+        compose.onNodeWithTag("chatRow:answer:header").performScrollTo()
+        compose.onNodeWithText("일반 지식 답변").assertIsDisplayed()
+        compose.onNodeWithText("참조한 문서").assertDoesNotExist()
     }
 }

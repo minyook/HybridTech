@@ -10,8 +10,13 @@ import kotlin.math.sqrt
 /** One short CPU session per question, closed before optional Gemma generation.
  * Weights ship as pinned assets and no network access exists in this class. */
 class SemanticEncoder(private val context: Context) {
+    private val tokenizer by lazy { SemanticTokenizer(context.assets.open("semantic-model/tokenizer.json").bufferedReader().use { it.readText() }) }
+    private val vectors=object:LinkedHashMap<String,FloatArray>(16,.75f,true){override fun removeEldestEntry(eldest:MutableMap.MutableEntry<String,FloatArray>?)=size>16}
+    @Synchronized fun cachedVector(question:String):FloatArray?=vectors[question]?.copyOf()
+    @Synchronized
     fun encode(question: String): FloatArray {
-        val ids = SemanticTokenizer(context.assets.open("semantic-model/tokenizer.json").bufferedReader().use { it.readText() }).encode("task: search result | query: $question")
+        cachedVector(question)?.let{return it}
+        val ids = tokenizer.encode("task: search result | query: $question")
         val directory = File(context.noBackupFilesDir,"semantic-embeddinggemma-5090578d").apply{mkdirs()}
         for((name,size) in listOf("model_q4.onnx" to 519322L,"model_q4.onnx_data" to 196725760L)){
             val file=File(directory,name)
@@ -33,7 +38,7 @@ class SemanticEncoder(private val context: Context) {
                             val vector = (output.get("sentence_embedding").get().value as Array<FloatArray>)[0].copyOf()
                             val norm = sqrt(vector.sumOf { it.toDouble()*it }).toFloat()
                             require(norm > 0 && vector.size == 768 && vector.all { it.isFinite() })
-                            return vector.map { it/norm }.toFloatArray()
+                            return vector.map { it/norm }.toFloatArray().also{vectors[question]=it.copyOf()}
                         }
                     }
                 }

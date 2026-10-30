@@ -5,7 +5,7 @@ import kotlin.math.ln
 import kotlin.math.sqrt
 
 data class SearchSuggestion(val label: String, val question: String)
-data class SearchResolution(val question: String, val sources: List<RetrievedChunk> = emptyList(), val status: String = "unconfirmed", val message: String = "질문에 직접 답할 근거를 아직 확인하지 못했어요. 궁금한 대상과 알고 싶은 내용을 함께 알려 주세요.", val suggestions: List<SearchSuggestion> = emptyList(), val semantic: Boolean = false)
+data class SearchResolution(val question: String, val sources: List<RetrievedChunk> = emptyList(), val status: String = "unconfirmed", val message: String = "질문에 직접 답할 근거를 아직 확인하지 못했어요. 궁금한 대상과 알고 싶은 내용을 함께 알려 주세요.", val suggestions: List<SearchSuggestion> = emptyList(), val semantic: Boolean = false, val method: String = "", val searchComplete: Boolean = false, val generalQuestion: String? = null)
 internal data class SemanticPassage(val id:String,val documentId:String,val page:Int,val chunkIndex:Int,val section:String,val text:String,val orders:List<Int>,val units:List<EvidencePassage>,val searchText:String,val sourceBody:String,val vector:FloatArray)
 internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:String) {
     private val root = JSONObject(json)
@@ -23,7 +23,7 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
         val topic=previous?.text?.let{Regex("^\\(([^)]+)\\)").find(it)?.groupValues?.get(1)}
         return if(previous!=null&&topic!=null&&EvidenceLanguage.compact(topic) in EvidenceLanguage.compact(p.section))listOf(previous.copy(section=p.section))+p.units else p.units
     }
-    fun resolve(question:String,vector:FloatArray?):SearchResolution {
+    fun resolve(question:String,vector:FloatArray?,review:Boolean=false):SearchResolution {
         var result=SearchResolution(question,semantic=vector!=null)
         if(Regex("(?:우리|현재|지금).*(?:승인|허가).*(?:됐|되었|받았|완료|상태)").containsMatchIn(question))return result.copy(status="live-state",message="현재 현장의 승인 상태는 문서로 확인할 수 없어요. 작업 전 점검 화면에서 요청과 감독관 승인 상태를 확인해 주세요.")
         val parts=FocusedRetriever.aspects(question).take(8)
@@ -41,10 +41,10 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
         val exact=passages.filter{heading.isNotBlank()&&EvidenceLanguage.compact(it.section)==heading}
         if(unknown.isEmpty()&&exact.isNotEmpty()&&exact.map{it.documentId to it.page}.distinct().size<=2){
             val selected=exact.groupBy{it.documentId to it.page}.values.map{group->group.maxBy{it.orders.size}}
-            return result.copy(status="answered",message="",semantic=false,sources=selected.map{p->val chunk=chunks.first{it.documentId==p.documentId&&it.pageNumber==p.page&&it.chunkIndex==p.chunkIndex};RetrievedChunk(chunk,1.0,completeScope(p,chunk))})
+            return result.copy(status="answered",message="",semantic=false,method="heading",sources=selected.map{p->val chunk=chunks.first{it.documentId==p.documentId&&it.pageNumber==p.page&&it.chunkIndex==p.chunkIndex};RetrievedChunk(chunk,1.0,completeScope(p,chunk))})
         }
         if(vector==null||vector.size!=768||vector.any{!it.isFinite()}){
-            if(sources.isNotEmpty()&&unknown.isEmpty()&&!vague)return result.copy(sources=sources,status="answered",message="",semantic=false)
+            if(sources.isNotEmpty()&&unknown.isEmpty()&&!vague)return result.copy(sources=sources,status="answered",message="",semantic=false,method="lexical")
             val suggestions=if(vague&&tokens.isNotEmpty())passages.filter{it.section.length<50&&tokens.any{t->t in EvidenceLanguage.compact(it.section)}}.map{it.section}.distinctBy{EvidenceLanguage.compact(it)}.take(3).map{val label=it.replace(Regex("^\\((.*)\\)$"),"$1");SearchSuggestion(label,"${label}에 대해 알려줘")} else emptyList()
             return result.copy(status=if(vague)"clarify" else "unconfirmed",message=if(vague)"어떤 대상의 방법이나 조건이 궁금한가요? 대상과 궁금한 점을 함께 알려 주세요." else result.message,suggestions=suggestions,semantic=false)
         }
@@ -64,11 +64,23 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
         val lead=dense.firstOrNull();val gap=if(lead!=null)lead.dense-(dense.firstOrNull{it.p.page!=lead.p.page||it.p.documentId!=lead.p.documentId}?.dense?:lead.dense) else 0.0
         val top=if(lead!=null&&lead.dense>=.40&&gap>=(if(lead.dense>=.5).04 else .06))lead else fused.firstOrNull()
         if((dense.firstOrNull()?.dense?:0.0)>=.4)result=result.copy(suggestions=fused.map{it.p.section}.filter{it.isNotBlank()&&it.length<=50}.distinctBy{EvidenceLanguage.compact(it)}.take(3).map{SearchSuggestion(it,"${it}에 대해 알려줘")})
-        if(vague)return result.copy(status="clarify",message="어떤 내용을 확인하려는 건가요? 관련 문서에서 찾은 항목 중 선택하거나 궁금한 대상을 알려 주세요.")
-        if(unknown.isNotEmpty())return result.copy(message="관련 주제는 찾았지만 요청한 ‘${unknown.joinToString("·")}’ 정보는 현재 문서 근거로 확인하지 못했어요. 아래 항목은 다른 관련 내용이에요.")
         val semanticClear=top!=null&&top.dense>=.40&&dense.indexOf(top)<5&&top.dense-(dense.firstOrNull{it.p.page!=top.p.page||it.p.documentId!=top.p.documentId}?.dense?:top.dense)>=(if(top.dense>=.5).04 else .06)
+        if(review){
+            result=result.copy(searchComplete=true,method="reviewed-semantic")
+            if(passages.isEmpty()||passages.size!=root.getJSONArray("passages").length())return result.copy(status="search-error",searchComplete=false,message="현재 문서와 검색 인덱스를 함께 확인하지 못했어요. 문서를 준비한 뒤 다시 질문해 주세요.",suggestions=emptyList())
+            if(vague)return result.copy(status="clarify",message="어떤 대상의 내용을 확인할까요? 관련 항목을 선택하거나 질문의 대상을 알려 주세요.")
+            if(unknown.isNotEmpty() || (sources.isEmpty()&&(lead?.dense?:0.0)<.40))return result.copy(status="no-evidence",message="제공 문서 전체 검색에서 질문에 직접 답할 근거를 확인하지 못했어요.",suggestions=emptyList(),generalQuestion=question)
+            if(!semanticClear){
+                val agreement=sources.isNotEmpty()&&dense.take(5).any{c->c.dense>=.40&&sources.any{it.chunk.documentId==c.p.documentId&&it.chunk.pageNumber==c.p.page}}
+                if(agreement&&!vague)return result.copy(status="answered",sources=sources,message="",suggestions=emptyList(),method="lexical-semantic-agreement")
+                return result.copy(status="clarify",message="관련 근거가 여러 항목으로 나뉘어 있어요. 아래 항목 중 궁금한 범위를 선택해 주세요.")
+            }
+        }else{
+            if(vague)return result.copy(status="clarify",message="어떤 내용을 확인하려는 건가요? 관련 문서에서 찾은 항목 중 선택하거나 궁금한 대상을 알려 주세요.")
+            if(unknown.isNotEmpty())return result.copy(message="관련 주제는 찾았지만 요청한 ‘${unknown.joinToString("·")}’ 정보는 현재 문서 근거로 확인하지 못했어요. 아래 항목은 다른 관련 내용이에요.")
+        }
         if(sources.isEmpty()&&!semanticClear)return result.copy(status="clarify",message="질문의 뜻을 한 가지로 좁히지 못했어요. 아래 관련 항목 중 어떤 내용인지 알려 주세요. 다른 뜻이라면 대상이나 상황을 조금 더 설명해 주세요.")
-        if(sources.isNotEmpty())return result.copy(sources=sources,status="answered",message="",suggestions=emptyList())
+        if(sources.isNotEmpty()&&!review)return result.copy(sources=sources,status="answered",message="",suggestions=emptyList())
         if(top==null)return result
         val p=top.p;val chunk=chunks.first{it.documentId==p.documentId&&it.pageNumber==p.page&&it.chunkIndex==p.chunkIndex}
         val units=FocusedEvidence.units(chunk)

@@ -25,6 +25,7 @@ import com.minyook.sllm2.data.AnswerSupplementVerifier
 import com.minyook.sllm2.data.HybridRetrieval
 import com.minyook.sllm2.data.SemanticEncoder
 import com.minyook.sllm2.data.SearchSuggestion
+import com.minyook.sllm2.data.GeneralKnowledgeAnswer
 import com.minyook.sllm2.gas.BleGasClient
 import com.minyook.sllm2.gas.GasMonitoringService
 import com.minyook.sllm2.gas.GasReading
@@ -135,6 +136,8 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     private val inferencePreferences = InferenceSettingsPreferences(appContext)
     private val repository = KnowledgeRepository()
     private val runtime = LocalModelRuntime(appContext)
+    private val semanticEncoder = SemanticEncoder(appContext)
+    private val questionSearchIndex by lazy { appContext.assets.open("knowledge/semantic-index-v1.json").bufferedReader().use { it.readText() } }
     private val history = ChatHistoryStore(appContext)
     private val uiPreferences = appContext.getSharedPreferences("field_guard_ui", Context.MODE_PRIVATE)
     private val scannedDevices = linkedMapOf<String, BluetoothDevice>()
@@ -381,31 +384,45 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
         }
         viewModelScope.launch(Dispatchers.IO) {
             try {
+            val firstBodyRecorded=java.util.concurrent.atomic.AtomicBoolean(false)
+            fun recordFirstBody(origin:String){if(firstBodyRecorded.compareAndSet(false,true))android.util.Log.i("FieldGuardAnswerLatency","firstBodyStateMs=${SystemClock.elapsedRealtime()-pending.startedAtElapsedRealtime} origin=$origin")}
             history.append(chatId, ChatHistoryStore.Role.USER, asked, resolvedQuestion=resolved)
-            val searchIndex = appContext.assets.open("knowledge/semantic-index-v1.json").bufferedReader().use { it.readText() }
-            val initial = repository.resolveQuestion(resolved, searchIndex, null)
-            val resolution = if(initial.status=="unconfirmed") {
-                // Do not overlap generator and encoder; ordinary source answers
-                // and explicit clarification choices need no neural allocation.
-                runtime.release()
-                val vector=runCatching { SemanticEncoder(appContext).encode(resolved) }.getOrNull()
-                repository.resolveQuestion(resolved,searchIndex,vector)
-            } else initial
+            val searchStarted=SystemClock.elapsedRealtime()
+            val resolution = repository.searchQuestion(resolved,questionSearchIndex){query->
+                semanticEncoder.cachedVector(query) ?: run { runtime.release();semanticEncoder.encode(query) }
+            }
+            android.util.Log.i("FieldGuardAnswerLatency","searchMs=${SystemClock.elapsedRealtime()-searchStarted} method=${resolution.method} status=${resolution.status} complete=${resolution.searchComplete}")
             val sources = resolution.sources
             val basePlan = DocumentAnswerPlan.create(resolved, sources, repository.documentCount() > 0)
             val plan = if(sources.isEmpty()) basePlan.copy(body=resolution.message) else if(resolution.message.isNotBlank())basePlan.copy(body=basePlan.body+"\n\n"+resolution.message) else basePlan
             val sourceIds = plan.sourceIds
             withContext(Dispatchers.Main) {
                 updateState { state -> state.copy(messages = state.messages.map { message -> if (message.id == pending.id) message.copy(text = plan.body, sourceIds = sourceIds, sourceLabels = plan.sourceLabels) else message }) }
+                if(sources.isNotEmpty())recordFirstBody("document")
             }
-            val supplement = if (resolution.status=="answered" && plan.supplementRequested && modelPreferences.status().phase == ModelPhase.READY) {
+            val generalQuestion=resolution.generalQuestion.takeIf{resolution.searchComplete}
+            val general = if(generalQuestion!=null){
+                if(modelPreferences.status().phase!=ModelPhase.READY)GeneralKnowledgeAnswer.NOTICE+"\n\n일반 지식 답변에 사용할 로컬 AI 모델이 필요해요. 설정에서 모델을 다운로드해 주세요."
+                else try{
+                    val raw=runtime.generate(generalQuestion,"",compactVoiceAnswer,generalKnowledge=true,onPartialAnswer={partial->
+                        GeneralKnowledgeAnswer.partial(partial,generalQuestion)?.let{body->
+                            val combined=if(sources.isEmpty())body else plan.body+"\n\n"+body
+                            updateState{state->state.copy(messages=state.messages.map{if(it.id==pending.id)it.copy(text=combined,sourceIds=sourceIds,sourceLabels=plan.sourceLabels) else it})}
+                            recordFirstBody("general")
+                        }
+                    })
+                    GeneralKnowledgeAnswer.finish(raw,generalQuestion)
+                }catch(cancelled:CancellationException){throw cancelled}catch(_:Exception){GeneralKnowledgeAnswer.NOTICE+"\n\n로컬 AI 답변을 완료하지 못했어요. 모델 상태를 확인한 뒤 다시 질문해 주세요."}
+            }else ""
+            val supplement = if (generalQuestion==null && resolution.status=="answered" && plan.supplementRequested && modelPreferences.status().phase == ModelPhase.READY) {
                 try {
                     val raw = runtime.generate(asked, plan.context(), compactVoiceAnswer, supplementOnly = true)
                     AnswerSupplementVerifier.fromJson(raw, plan)
                 } catch (cancelled: CancellationException) { throw cancelled }
                 catch (_: Exception) { "" }
             } else ""
-            val response = AnswerSupplementVerifier.compose(plan, supplement)
+            val response = if(general.isNotBlank()){if(sources.isEmpty())general else plan.body+"\n\n"+general} else AnswerSupplementVerifier.compose(plan, supplement)
+            android.util.Log.i("FieldGuardAnswerLatency","answerMs=${SystemClock.elapsedRealtime()-searchStarted} origin=${if(general.isNotBlank())"general-or-mixed" else "document"}")
             history.append(chatId, ChatHistoryStore.Role.ASSISTANT, response, sourceIds, suggestions=resolution.suggestions)
             withContext(Dispatchers.Main) {
                 updateState { state ->
@@ -505,6 +522,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
         val result = runCatching { KnowledgeSeeder(appContext).seedIfNeeded() }
         val documents = runCatching { repository.documents().map { DocumentUi(it.id, it.title, it.chunkCount) } }
             .getOrDefault(emptyList())
+        if(result.isSuccess)runCatching{repository.prepareQuestionIndex(questionSearchIndex)}
         withContext(Dispatchers.Main) {
             updateState {
                 it.copy(

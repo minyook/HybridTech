@@ -42,6 +42,7 @@ internal class EquipmentOverview(private val chunks: List<KnowledgeChunk>) {
             question = question,
             sources = sources,
             status = "answered",
+            method = "inventory",
             message = "문서에서 확인되는 장비를 용도별로 정리했어요. 각 장비의 사용 조건도 함께 확인해 주세요.",
         )
     }
