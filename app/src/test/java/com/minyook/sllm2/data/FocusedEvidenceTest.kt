@@ -52,6 +52,8 @@ class FocusedEvidenceTest {
         val plan = DocumentAnswerPlan.create("쉽게 설명해줘", listOf(selected))
         assertFalse(plan.body.contains("사전준비")); assertFalse(plan.context().contains("사전준비")); assertTrue(plan.context().contains("[e1-1]"))
         assertTrue(plan.supplementRequested); assertFalse(DocumentAnswerPlan.create("측정방법 알려줘", listOf(selected)).supplementRequested)
+        assertFalse(DocumentAnswerPlan.create("환기를 계속해야 하는 이유", listOf(selected)).supplementRequested)
+        assertFalse(DocumentAnswerPlan.create("급기방식과 배기방식 적용 차이", listOf(selected)).supplementRequested)
     }
     @Test fun supplementCannotAddNumbersApprovalOrWrongEvidenceAndDoesNotReplaceTheBody() {
         val source = page(1, "산소는 18% 이상 23.5% 미만이어야 합니다.")

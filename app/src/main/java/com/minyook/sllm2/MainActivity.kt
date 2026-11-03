@@ -102,6 +102,11 @@ class MainActivity : ComponentActivity() {
         super.onPause()
     }
 
+    override fun onStop() {
+        viewModel.releaseQuestionSearchMemory()
+        super.onStop()
+    }
+
     override fun onResume() {
         super.onResume()
         hideSystemNavigationBar()

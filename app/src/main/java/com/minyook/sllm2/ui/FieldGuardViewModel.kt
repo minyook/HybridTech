@@ -404,6 +404,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
             val general = if(generalQuestion!=null){
                 if(modelPreferences.status().phase!=ModelPhase.READY)GeneralKnowledgeAnswer.NOTICE+"\n\n일반 지식 답변에 사용할 로컬 AI 모델이 필요해요. 설정에서 모델을 다운로드해 주세요."
                 else try{
+                    semanticEncoder.release()
                     val raw=runtime.generate(generalQuestion,"",compactVoiceAnswer,generalKnowledge=true,onPartialAnswer={partial->
                         GeneralKnowledgeAnswer.partial(partial,generalQuestion)?.let{body->
                             val combined=if(sources.isEmpty())body else plan.body+"\n\n"+body
@@ -416,6 +417,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
             }else ""
             val supplement = if (generalQuestion==null && resolution.status=="answered" && plan.supplementRequested && modelPreferences.status().phase == ModelPhase.READY) {
                 try {
+                    semanticEncoder.release()
                     val raw = runtime.generate(asked, plan.context(), compactVoiceAnswer, supplementOnly = true)
                     AnswerSupplementVerifier.fromJson(raw, plan)
                 } catch (cancelled: CancellationException) { throw cancelled }
@@ -510,6 +512,8 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
         updateState { it.copy(bluetoothStatus = "가스 측정기 연결을 해제했습니다.", isScanning = false, sensorConnectionLost = false, lastGasReading = last) }
     }
 
+    fun releaseQuestionSearchMemory() = viewModelScope.launch(Dispatchers.Default) { semanticEncoder.release() }
+
     fun persistSettings() {
         val current = _uiState.value.settings
         if (current != inferencePreferences.load()) {
@@ -568,6 +572,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
         modelWork.removeObserver(workObserver)
         runCatching { appContext.unregisterReceiver(gasReceiver) }
         bleClient.close()
+        semanticEncoder.release()
         runtime.release()
         super.onCleared()
     }

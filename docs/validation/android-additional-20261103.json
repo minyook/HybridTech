@@ -1,0 +1,929 @@
+{
+  "phase": "complete",
+  "queryTotal": 31,
+  "indexPrepareMs": 594.5117,
+  "questions": [
+    "통제실에서 유해가스 위험을 발견하면 누가 뭘 해야 하나요",
+    "센서에서 오는 정보를 통제실이 실시간으로 받고 위험 시 대피시켜야 하나요",
+    "산소 가스를 잴 때 위아래랑 가로로 어디까지 재야 돼요",
+    "어두운 맨홀을 살펴볼 손전등 아무거나 써도 되나요",
+    "보일러 안에서 용접하는데 환기가 충분하지 않아요 필요한 조치는",
+    "자동 이산화탄소 소화장치가 있는 방에서 작업할 때 스위치 설정은",
+    "CO2 소화설비 감지기 경보가 울리면 가스가 나오기 전에 얼마나 빨리 나가야 하나요",
+    "송기마스크로 숨 쉬는 중 전기가 나가거나 호스가 꺾이면 어떻게 대비해",
+    "심장마사지 시작 전에 사람 반응과 숨을 어떻게 확인해야 하나요",
+    "가슴압박을 할 줄 아는데 인공호흡은 못하겠어요 어떻게 해요",
+    "심폐소생술 하다가 사람이 움직였어요 옆으로 눕히기 전에 뭘 확인해요",
+    "심폐소생술 중 구급대가 아직 안 왔으면 계속 해야 하나요",
+    "점심 먹느라 맨홀 밖에 있다 다시 내려가요 가스는 다시 재나요",
+    "질소 배관을 실수로 열지 않도록 밸브에 어떤 표시를 붙이나요",
+    "밀폐된 지하실 가스 공급관을 떼어낼 때 유입을 막는 방법",
+    "분뇨로 더러워진 펌프를 뜯어 수리할 때 작업순서는 누가 알려줘야 해요",
+    "밀폐공간 작업자가 들어간 뒤 나올 때마다 인원 체크를 하나요",
+    "밀폐공간에 동료가 쓰러졌는데 공기호흡기가 없어요 구하러 가도 돼요",
+    "탱크에서 환기팬이 정전으로 멈추면 안에서 기다려도 되나요",
+    "긴급 구조 연습은 사업장에서 얼마나 자주 해야 하는지",
+    "환기팬 덕트 길이를 제조사가 안내하지 않으면 몇 미터로 해요",
+    "손전등 방수 IP 등급이 67인지 알려줘",
+    "우리 현장이 지금 작업 승인 완료됐나요",
+    "그거 어떻게 하는데?"
+  ],
+  "startedAt": "2026-11-03T03:28:43.285498700Z",
+  "groups": {"additional-expression": {
+    "total": 24,
+    "passed": 24
+  }},
+  "completed": 24,
+  "failed": 0,
+  "finishedAt": "2026-11-03T03:28:49.453992500Z",
+  "rubricStatus": "additional engineering challenge; not an independent held-out quality score",
+  "total": 24,
+  "originalQuestionFileVerified": false,
+  "scope": "PC JVM: current Android QuestionSearchCoordinator + DocumentAnswerPlan; actual pinned query model on PC ONNX CPU. No Android device, UI, STT/TTS, or Gemma generation execution.",
+  "hashes": {
+    "semanticIndex": "12ece1e7e7d1a3e46ace5491f35beddacf945f36b68abba8903d264c6bf9f4cd",
+    "questions": null,
+    "corpus": "2c8e9edcc986c9e0c65f66d9a4784d88462656702669ba5a7182c98a86bfebae",
+    "rubric": "f075e031b797c20dc215e516ef5a6ff33f4176e29d480196f6063741d2713b0e"
+  },
+  "embedding": {
+    "sessionReuse": true,
+    "onnxRuntime": {
+      "node": "1.21.0",
+      "common": "1.21.0"
+    },
+    "modelRevision": "5090578d9565bb06545b4552f76e6bc2c93e4a66",
+    "exactAndroidTokenizerIds": true,
+    "loadMs": 713.21,
+    "warning": "Android uses ONNX Runtime 1.22; PC runtime version recorded above. Inference vectors are computed before Kotlin evaluation; timing is not device wall-clock latency.",
+    "queryCount": 31,
+    "platform": "PC ONNX CPU"
+  },
+  "passed": 24,
+  "results": [
+    {
+      "semantic": true,
+      "sources": [{
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 26,
+        "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+      }],
+      "searchComplete": true,
+      "required": [
+        "저장하고 표시",
+        "통제 권한"
+      ],
+      "encoderQueries": ["통제실에서 유해가스 위험을 발견하면 누가 뭘 해야 하나요"],
+      "number": 1,
+      "pages": [26],
+      "kotlinSearchAndCompositionMs": 46.8121,
+      "id": "additional-1",
+      "generation": "not-needed",
+      "expectedPages": [[26]],
+      "failures": [],
+      "question": "통제실에서 유해가스 위험을 발견하면 누가 뭘 해야 하나요",
+      "method": "unique-source-anchor-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 50.112499999999955,
+      "answerMarkdown": "- 센서 및 무선통신을 이용한 측정 1.\n\n- 센서부 가.\n\n- 밀폐공간 내 실제 작업이 이뤄지는 작업공간의 산소 및 유해가스 농도를 측정할 수 있어야 한다.\n\n- 산소 및 유해가스 농도를 실시간 측정할 수 있어야 한다.\n\n- 검교정 등을 통해 정확도와 신뢰성을 확보해야 한다.\n\n- 통신부 가.\n\n- 센서에서 측정된 데이터를 통제실로 실시간 전송할 수 있어야 한다.\n\n- 장애물이나 다른 전파 등의 방해를 받지 않고 안정적으로 측정 데이터를 전송할 수 있어야 한다.\n\n- 통제실 가.\n\n- 전송받은 데이터를 저장하고 표시할 수 있는 전산시스템을 갖추어야 한다.\n\n- 위험상황이 감지된 경우 이를 신속히 알리고, 작업의 중단이나 재개, 대피 등 통제 권한을 가진 자 를 배치하여야 한다.",
+      "pcMeasuredWorkSumMs": 96.92459999999996,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [{
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 26,
+        "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+      }],
+      "searchComplete": true,
+      "required": ["통제 권한"],
+      "encoderQueries": ["센서에서 오는 정보를 통제실이 실시간으로 받고 위험 시 대피시켜야 하나요"],
+      "number": 2,
+      "pages": [26],
+      "kotlinSearchAndCompositionMs": 55.6248,
+      "id": "additional-2",
+      "generation": "not-needed",
+      "expectedPages": [[26]],
+      "failures": [],
+      "question": "센서에서 오는 정보를 통제실이 실시간으로 받고 위험 시 대피시켜야 하나요",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 42.31439999999998,
+      "answerMarkdown": "- 센서 및 무선통신을 이용한 측정 1.\n\n- 센서부 가.\n\n- 밀폐공간 내 실제 작업이 이뤄지는 작업공간의 산소 및 유해가스 농도를 측정할 수 있어야 한다.\n\n- 산소 및 유해가스 농도를 실시간 측정할 수 있어야 한다.\n\n- 검교정 등을 통해 정확도와 신뢰성을 확보해야 한다.\n\n- 통신부 가.\n\n- 센서에서 측정된 데이터를 통제실로 실시간 전송할 수 있어야 한다.\n\n- 장애물이나 다른 전파 등의 방해를 받지 않고 안정적으로 측정 데이터를 전송할 수 있어야 한다.\n\n- 통제실 가.\n\n- 전송받은 데이터를 저장하고 표시할 수 있는 전산시스템을 갖추어야 한다.\n\n- 위험상황이 감지된 경우 이를 신속히 알리고, 작업의 중단이나 재개, 대피 등 통제 권한을 가진 자 를 배치하여야 한다.",
+      "pcMeasuredWorkSumMs": 97.93919999999997,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [{
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 27,
+        "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+      }],
+      "searchComplete": true,
+      "required": ["3개소"],
+      "encoderQueries": ["산소 유해가스를 측정 때 수직 수평 어디까지 측정 돼요"],
+      "number": 3,
+      "pages": [27],
+      "kotlinSearchAndCompositionMs": 32.5231,
+      "id": "additional-3",
+      "generation": "not-needed",
+      "expectedPages": [[27]],
+      "failures": [],
+      "question": "산소 가스를 잴 때 위아래랑 가로로 어디까지 재야 돼요",
+      "method": "unique-source-anchor-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 41.67910000000006,
+      "answerMarkdown": "- 산소·유해가스 농도 측정방법\n\n**사전준비**\n\n- 가스농도 측정기에 이상이 없는지 확인하십시오.\n\n- 예를 들어, 깨끗한 야외 공기에서 산소농도를 측정했을 때 산소농도가 **20.9%**를 초과하거나 미만으로 나타나 면 교정 또는 센서교체가 필요한 상황입니다.\n\n- 그 밖의 다른 유해가스도 표준가스를 이용하여 측정기의 이상 유 무를 확인하거나 정기적인 검교정을 통해 정상상태를 유지해야 합니다.\n\n**측정방법**\n\n- 면적 및 깊이를 고려하여 밀폐공간 내부를 골고루 측정하십시오.\n\n- (작업장소에 대해 수직 및 수평방 향으로 각각 **3개소 이상** 측정)\n\n- 좁은 원형 맨홀인 경우 원칙적으로 3가지 깊이 로 각 **3개소** 측정\n\n- 넓은 원형 공간인 경우 전 맨홀의 밑을 3가지 깊이로 측정\n\n- 좁은 원형 맨홀인 경우 우선 맨홀의 바로 밑 ①~③을 측정하고 X 는 공기호흡기 등을 장착하고 측정\n\n- 구형 공간인 경우 정사의 맨홀 바로 밑 X 는 공기호흡기 등을 장착하고 측정 3점과 적도상의 샘플링 구명을 측정\n\n- 탱크 등 깊은 장소의 농도를 측정할 때에는 고무호스나 PV C로 된 채기관을 연결하여 측정하십시 오.\n\n- (채기관은 1m 마다 작은 눈금으로, 5m 마다 큰 눈금으로 표시)\n\n**측정시 주의사항**\n\n- 측정시 밀폐공간 내부를 살펴보기 위해 측정자의 머리(호흡기)가 밀폐공간 개구면 안쪽으로 들어가 지 않도록 하십시오.\n\n- 밀폐공간에 유독가스가 차 있다면 개구면 근처에 가기만 해도 위험할 수 있습 니다.\n\n- 밀폐공간 내부에서 측정을 해야 하는 경우, 공기호흡기 또는 송기마스크를 착용하고 측정을 하십 시오.\n\n- 어두운 밀폐공간 내부에서 측정을 위해 전등을 사용하는 경우, 가연성가스가 차 있을 수 있으므로 방폭구조의 전등을 사용하십시오.\n\n- 산소 및 유해가스 농도측정을 위해 밀폐공간에 들어가는 경우, 긴급상황을 대비해 밀폐공간 외부에 감시인을 배치하십시오.\n\n> 도식의 위치·기호가 포함된 절차는 아래 출처의 원문 그림과 함께 확인해 주세요.",
+      "pcMeasuredWorkSumMs": 74.20220000000006,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [{
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 27,
+        "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+      }],
+      "searchComplete": true,
+      "required": ["방폭"],
+      "encoderQueries": ["어두운 맨홀을 살펴볼 손전등 아무거나 써도 되나요"],
+      "number": 4,
+      "pages": [27],
+      "kotlinSearchAndCompositionMs": 40.7165,
+      "id": "additional-4",
+      "generation": "not-needed",
+      "expectedPages": [[27]],
+      "failures": [],
+      "question": "어두운 맨홀을 살펴볼 손전등 아무거나 써도 되나요",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 43.11220000000003,
+      "answerMarkdown": "**측정시 주의사항**\n\n- 측정시 밀폐공간 내부를 살펴보기 위해 측정자의 머리(호흡기)가 밀폐공간 개구면 안쪽으로 들어가 지 않도록 하십시오.\n\n- 밀폐공간에 유독가스가 차 있다면 개구면 근처에 가기만 해도 위험할 수 있습 니다.\n\n- 밀폐공간 내부에서 측정을 해야 하는 경우, 공기호흡기 또는 송기마스크를 착용하고 측정을 하십 시오.\n\n- 어두운 밀폐공간 내부에서 측정을 위해 전등을 사용하는 경우, 가연성가스가 차 있을 수 있으므로 방폭구조의 전등을 사용하십시오.\n\n- 산소 및 유해가스 농도측정을 위해 밀폐공간에 들어가는 경우, 긴급상황을 대비해 밀폐공간 외부에 감시인을 배치하십시오.\n\n**사전준비**\n\n- 가스농도 측정기에 이상이 없는지 확인하십시오.\n\n- 예를 들어, 깨끗한 야외 공기에서 산소농도를 측정했을 때 산소농도가 **20.9%**를 초과하거나 미만으로 나타나 면 교정 또는 센서교체가 필요한 상황입니다.\n\n- 그 밖의 다른 유해가스도 표준가스를 이용하여 측정기의 이상 유 무를 확인하거나 정기적인 검교정을 통해 정상상태를 유지해야 합니다.",
+      "pcMeasuredWorkSumMs": 83.82870000000003,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [{
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 30,
+        "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+      }],
+      "searchComplete": true,
+      "required": ["공기호흡기 또는 송기마스크"],
+      "encoderQueries": ["보일러 안에서 용접하는데 환기가 충분하지 않아요 필요한 조치는"],
+      "number": 5,
+      "pages": [30],
+      "kotlinSearchAndCompositionMs": 53.2261,
+      "id": "additional-5",
+      "generation": "not-needed",
+      "expectedPages": [[30]],
+      "failures": [],
+      "question": "보일러 안에서 용접하는데 환기가 충분하지 않아요 필요한 조치는",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 42.08840000000009,
+      "answerMarkdown": "**유해가스 발생장소 등에 대한 조치3 용접 등에 관한 조치 산업안전보건기준에 관한 규칙 제629조**\n\n- 탱크, 보일러 또는 반응탑의 내부 등 환기가 불충분한 장소에서 용접을 하는 경우에는 다음 조치를 하여야 합니다.\n\n- 가스농도를 측정하고 환기시키는 등의 방법으로 작업공간을 적 정한 공기상태로 유지할 것\n\n- 환기를 했음에도 작업장소를 적정공기 상태로 유지하기 어려운 경우에는 근로자에게 공기호흡기 또는 송기마스크를 지급하여 착용하도록 할 것 불활성기체 사용시 조치 산업안전보건기준에 관한 규칙 제630조, 631조\n\n- 불활성기체를 내보내는 배관이 있는 보일러, 탱크, 반응탑 또는 선창 등의 장소에서 작업을 하는 경우에는 다음 조치를 하여야 합니다.\n\n- 밸브 또는 콕을 잠그거나 차단판을 설치할 것\n\n- 밸브 또는 콕과 차단판에는 잠금장치를 하고 이를 임의로 개방 하는 것을 금지한다는 내용을 보기 쉬운 장소에 게시할 것\n\n- 불활성기체를 내보내는 배관의 밸브나 콕 또는 이를 조작하기 위한 스위치 또는 누름단추 등에 대하여는 잘못된 조작으로 인 하여 불활성기체가 새지 않도록 배관 내의 불활성기체의 명칭 및 개폐의 방향 등 조작방법에 관한 표지를 게시할 것\n\n- 불활성기체가 배출될 우려가 있는 작업을 하는 경우에는 해당 안전판으로부터 배출되는 불활성기체를 직접 외부로 내보내기 위한 설비를 설치하는 등 해당 불활성기체가 해당 작업 장소에 잔류하는 것을 방지하기 위한 조치를 할 것",
+      "pcMeasuredWorkSumMs": 95.3145000000001,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [{
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 32,
+        "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+      }],
+      "searchComplete": true,
+      "required": ["수동"],
+      "encoderQueries": ["자동 이산화탄소 소화장치가 있는 방에서 작업할 때 스위치 설정은"],
+      "number": 6,
+      "pages": [32],
+      "kotlinSearchAndCompositionMs": 33.0063,
+      "id": "additional-6",
+      "generation": "not-needed",
+      "expectedPages": [[32]],
+      "failures": [],
+      "question": "자동 이산화탄소 소화장치가 있는 방에서 작업할 때 스위치 설정은",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 47.402900000000045,
+      "answerMarkdown": "**압기공법에 관한 조치 산업안전보건기준에 관한 규칙 제635조**\n\n- CO 2 소화설비가 설치된 장소에서 작업시(화기사용 또는 연기가 발생 할 우려가 있는 작업) 오 작동 방지를 위해 자동ㆍ수 동 전환스위치는 반드 시『수동』측으로 전환(제어반의 솔레노이드 밸브 연동정지) → 임의작동금지\n\n- 지층이나 그와 인접한 장소에서 압기공법에 의하여 작업을 할 때에는 당해 작업에 의하여 유해가 스가 샐 우려가 있는지의 여부 및 공기 중의 산소농도를 조사할 것\n\n- 조사결과, 유해가스가 새고 있거나 공기 중에 산소가 부족 할 때에는 즉시 작업을 중지하고 출입금 지를 시키는 등 필요한 조치를 할 것 소화설비 등에 대한 조치 산업안전보건기준에 관한 규칙 제628조\n\n- 통풍이 불충분한 장소에서 탄산가스(이산화탄소)를 사용하는 소화기 또는 소화설비를 사용 할 때에는 다음 조치를 하여야 합니다.\n\n- 해당 소화기 또는 소화설비가 쉽게 뒤집히거나 손잡이가 쉽게 작동 되어 탄산가스가 새어나가지 않도록 할 것\n\n- 소화를 위하여 작동 하는 경우 외에 소화기 또는 소화설비를 임의로 작동시키는 것을 금지할 것 자동 CO2 소화설비 설치장소에서의 유지보수작업\n\n- 작업 전, 소방시설 운영 담당자와 작업장소 도면 검토 및 현 장조사 실시 * 작업장소에 설치된 소화설비의 종류, 배치도, 화재감지기의 종류 및 형식, 신속한 대피를 위한 출 입문의 위치, 그 밖의 안전조치 사항 등\n\n- 해당장소에 안전수칙(안전수칙 내용, 담당자 및 연락처 ) 게시 및 외부인 출입금지 표지 설치\n\n- 소화설비 작동 시 조치사항 등에 대한 안전보건교육 실시 * 경보설비 및 이산화탄소 소화설비 감지기가 작동(경보) 후 이산화탄소가 방출되기 전(**30초**) 이내 에 대피하는 방법, 이산화탄소의 유해성 등\n\n- 이산화탄소 방출 장소에 들어가기 전, 완전히 환기(반드시 산소농도 측정 후 출입) * 인명구조 등으로 꼭 들어가야 할 경우에는 공기호흡기를 착용하여야 함",
+      "pcMeasuredWorkSumMs": 80.40920000000006,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [{
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 32,
+        "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+      }],
+      "searchComplete": true,
+      "required": ["30초"],
+      "encoderQueries": ["CO2 소화설비 감지기 경보가 울리면 가스가 나오기 전에 얼마나 빨리 나가야 하나요"],
+      "number": 7,
+      "pages": [32],
+      "kotlinSearchAndCompositionMs": 45.619,
+      "id": "additional-7",
+      "generation": "not-needed",
+      "expectedPages": [[32]],
+      "failures": [],
+      "question": "CO2 소화설비 감지기 경보가 울리면 가스가 나오기 전에 얼마나 빨리 나가야 하나요",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 50.246799999999894,
+      "answerMarkdown": "**압기공법에 관한 조치 산업안전보건기준에 관한 규칙 제635조**\n\n- 소화설비 작동 시 조치사항 등에 대한 안전보건교육 실시 * 경보설비 및 이산화탄소 소화설비 감지기가 작동(경보) 후 이산화탄소가 방출되기 전(**30초**) 이내 에 대피하는 방법, 이산화탄소의 유해성 등\n\n- 지층이나 그와 인접한 장소에서 압기공법에 의하여 작업을 할 때에는 당해 작업에 의하여 유해가 스가 샐 우려가 있는지의 여부 및 공기 중의 산소농도를 조사할 것\n\n- 조사결과, 유해가스가 새고 있거나 공기 중에 산소가 부족 할 때에는 즉시 작업을 중지하고 출입금 지를 시키는 등 필요한 조치를 할 것 소화설비 등에 대한 조치 산업안전보건기준에 관한 규칙 제628조\n\n- 통풍이 불충분한 장소에서 탄산가스(이산화탄소)를 사용하는 소화기 또는 소화설비를 사용 할 때에는 다음 조치를 하여야 합니다.\n\n- 해당 소화기 또는 소화설비가 쉽게 뒤집히거나 손잡이가 쉽게 작동 되어 탄산가스가 새어나가지 않도록 할 것\n\n- 소화를 위하여 작동 하는 경우 외에 소화기 또는 소화설비를 임의로 작동시키는 것을 금지할 것 자동 CO2 소화설비 설치장소에서의 유지보수작업\n\n- 작업 전, 소방시설 운영 담당자와 작업장소 도면 검토 및 현 장조사 실시 * 작업장소에 설치된 소화설비의 종류, 배치도, 화재감지기의 종류 및 형식, 신속한 대피를 위한 출 입문의 위치, 그 밖의 안전조치 사항 등\n\n- CO 2 소화설비가 설치된 장소에서 작업시(화기사용 또는 연기가 발생 할 우려가 있는 작업) 오 작동 방지를 위해 자동ㆍ수 동 전환스위치는 반드 시『수동』측으로 전환(제어반의 솔레노이드 밸브 연동정지) → 임의작동금지\n\n- 해당장소에 안전수칙(안전수칙 내용, 담당자 및 연락처 ) 게시 및 외부인 출입금지 표지 설치\n\n- 이산화탄소 방출 장소에 들어가기 전, 완전히 환기(반드시 산소농도 측정 후 출입) * 인명구조 등으로 꼭 들어가야 할 경우에는 공기호흡기를 착용하여야 함",
+      "pcMeasuredWorkSumMs": 95.8657999999999,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [{
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 36,
+        "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+      }],
+      "searchComplete": true,
+      "required": [
+        "정전",
+        "송기라인"
+      ],
+      "encoderQueries": ["송기마스크로 숨 쉬는 중 정전 송기라인가 꺾이면 어떻게 대비해"],
+      "number": 8,
+      "pages": [36],
+      "kotlinSearchAndCompositionMs": 53.0776,
+      "id": "additional-8",
+      "generation": "not-needed",
+      "expectedPages": [[36]],
+      "failures": [],
+      "question": "송기마스크로 숨 쉬는 중 전기가 나가거나 호스가 꺾이면 어떻게 대비해",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 58.968599999999924,
+      "answerMarkdown": "**호흡용 보호구의 착용 장소**\n\n- 다만, 송기마스크의 송기라인이 꼬이거나 끊어지지 않도록 잘 관리하여 야 하며, 정전 등으로 공기공급이 중단되는 경우가 없도록 대비하여야 합 니다.\n\n- 공기호흡기(SCBA) 5 보호구\n\n**호흡용 보호구(공기호흡기 또는 송기마스크)**\n\n- 환기를 할 수 없거나 환기만으로 불충분한 경우에는 호흡용보호구를 반드시 착용하고 출입하여야 합 니다.\n\n**호흡용 보호구의 착용 장소**\n\n- 유해가스가 지속적으로 발생하여 환기만으로 적정공기를 유지하기 힘든 경우\n\n- 탱크, 화학설비, 수도나 도수관 등 구조적으로 충분히 환기가 힘든 경우\n\n- 응급상황이 발생하여 충분히 환기시킬 시간적 여유가 없는 경우\n\n- 밀폐공간은 장소가 협소하여 공기호흡기를 착용하고 들어가기 어려울 수 있습니다.\n\n- 이 경우 외부에서 공기를 공급하는 방식의 송기마스크를 착 용하는 것이 더 안전할 수 있습니다.",
+      "pcMeasuredWorkSumMs": 112.04619999999991,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45,
+          "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 46,
+          "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+        }
+      ],
+      "searchComplete": true,
+      "required": [
+        "10초 이내",
+        "119"
+      ],
+      "encoderQueries": ["심장마사지 시작 전에 사람 반응과 숨을 어떻게 확인해야 하나요"],
+      "number": 9,
+      "pages": [
+        45,
+        46
+      ],
+      "kotlinSearchAndCompositionMs": 65.6325,
+      "id": "additional-9",
+      "generation": "not-needed",
+      "expectedPages": [[45]],
+      "failures": [],
+      "question": "심장마사지 시작 전에 사람 반응과 숨을 어떻게 확인해야 하나요",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 44.33080000000018,
+      "answerMarkdown": "**반응확인**\n\n- 어깨를 가볍게 두드리며 \u201c여보세요, 괜찮으세요?\u201d를 외치면서 재해자의 반응을 확인합니다.\n\n**119 신고**\n\n- 의식(반응)이 없으면 큰 소리로 주변 사람에게 119 신고를 요청하고, 자동심장충격기(AED)를 가져오도록 부탁합니다.\n\n**호흡 확인**\n\n- 얼굴과 가슴을 **10초** 이내로 관찰하여 호흡이 있는지를 확인합니다.\n\n- 호흡이 없거나 비정상적이라면 즉시 심폐소생술을 준비합니다.\n\n**심폐소생술 흉부 압박 (30회)**\n\n- 흉부압박 위치 확인 : 양 젖꼭지를 이은 중앙의 흉부부위\n\n- 한손의 손등에 다른 손을 겹치고 깍지를 껴서 손가락을 잡아 당김\n\n- 팔꿈치가 구부러지지 않도록 하고, 어깨와 손은 일직선으로 유지\n\n- 압박 깊이는 **5cm**(소아는 **4~5cm**), 압박 속도는 분당 **100~120회**를 유지하면서 **30회** 흉부압박을 실시\n\n**기도 개방**\n\n- 인공호흡을 시행하기 위해서는 먼저 재해자의 머리를 젖히고, 턱을 들어 올려서 재해자의 기 도를 개방합니다.\n\n**인공 호흡 (2회)**\n\n- 재해자 이마에 댄 손의 엄지와 검지로 재해자의 코를 잡아 막고\n\n- 재해자의 입을 구조자의 입으로 완전히 밀착시킨 뒤에\n\n- 가슴이 올라올 정도로 **1초** 동안 숨을 불어 넣음(**2회**)\n\n- 인공호흡 방법을 모르거나 꺼리는 경우에는 인공호흡을 제외하고 지속적으로 가슴압박만을 시행합니다.\n\n**심폐소생술 흉부 압박 & 인공 호흡 반복**\n\n- **30회** 가슴압박, **2회** 인공호흡을 119구급대가 도착할 때까지 반복실시\n\n**회복자세**\n\n- 심폐소생술 중 재해자가 움직이거나 소리를 내면\n\n- 호흡이 회복되었는지 확인하고 호흡이 회복되었다면\n\n- 재해자를 옆으로 돌려 눕혀 기도(숨길)가 막히는 것을 예방",
+      "pcMeasuredWorkSumMs": 109.96330000000017,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45,
+          "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 46,
+          "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+        }
+      ],
+      "searchComplete": true,
+      "required": ["인공호흡 방법을 모르거나 꺼리는 경우"],
+      "encoderQueries": ["가슴압박을 할 줄 아는데 인공호흡은 못하겠어요 어떻게 해요"],
+      "number": 10,
+      "pages": [
+        45,
+        46
+      ],
+      "kotlinSearchAndCompositionMs": 60.8724,
+      "id": "additional-10",
+      "generation": "not-needed",
+      "expectedPages": [[45]],
+      "failures": [],
+      "question": "가슴압박을 할 줄 아는데 인공호흡은 못하겠어요 어떻게 해요",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 52.41630000000009,
+      "answerMarkdown": "**반응확인**\n\n- 어깨를 가볍게 두드리며 \u201c여보세요, 괜찮으세요?\u201d를 외치면서 재해자의 반응을 확인합니다.\n\n**119 신고**\n\n- 의식(반응)이 없으면 큰 소리로 주변 사람에게 119 신고를 요청하고, 자동심장충격기(AED)를 가져오도록 부탁합니다.\n\n**호흡 확인**\n\n- 얼굴과 가슴을 **10초** 이내로 관찰하여 호흡이 있는지를 확인합니다.\n\n- 호흡이 없거나 비정상적이라면 즉시 심폐소생술을 준비합니다.\n\n**심폐소생술 흉부 압박 (30회)**\n\n- 흉부압박 위치 확인 : 양 젖꼭지를 이은 중앙의 흉부부위\n\n- 한손의 손등에 다른 손을 겹치고 깍지를 껴서 손가락을 잡아 당김\n\n- 팔꿈치가 구부러지지 않도록 하고, 어깨와 손은 일직선으로 유지\n\n- 압박 깊이는 **5cm**(소아는 **4~5cm**), 압박 속도는 분당 **100~120회**를 유지하면서 **30회** 흉부압박을 실시\n\n**기도 개방**\n\n- 인공호흡을 시행하기 위해서는 먼저 재해자의 머리를 젖히고, 턱을 들어 올려서 재해자의 기 도를 개방합니다.\n\n**인공 호흡 (2회)**\n\n- 재해자 이마에 댄 손의 엄지와 검지로 재해자의 코를 잡아 막고\n\n- 재해자의 입을 구조자의 입으로 완전히 밀착시킨 뒤에\n\n- 가슴이 올라올 정도로 **1초** 동안 숨을 불어 넣음(**2회**)\n\n- 인공호흡 방법을 모르거나 꺼리는 경우에는 인공호흡을 제외하고 지속적으로 가슴압박만을 시행합니다.\n\n**심폐소생술 흉부 압박 & 인공 호흡 반복**\n\n- **30회** 가슴압박, **2회** 인공호흡을 119구급대가 도착할 때까지 반복실시\n\n**회복자세**\n\n- 심폐소생술 중 재해자가 움직이거나 소리를 내면\n\n- 호흡이 회복되었는지 확인하고 호흡이 회복되었다면\n\n- 재해자를 옆으로 돌려 눕혀 기도(숨길)가 막히는 것을 예방",
+      "pcMeasuredWorkSumMs": 113.28870000000009,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 46,
+          "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45,
+          "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+        }
+      ],
+      "searchComplete": true,
+      "required": ["호흡이 회복되었다면"],
+      "encoderQueries": ["심폐소생술 하다가 사람이 움직였어요 옆으로 눕히기 전에 뭘 확인해요"],
+      "number": 11,
+      "pages": [
+        46,
+        45
+      ],
+      "kotlinSearchAndCompositionMs": 37.8283,
+      "id": "additional-11",
+      "generation": "not-needed",
+      "expectedPages": [[46]],
+      "failures": [],
+      "question": "심폐소생술 하다가 사람이 움직였어요 옆으로 눕히기 전에 뭘 확인해요",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 47.03890000000001,
+      "answerMarkdown": "**심폐소생술 흉부 압박 & 인공 호흡 반복**\n\n- **30회** 가슴압박, **2회** 인공호흡을 119구급대가 도착할 때까지 반복실시\n\n**회복자세**\n\n- 심폐소생술 중 재해자가 움직이거나 소리를 내면\n\n- 호흡이 회복되었는지 확인하고 호흡이 회복되었다면\n\n- 재해자를 옆으로 돌려 눕혀 기도(숨길)가 막히는 것을 예방\n\n**반응확인**\n\n- 어깨를 가볍게 두드리며 \u201c여보세요, 괜찮으세요?\u201d를 외치면서 재해자의 반응을 확인합니다.\n\n**119 신고**\n\n- 의식(반응)이 없으면 큰 소리로 주변 사람에게 119 신고를 요청하고, 자동심장충격기(AED)를 가져오도록 부탁합니다.\n\n**호흡 확인**\n\n- 얼굴과 가슴을 **10초** 이내로 관찰하여 호흡이 있는지를 확인합니다.\n\n- 호흡이 없거나 비정상적이라면 즉시 심폐소생술을 준비합니다.\n\n**심폐소생술 흉부 압박 (30회)**\n\n- 흉부압박 위치 확인 : 양 젖꼭지를 이은 중앙의 흉부부위\n\n- 한손의 손등에 다른 손을 겹치고 깍지를 껴서 손가락을 잡아 당김\n\n- 팔꿈치가 구부러지지 않도록 하고, 어깨와 손은 일직선으로 유지\n\n- 압박 깊이는 **5cm**(소아는 **4~5cm**), 압박 속도는 분당 **100~120회**를 유지하면서 **30회** 흉부압박을 실시\n\n**기도 개방**\n\n- 인공호흡을 시행하기 위해서는 먼저 재해자의 머리를 젖히고, 턱을 들어 올려서 재해자의 기 도를 개방합니다.\n\n**인공 호흡 (2회)**\n\n- 재해자 이마에 댄 손의 엄지와 검지로 재해자의 코를 잡아 막고\n\n- 재해자의 입을 구조자의 입으로 완전히 밀착시킨 뒤에\n\n- 가슴이 올라올 정도로 **1초** 동안 숨을 불어 넣음(**2회**)\n\n- 인공호흡 방법을 모르거나 꺼리는 경우에는 인공호흡을 제외하고 지속적으로 가슴압박만을 시행합니다.",
+      "pcMeasuredWorkSumMs": 84.86720000000001,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 46,
+          "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 45,
+          "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+        }
+      ],
+      "searchComplete": true,
+      "required": ["119구급대가 도착할 때까지"],
+      "encoderQueries": ["심폐소생술 중 구급대가 아직 안 왔으면 반복 하나요"],
+      "number": 12,
+      "pages": [
+        46,
+        45
+      ],
+      "kotlinSearchAndCompositionMs": 51.8678,
+      "id": "additional-12",
+      "generation": "not-needed",
+      "expectedPages": [[46]],
+      "failures": [],
+      "question": "심폐소생술 중 구급대가 아직 안 왔으면 계속 해야 하나요",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 47.695399999999836,
+      "answerMarkdown": "**심폐소생술 흉부 압박 & 인공 호흡 반복**\n\n- **30회** 가슴압박, **2회** 인공호흡을 119구급대가 도착할 때까지 반복실시\n\n**회복자세**\n\n- 심폐소생술 중 재해자가 움직이거나 소리를 내면\n\n- 호흡이 회복되었는지 확인하고 호흡이 회복되었다면\n\n- 재해자를 옆으로 돌려 눕혀 기도(숨길)가 막히는 것을 예방\n\n**반응확인**\n\n- 어깨를 가볍게 두드리며 \u201c여보세요, 괜찮으세요?\u201d를 외치면서 재해자의 반응을 확인합니다.\n\n**119 신고**\n\n- 의식(반응)이 없으면 큰 소리로 주변 사람에게 119 신고를 요청하고, 자동심장충격기(AED)를 가져오도록 부탁합니다.\n\n**호흡 확인**\n\n- 얼굴과 가슴을 **10초** 이내로 관찰하여 호흡이 있는지를 확인합니다.\n\n- 호흡이 없거나 비정상적이라면 즉시 심폐소생술을 준비합니다.\n\n**심폐소생술 흉부 압박 (30회)**\n\n- 흉부압박 위치 확인 : 양 젖꼭지를 이은 중앙의 흉부부위\n\n- 한손의 손등에 다른 손을 겹치고 깍지를 껴서 손가락을 잡아 당김\n\n- 팔꿈치가 구부러지지 않도록 하고, 어깨와 손은 일직선으로 유지\n\n- 압박 깊이는 **5cm**(소아는 **4~5cm**), 압박 속도는 분당 **100~120회**를 유지하면서 **30회** 흉부압박을 실시\n\n**기도 개방**\n\n- 인공호흡을 시행하기 위해서는 먼저 재해자의 머리를 젖히고, 턱을 들어 올려서 재해자의 기 도를 개방합니다.\n\n**인공 호흡 (2회)**\n\n- 재해자 이마에 댄 손의 엄지와 검지로 재해자의 코를 잡아 막고\n\n- 재해자의 입을 구조자의 입으로 완전히 밀착시킨 뒤에\n\n- 가슴이 올라올 정도로 **1초** 동안 숨을 불어 넣음(**2회**)\n\n- 인공호흡 방법을 모르거나 꺼리는 경우에는 인공호흡을 제외하고 지속적으로 가슴압박만을 시행합니다.",
+      "pcMeasuredWorkSumMs": 99.56319999999984,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 22,
+          "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+        },
+        {
+          "documentId": "confined_space_safety_guide_2022",
+          "page": 25,
+          "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+        }
+      ],
+      "searchComplete": true,
+      "required": ["점심시간"],
+      "encoderQueries": ["점심시간 맨홀 밖에 있다 다시 내려가요 가스는 다시 측정"],
+      "number": 13,
+      "pages": [
+        22,
+        25
+      ],
+      "kotlinSearchAndCompositionMs": 56.3951,
+      "id": "additional-13",
+      "generation": "not-needed",
+      "expectedPages": [[25]],
+      "failures": [],
+      "question": "점심 먹느라 맨홀 밖에 있다 다시 내려가요 가스는 다시 재나요",
+      "method": "source-anchor-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 37.277900000000045,
+      "answerMarkdown": "- 게시된 허가서에 일정시간(예를 들어 **2시간**) 간격으로 공기상태를 측정하여 기록하도록 합 니다.\n\n- 작업허가 기간 내라도 일정시간 밀폐공간을 떠나 있다가(예, 점심시간) 다시 출입하는 경우 반드시 산소 및 유해가스 농도를 측정하고 기록하도록 합니다.\n\n- 밀폐공간작업 허가사항의 준수 및 확인3 작업허가 사항을 작업이 종료될 때까지 해당 작업장 출입구에 게시하여야 합니다.\n\n- 23쪽 \u2018밀폐공간작업허가서\u2019 참조 산업안전보건기준에 관한 규칙 제619조 제3항\n\n- 누구든지 작업허가서와 다른 상황을 발견했을 경우, 즉시 허가권자(허가 담당부서)에게 통 보하여야 합니다.\n\n- 사업주나 관리감독자 등은 허가요건을 준수하고 작업하는지를 확인합니다.\n\n**측정 시기**\n\n- ③ 일정시간 작업장소를 떠났다가 다시 작업을 시작하기 전(ex. 점심시간)\n\n- ① 밀폐공간 작업허가를 받기 전\n\n- ② 밀폐공간에 작업을 위해 들어가기 전\n\n- ④ 장시간 작업이나 불활성가스 또는 유해가스의 누출·유입·발생 가능성이 있는 경우 수시 또는 일정 시간 간격으로(ex. **2시간**)\n\n- ⑤ 근로자의 신체, 환기장치 등에 이상이 있을 때 등\n\n- (측정자) 산소 및 유해가스의 농도측정은 반드시 측정 장비의 조작과 그 결과에 대한 올바른 해석을 할 수 있는 사람이 수행하여야 합니다.",
+      "pcMeasuredWorkSumMs": 93.67300000000004,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [{
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 30,
+        "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+      }],
+      "searchComplete": true,
+      "required": ["개폐의 방향"],
+      "encoderQueries": ["질소 배관을 잘못된 조작 방지 밸브에 어떤 표시를 붙이나요"],
+      "number": 14,
+      "pages": [30],
+      "kotlinSearchAndCompositionMs": 40.7982,
+      "id": "additional-14",
+      "generation": "not-needed",
+      "expectedPages": [[30]],
+      "failures": [],
+      "question": "질소 배관을 실수로 열지 않도록 밸브에 어떤 표시를 붙이나요",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 50.78729999999996,
+      "answerMarkdown": "**유해가스 발생장소 등에 대한 조치3 용접 등에 관한 조치 산업안전보건기준에 관한 규칙 제629조**\n\n- 불활성기체를 내보내는 배관의 밸브나 콕 또는 이를 조작하기 위한 스위치 또는 누름단추 등에 대하여는 잘못된 조작으로 인 하여 불활성기체가 새지 않도록 배관 내의 불활성기체의 명칭 및 개폐의 방향 등 조작방법에 관한 표지를 게시할 것\n\n- 탱크, 보일러 또는 반응탑의 내부 등 환기가 불충분한 장소에서 용접을 하는 경우에는 다음 조치를 하여야 합니다.\n\n- 가스농도를 측정하고 환기시키는 등의 방법으로 작업공간을 적 정한 공기상태로 유지할 것\n\n- 환기를 했음에도 작업장소를 적정공기 상태로 유지하기 어려운 경우에는 근로자에게 공기호흡기 또는 송기마스크를 지급하여 착용하도록 할 것 불활성기체 사용시 조치 산업안전보건기준에 관한 규칙 제630조, 631조\n\n- 불활성기체를 내보내는 배관이 있는 보일러, 탱크, 반응탑 또는 선창 등의 장소에서 작업을 하는 경우에는 다음 조치를 하여야 합니다.\n\n- 밸브 또는 콕을 잠그거나 차단판을 설치할 것\n\n- 밸브 또는 콕과 차단판에는 잠금장치를 하고 이를 임의로 개방 하는 것을 금지한다는 내용을 보기 쉬운 장소에 게시할 것\n\n- 불활성기체가 배출될 우려가 있는 작업을 하는 경우에는 해당 안전판으로부터 배출되는 불활성기체를 직접 외부로 내보내기 위한 설비를 설치하는 등 해당 불활성기체가 해당 작업 장소에 잔류하는 것을 방지하기 위한 조치를 할 것",
+      "pcMeasuredWorkSumMs": 91.58549999999997,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [{
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 31,
+        "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+      }],
+      "searchComplete": true,
+      "required": ["해당가스가 들어오지 않도록 차단"],
+      "encoderQueries": ["밀폐된 지하실 가스 공급관을 떼어낼 때 유입을 막는 방법"],
+      "number": 15,
+      "pages": [31],
+      "kotlinSearchAndCompositionMs": 31.6629,
+      "id": "additional-15",
+      "generation": "not-needed",
+      "expectedPages": [[31]],
+      "failures": [],
+      "question": "밀폐된 지하실 가스 공급관을 떼어낼 때 유입을 막는 방법",
+      "method": "unique-source-anchor-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 52.97739999999999,
+      "answerMarkdown": "**가스배관 공사 등에 관한 조치 산업안전보건기준에 관한 규칙 제634조**\n\n- 지하실 또는 맨홀의 내부, 그 밖에 통풍이 불충분한 장소에서 가스를 공급하는 배관을 해체 또는 부착하는 작업을 하는 경우에는 다음 조치를 하여야 합니다.\n\n- 배관을 해체 또는 부착하는 작업장소에 해당가스가 들어오지 않도록 차단할 것\n\n- 해당작업을 행하는 장소는 적정한 공기상태가 유지되도록 환기 를 하거나 근로자에게 공기호흡기 또는 송기 마스크를 지급하 여 착용할 것 설비개조 등의 작업 시 조치 산업안전보건기준에 관한 규칙 제637조\n\n- 분뇨, 오수, 펄프액 및 부패하기 쉬운 물질에 오염된 펌프, 배관 그 밖의 부속설비에 대하여 분해, 개조, 수리 또는 청소 등을 행하는 작업을 하는 경우에는 다음 조치를 하여야 합니다.\n\n- 작업방법 및 순서를 정하여 사전에 작업에 종사하는 근로자에 게 널리 알릴 것\n\n- 황화수소 중독방지에 필요한 지식을 가진 자를 당해 작업의 지 휘자로 지정하여 작업을 지휘하도록 할 것 지하실 등의 작업 시 조치 산업안전보건기준에 관한 규칙 제636조\n\n- 밀폐공간 내부를 통하는 배관이 설치되어 있는 지하실이나 피 트(pit) 등의 내부에서 작업을 하는 경우 그 배관을 통하여 산소 가 결핍된 공기나 유해가스가 새지 않도록 조치할 것\n\n- 산소가 결핍된 공기나 유해가스가 샐 때에는 이를 직접 외부로 내보낼 수 있는 설비를 설치하는 등 적정한 공기상태를 유지토 록 조치할 것",
+      "pcMeasuredWorkSumMs": 84.6403,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [{
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 31,
+        "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+      }],
+      "searchComplete": true,
+      "required": ["작업방법 및 순서"],
+      "encoderQueries": ["분뇨로 오염된 펌프를 분해 수리할 때 작업순서는 누가 알려줘야 해요"],
+      "number": 16,
+      "pages": [31],
+      "kotlinSearchAndCompositionMs": 48.7901,
+      "id": "additional-16",
+      "generation": "not-needed",
+      "expectedPages": [[31]],
+      "failures": [],
+      "question": "분뇨로 더러워진 펌프를 뜯어 수리할 때 작업순서는 누가 알려줘야 해요",
+      "method": "lexical-semantic-agreement",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 45.73279999999977,
+      "answerMarkdown": "**가스배관 공사 등에 관한 조치 산업안전보건기준에 관한 규칙 제634조**\n\n- 분뇨, 오수, 펄프액 및 부패하기 쉬운 물질에 오염된 펌프, 배관 그 밖의 부속설비에 대하여 분해, 개조, 수리 또는 청소 등을 행하는 작업을 하는 경우에는 다음 조치를 하여야 합니다.\n\n- 지하실 또는 맨홀의 내부, 그 밖에 통풍이 불충분한 장소에서 가스를 공급하는 배관을 해체 또는 부착하는 작업을 하는 경우에는 다음 조치를 하여야 합니다.\n\n- 배관을 해체 또는 부착하는 작업장소에 해당가스가 들어오지 않도록 차단할 것\n\n- 해당작업을 행하는 장소는 적정한 공기상태가 유지되도록 환기 를 하거나 근로자에게 공기호흡기 또는 송기 마스크를 지급하 여 착용할 것 설비개조 등의 작업 시 조치 산업안전보건기준에 관한 규칙 제637조\n\n- 작업방법 및 순서를 정하여 사전에 작업에 종사하는 근로자에 게 널리 알릴 것\n\n- 황화수소 중독방지에 필요한 지식을 가진 자를 당해 작업의 지 휘자로 지정하여 작업을 지휘하도록 할 것 지하실 등의 작업 시 조치 산업안전보건기준에 관한 규칙 제636조\n\n- 밀폐공간 내부를 통하는 배관이 설치되어 있는 지하실이나 피 트(pit) 등의 내부에서 작업을 하는 경우 그 배관을 통하여 산소 가 결핍된 공기나 유해가스가 새지 않도록 조치할 것\n\n- 산소가 결핍된 공기나 유해가스가 샐 때에는 이를 직접 외부로 내보낼 수 있는 설비를 설치하는 등 적정한 공기상태를 유지토 록 조치할 것",
+      "pcMeasuredWorkSumMs": 94.52289999999977,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [{
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 35,
+        "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+      }],
+      "searchComplete": true,
+      "required": ["퇴장"],
+      "encoderQueries": ["밀폐공간 작업자가 들어간 뒤 나올 때마다 인원 체크를 하나요"],
+      "number": 17,
+      "pages": [35],
+      "kotlinSearchAndCompositionMs": 48.9295,
+      "id": "additional-17",
+      "generation": "not-needed",
+      "expectedPages": [[35]],
+      "failures": [],
+      "question": "밀폐공간 작업자가 들어간 뒤 나올 때마다 인원 체크를 하나요",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 47.878400000000056,
+      "answerMarkdown": "- 밀폐공간 출입시 인원의 점검3 근로자가 밀폐공간에서 작업을 하는 경우, 근로자를 입장시킬 때와 퇴장시킬 때마다 인원을 점검하여야 합니다 산업안전보건기준에 관한 규칙 제621조\n\n- 사업주는 밀폐공간에서 작업하는 동안 그 작업장과 외부의 감시인 간에 항상 연락을 취할 수 있는 설비를 설치하여야 합니다.",
+      "pcMeasuredWorkSumMs": 96.80790000000005,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [{
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 44,
+        "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+      }],
+      "searchComplete": true,
+      "required": ["공기호흡기"],
+      "encoderQueries": ["밀폐공간에 동료가 쓰러졌는데 공기호흡기가 없어요 구하러 가도 돼요"],
+      "number": 18,
+      "pages": [44],
+      "kotlinSearchAndCompositionMs": 43.0574,
+      "id": "additional-18",
+      "generation": "not-needed",
+      "expectedPages": [[44]],
+      "failures": [],
+      "question": "밀폐공간에 동료가 쓰러졌는데 공기호흡기가 없어요 구하러 가도 돼요",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 61.2485999999999,
+      "answerMarkdown": "**밀폐공간에서 작업자가 쓰러진 것을 발견 한 경우**\n\n- 밀폐공간 내 재해자를 발견 한 경우, 먼저 119 나 회사 내 안전보건관리팀 에 연락하십시오.\n\n- 재해자를 구조하기 위해 공기호흡기(SCBA)나 송기마스크를 착용하십 시오.\n\n- 송기마스크 등 보호장비 없이 밀폐공간 내부로 들어갔다가는 구조자 또한 위험해질 수 있습니다.\n\n- 밀 폐공간 질식재해자 중 상당수는 공기호흡기나 송기마스크를 착용하지 않고 들어간 구조자였습니다.\n\n- 밀폐공간 내부의 공기상태가 안전한지 확인할 수 없거나 적절한 호흡용보호구가 없다면 밀폐공간 밖에서 119 구조대가 올 때까지 기다리십시오.\n\n- 구조된 재해자에 대해 심폐소생술 을 실시하십시오.\n\n- 1 재해자 구조\n\n- \u201c공기호흡기가 없다면 절대 구조하러 들어가지 마십시오.\u201d 밀폐공간에서 일하던 내 동료가 쓰러져 있는 것을 발견했을 때, 가만히 있을 사람은 없을 것입니 다.\n\n- 밀폐공간에서 질식 재해자를 구조하는 것은 밀폐공간의 입구와 내부가 협소하고 산소결핍 또는 유해가스가 존재할 수 있어 상당히 어렵고 위험하기 때문에 반드시 다음 절차에 따라 재해자를 구조하십시오.",
+      "pcMeasuredWorkSumMs": 104.3059999999999,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [{
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 29,
+        "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+      }],
+      "searchComplete": true,
+      "required": ["대피"],
+      "encoderQueries": ["탱크에서 환기팬이 정전으로 중단 안에서 기다려도 되나요"],
+      "number": 19,
+      "pages": [29],
+      "kotlinSearchAndCompositionMs": 50.9118,
+      "id": "additional-19",
+      "generation": "not-needed",
+      "expectedPages": [[29]],
+      "failures": [],
+      "question": "탱크에서 환기팬이 정전으로 멈추면 안에서 기다려도 되나요",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 48.532300000000305,
+      "answerMarkdown": "**사전준비**\n\n- 환기팬은 정압이 **40mmAq 이상**이고, 용량(m 3/min)이 밀폐공간 체적(m3)의 **40% 이상**의 것으로 준비합니다.\n\n- (예시 : 체적이 600m3인 경우, 환기팬 용량은 600×0.4=**240m3/min**)\n\n- 송풍관(덕트) 길이는 환기팬 제조사에서 제시한 길이를 초과하지 않아야 하며 제조사에서 별도 제 시하지 않는 경우 **15미터**를 넘기지 않도록 합니다.\n\n- 송풍관(덕트)은 가급적 구부리는 부위가 적게 하고, 용접불꽃 등에 의한 구멍이 나지 않도록 난연재 질을 사용합니다.\n\n- 폭발위험지역 내에서는 방폭형 구조를 사용합니다.\n\n**환기방법**\n\n- 정전 등에 의하여 환기가 중단되는 등 응급상황 발생시 작업근로자는 즉시 밀폐공간 외부로 대피할 수 있어야 합니다.\n\n- (환기가 어려울 경우의 조치) 환기를 통해서도 적정공기 상태를 유지하기 어려운 경우 또는 폭발이나 산화 등의 위험으로 환기를 실시할 수 없는 경우에는 송기마스크 또는 공기호흡기 착용 등 추가적인 보호조치를 취해야 합니다.",
+      "pcMeasuredWorkSumMs": 99.4441000000003,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [{
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 39,
+        "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+      }],
+      "searchComplete": true,
+      "required": ["6개월"],
+      "encoderQueries": ["긴급 구조 연습은 사업장에서 얼마나 자주 해야 하는지"],
+      "number": 20,
+      "pages": [39],
+      "kotlinSearchAndCompositionMs": 54.7537,
+      "id": "additional-20",
+      "generation": "not-needed",
+      "expectedPages": [[39]],
+      "failures": [],
+      "question": "긴급 구조 연습은 사업장에서 얼마나 자주 해야 하는지",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 51.35400000000027,
+      "answerMarkdown": "- 긴급구조훈련2 사업주는 긴급상황 발생 시 신속히 대응할 수 있도록 6개월에 **1회 이상** 주기적으로 긴급구 조훈련을 실시하여야 합니다.\n\n- 긴급구조훈련은 구조상황을 가정하여 비상연락-구조-응급조치-후송 등과 관계되는 사람(또는 부서)이 구조과정을 조직적으로 숙달하는 사업장 단위의 훈련을 말하는 것으로, 개별 근로자 단위로 실시하는 특별교육과는 대상이 다를 수 있음 작업시 안전한 작업방법의 주지3 밀폐공간에서 작업을 시작할 때마다 사전에 작업근로자와 감시인을 대상으로 안전한 작업 방법에 대해 주지시켜야 합니다.\n\n- 긴급구조훈련은 구조상황을 가정하여 비상연락-구조-응급조치-후송 등과 관계되는 사람(또는 부서)이 구조과정을 조직적으로 숙달하는 사업장 단위의 훈련을 말하는 것으로, 개별 근로자 단위로 실시하는 특별교육과는 대상이 다를 수 있음 안전한 작업방법 등의 주지내용(산업안전보건규칙에 관한 사항 제641조)\n\n- ① 산소 및 유해가스농도 측정에 관한 사항\n\n- ② 환기설비의 가동 등 안전한 작업방법에 관한 사항\n\n- ③ 보호구의 착용과 사용방법에 관한 사항\n\n- ④ 사고 시의 응 급조치 요령\n\n- ⑤ 구조요청을 할 수 있는 비상연락처 , 구조용 장비의 사용 등 비상시 구출에 관한 사항",
+      "pcMeasuredWorkSumMs": 106.10770000000028,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [{
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 29,
+        "title": "밀폐공간 질식재해예방 안전작업 가이드 (2022)"
+      }],
+      "searchComplete": true,
+      "required": ["15미터"],
+      "encoderQueries": ["환기팬 덕트 길이를 제조사가 안내하지 않으면 몇 미터로 해요"],
+      "number": 21,
+      "pages": [29],
+      "kotlinSearchAndCompositionMs": 89.7537,
+      "id": "additional-21",
+      "generation": "not-needed",
+      "expectedPages": [[29]],
+      "failures": [],
+      "question": "환기팬 덕트 길이를 제조사가 안내하지 않으면 몇 미터로 해요",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 41.991399999999885,
+      "answerMarkdown": "**사전준비**\n\n- 송풍관(덕트) 길이는 환기팬 제조사에서 제시한 길이를 초과하지 않아야 하며 제조사에서 별도 제 시하지 않는 경우 **15미터**를 넘기지 않도록 합니다.\n\n- 환기팬은 정압이 **40mmAq 이상**이고, 용량(m 3/min)이 밀폐공간 체적(m3)의 **40% 이상**의 것으로 준비합니다.\n\n- (예시 : 체적이 600m3인 경우, 환기팬 용량은 600×0.4=**240m3/min**)\n\n- 송풍관(덕트)은 가급적 구부리는 부위가 적게 하고, 용접불꽃 등에 의한 구멍이 나지 않도록 난연재 질을 사용합니다.\n\n- 폭발위험지역 내에서는 방폭형 구조를 사용합니다.",
+      "pcMeasuredWorkSumMs": 131.74509999999987,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "answered"
+    },
+    {
+      "semantic": true,
+      "sources": [],
+      "searchComplete": true,
+      "required": [],
+      "encoderQueries": ["손전등 방수 IP 등급이 67인지 알려줘"],
+      "number": 22,
+      "pages": [],
+      "kotlinSearchAndCompositionMs": 231.7143,
+      "id": "additional-22",
+      "generation": "not-run: general knowledge requires Android Gemma",
+      "expectedPages": [],
+      "failures": [],
+      "question": "손전등 방수 IP 등급이 67인지 알려줘",
+      "method": "reviewed-semantic",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 37.53719999999976,
+      "answerMarkdown": "제공 문서 전체 검색에서 질문에 직접 답할 근거를 확인하지 못했어요.",
+      "pcMeasuredWorkSumMs": 269.25149999999974,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": "손전등 방수 IP 등급이 67인지 알려줘",
+      "status": "no-evidence"
+    },
+    {
+      "semantic": false,
+      "sources": [],
+      "searchComplete": false,
+      "required": [],
+      "encoderQueries": [],
+      "number": 23,
+      "pages": [],
+      "kotlinSearchAndCompositionMs": 0.1874,
+      "id": "additional-23",
+      "generation": "not-needed",
+      "expectedPages": [],
+      "failures": [],
+      "question": "우리 현장이 지금 작업 승인 완료됐나요",
+      "method": "",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 0,
+      "answerMarkdown": "현재 현장의 승인 상태는 문서로 확인할 수 없어요. 작업 전 점검 화면에서 요청과 감독관 승인 상태를 확인해 주세요.",
+      "pcMeasuredWorkSumMs": 0.1874,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "live-state"
+    },
+    {
+      "semantic": false,
+      "sources": [],
+      "searchComplete": false,
+      "required": [],
+      "encoderQueries": [],
+      "number": 24,
+      "pages": [],
+      "kotlinSearchAndCompositionMs": 0.1766,
+      "id": "additional-24",
+      "generation": "not-needed",
+      "expectedPages": [],
+      "failures": [],
+      "question": "그거 어떻게 하는데?",
+      "method": "reference-clarification",
+      "pass": true,
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "bodyPass": true,
+      "pcModelInferenceSumMs": 0,
+      "answerMarkdown": "어떤 대상을 말하는지 알려 주세요. 앞선 질문이 없는 상태에서는 \u2018그거\u2019의 대상을 확인할 수 없어요.",
+      "pcMeasuredWorkSumMs": 0.1766,
+      "pagePass": true,
+      "suggestions": [],
+      "category": "additional-expression",
+      "generalQuestion": null,
+      "status": "clarify"
+    }
+  ],
+  "encoded": 31
+}

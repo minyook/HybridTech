@@ -4,7 +4,7 @@
 
 **최종 갱신: 2026-11-03.** 문서 검색·답변·대화 기록은 기기 중심으로 동작합니다. 최초 모델/언어 데이터 준비에는 인터넷이 필요할 수 있고, 작업자 요청·감독관 QR 인증·승인 공유에는 별도의 작업 서버가 필요합니다.
 
-**150개 질문 실행 결과 (2026-11-03):** 현재 Android 검색·본문 조립 코드와 실제 검색 모델을 PC에서 평가했습니다. 기존 자동 기준은 **136/150개 통과**, 문서 질문 140개 중 기준을 통과하며 추가 확인 없이 답한 항목은 **118개**입니다. 실패 14개와 기준 통과 뒤 추가 확인이 붙는 8개를 그대로 기록했습니다. Android 실기기·Gemma 생성·음성·전체 응답 1~2초는 이번에 측정하지 않았습니다. [평가 요약·재실행 방법](docs/ANDROID_150_EVALUATION_20261103.md) · [150개 실제 답변](docs/validation/android-150-20261103.md) · [상세 JSON](docs/validation/android-150-20261103.json).
+**정확도 개선·실기기 측정 (2026-11-03):** 기존 기준 **136/150 → 150/150**, 추가 개발 질문 **24/24**, S24 Ultra/Android 16의 문서 질문 **140/140**을 확인했습니다. 명사구 분리·구어체·잘못된 절차/조건 선택을 고치고 문단 정규화와 검색 세션을 재사용합니다. S24 문서 답변 완료는 중앙값 **0.081초**, 95백분위 **0.146초**, **139/140개가 2초 이내**이며 최초 준비가 포함된 최대값은 **3.055초**였습니다. 실제 화면 프레임 표시·음성 시간은 제외합니다. 일반 지식은 별도 CPU 시험에서 완료까지 **12.45~93.51초**가 걸렸으며 이 실행은 최종 검색 전처리 최적화 전입니다. 생성 엔진·프롬프트·설정은 동일합니다. 전체 긴 생성 1~2초나 모든 새 질문의 정확도를 보장하는 결과가 아닙니다. [현재 설계·정확도·측정 범위](docs/ANDROID_RAG_ACCURACY_LATENCY.md) · [S24 질문별 실제 답변·시간](docs/validation/android-s24-answers-20261103.md) · [상세 요약](docs/validation/android-accuracy-latency-20261103.json). [수정 전 136개 통과 기록](docs/ANDROID_150_EVALUATION_20261103.md)은 비교용으로 보존합니다.
 
 **문서 우선·일반 지식 답변 추가:** 제목이 정확한 질문/장비 목록 외에는 어휘 검색 후보를 의미 검색으로 재검토합니다. 구성된 문서 인덱스를 검색한 뒤 직접 근거를 확인하지 못한 경우 로컬 Gemma가 **일반 지식임을 표시한 Markdown 답변**을 작성합니다. 검색 실패나 대상이 모호한 질문은 문서 부재로 바꾸지 않습니다. 첫 본문을 빠르게 표시하는 것이 목표이며 **긴 답변 완성 1~2초는 보장하지 않습니다.** [현재 검색·일반 답변·속도 설계](docs/ANDROID_REVIEWED_RAG.md).
 
@@ -68,7 +68,7 @@ flowchart TD
   K --> UI
   D --> P[DocumentAnswerPlan]
   P --> UI[Markdown 채팅 · 원문 PDF · 로컬 읽기]
-  P -->|이유·비교 등 필요할 때만| AI[LiteRT-LM Gemma 보충 생성]
+  P -->|쉽게 풀어 설명하는 명시적 요청| AI[LiteRT-LM Gemma 보충 생성]
   AI --> V[근거 ID · 수치 · 조건 검사]
   V -->|통과한 보충만| UI
   B[BLE 측정기] --> G[수신 · 신선도 · 서비스 · 위젯]
@@ -97,6 +97,8 @@ node tools/prepare-semantic.mjs --android-only
 | JVM 결과 | `app/build/test-results/testDebugUnitTest/`, `app/build/reports/tests/testDebugUnitTest/` |
 | 최신 검색·일반 지식 변경 검증 | `docs/validation/android-reviewed-rag-20261030.json` |
 | 이번 APK 보관 사본 | `tmp/reviewed-rag-20261030/fieldguard-reviewed-rag-20261030.apk` (로컬 생성물, Git 제외) |
+| 최신 정확도·속도 개선 APK | `tmp/accuracy-speed-20261103/fieldguard-accuracy-speed-20261103.apk` (S24에 업데이트 설치, Git 제외) |
+| 최신 정확도·실기기 시간 | `docs/validation/android-accuracy-latency-20261103.json`, `docs/validation/android-s24-latency-20261103.json` |
 
 현재 작업 점검/인증을 사용할 때만 설정 → 현장 작업 서버에 기존 서버의 기본 주소를 지정합니다. 이 기능의 서버 실행·초기 관리자·QR 시험 절차는 [기존 작업 흐름](web/docs/workflow.md)과 아래 접힌 상세 기록에 있습니다. 서버 없이 문서 질문·원문 확인을 실행하는 흐름과 구분합니다.
 
@@ -115,6 +117,7 @@ node tools/prepare-semantic.mjs --android-only
 | `app/src/main/java/com/minyook/sllm2/ui/FieldGuardViewModel.kt` | 텍스트/음성 질문·검색·본문·보충·기록 조정 |
 | `app/src/main/java/com/minyook/sllm2/data/HybridRetrieval.kt`, `EquipmentOverview.kt`, `FocusedEvidence.kt` | 의미/문단 검색·장비 목록·조건 선택 |
 | `app/src/main/java/com/minyook/sllm2/data/QuestionSearchCoordinator.kt`, `GeneralKnowledgeAnswer.kt` | 복합 질문별 검색·어휘 후보 재검토·실패/미확인 구분·일반 지식 안내/표시 제한 |
+| `app/src/main/java/com/minyook/sllm2/data/QuestionUnderstanding.kt` | 구어체 검색 표현 정규화·원래 질문 보존 |
 | `app/src/main/java/com/minyook/sllm2/data/SemanticEncoder.kt`, `SemanticTokenizer.kt` | 기기 내 ONNX 질문 임베딩·토큰 처리 |
 | `app/src/main/java/com/minyook/sllm2/data/DocumentAnswerPlan.kt` | 화면/음성/보충 공통 계획·보충 검사 |
 | `app/src/main/java/com/minyook/sllm2/data/ChatHistoryStore.kt` | 기기 대화·근거·확인 선택지 저장 |

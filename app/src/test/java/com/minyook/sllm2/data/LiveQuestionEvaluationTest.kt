@@ -13,16 +13,25 @@ import java.time.Instant
 /** Opt-in measurement, not a replacement for device/Gemma/UI tests or an unseen holdout. */
 class LiveQuestionEvaluationTest {
     @Test fun evaluateOriginal150WithProductionCoordinatorAndRealQueryEmbeddings() {
+        evaluate(false)
+    }
+    @Test fun evaluateAdditionalExpressionsWithRealQueryEmbeddings() {
+        evaluate(true)
+    }
+    private fun evaluate(additional:Boolean) {
         assumeTrue("Set FIELDGUARD_EVALUATE_150=1 for this slower, local-model evaluation", System.getenv("FIELDGUARD_EVALUATE_150") == "1")
         val app = if (File("src/main/assets").exists()) File(".").canonicalFile else File("app").canonicalFile
         val root = app.parentFile
-        val out = File(root, System.getenv("FIELDGUARD_EVALUATION_DIR") ?: "tmp/evaluation-150-20261103").apply { mkdirs() }
-        val rubricFile = File(app, "src/androidTest/assets/rag-evaluation/evaluation-150.json")
+        val baseOut = File(root, System.getenv("FIELDGUARD_EVALUATION_DIR") ?: "tmp/evaluation-150-20261103")
+        val out = (if(additional)File(baseOut,"additional") else baseOut).apply { mkdirs() }
+        val rubricFile = File(app, if(additional)"src/test/resources/additional-questions-20261103.json" else "src/androidTest/assets/rag-evaluation/evaluation-150.json")
         val rubric = JSONObject(rubricFile.readText())
         val cases = rubric.getJSONArray("cases")
-        assertEquals(150, cases.length())
+        val total=if(additional)24 else 150
+        assertEquals(total, cases.length())
         val questionFile = File(root, "밀폐공간_테스트_질문_150개.txt")
-        val questionList = if(questionFile.exists()) Regex("(?m)^\\d{3}\\. (.+?)\\r?$").findAll(questionFile.readText()).map { it.groupValues[1] }.toList()
+        val verifyQuestionFile=questionFile.exists()&&!additional
+        val questionList = if(verifyQuestionFile) Regex("(?m)^\\d{3}\\. (.+?)\\r?$").findAll(questionFile.readText()).map { it.groupValues[1] }.toList()
             else (0 until cases.length()).map { cases.getJSONObject(it).getString("question") }
         assertEquals("Use the user's original questions, in original order", (0 until cases.length()).map { cases.getJSONObject(it).getString("question") }, questionList)
         val corpusFile = File(app, "src/main/assets/knowledge/seed_chunks_v1.json")
@@ -33,9 +42,9 @@ class LiveQuestionEvaluationTest {
             KnowledgeChunk(id=i+1L, documentId=c.getString("documentId"), documentTitle=c.getString("documentTitle"), sourceKind=c.getString("sourceKind"), pageNumber=c.getInt("pageNumber"), chunkIndex=c.getInt("chunkIndex"), heading=c.getString("heading"), body=c.getString("body"))
         }
         val rows = JSONArray()
-        val report = JSONObject().put("startedAt", Instant.now().toString()).put("phase", "tokenizing").put("total", 150).put("completed", 0).put("encoded", 0)
+        val report = JSONObject().put("startedAt", Instant.now().toString()).put("phase", "tokenizing").put("total", total).put("completed", 0).put("encoded", 0)
             .put("scope", "PC JVM: current Android QuestionSearchCoordinator + DocumentAnswerPlan; actual pinned query model on PC ONNX CPU. No Android device, UI, STT/TTS, or Gemma generation execution.")
-            .put("rubricStatus", rubric.getString("rubricStatus")).put("originalQuestionFileVerified",questionFile.exists()).put("hashes", JSONObject().put("questions",if(questionFile.exists())sha(questionFile) else JSONObject.NULL).put("rubric",sha(rubricFile)).put("corpus",sha(corpusFile)).put("semanticIndex",sha(semanticFile)))
+            .put("rubricStatus", rubric.getString("rubricStatus")).put("originalQuestionFileVerified",verifyQuestionFile).put("hashes", JSONObject().put("questions",if(verifyQuestionFile)sha(questionFile) else JSONObject.NULL).put("rubric",sha(rubricFile)).put("corpus",sha(corpusFile)).put("semanticIndex",sha(semanticFile)))
             .put("questions",JSONArray(questionList)).put("results", rows)
         fun publish() {
             val temporary=File(out,"progress.json.part").apply{writeText(report.toString(2))}
@@ -48,7 +57,7 @@ class LiveQuestionEvaluationTest {
         publish()
         val tokenizer = SemanticTokenizer(File(app,"src/main/assets/semantic-model/tokenizer.json").readText())
         val queries = linkedSetOf<String>()
-        fun collect(q: String) { if (queries.add(q)) FocusedRetriever.aspects(q).filter { it != q }.forEach(::collect) }
+        fun collect(q: String) { if (queries.add(q)) { queries.add(QuestionUnderstanding.normalize(q));FocusedRetriever.aspects(q).filter { it != q }.forEach(::collect);QuestionSearchCoordinator.parts(q).filter{it!=q}.forEach(::collect) } }
         questionList.forEach(::collect)
         val inputs = JSONArray()
         for(q in queries) inputs.put(JSONObject().put("question",q).put("ids",JSONArray(tokenizer.encode("task: search result | query: $q").toList())))
@@ -84,6 +93,7 @@ class LiveQuestionEvaluationTest {
             }
             val failures=mutableListOf<String>()
             if(!pagePass)failures.add("정답 페이지 불일치")
+            if(c.has("expectedStatus")&&c.getString("expectedStatus")!=result.status)failures.add("검색 상태 불일치: ${c.getString("expectedStatus")}")
             for(clause in strings(c.optJSONArray("required")))if(!norm(body).contains(norm(clause)))failures.add("필수 내용 누락: $clause")
             for(clause in strings(c.optJSONArray("forbidden")))if(norm(body).contains(norm(clause)))failures.add("금지 내용 포함: $clause")
             val first=c.optString("first")
@@ -102,19 +112,19 @@ class LiveQuestionEvaluationTest {
                 .put("sources",JSONArray(result.sources.map { JSONObject().put("documentId",it.chunk.documentId).put("title",it.chunk.documentTitle).put("page",it.chunk.pageNumber) }))
             rows.put(row)
             report.put("completed",i+1).put("passed",passed).put("failed",i+1-passed);publish()
-            println("[${i+1}/150] ${if(pass)"PASS" else "FAIL"} ${result.status} $q")
+            println("[${i+1}/$total] ${if(pass)"PASS" else "FAIL"} ${result.status} $q")
         }
         val summary=JSONObject()
-        for(category in listOf("single","paraphrase","compound","out-of-scope")) {
+        for(category in (0 until cases.length()).map{cases.getJSONObject(it).getString("category")}.distinct()) {
             val group=(0 until rows.length()).map{rows.getJSONObject(it)}.filter{it.getString("category")==category}
             summary.put(category,JSONObject().put("total",group.size).put("passed",group.count{it.getBoolean("pass")}))
         }
         report.put("groups",summary).put("phase","complete").put("finishedAt",Instant.now().toString());publish()
         File(out,"results.json").writeText(report.toString(2))
         val markdown=buildString {
-            append("# Android 150개 질문 평가 · 2026-11-03\n\n")
-            append("- 실행: PC JVM의 현재 Android 검색·답변 조립 코드 + 실제 검색 모델 CPU 추론\n- 범위: 기존 150개 개발 질문, 정답 페이지·필수/금지 내용 자동 검사\n- 제외: Android 기기·UI·Gemma 일반 지식/보충 생성·음성·실기기 응답 시간\n")
-            append("- 통과: $passed / 150, 실패: ${150-passed} / 150\n- 문서 밖 질문의 통과는 관련 없는 문서 미반환 검사이며 AI 답변 생성 성공을 뜻하지 않음\n- PC 추론은 미리 계산한 실제 질문 벡터를 사용하며, 검색 시간과 모델 시간의 합은 앱 전송부터 표시까지의 실측 시간이 아님\n\n")
+            append("# Android ${total}개 질문 평가 · 2026-11-03\n\n")
+            append("- 실행: PC JVM의 현재 Android 검색·답변 조립 코드 + 실제 검색 모델 CPU 추론\n- 범위: $total 개 개발 질문, 정답 페이지·필수/금지 내용 자동 검사\n- 제외: Android 기기·UI·Gemma 일반 지식/보충 생성·음성·실기기 응답 시간\n")
+            append("- 통과: $passed / $total, 실패: ${total-passed} / $total\n- 문서 밖 질문의 통과는 관련 없는 문서 미반환 검사이며 AI 답변 생성 성공을 뜻하지 않음\n- PC 추론은 미리 계산한 실제 질문 벡터를 사용하며, 검색 시간과 모델 시간의 합은 앱 전송부터 표시까지의 실측 시간이 아님\n\n")
             for(i in 0 until rows.length()) {val r=rows.getJSONObject(i)
                 append("## %03d. %s\n\n".format(i+1,r.getString("question")))
                 append("- 결과: ${if(r.getBoolean("pass"))"통과" else "실패"} / 상태: ${r.getString("status")} / 경로: ${r.getString("method").ifBlank{"-"}}\n")
@@ -125,9 +135,9 @@ class LiveQuestionEvaluationTest {
         }
         File(out,"results.md").writeText(markdown.trimEnd()+"\n")
         // Execution assertions only. Quality failures remain visible instead of being tuned away.
-        assertEquals(150,rows.length())
+        assertEquals(total,rows.length())
         assertTrue(rows.toString(),(0 until rows.length()).none{rows.getJSONObject(it).getString("status")=="search-error"})
-        println("EVALUATION COMPLETE: $passed/150 rubric passes. This is not an Android/Gemma end-to-end pass.")
+        println("EVALUATION COMPLETE: $passed/$total rubric passes. This is not an Android/Gemma end-to-end pass.")
     }
     private fun strings(a:JSONArray?)=if(a==null)emptyList() else (0 until a.length()).map{a.getString(it)}
     private fun norm(s:String)=Normalizer.normalize(s,Normalizer.Form.NFKC).lowercase().replace(Regex("[\\s\\\\*_`#]"),"")

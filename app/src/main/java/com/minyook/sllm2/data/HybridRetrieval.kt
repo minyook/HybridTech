@@ -16,29 +16,39 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
     }.filter { p -> chunks.any { it.documentId==p.documentId && it.pageNumber==p.page && it.chunkIndex==p.chunkIndex && it.body==p.sourceBody } } }
     private val lexical = FocusedRetriever(chunks)
     private val equipment = EquipmentOverview(chunks)
+    private val passageTexts = passages.map{EvidenceLanguage.aliases(it.searchText)}
+    private val pageUnits = chunks.associate{it.id to FocusedEvidence.units(it)}
+    private val pageTexts = chunks.associate{it.id to EvidenceLanguage.aliases(it.body)}
+    private val pageTitles = chunks.associate{it.id to EvidenceLanguage.aliases(FocusedEvidence.pageBody(it).substringBefore('▶').substringBefore('•').substringBefore("산업안전보건기준").take(160))}
+    private val sectionKeys=passages.map{it.section}.plus(pageUnits.values.flatten().map{it.section}).distinct().associateWith{EvidenceLanguage.compact(it)}
+    private val caseText=passages.map{Regex("사망\\s*\\d+명|\\[답변|┃사례").containsMatchIn(it.text)}
+    private val caseBody=passages.map{Regex("┃사례|확인\\s*부탁|문의드립니다|\\[답변").containsMatchIn(it.sourceBody)}
+    private val prefaces=passages.map{it.units.size<=2&&Regex("다음.*조치.*하여야").containsMatchIn(it.text)&&!Regex("유지할|착용|지급|설치할|측정하고").containsMatchIn(it.text)}
+    private val tokenFrequency = java.util.concurrent.ConcurrentHashMap<String,Int>()
     private val specification = Regex("방수|IP\\s*등급|배터리|전압|볼트|가격|구매|무게|제조사|모델명|충전|유효기간|유효\\s*기간",RegexOption.IGNORE_CASE)
     private data class Candidate(val p:SemanticPassage,val dense:Double,val lex:Double,var fused:Double=0.0)
     private fun completeScope(p:SemanticPassage,chunk:KnowledgeChunk):List<EvidencePassage>{
-        val units=FocusedEvidence.units(chunk);val first=units.indexOfFirst{it.section==p.section};val previous=units.getOrNull(first-1)
+        val units=pageUnits.getValue(chunk.id);val first=units.indexOfFirst{it.section==p.section};val previous=units.getOrNull(first-1)
         val topic=previous?.text?.let{Regex("^\\(([^)]+)\\)").find(it)?.groupValues?.get(1)}
         return if(previous!=null&&topic!=null&&EvidenceLanguage.compact(topic) in EvidenceLanguage.compact(p.section))listOf(previous.copy(section=p.section))+p.units else p.units
     }
-    fun resolve(question:String,vector:FloatArray?,review:Boolean=false):SearchResolution {
+    fun resolve(question:String,vector:FloatArray?,review:Boolean=false,fastOnly:Boolean=false):SearchResolution {
         var result=SearchResolution(question,semantic=vector!=null)
         if(Regex("(?:우리|현재|지금).*(?:승인|허가).*(?:됐|되었|받았|완료|상태)").containsMatchIn(question))return result.copy(status="live-state",message="현재 현장의 승인 상태는 문서로 확인할 수 없어요. 작업 전 점검 화면에서 요청과 감독관 승인 상태를 확인해 주세요.")
         val parts=FocusedRetriever.aspects(question).take(8)
         val sharedGas=parts.size>1&&parts.dropLast(1).all{Regex("^(산소|유해가스|일산화탄소|이산화탄소|황화수소)$").matches(EvidenceLanguage.compact(it))}&&EvidenceLanguage.terms(parts.last()).any{it in setOf("측정","농도","기준")}
-        if(parts.size>1&&!sharedGas){
+        if(!review&&!fastOnly&&parts.size>1&&!sharedGas){
             val each=parts.map{resolve(it,null)};val found=each.filter{it.status=="answered"};val missing=each.filter{it.status!="answered"}
             if(found.isNotEmpty()&&missing.isNotEmpty())return result.copy(status="partial",sources=found.flatMap{it.sources}.groupBy{it.chunk.id}.values.map{group->group.first().copy(evidence=group.flatMap{FocusedEvidence.selected(it)}.distinctBy{it.text})},message="질문 중 ‘${missing.joinToString(" / "){it.question}}’ 부분은 아직 직접 근거를 확인하지 못했어요. 이 부분에서 궁금한 대상이나 조건을 더 알려 주세요.",suggestions=missing.take(3).map{SearchSuggestion(it.question,it.question)})
         }
-        val tokens=EvidenceLanguage.terms(question).filterNot{Regex("^(그거|그건|그것|그러면|그럼|후속|질문)").containsMatchIn(it)}
+        val tokenQuestion=if(review)question.replace(Regex("(?<=[가-힣])(?:과|와)\\s+")," ") else question
+        val tokens=EvidenceLanguage.terms(tokenQuestion).filterNot{Regex("^(그거|그건|그것|그러면|그럼|후속|질문)").containsMatchIn(it)}
         equipment.resolve(question)?.let { return it }
-        val sources=lexical.retrieve(question)
+        val sources=if(fastOnly)emptyList() else lexical.retrieve(question,splitQuestion=!review)
         val unknown=specification.findAll(question).map{it.value}.distinct().filter{s->chunks.none{EvidenceLanguage.compact(s) in EvidenceLanguage.compact(it.body)}}.toList()
         val vague=tokens.size<=1&&tokens.none{it !in EvidenceLanguage.generic}
         val heading=EvidenceLanguage.compact(question.replace(Regex("(?:에\\s*대해|관련|내용|알려줘|알려주세요|설명해줘|설명해주세요|정리해줘|주세요|좀|\\?)"),""))
-        val exact=passages.filter{heading.isNotBlank()&&EvidenceLanguage.compact(it.section)==heading}
+        val exact=passages.filter{heading.isNotBlank()&&sectionKeys.getValue(it.section)==heading}
         if(unknown.isEmpty()&&exact.isNotEmpty()&&exact.map{it.documentId to it.page}.distinct().size<=2){
             val selected=exact.groupBy{it.documentId to it.page}.values.map{group->group.maxBy{it.orders.size}}
             return result.copy(status="answered",message="",semantic=false,method="heading",sources=selected.map{p->val chunk=chunks.first{it.documentId==p.documentId&&it.pageNumber==p.page&&it.chunkIndex==p.chunkIndex};RetrievedChunk(chunk,1.0,completeScope(p,chunk))})
@@ -48,12 +58,19 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
             val suggestions=if(vague&&tokens.isNotEmpty())passages.filter{it.section.length<50&&tokens.any{t->t in EvidenceLanguage.compact(it.section)}}.map{it.section}.distinctBy{EvidenceLanguage.compact(it)}.take(3).map{val label=it.replace(Regex("^\\((.*)\\)$"),"$1");SearchSuggestion(label,"${label}에 대해 알려줘")} else emptyList()
             return result.copy(status=if(vague)"clarify" else "unconfirmed",message=if(vague)"어떤 대상의 방법이나 조건이 궁금한가요? 대상과 궁금한 점을 함께 알려 주세요." else result.message,suggestions=suggestions,semantic=false)
         }
-        val texts=passages.map{EvidenceLanguage.aliases(it.searchText)}
-        val frequencies=tokens.associateWith{t->texts.count{t in it}}
+        val texts=passageTexts
+        val frequencies=tokens.associateWith{t->tokenFrequency.computeIfAbsent(t){texts.count{t in it}}}
+        val wantsCase=Regex("사례|사고사례|질의|해석").containsMatchIn(question)
+        val wantsCaseBody=wantsCase||Regex("해당\\s*여부").containsMatchIn(question)
         val candidates=passages.mapIndexed{index,p->
             var dense=p.vector.indices.sumOf{i->p.vector[i].toDouble()*vector[i]}
-            if(Regex("사망\\s*\\d+명|\\[답변|┃사례").containsMatchIn(p.text)&&!Regex("사례|사고사례|질의|해석").containsMatchIn(question))dense-=.035
+            if(caseText[index]&&!wantsCase)dense-=.035
             if(p.text.length<40)dense-=.025
+            if(review&&!wantsCaseBody){
+                if(caseBody[index])dense-=.13
+                // A repeated introductory sentence is not the requested procedure.
+                if(prefaces[index])dense-=.18
+            }
             val text=texts[index]
             val lex=tokens.sumOf{t->if(t in text)ln(1+passages.size.toDouble()/(1+frequencies.getValue(t)))*(if(t in EvidenceLanguage.generic).2 else 1.0) else 0.0}/sqrt(1+p.text.length/500.0)
             Candidate(p,dense,lex)
@@ -70,9 +87,32 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
             if(passages.isEmpty()||passages.size!=root.getJSONArray("passages").length())return result.copy(status="search-error",searchComplete=false,message="현재 문서와 검색 인덱스를 함께 확인하지 못했어요. 문서를 준비한 뒤 다시 질문해 주세요.",suggestions=emptyList())
             if(vague)return result.copy(status="clarify",message="어떤 대상의 내용을 확인할까요? 관련 항목을 선택하거나 질문의 대상을 알려 주세요.")
             if(unknown.isNotEmpty() || (sources.isEmpty()&&(lead?.dense?:0.0)<.40))return result.copy(status="no-evidence",message="제공 문서 전체 검색에서 질문에 직접 답할 근거를 확인하지 못했어요.",suggestions=emptyList(),generalQuestion=question)
+            val attributes=tokens.filter{it in setOf("방법","시기","자격","직무","절차")}
+            val titled=if(attributes.isEmpty()||tokens.count{it !in EvidenceLanguage.generic}<1)emptyList() else chunks.filter{c->
+                val title=pageTitles.getValue(c.id)
+                attributes.all{it in title}&&tokens.all{it in title}&&candidates.any{it.p.documentId==c.documentId&&it.p.page==c.pageNumber&&it.dense>=.35}
+            }
+            if(titled.size==1)return result.copy(status="answered",sources=completeSafety(titled.map{RetrievedChunk(it,1.0,pageUnits.getValue(it.id))},question),message="",suggestions=emptyList(),method="title-semantic")
+            // Rare source anchors can disambiguate a specialist term that the
+            // embedding model underweights. Require source coverage plus an
+            // independently computed semantic score; never accept token overlap alone.
+            val relationWords=setOf("역할","요건","기능","조건","배치","대상","준비","설치","사용","관리","원리","설명","목적")
+            val anchors=tokens.filter{it !in EvidenceLanguage.generic&&it !in relationWords&&pageTexts.values.count{text->it in text} in 1..4}
+            val anchorCandidates=if(anchors.isEmpty())emptyList() else chunks.filter{c->
+                val text=pageTexts.getValue(c.id)
+                val covered=anchors.count{it in text}
+                covered>=minOf(2,anchors.size)&&covered.toDouble()/anchors.size>=.75&&tokens.count{it in text}>=minOf(3,tokens.size)&&candidates.any{it.p.documentId==c.documentId&&it.p.page==c.pageNumber&&it.dense>=.30}
+            }
+            val anchored=sources.isNotEmpty()&&anchors.isNotEmpty()&&sources.any{s->
+                val text=EvidenceLanguage.aliases(s.chunk.body)
+                val covered=anchors.count{it in text}
+                val support=candidates.filter{it.p.documentId==s.chunk.documentId&&it.p.page==s.chunk.pageNumber}.maxOfOrNull{it.dense}?:0.0
+                covered>=minOf(2,anchors.size)&&covered.toDouble()/anchors.size>=.75&&support>=.30
+            }
             if(!semanticClear){
+                if(anchorCandidates.size==1)return result.copy(status="answered",sources=completeSafety(anchorCandidates.map{RetrievedChunk(it,1.0,pageUnits.getValue(it.id))},question),message="",suggestions=emptyList(),method="unique-source-anchor-semantic")
                 val agreement=sources.isNotEmpty()&&dense.take(5).any{c->c.dense>=.40&&sources.any{it.chunk.documentId==c.p.documentId&&it.chunk.pageNumber==c.p.page}}
-                if(agreement&&!vague)return result.copy(status="answered",sources=sources,message="",suggestions=emptyList(),method="lexical-semantic-agreement")
+                if((agreement||anchored)&&!vague)return result.copy(status="answered",sources=completeSafety(sources,question),message="",suggestions=emptyList(),method=if(anchored)"source-anchor-semantic" else "lexical-semantic-agreement")
                 return result.copy(status="clarify",message="관련 근거가 여러 항목으로 나뉘어 있어요. 아래 항목 중 궁금한 범위를 선택해 주세요.")
             }
         }else{
@@ -83,10 +123,44 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
         if(sources.isNotEmpty()&&!review)return result.copy(sources=sources,status="answered",message="",suggestions=emptyList())
         if(top==null)return result
         val p=top.p;val chunk=chunks.first{it.documentId==p.documentId&&it.pageNumber==p.page&&it.chunkIndex==p.chunkIndex}
-        val units=FocusedEvidence.units(chunk)
+        val units=pageUnits.getValue(chunk.id)
         val selected=completeScope(p,chunk)
         val context=units.filter{(it.section==p.section||Regex("반드시|금지|없다면").containsMatchIn(it.text))&&EvidenceLanguage.compact(it.text) !in EvidenceLanguage.compact(p.text)}
-        return result.copy(sources=listOf(RetrievedChunk(chunk,top.fused,selected+context)),status="answered",message="",suggestions=emptyList())
+        val evidence=listOf(RetrievedChunk(chunk,top.fused,selected+context))
+        return result.copy(sources=if(review)completeSafety(evidence,question) else evidence,status="answered",message="",suggestions=emptyList())
+    }
+    private fun completeSafety(sources:List<RetrievedChunk>,question:String):List<RetrievedChunk> {
+        fun procedure(c:KnowledgeChunk)=Regex("^순\\s*서\\s*실\\s*시\\s*방\\s*법").containsMatchIn(FocusedEvidence.pageBody(c))
+        val complete=sources.toMutableList()
+        for(source in sources.filter{procedure(it.chunk)}){
+            val topic=EvidenceLanguage.vocabulary.filter{it !in EvidenceLanguage.generic&&it.length>=3&&it in EvidenceLanguage.aliases(source.chunk.body)}
+            val adjacent=chunks.filter{it.documentId==source.chunk.documentId&&kotlin.math.abs(it.pageNumber-source.chunk.pageNumber)==1&&procedure(it)&&topic.any{t->t in EvidenceLanguage.aliases(it.body)}}
+            for(chunk in adjacent)if(complete.none{it.chunk.id==chunk.id})complete.add(RetrievedChunk(chunk,source.score,pageUnits.getValue(chunk.id)))
+        }
+        return complete.map{source->
+        val units=pageUnits.getValue(source.chunk.id)
+        if(Regex("^순\\s*서\\s*실\\s*시\\s*방\\s*법").containsMatchIn(FocusedEvidence.pageBody(source.chunk)))source.copy(evidence=units)
+        else {
+            val initial=FocusedEvidence.selected(source)
+            // "방법" can refer to a check/preparation as well as the measured
+            // procedure; it is not a sufficiently specific section constraint.
+            val attributes=EvidenceLanguage.terms(question).filter{it in setOf("시기","자격","직무","주의사항")}
+            val requestedScopes=units.filter{unit->attributes.any{it in EvidenceLanguage.compact(unit.section)}}
+            val scopeCovered=initial.any{unit->attributes.any{it in EvidenceLanguage.compact(unit.section)}}
+            val selected=if(requestedScopes.isNotEmpty()&&!scopeCovered)requestedScopes+initial.filter{Regex("반드시|금지|없다면").containsMatchIn(it.text)} else initial
+            val text=selected.joinToString(" "){it.section+" "+it.text}
+            val normalizedText=EvidenceLanguage.aliases(text)
+            val entities=EvidenceLanguage.vocabulary.filter{it.length>=3&&it !in EvidenceLanguage.generic&&it in normalizedText}
+            val guards=units.filter{Regex("^다만|^이 경우|^그 밖|^또한|^그러나").containsMatchIn(it.text)&&entities.any{e->e in EvidenceLanguage.aliases(it.text)}}
+            val groups=guards.map{it.group}.toSet()
+            // A queried condition must not disappear just because another
+            // section scored higher. Add its original local action/condition.
+            val missing=EvidenceLanguage.terms(question).filter{it !in EvidenceLanguage.generic&&pageTexts.values.count{body->it in body} in 1..4&&it in pageTexts.getValue(source.chunk.id)&&it !in normalizedText}
+            val requested=units.filter{unit->missing.any{it in EvidenceLanguage.aliases(unit.text)}}
+            val requestedGroups=requested.map{it.group}.toSet()
+            source.copy(evidence=(selected+units.filter{it.group in groups||it.group in requestedGroups}).distinctBy{EvidenceLanguage.compact(it.text)})
+        }
+    }
     }
     companion object {
         fun contextualQuestion(question:String,previous:String=""):String {

@@ -1,0 +1,152 @@
+{
+  "date": "2026-11-03",
+  "platform": "samsung SM-S928N / Android 16",
+  "scope": "Android app search/answer-state measurements, not rendered UI/audio latency. Final document 140 and earlier general 9 runs are separate. General engine/prompt/settings unchanged, but the earlier general run predates the last search preprocessing optimization. Not one continuous final-code 150 run.",
+  "quality": {
+    "pc150": {
+      "passed": 150,
+      "total": 150
+    },
+    "additional24": {
+      "passed": 24,
+      "total": 24,
+      "developmentRegression": true
+    },
+    "deviceDocument140": {
+      "passed": 140,
+      "total": 140,
+      "fullyAnswered": 140
+    },
+    "generalClassification": {
+      "passed": 10,
+      "total": 10,
+      "factualAccuracyNotEvaluated": true
+    },
+    "failures": []
+  },
+  "timing": {
+    "documentFirstBodyState": {
+      "count": 140,
+      "medianMs": 80.668281,
+      "p95Ms": 146.316823,
+      "minMs": 8.484896,
+      "maxMs": 3055.418905,
+      "within2s": 139
+    },
+    "documentCompletion": {
+      "count": 140,
+      "medianMs": 80.684166,
+      "p95Ms": 146.333073,
+      "minMs": 8.501615,
+      "maxMs": 3055.479739,
+      "within2s": 139
+    },
+    "generalFirstBodyState": {
+      "count": 9,
+      "medianMs": 5948.884894,
+      "p95Ms": 7418.44656,
+      "minMs": 4314.806717,
+      "maxMs": 7418.44656,
+      "within2s": 0
+    },
+    "generalCompletion": {
+      "count": 9,
+      "medianMs": 42716.074984,
+      "p95Ms": 93507.238611,
+      "minMs": 12452.390256,
+      "maxMs": 93507.238611,
+      "within2s": 0
+    },
+    "generalGenerationFirstBodyAfterSearch": {
+      "count": 9,
+      "medianMs": 4361.168852,
+      "p95Ms": 5577.653905,
+      "minMs": 3166.1902070000006,
+      "maxMs": 5577.653905,
+      "within2s": 0
+    },
+    "generalGenerationCompletion": {
+      "count": 9,
+      "medianMs": 40751.097797,
+      "p95Ms": 91812.543402,
+      "minMs": 12120.643329,
+      "maxMs": 91812.543402,
+      "within2s": 0
+    },
+    "generalErrors": [],
+    "matchedSearchBefore": {
+      "count": 26,
+      "medianMs": 1140.466354,
+      "p95Ms": 3849.246301,
+      "minMs": 860.294687,
+      "maxMs": 4266.127863,
+      "within2s": 14
+    },
+    "matchedSearchAfter": {
+      "count": 26,
+      "medianMs": 80.807396,
+      "p95Ms": 150.17302,
+      "minMs": 59.16,
+      "maxMs": 3052.651145,
+      "within2s": 25
+    },
+    "repeatedQuestions": [
+      {
+        "number": 1,
+        "millis": 46.60651
+      },
+      {
+        "number": 39,
+        "millis": 38.884896
+      },
+      {
+        "number": 113,
+        "millis": 45.734219
+      }
+    ]
+  },
+  "gpuComparison": {
+    "requestedBackend": "GPU",
+    "observedBackend": "GPU; verified FieldGuardInference logs",
+    "note": "Two sequential development questions, cold initialization included; not a controlled CPU/GPU benchmark. Original CPU setting restored after test.",
+    "results": [
+      {
+        "number": 143,
+        "firstBodyStateMs": 28505.266395,
+        "totalMs": 88660.507466,
+        "generationMs": 83595.153718,
+        "generation": "completed",
+        "cpuEarlierTotalMs": 58988.014977
+      },
+      {
+        "number": 149,
+        "firstBodyStateMs": 19465.249628,
+        "totalMs": 96585.275276,
+        "generationMs": 92934.62835,
+        "generation": "completed",
+        "cpuEarlierTotalMs": 93507.238611
+      }
+    ]
+  },
+  "inferenceSettings": {
+    "originalBackend": "CPU",
+    "contextTokens": 8192,
+    "responseTokens": 4096,
+    "generalOutputTokenCap": 768,
+    "automaticAnswerLength": true
+  },
+  "runs": {
+    "beforeCount": 27,
+    "documentCount": 140,
+    "generalCount": 9,
+    "finalIndexPrepareMs": 2126.142864,
+    "sourceAnswersWrittenToChatHistory": false
+  },
+  "limits": [
+    "Fixed development regression sets; not an independent unseen-question accuracy score.",
+    "First-body state is computed at the answer state boundary, not an actual rendered frame.",
+    "One S24, fixed sequential question order; no controlled thermal/JIT/storage conditions or cross-device guarantee.",
+    "General-knowledge completion and visible output do not establish factual correctness.",
+    "Cold tokenizer/session startup is included in the first document question. Corpus/index startup preparation is recorded separately."
+  ]
+}

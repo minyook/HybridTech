@@ -47,6 +47,7 @@ object FocusedEvidence {
             buildList {
                 selected(source).forEach { unit ->
                     if(Regex("^[,\\s]*제\\d+조(?:의\\d+)?\\s*(?:\\d+\\s*)?(?:작업시\\s*안전보건\\s*조치)?$").matches(unit.text.trim()))return@forEach
+                    if(Regex("^(?:\\d+|[가-하])\\.$").matches(unit.text.trim()))return@forEach
                     val key = unit.text.replace(Regex("\\s+"), " ")
                     if (!seen.add(key)) return@forEach
                     if (unit.section.isNotBlank() && unit.section != section) { section = unit.section; add("**${unit.section}**") }
@@ -65,6 +66,11 @@ internal class FocusedRetriever(chunks: List<KnowledgeChunk>) {
         val procedure = Regex("^순\\s*서\\s*실\\s*시\\s*방\\s*법").containsMatchIn(body)
     }
     private val pages = chunks.map { val body = FocusedEvidence.pageBody(it); Page(it, body, EvidenceLanguage.searchable(body), EvidenceLanguage.searchable(body.take(180)), FocusedEvidence.units(it)) }
+    private data class GroupText(val local:String,val heading:String,val length:Int)
+    private val groupTexts=pages.flatMap{it.groups}.associateWith{units->
+        val body=units.joinToString(" "){it.text}
+        GroupText(EvidenceLanguage.searchable(body),EvidenceLanguage.compact(units.firstOrNull()?.section.orEmpty()),EvidenceLanguage.compact(body).length)
+    }
     private data class Profile(val tokens: List<String>, val weights: List<Double>, val focus: List<String>) { val total = weights.sum() }
     private fun profile(question: String): Profile {
         val tokens = EvidenceLanguage.terms(question).map { token ->
@@ -79,9 +85,8 @@ internal class FocusedRetriever(chunks: List<KnowledgeChunk>) {
         return Profile(tokens, weights, specific.filter { frequencies[tokens.indexOf(it)] <= maxOf(5.0, rarest * 1.5) })
     }
     private fun passageScore(units: List<EvidencePassage>, profile: Profile): Double {
-        val body = units.joinToString(" ") { it.text }; val local = EvidenceLanguage.searchable(body)
-        val heading = EvidenceLanguage.compact(units.firstOrNull()?.section.orEmpty())
-        return profile.tokens.indices.sumOf { i -> profile.weights[i] * when { profile.tokens[i] in local -> 1.0; profile.tokens[i] in heading -> .35; else -> 0.0 } } / sqrt(1 + EvidenceLanguage.compact(body).length / 350.0)
+        val group=groupTexts.getValue(units)
+        return profile.tokens.indices.sumOf { i -> profile.weights[i] * when { profile.tokens[i] in group.local -> 1.0; profile.tokens[i] in group.heading -> .35; else -> 0.0 } } / sqrt(1 + group.length / 350.0)
     }
     fun rank(question: String): List<RetrievedChunk> {
         val profile = profile(question); if (profile.tokens.isEmpty() || profile.total == 0.0) return emptyList()
@@ -109,9 +114,9 @@ internal class FocusedRetriever(chunks: List<KnowledgeChunk>) {
             RetrievedChunk(page.chunk, score * coverage * if (text.length < 100) .3 else 1.0)
         }.sortedWith(compareByDescending<RetrievedChunk> { it.score }.thenBy { it.chunk.pageNumber })
     }
-    fun retrieve(question: String, limit: Int = 3): List<RetrievedChunk> {
+    fun retrieve(question: String, limit: Int = 3, splitQuestion: Boolean = true): List<RetrievedChunk> {
         if (Regex("(?:우리|현재|지금).*(?:승인|허가).*(?:됐|되었|받았|상태)").containsMatchIn(question)) return emptyList()
-        var subjects = aspects(question).take(8)
+        var subjects = if(splitQuestion) aspects(question).take(8) else listOf(question)
         if (subjects.size > 1 && subjects.dropLast(1).all { Regex("^(?:산소|유해가스|일산화탄소|이산화탄소|황화수소)$").matches(EvidenceLanguage.compact(it)) } && EvidenceLanguage.terms(subjects.last()).any { it in setOf("측정", "농도", "기준") }) subjects = listOf(question)
         val rankings = subjects.map(::rank); val selected = linkedMapOf<Long, RetrievedChunk>()
         fun page(source: RetrievedChunk) = pages.first { it.chunk === source.chunk }

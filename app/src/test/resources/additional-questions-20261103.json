@@ -1,0 +1,426 @@
+{
+  "documentId": "confined_space_safety_guide_2022",
+  "rubricStatus": "additional engineering challenge; not an independent held-out quality score",
+  "cases": [
+    {
+      "id": "additional-1",
+      "category": "additional-expression",
+      "question": "통제실에서 유해가스 위험을 발견하면 누가 뭘 해야 하나요",
+      "pages": [
+        [
+          26
+        ]
+      ],
+      "required": [
+        "저장하고 표시",
+        "통제 권한"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-2",
+      "category": "additional-expression",
+      "question": "센서에서 오는 정보를 통제실이 실시간으로 받고 위험 시 대피시켜야 하나요",
+      "pages": [
+        [
+          26
+        ]
+      ],
+      "required": [
+        "통제 권한"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-3",
+      "category": "additional-expression",
+      "question": "산소 가스를 잴 때 위아래랑 가로로 어디까지 재야 돼요",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "3개소"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-4",
+      "category": "additional-expression",
+      "question": "어두운 맨홀을 살펴볼 손전등 아무거나 써도 되나요",
+      "pages": [
+        [
+          27
+        ]
+      ],
+      "required": [
+        "방폭"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-5",
+      "category": "additional-expression",
+      "question": "보일러 안에서 용접하는데 환기가 충분하지 않아요 필요한 조치는",
+      "pages": [
+        [
+          30
+        ]
+      ],
+      "required": [
+        "공기호흡기 또는 송기마스크"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-6",
+      "category": "additional-expression",
+      "question": "자동 이산화탄소 소화장치가 있는 방에서 작업할 때 스위치 설정은",
+      "pages": [
+        [
+          32
+        ]
+      ],
+      "required": [
+        "수동"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-7",
+      "category": "additional-expression",
+      "question": "CO2 소화설비 감지기 경보가 울리면 가스가 나오기 전에 얼마나 빨리 나가야 하나요",
+      "pages": [
+        [
+          32
+        ]
+      ],
+      "required": [
+        "30초"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-8",
+      "category": "additional-expression",
+      "question": "송기마스크로 숨 쉬는 중 전기가 나가거나 호스가 꺾이면 어떻게 대비해",
+      "pages": [
+        [
+          36
+        ]
+      ],
+      "required": [
+        "정전",
+        "송기라인"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-9",
+      "category": "additional-expression",
+      "question": "심장마사지 시작 전에 사람 반응과 숨을 어떻게 확인해야 하나요",
+      "pages": [
+        [
+          45
+        ]
+      ],
+      "required": [
+        "10초 이내",
+        "119"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-10",
+      "category": "additional-expression",
+      "question": "가슴압박을 할 줄 아는데 인공호흡은 못하겠어요 어떻게 해요",
+      "pages": [
+        [
+          45
+        ]
+      ],
+      "required": [
+        "인공호흡 방법을 모르거나 꺼리는 경우"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-11",
+      "category": "additional-expression",
+      "question": "심폐소생술 하다가 사람이 움직였어요 옆으로 눕히기 전에 뭘 확인해요",
+      "pages": [
+        [
+          46
+        ]
+      ],
+      "required": [
+        "호흡이 회복되었다면"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-12",
+      "category": "additional-expression",
+      "question": "심폐소생술 중 구급대가 아직 안 왔으면 계속 해야 하나요",
+      "pages": [
+        [
+          46
+        ]
+      ],
+      "required": [
+        "119구급대가 도착할 때까지"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-13",
+      "category": "additional-expression",
+      "question": "점심 먹느라 맨홀 밖에 있다 다시 내려가요 가스는 다시 재나요",
+      "pages": [
+        [
+          25
+        ]
+      ],
+      "required": [
+        "점심시간"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-14",
+      "category": "additional-expression",
+      "question": "질소 배관을 실수로 열지 않도록 밸브에 어떤 표시를 붙이나요",
+      "pages": [
+        [
+          30
+        ]
+      ],
+      "required": [
+        "개폐의 방향"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-15",
+      "category": "additional-expression",
+      "question": "밀폐된 지하실 가스 공급관을 떼어낼 때 유입을 막는 방법",
+      "pages": [
+        [
+          31
+        ]
+      ],
+      "required": [
+        "해당가스가 들어오지 않도록 차단"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-16",
+      "category": "additional-expression",
+      "question": "분뇨로 더러워진 펌프를 뜯어 수리할 때 작업순서는 누가 알려줘야 해요",
+      "pages": [
+        [
+          31
+        ]
+      ],
+      "required": [
+        "작업방법 및 순서"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-17",
+      "category": "additional-expression",
+      "question": "밀폐공간 작업자가 들어간 뒤 나올 때마다 인원 체크를 하나요",
+      "pages": [
+        [
+          35
+        ]
+      ],
+      "required": [
+        "퇴장"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-18",
+      "category": "additional-expression",
+      "question": "밀폐공간에 동료가 쓰러졌는데 공기호흡기가 없어요 구하러 가도 돼요",
+      "pages": [
+        [
+          44
+        ]
+      ],
+      "required": [
+        "공기호흡기"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-19",
+      "category": "additional-expression",
+      "question": "탱크에서 환기팬이 정전으로 멈추면 안에서 기다려도 되나요",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "대피"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-20",
+      "category": "additional-expression",
+      "question": "긴급 구조 연습은 사업장에서 얼마나 자주 해야 하는지",
+      "pages": [
+        [
+          39
+        ]
+      ],
+      "required": [
+        "6개월"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-21",
+      "category": "additional-expression",
+      "question": "환기팬 덕트 길이를 제조사가 안내하지 않으면 몇 미터로 해요",
+      "pages": [
+        [
+          29
+        ]
+      ],
+      "required": [
+        "15미터"
+      ],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": []
+    },
+    {
+      "id": "additional-22",
+      "category": "additional-expression",
+      "question": "손전등 방수 IP 등급이 67인지 알려줘",
+      "pages": [],
+      "required": [],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": [],
+      "expectedStatus": "no-evidence"
+    },
+    {
+      "id": "additional-23",
+      "category": "additional-expression",
+      "question": "우리 현장이 지금 작업 승인 완료됐나요",
+      "pages": [],
+      "required": [],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": [],
+      "expectedStatus": "live-state"
+    },
+    {
+      "id": "additional-24",
+      "category": "additional-expression",
+      "question": "그거 어떻게 하는데?",
+      "pages": [],
+      "required": [],
+      "forbidden": [
+        "작업 가능합니다",
+        "승인되었습니다"
+      ],
+      "exceptions": [],
+      "expectedStatus": "clarify"
+    }
+  ]
+}

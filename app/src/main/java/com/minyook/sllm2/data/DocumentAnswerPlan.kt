@@ -4,7 +4,9 @@ import org.json.JSONObject
 
 data class PlannedPassage(val id: String, val sourceId: Long, val text: String, val section: String)
 data class DocumentAnswerPlan(val question: String, val body: String, val evidence: List<PlannedPassage>, val sources: List<RetrievedChunk>) {
-    val supplementRequested = evidence.isNotEmpty() && Regex("왜|이유|차이|비교|뜻|의미|쉽게|풀어").containsMatchIn(question) && !Regex("승인|작업\\s*가능|들어가도|출입해도").containsMatchIn(question)
+    // Source answers finish immediately. A reason/comparison question already
+    // answered by the document must not spend seconds regenerating the same text.
+    val supplementRequested = evidence.isNotEmpty() && Regex("쉽게|풀어|AI\\s*(?:로|가)\\s*(?:설명|보충)",RegexOption.IGNORE_CASE).containsMatchIn(question) && !Regex("승인|작업\\s*가능|들어가도|출입해도").containsMatchIn(question)
     val sourceLabels = sources.associate { it.chunk.id to "${it.chunk.sourceKind} · ${it.chunk.pageNumber}쪽" }
     val sourceIds = sources.map { it.chunk.id }.distinct()
     fun context(): String = evidence.joinToString("\n\n") { "[${it.id}] ${it.section}\n${it.text}" }

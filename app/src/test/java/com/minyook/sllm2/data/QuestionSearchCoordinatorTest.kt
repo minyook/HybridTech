@@ -7,6 +7,18 @@ import org.junit.Test
 import java.io.File
 
 class QuestionSearchCoordinatorTest {
+    @Test fun domainNormalizationIsIdempotentAndDoesNotRewriteAccidentOrMeasurementHoses() {
+        for(q in listOf("산소 가스를 잴 때 위아래랑 가로로 어디까지 재야 돼요","송기마스크로 숨 쉬는 중 전기가 나가거나 호스가 꺾이면 어떻게 대비해","점심 먹느라 맨홀 밖에 있다 다시 내려가요 가스는 다시 재나요")){
+            val normalized=QuestionUnderstanding.normalize(q)
+            assertEquals(normalized,QuestionUnderstanding.normalize(normalized))
+        }
+        assertEquals("재해 예방과 측정 호스",QuestionUnderstanding.normalize("재해 예방과 측정 호스"))
+        assertTrue(QuestionUnderstanding.normalize("산소 가스를 잴 때 위아래랑 가로로 측정").contains("수직"))
+    }
+    @Test fun nounConjunctionsStayInOneQuestionWhileExplicitQuestionsSplit() {
+        for(q in listOf("급기구와 배기구 배치는 어떻게 해","산소 및 유해가스 측정방법","센서 정확도와 신뢰성은 어떻게 확보해","구조훈련 대상과 주기"))assertEquals(listOf(q),QuestionSearchCoordinator.parts(q))
+        assertEquals(listOf("측정 위치와 개소","깊은 탱크 호스 눈금"),QuestionSearchCoordinator.parts("측정 위치와 개소 그리고 깊은 탱크 호스 눈금"))
+    }
     private fun vector(axis:Int)=FloatArray(768){if(it==axis)1f else 0f}
     private val chunks=listOf(
         KnowledgeChunk(id=1,documentId="guide",pageNumber=1,body="대상설비은 첫 번째 후보입니다. 이 후보의 조건을 확인합니다."),
