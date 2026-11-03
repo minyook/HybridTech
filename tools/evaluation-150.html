@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Field Guard · 150개 질문 테스트</title>
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#f5f7fb,#141821);--fg:light-dark(#182234,#e8edf5);--panel:light-dark(#fff,#1e2532);--line:light-dark(#dce3ee,#394358);--muted:light-dark(#56647b,#b2bed1);--good:light-dark(#137355,#68d9ae);--bad:light-dark(#b62f43,#ff8f9f);--blue:light-dark(#2c63d7,#86afff)}
+*{box-sizing:border-box}body{font:16px/1.65 system-ui,sans-serif;background:var(--bg);color:var(--fg);margin:0}main{max-width:1080px;margin:auto;padding:28px 20px 70px}h1{font-size:27px;margin:0 0 10px}h2{font-size:19px}p{margin:6px 0}.muted{color:var(--muted)}header{position:sticky;top:0;background:var(--bg);z-index:2;padding:12px 0 18px;border-bottom:1px solid var(--line)}progress{display:block;width:100%;height:16px;accent-color:var(--blue);margin:12px 0}.stats{display:flex;flex-wrap:wrap;gap:8px 24px}.notice{padding:16px;background:var(--panel);border-radius:12px;margin:18px 0}a{color:var(--blue)}.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:20px 0}select,input,button{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit}input{flex:1;min-width:180px}details{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin:10px 0;overflow:hidden}summary{padding:14px;cursor:pointer;display:flex;gap:12px;align-items:baseline}summary .q{flex:1}.badge{white-space:nowrap;font-size:14px}.pass{color:var(--good)}.fail{color:var(--bad)}.body{padding:0 18px 20px;border-top:1px solid var(--line)}.body p{overflow-wrap:anywhere}.answer{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;background:var(--bg);padding:16px;border-radius:8px;margin:12px 0}ul{padding-left:22px}#now{overflow-wrap:anywhere}#error{color:var(--bad)}.links{display:flex;gap:18px;margin:10px 0}@media(max-width:600px){main{padding:16px 12px 50px}summary{flex-wrap:wrap}summary .q{flex-basis:75%}h1{font-size:22px}}
+</style>
+<main>
+<header>
+<h1>Field Guard · 150개 질문 테스트</h1>
+<p id="phase">실행 준비 중</p>
+<progress id="progress" max="150" value="0" aria-label="질문 평가 진행"></progress>
+<div class="stats"><span id="count">0 / 150개 평가</span><span id="passed">자동 검사 통과 0개</span><span id="failed">실패 0개</span></div>
+<p class="muted" id="now">현재 앱의 검색·답변 조립 코드로 검사합니다.</p>
+</header>
+<div class="notice">
+<p><strong>실행 범위: PC에서 Android 검색 코드 + 실제 검색 모델 CPU 추론</strong></p>
+<p>원래 150개 개발 질문과 정답 기준을 그대로 사용합니다. 문서 답변의 페이지·필수 내용·금지 표현을 자동 검사합니다.</p>
+<p class="muted">Android 실기기·화면·Gemma 답변 생성·음성은 미실행입니다. 문서 밖 질문의 통과는 관련 없는 문서를 붙이지 않았다는 뜻이며, 생성 답변 성공이나 전체 응답 1~2초 달성을 뜻하지 않습니다.</p>
+<p id="coverage"></p>
+</div>
+<p id="groups"></p>
+<div class="links"><a href="results.md" target="_blank" rel="noopener">질문별 Markdown 결과</a><a href="results.json" target="_blank" rel="noopener">전체 JSON 결과</a></div>
+<div class="controls"><label for="filter">표시</label><select id="filter"><option value="all">전체 질문</option><option value="fail">실패 질문</option><option value="pass">통과 질문</option><option value="pending">미평가 질문</option></select><input id="search" type="search" aria-label="질문 검색" placeholder="질문·번호 검색"></div>
+<p id="error" role="status"></p><section id="rows" aria-label="질문별 평가 결과"></section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const escape=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const state={data:null,stamp:'',timer:null};
+const phases={tokenizing:'질문 준비 · 앱과 동일한 토큰 변환',embedding:'실제 검색 모델로 질문 의미 계산 중',evaluating:'현재 앱 검색·답변 조립 코드 평가 중',complete:'150개 질문 평가 완료',error:'평가 실행 오류'};
+const labels={answered:'문서 답변',partial:'일부 근거',clarify:'추가 확인 질문','no-evidence':'직접 근거 미확인','live-state':'현장 상태 확인 필요','search-error':'검색 오류'};
+function render(){
+ const data=state.data;if(!data)return;
+ const open=new Set([...$('rows').querySelectorAll('details[open]')].map(d=>d.dataset.number));
+ const filter=$('filter').value,term=$('search').value.trim().toLocaleLowerCase();
+ const results=new Map((data.results||[]).map(r=>[r.number,r]));
+ $('rows').innerHTML=(data.questions||[]).map((question,i)=>({number:i+1,question,r:results.get(i+1)})).filter(({number,question,r})=>(!term||`${number} ${question}`.toLocaleLowerCase().includes(term))&&(filter==='all'||filter==='pending'&&!r||filter==='pass'&&r?.pass||filter==='fail'&&r&&!r.pass)).map(({number,question,r})=>{
+  const status=r?(r.pass?(r.status==='partial'?'기준 통과 · 추가 확인':'기준 통과'):'실패'):'대기';
+  const content=r?`<p><strong>검색 상태:</strong> ${escape(labels[r.status]||r.status)} · ${escape(r.method)}</p><p><strong>정답 페이지:</strong> ${escape(JSON.stringify(r.expectedPages))} / <strong>반환 페이지:</strong> ${escape(JSON.stringify(r.pages))}</p><p><strong>자동 검사:</strong> 페이지 ${r.pagePass?'통과':'실패'} · 본문 ${r.bodyPass?'통과':'실패'}</p>${r.failures.length?'<ul class="fail">'+r.failures.map(f=>'<li>'+escape(f)+'</li>').join('')+'</ul>':''}<p class="muted">PC 검색·조립 ${r.kotlinSearchAndCompositionMs.toFixed(1)}ms · 이 질문의 실제 모델 추론 합 ${r.pcModelInferenceSumMs.toFixed(1)}ms (미리 계산한 벡터, 실기기 전체 응답 시간과 다름)</p><p><strong>생성:</strong> ${escape(r.generation==='not-needed'?'필요 없음':r.generation.startsWith('not-run: general')?'일반 지식 Gemma 생성 미실행':'선택적 Gemma 보충 미실행')}</p><h2>실제 문서 답변 · Markdown 원문</h2><div class="answer">${escape(r.answerMarkdown||'(문서 본문 없음; 일반 지식 생성은 미실행)')}</div>${r.suggestions.length?'<p>앱의 확인 선택지: '+escape(r.suggestions.join(' / '))+'</p>':''}`:'<p>평가 순서를 기다리고 있습니다.</p>';
+  return `<details data-number="${number}" ${open.has(String(number))?'open':''}><summary><span class="muted">${String(number).padStart(3,'0')}</span><span class="q">${escape(question)}</span><span class="badge ${r?(r.pass?'pass':'fail'):'muted'}">${status}</span></summary><div class="body">${content}</div></details>`;
+ }).join('');
+}
+async function poll(){
+ try{
+  const response=await fetch('./progress.json?t='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error('실행 준비 중');
+  const data=await response.json();state.data=data;
+  $('phase').textContent=phases[data.phase]||data.phase;
+  $('progress').max=data.phase==='embedding'?data.queryTotal:150;$('progress').value=data.phase==='embedding'?data.encoded:data.completed;
+  $('count').textContent=`${data.completed||0} / 150개 평가`;$('passed').textContent=`자동 검사 통과 ${data.passed||0}개`;$('failed').textContent=`실패 ${data.failed||0}개`;
+  $('now').textContent=data.phase==='embedding'?`질문 벡터 ${data.encoded} / ${data.queryTotal}개 · ${data.embeddingQuestion||''}`:data.phase==='complete'?'평가 종료 · 질문을 펼치면 실제 답변과 실패 이유를 볼 수 있습니다.':`${data.completed||0}개 평가 완료`;
+  $('groups').textContent=data.groups?Object.entries(data.groups).map(([k,v])=>`${({single:'단일',paraphrase:'표현 변형',compound:'복합','out-of-scope':'문서 밖'})[k]||k}: ${v.passed}/${v.total}`).join(' · '):'';
+  const docs=(data.results||[]).filter(r=>r.category!=='out-of-scope');const partial=docs.filter(r=>r.pass&&r.status==='partial');
+  $('coverage').textContent=data.phase==='complete'?`문서 질문 ${docs.length}개 중 자동 기준 통과 ${docs.filter(r=>r.pass).length}개. 그중 ${partial.length}개는 본문 뒤에 추가 확인을 요구합니다. 자동 기준 통과와 추가 확인 없는 문서 답변을 모두 충족한 항목은 ${docs.filter(r=>r.pass&&r.status==='answered').length}개입니다.`:'';
+  $('error').textContent=data.error||'';
+  const stamp=`${data.phase}:${data.completed}:${data.encoded}`;if(stamp!==state.stamp){state.stamp=stamp;render();}
+  if(data.phase==='complete'||data.phase==='error')return;
+ }catch(e){$('error').textContent=e.message==='실행 준비 중'?'평가 프로세스 시작을 기다리는 중입니다.':'진행 기록 연결 대기 중입니다.';}
+ state.timer=setTimeout(poll,1200);
+}
+$('filter').addEventListener('change',render);$('search').addEventListener('input',render);poll();
+</script>
+</html>
