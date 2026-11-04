@@ -36,6 +36,7 @@ class KnowledgeRepository {
     fun prepareQuestionIndex(semanticIndex:String) { questionIndex(semanticIndex) }
     fun resolveQuestion(question: String, semanticIndex: String, vector: FloatArray?): SearchResolution = questionIndex(semanticIndex).resolve(question, vector)
     fun searchQuestion(question:String,semanticIndex:String,encode:(String)->FloatArray):SearchResolution = QuestionSearchCoordinator(questionIndex(semanticIndex),encode).search(question)
+    fun searchQuestion(request:ConversationRequest,semanticIndex:String,encode:(String)->FloatArray):SearchResolution = QuestionSearchCoordinator(questionIndex(semanticIndex),encode).search(request)
     fun retrieve(question: String, limit: Int = 4): List<RetrievedChunk> = if (question.isBlank()) emptyList() else retriever().rank(question).take(limit.coerceAtLeast(1))
     fun answerWithoutModel(sources: List<RetrievedChunk>): String = FocusedEvidence.format(sources)
     fun contextForModel(sources: List<RetrievedChunk>): String = sources.joinToString("\n\n") { source ->

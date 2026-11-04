@@ -1,0 +1,662 @@
+{
+  "date": "2026-11-04",
+  "baseCommit": "0f816b8",
+  "scope": "Android same-chat follow-up context, local history/choices restoration, bounded model prompt history; PC tests/build only",
+  "finalUnitRegression": {
+    "tests": 138,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 10,
+    "passed": 128,
+    "suites": [
+      {
+        "name": "com.minyook.sllm2.data.AnswerMarkdownTest",
+        "tests": "7",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.ChatHistoryJsonTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.ConversationContextTest",
+        "tests": "14",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.ConversationRetrievalEvaluationTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "1"
+      },
+      {
+        "name": "com.minyook.sllm2.data.EquipmentOverviewTest",
+        "tests": "6",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.FocusedEvidenceTest",
+        "tests": "13",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.GeneralKnowledgeAnswerTest",
+        "tests": "5",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.HybridRetrievalTest",
+        "tests": "5",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.LiveQuestionEvaluationTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "2"
+      },
+      {
+        "name": "com.minyook.sllm2.data.NativeAnswerCorpusTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionAnswerVerifierTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionEvidencePlannerTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionSearchCoordinatorTest",
+        "tests": "14",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.ReviewedRetrievalEvaluationTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.SemanticTokenizerTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.SourcePdfCatalogTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.ExampleUnitTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.gas.GasReadingFreshnessTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterProtocolTest",
+        "tests": "5",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterRegistryTest",
+        "tests": "6",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterServerTest",
+        "tests": "5",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterStressTest",
+        "tests": "7",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "7"
+      },
+      {
+        "name": "com.minyook.sllm2.model.AnswerOutputPolicyTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.ui.ChatTimelineTest",
+        "tests": "5",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.ui.MarkdownBlocksTest",
+        "tests": "8",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.ui.SourceDocumentFormatterTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.ui.VoiceConversationLoopTest",
+        "tests": "11",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.ui.VoiceResponseFormatterTest",
+        "tests": "5",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.ui.WorkServerAddressTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      }
+    ],
+    "skippedReason": "7 AP stress and 3 real-model evaluation tasks skipped on final prompt-fallback build; those 3 model evaluations passed in preceding full run"
+  },
+  "precedingFullEvaluationRun": {
+    "suites": [
+      {
+        "name": "com.minyook.sllm2.data.AnswerMarkdownTest",
+        "tests": "7",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.ChatHistoryJsonTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.ConversationContextTest",
+        "tests": "13",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.ConversationRetrievalEvaluationTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.EquipmentOverviewTest",
+        "tests": "6",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.FocusedEvidenceTest",
+        "tests": "13",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.GeneralKnowledgeAnswerTest",
+        "tests": "5",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.HybridRetrievalTest",
+        "tests": "5",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.LiveQuestionEvaluationTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.NativeAnswerCorpusTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionAnswerVerifierTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionEvidencePlannerTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionSearchCoordinatorTest",
+        "tests": "13",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.ReviewedRetrievalEvaluationTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.SemanticTokenizerTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.data.SourcePdfCatalogTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.ExampleUnitTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.gas.GasReadingFreshnessTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterProtocolTest",
+        "tests": "5",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterRegistryTest",
+        "tests": "6",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterServerTest",
+        "tests": "5",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterStressTest",
+        "tests": "7",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "7"
+      },
+      {
+        "name": "com.minyook.sllm2.model.AnswerOutputPolicyTest",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.ui.ChatTimelineTest",
+        "tests": "5",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.ui.MarkdownBlocksTest",
+        "tests": "8",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.ui.SourceDocumentFormatterTest",
+        "tests": "1",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.ui.VoiceConversationLoopTest",
+        "tests": "11",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.ui.VoiceResponseFormatterTest",
+        "tests": "5",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      },
+      {
+        "name": "com.minyook.sllm2.ui.WorkServerAddressTest",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0"
+      }
+    ],
+    "counts": {
+      "tests": 136,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 7
+    },
+    "log": "tmp/conversation-build.log",
+    "note": "Passed before two model-prompt-only refinements: general-knowledge continuation routing and previous-answer heading fallback. Final regression tests cover both refinements. Source retrieval/context resolution logic unchanged."
+  },
+  "originalQuestions": {
+    "total": 150,
+    "passed": 150,
+    "failed": 0,
+    "hashes": {
+      "semanticIndex": "12ece1e7e7d1a3e46ace5491f35beddacf945f36b68abba8903d264c6bf9f4cd",
+      "questions": "91dc740d32b1d55bd4dd2355bbee9c38f4fd79177b5d10a89f00d359aaade208",
+      "corpus": "2c8e9edcc986c9e0c65f66d9a4784d88462656702669ba5a7182c98a86bfebae",
+      "rubric": "d2083c4b22e6eb5b6967ce73eb5722a318d52072050b2c9516d73a19bd6f2ecb"
+    }
+  },
+  "additionalQuestions": {
+    "total": 24,
+    "passed": 24,
+    "failed": 0,
+    "hashes": {
+      "semanticIndex": "12ece1e7e7d1a3e46ace5491f35beddacf945f36b68abba8903d264c6bf9f4cd",
+      "questions": null,
+      "corpus": "2c8e9edcc986c9e0c65f66d9a4784d88462656702669ba5a7182c98a86bfebae",
+      "rubric": "f075e031b797c20dc215e516ef5a6ff33f4176e29d480196f6063741d2713b0e"
+    }
+  },
+  "conversationRetrieval": {
+    "total": 10,
+    "scope": "PC real ONNX query embeddings and production dialogue/RAG, no generated model/UI",
+    "passed": 10,
+    "failed": 0,
+    "results": [
+      {
+        "pages": [
+          27
+        ],
+        "asked": "산소 유해가스 측정방법",
+        "expectedPage": 27,
+        "choiceLabels": [],
+        "pass": true,
+        "answerMarkdown": "- 산소·유해가스 농도 측정방법\n\n### 사전준비\n\n- 가스농도 측정기에 이상이 없는지 확인하십시오.\n\n- 예를 들어, 깨끗한 야외 공기에서 산소농도를 측정했을 때 산소농도가 **20.9%**를 초과하거나 미만으로 나타나 면 교정 또는 센서교체가 필요한 상황입니다.\n\n- 그 밖의 다른 유해가스도 표준가스를 이용하여 측정기의 이상 유 무를 확인하거나 정기적인 검교정을 통해 정상상태를 유지해야 합니다.\n\n### 측정방법\n\n- 면적 및 깊이를 고려하여 밀폐공간 내부를 골고루 측정하십시오.\n\n- (작업장소에 대해 수직 및 수평방 향으로 각각 **3개소 이상** 측정)\n\n- 좁은 원형 맨홀인 경우 원칙적으로 3가지 깊이 로 각 **3개소** 측정\n\n- 넓은 원형 공간인 경우 전 맨홀의 밑을 3가지 깊이로 측정\n\n- 좁은 원형 맨홀인 경우 우선 맨홀의 바로 밑 ①~③을 측정하고 X 는 공기호흡기 등을 장착하고 측정\n\n- 구형 공간인 경우 정사의 맨홀 바로 밑 X 는 공기호흡기 등을 장착하고 측정 3점과 적도상의 샘플링 구명을 측정\n\n- 탱크 등 깊은 장소의 농도를 측정할 때에는 고무호스나 PV C로 된 채기관을 연결하여 측정하십시오.\n\n- (채기관은 1m 마다 작은 눈금으로, 5m 마다 큰 눈금으로 표시)\n\n### 측정시 주의사항\n\n- 측정시 밀폐공간 내부를 살펴보기 위해 측정자의 머리(호흡기)가 밀폐공간 개구면 안쪽으로 들어가 지 않도록 하십시오.\n\n- 밀폐공간에 유독가스가 차 있다면 개구면 근처에 가기만 해도 위험할 수 있습니다.\n\n- 밀폐공간 내부에서 측정을 해야 하는 경우, 공기호흡기 또는 송기마스크를 착용하고 측정을 하십시오.\n\n- 어두운 밀폐공간 내부에서 측정을 위해 전등을 사용하는 경우, 가연성가스가 차 있을 수 있으므로 방폭구조의 전등을 사용하십시오.\n\n- 산소 및 유해가스 농도측정을 위해 밀폐공간에 들어가는 경우, 긴급상황을 대비해 밀폐공간 외부에 감시인을 배치하십시오.\n\n> 도식의 위치·기호가 포함된 절차는 아래 출처의 원문 그림과 함께 확인해 주세요.",
+        "kind": "NEW",
+        "topic": "산소 유해가스 측정방법",
+        "step": 1,
+        "resolvedQuestion": "산소 유해가스 측정방법",
+        "status": "answered"
+      },
+      {
+        "pages": [
+          25
+        ],
+        "asked": "그럼 언제 해야 해?",
+        "expectedPage": 25,
+        "choiceLabels": [],
+        "pass": true,
+        "answerMarkdown": "### 측정 시기\n\n1. 밀폐공간 작업허가를 받기 전\n\n2. 밀폐공간에 작업을 위해 들어가기 전\n\n3. 일정시간 작업장소를 떠났다가 다시 작업을 시작하기 전(ex. 점심시간)\n\n4. 장시간 작업이나 불활성가스 또는 유해가스의 누출·유입·발생 가능성이 있는 경우 수시 또는 일정 시간 간격으로(ex. **2시간**)\n\n5. 근로자의 신체, 환기장치 등에 이상이 있을 때 등\n\n- (측정자) 산소 및 유해가스의 농도측정은 반드시 측정 장비의 조작과 그 결과에 대한 올바른 해석을 할 수 있는 사람이 수행하여야 합니다.",
+        "kind": "FOLLOW_UP",
+        "topic": "산소 유해가스 측정 시기",
+        "step": 2,
+        "resolvedQuestion": "산소 유해가스 측정 시기",
+        "status": "answered"
+      },
+      {
+        "pages": [
+          25
+        ],
+        "asked": "누가 해야 해?",
+        "expectedPage": 25,
+        "choiceLabels": [],
+        "pass": true,
+        "answerMarkdown": "### 산소·유해가스 농도 측정자의 자격\n\n- (측정자) 산소 및 유해가스의 농도측정은 반드시 측정 장비의 조작과 그 결과에 대한 올바른 해석을 할 수 있는 사람이 수행하여야 합니다.\n\n1. 관리감독자\n\n2. 안전관리자 또는 보건관리자\n\n3. 안전관리전문기관 또는 보건관리전문기관\n\n4. 건설재해예방전문지도기관\n\n5. 작업환경측정기관\n\n6. 안전보건공단 산소 및 유해가스농도의 측정·평가에 관한 교육 이수자 산소·유해가스 농도 측정자의 자격\n\n- (교육과정명) 산소 및 유해가스농도 측정 및 평가에 관한 교육(3H)(공단 광역본부 교육센터)\n\n- (교육대상) 산소 및 유해가스농도 측정자격 취득을 원하는 누구나 신청 가능\n\n- (신청방법) 안전보건교육포털(koshats.co.kr) : 교육신청 > 교육과정 검색 > 신청\n\n- 무선통신을 이용한 산소·유해가스 농도의 측정도 가능합니다.\n\n- 이 경우 각 주요 구성별 요건 을 갖추고 운영을 하여야 합니다.",
+        "kind": "FOLLOW_UP",
+        "topic": "산소 유해가스 측정 자격",
+        "step": 3,
+        "resolvedQuestion": "산소 유해가스 측정 자격",
+        "status": "answered"
+      },
+      {
+        "pages": [],
+        "asked": "또 다른 건 없어?",
+        "expectedPage": null,
+        "choiceLabels": [
+          "산소·유해가스 농도 측정자의 자격",
+          "유해가스 주된 위험 외관 및 냄새 아르곤(Ar)",
+          "(측정 시기)"
+        ],
+        "pass": true,
+        "answerMarkdown": "앞선 ‘산소 유해가스 측정 자격’ 답변과 겹치지 않는 추가 근거는 이번 검색에서 찾지 못했어요. 이미 설명한 내용이 문서에 없다는 뜻은 아니에요. 더 살펴볼 항목을 적어 드릴게요.\n\n1. 산소·유해가스 농도 측정자의 자격\n2. 유해가스 주된 위험 외관 및 냄새 아르곤(Ar)\n3. (측정 시기)",
+        "kind": "MORE",
+        "topic": "산소 유해가스 측정 자격",
+        "step": 4,
+        "resolvedQuestion": "산소 유해가스 측정 자격",
+        "status": "no-more"
+      },
+      {
+        "pages": [],
+        "asked": "항목이 안보이는데?",
+        "expectedPage": null,
+        "choiceLabels": [
+          "산소·유해가스 농도 측정자의 자격",
+          "유해가스 주된 위험 외관 및 냄새 아르곤(Ar)",
+          "(측정 시기)"
+        ],
+        "pass": true,
+        "answerMarkdown": "앞선 주제 ‘산소 유해가스 측정 자격’에서 확인할 수 있는 항목을 다시 적어 드릴게요. 번호나 항목 이름으로 말씀하셔도 돼요.\n\n1. 산소·유해가스 농도 측정자의 자격\n2. 유해가스 주된 위험 외관 및 냄새 아르곤(Ar)\n3. (측정 시기)",
+        "kind": "SHOW_CHOICES",
+        "topic": "산소 유해가스 측정 자격",
+        "step": 5,
+        "resolvedQuestion": "산소 유해가스 측정 자격",
+        "status": "conversation-choices"
+      },
+      {
+        "pages": [
+          45,
+          46
+        ],
+        "asked": "심폐소생술 알려줘",
+        "expectedPage": 45,
+        "choiceLabels": [],
+        "pass": true,
+        "answerMarkdown": "### 반응확인\n\n- 어깨를 가볍게 두드리며 “여보세요, 괜찮으세요?”를 외치면서 재해자의 반응을 확인합니다.\n\n### 119 신고\n\n- 의식(반응)이 없으면 큰 소리로 주변 사람에게 119 신고를 요청하고, 자동심장충격기(AED)를 가져오도록 부탁합니다.\n\n### 호흡 확인\n\n- 얼굴과 가슴을 **10초** 이내로 관찰하여 호흡이 있는지를 확인합니다.\n\n- 호흡이 없거나 비정상적이라면 즉시 심폐소생술을 준비합니다.\n\n### 심폐소생술 흉부 압박 (30회)\n\n- 흉부압박 위치 확인 : 양 젖꼭지를 이은 중앙의 흉부부위\n\n- 한손의 손등에 다른 손을 겹치고 깍지를 껴서 손가락을 잡아 당김\n\n- 팔꿈치가 구부러지지 않도록 하고, 어깨와 손은 일직선으로 유지\n\n- 압박 깊이는 **5cm**(소아는 **4~5cm**), 압박 속도는 분당 **100~120회**를 유지하면서 **30회** 흉부압박을 실시\n\n### 기도 개방\n\n- 인공호흡을 시행하기 위해서는 먼저 재해자의 머리를 젖히고, 턱을 들어 올려서 재해자의 기 도를 개방합니다.\n\n### 인공 호흡 (2회)\n\n- 재해자 이마에 댄 손의 엄지와 검지로 재해자의 코를 잡아 막고\n\n- 재해자의 입을 구조자의 입으로 완전히 밀착시킨 뒤에\n\n- 가슴이 올라올 정도로 **1초** 동안 숨을 불어 넣음(**2회**)\n\n- 인공호흡 방법을 모르거나 꺼리는 경우에는 인공호흡을 제외하고 지속적으로 가슴압박만을 시행합니다.\n\n### 심폐소생술 흉부 압박 & 인공 호흡 반복\n\n- **30회** 가슴압박, **2회** 인공호흡을 119구급대가 도착할 때까지 반복실시\n\n### 회복자세\n\n- 심폐소생술 중 재해자가 움직이거나 소리를 내면\n\n- 호흡이 회복되었는지 확인하고 호흡이 회복되었다면\n\n- 재해자를 옆으로 돌려 눕혀 기도(숨길)가 막히는 것을 예방",
+        "kind": "NEW",
+        "topic": "심폐소생술 알려줘",
+        "step": 6,
+        "resolvedQuestion": "심폐소생술 알려줘",
+        "status": "answered"
+      },
+      {
+        "pages": [
+          45,
+          46
+        ],
+        "asked": "그럼 언제까지 반복해?",
+        "expectedPage": 46,
+        "choiceLabels": [],
+        "pass": true,
+        "answerMarkdown": "### 반응확인\n\n- 어깨를 가볍게 두드리며 “여보세요, 괜찮으세요?”를 외치면서 재해자의 반응을 확인합니다.\n\n### 119 신고\n\n- 의식(반응)이 없으면 큰 소리로 주변 사람에게 119 신고를 요청하고, 자동심장충격기(AED)를 가져오도록 부탁합니다.\n\n### 호흡 확인\n\n- 얼굴과 가슴을 **10초** 이내로 관찰하여 호흡이 있는지를 확인합니다.\n\n- 호흡이 없거나 비정상적이라면 즉시 심폐소생술을 준비합니다.\n\n### 심폐소생술 흉부 압박 (30회)\n\n- 흉부압박 위치 확인 : 양 젖꼭지를 이은 중앙의 흉부부위\n\n- 한손의 손등에 다른 손을 겹치고 깍지를 껴서 손가락을 잡아 당김\n\n- 팔꿈치가 구부러지지 않도록 하고, 어깨와 손은 일직선으로 유지\n\n- 압박 깊이는 **5cm**(소아는 **4~5cm**), 압박 속도는 분당 **100~120회**를 유지하면서 **30회** 흉부압박을 실시\n\n### 기도 개방\n\n- 인공호흡을 시행하기 위해서는 먼저 재해자의 머리를 젖히고, 턱을 들어 올려서 재해자의 기 도를 개방합니다.\n\n### 인공 호흡 (2회)\n\n- 재해자 이마에 댄 손의 엄지와 검지로 재해자의 코를 잡아 막고\n\n- 재해자의 입을 구조자의 입으로 완전히 밀착시킨 뒤에\n\n- 가슴이 올라올 정도로 **1초** 동안 숨을 불어 넣음(**2회**)\n\n- 인공호흡 방법을 모르거나 꺼리는 경우에는 인공호흡을 제외하고 지속적으로 가슴압박만을 시행합니다.\n\n### 심폐소생술 흉부 압박 & 인공 호흡 반복\n\n- **30회** 가슴압박, **2회** 인공호흡을 119구급대가 도착할 때까지 반복실시\n\n### 회복자세\n\n- 심폐소생술 중 재해자가 움직이거나 소리를 내면\n\n- 호흡이 회복되었는지 확인하고 호흡이 회복되었다면\n\n- 재해자를 옆으로 돌려 눕혀 기도(숨길)가 막히는 것을 예방",
+        "kind": "FOLLOW_UP",
+        "topic": "심폐소생술 시기",
+        "step": 7,
+        "resolvedQuestion": "심폐소생술 시기",
+        "status": "answered"
+      },
+      {
+        "pages": [
+          46,
+          45
+        ],
+        "asked": "그럼 호흡이 돌아오면?",
+        "expectedPage": 46,
+        "choiceLabels": [],
+        "pass": true,
+        "answerMarkdown": "### 심폐소생술 흉부 압박 & 인공 호흡 반복\n\n- **30회** 가슴압박, **2회** 인공호흡을 119구급대가 도착할 때까지 반복실시\n\n### 회복자세\n\n- 심폐소생술 중 재해자가 움직이거나 소리를 내면\n\n- 호흡이 회복되었는지 확인하고 호흡이 회복되었다면\n\n- 재해자를 옆으로 돌려 눕혀 기도(숨길)가 막히는 것을 예방\n\n### 반응확인\n\n- 어깨를 가볍게 두드리며 “여보세요, 괜찮으세요?”를 외치면서 재해자의 반응을 확인합니다.\n\n### 119 신고\n\n- 의식(반응)이 없으면 큰 소리로 주변 사람에게 119 신고를 요청하고, 자동심장충격기(AED)를 가져오도록 부탁합니다.\n\n### 호흡 확인\n\n- 얼굴과 가슴을 **10초** 이내로 관찰하여 호흡이 있는지를 확인합니다.\n\n- 호흡이 없거나 비정상적이라면 즉시 심폐소생술을 준비합니다.\n\n### 심폐소생술 흉부 압박 (30회)\n\n- 흉부압박 위치 확인 : 양 젖꼭지를 이은 중앙의 흉부부위\n\n- 한손의 손등에 다른 손을 겹치고 깍지를 껴서 손가락을 잡아 당김\n\n- 팔꿈치가 구부러지지 않도록 하고, 어깨와 손은 일직선으로 유지\n\n- 압박 깊이는 **5cm**(소아는 **4~5cm**), 압박 속도는 분당 **100~120회**를 유지하면서 **30회** 흉부압박을 실시\n\n### 기도 개방\n\n- 인공호흡을 시행하기 위해서는 먼저 재해자의 머리를 젖히고, 턱을 들어 올려서 재해자의 기 도를 개방합니다.\n\n### 인공 호흡 (2회)\n\n- 재해자 이마에 댄 손의 엄지와 검지로 재해자의 코를 잡아 막고\n\n- 재해자의 입을 구조자의 입으로 완전히 밀착시킨 뒤에\n\n- 가슴이 올라올 정도로 **1초** 동안 숨을 불어 넣음(**2회**)\n\n- 인공호흡 방법을 모르거나 꺼리는 경우에는 인공호흡을 제외하고 지속적으로 가슴압박만을 시행합니다.",
+        "kind": "FOLLOW_UP",
+        "topic": "심폐소생술 시기 호흡이 돌아오면",
+        "step": 8,
+        "resolvedQuestion": "심폐소생술 시기 호흡이 돌아오면",
+        "status": "answered"
+      },
+      {
+        "pages": [],
+        "asked": "다른 얘기: 커피 추출 원리",
+        "expectedPage": null,
+        "choiceLabels": [],
+        "pass": true,
+        "answerMarkdown": "제공 문서 전체 검색에서 질문에 직접 답할 근거를 확인하지 못했어요.",
+        "kind": "NEW",
+        "topic": "커피 추출 원리",
+        "step": 9,
+        "resolvedQuestion": "커피 추출 원리",
+        "status": "no-evidence"
+      },
+      {
+        "pages": [],
+        "asked": "그거 쉽게 설명해줘",
+        "expectedPage": null,
+        "choiceLabels": [],
+        "pass": true,
+        "answerMarkdown": "제공 문서 전체 검색에서 질문에 직접 답할 근거를 확인하지 못했어요.",
+        "kind": "EXPLAIN",
+        "topic": "커피 추출 원리",
+        "step": 10,
+        "resolvedQuestion": "커피 추출 원리",
+        "status": "no-evidence"
+      }
+    ]
+  },
+  "checks": [
+    "same topic for more/when/who questions",
+    "actual choice labels and ordinal selection",
+    "empty choices never point to nonexistent controls",
+    "UI choice feedback bypasses global absence/model generation",
+    "novel evidence retains safety scope",
+    "general knowledge more can continue with prior roles",
+    "explicit topic reset bounds later prompt history",
+    "legacy and new JSON round trips preserve context/source IDs/options",
+    "generation prompt byte budget, whole answers or actual headings only, latest utterance last"
+  ],
+  "build": {
+    "debugApk": "PASS",
+    "instrumentationApk": "PASS",
+    "lint": {
+      "Error": 0,
+      "Warning": 118
+    },
+    "log": "tmp/conversation-final-build.log",
+    "uiChoiceTestCompileLog": "tmp/conversation-ui-test-build.log"
+  },
+  "apk": {
+    "path": "tmp/conversation-20261104/fieldguard-conversation-debug.apk",
+    "bytes": 324472129,
+    "sha256": "f032ede43e7b0eeba199783956888072adda6d8678c3bf29d0660003bac01012"
+  },
+  "limits": {
+    "resolverMessages": 16,
+    "modelRecentPairs": 3,
+    "modelHistoryMaxUtf8Bytes": 4096,
+    "savedChats": 20,
+    "savedMessagesPerChat": 80,
+    "longAnswers": "Skip full text rather than cut conditions; actual headings only if budget permits",
+    "reset": "Current chat only; explicit topic reset excludes earlier turns"
+  },
+  "notRun": [
+    "real Gemma continued generation on S24",
+    "Compose visual/touch/keyboard run",
+    "voice utterances",
+    "on-device preferences reopen"
+  ],
+  "deviceReason": "ADB devices list empty; no data deletion/model re-download performed",
+  "files": {
+    "design": "docs/ANDROID_CONVERSATION_CONTEXT.md",
+    "trace": "docs/validation/android-conversation-examples-20261104.md"
+  }
+}

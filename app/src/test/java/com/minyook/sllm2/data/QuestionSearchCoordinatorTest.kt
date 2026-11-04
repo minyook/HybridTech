@@ -24,9 +24,9 @@ class QuestionSearchCoordinatorTest {
         KnowledgeChunk(id=1,documentId="guide",pageNumber=1,body="대상설비은 첫 번째 후보입니다. 이 후보의 조건을 확인합니다."),
         KnowledgeChunk(id=2,documentId="guide",pageNumber=2,body="두 번째 문단이 의미에 맞는 실제 설명입니다. 조건도 함께 확인합니다.")
     )
-    private fun index(sourceChunks:List<KnowledgeChunk> = chunks):HybridRetrieval {
+    private fun index(sourceChunks:List<KnowledgeChunk> = chunks, passageChunks:List<KnowledgeChunk> = chunks):HybridRetrieval {
         val passages=JSONArray()
-        chunks.forEachIndexed{index,c->
+        passageChunks.forEachIndexed{index,c->
             val units=FocusedEvidence.units(c)
             passages.put(JSONObject().put("id","p$index").put("documentId",c.documentId).put("page",c.pageNumber).put("chunkIndex",c.chunkIndex).put("section","").put("text",c.body).put("sourceBody",c.body).put("searchText",c.body).put("orders",JSONArray(units.map{it.order})).put("units",JSONArray(units.map{JSONObject().put("text",it.text).put("section",it.section).put("order",it.order).put("group",it.group)})).put("vector",JSONArray(vector(index).map{it.toDouble()})))
         }
@@ -81,5 +81,41 @@ class QuestionSearchCoordinatorTest {
             val result=search.search(q)
             assertEquals("clarify",result.status);assertFalse(result.searchComplete);assertNull(result.generalQuestion)
         }
+    }
+    @Test fun choiceFeedbackUsesPreviousOptionsWithoutInvokingTheEncoder() {
+        val options = listOf(SearchSuggestion("첫 항목", "대상설비"), SearchSuggestion("두 번째 항목", "다른 대상"))
+        val history = listOf(ConversationTurn(true, "대상설비"), ConversationTurn(false, "선택해 주세요.", suggestions = options))
+        val request = ConversationContext.resolve("항목이 안보이는데?", history)
+        val result = QuestionSearchCoordinator(index()) { error("UI repair must not search") }.search(request)
+        assertEquals("conversation-choices", result.method); assertNull(result.generalQuestion)
+        assertTrue(result.message.contains("1. 첫 항목")); assertEquals(options, result.suggestions)
+    }
+    @Test fun moreWithoutNewSupportedEvidenceDoesNotClaimTheOriginalTopicIsAbsent() {
+        val history = listOf(ConversationTurn(true, "대상설비"), ConversationTurn(false, chunks[0].body, topicQuestion = "대상설비"))
+        val result = QuestionSearchCoordinator(index()) { vector(0) }.search(ConversationContext.resolve("또 다른 건 없어?", history))
+        assertEquals("no-more", result.status); assertNull(result.generalQuestion)
+        assertTrue(result.message.contains("이미 설명한 내용이 문서에 없다는 뜻은 아니에요"))
+    }
+    @Test fun recallUsesTheLocalUserTranscriptInsteadOfModelKnowledge() {
+        val request = ConversationContext.resolve("내가 아까 뭐라고 말했지?", listOf(ConversationTurn(true, "저는 S24를 사용해요.")))
+        val result = QuestionSearchCoordinator(index()) { error("recall must not search") }.search(request)
+        assertEquals("conversation-recall", result.status); assertTrue(result.message.contains("S24를 사용해요")); assertNull(result.generalQuestion)
+    }
+    @Test fun moreReturnsNovelEvidenceWithinTheSameTopicWhenItExists() {
+        val pages = listOf(chunks[0], chunks[1].copy(body = "대상설비에는 추가로 점검할 부품이 있습니다. 연결 상태도 확인합니다."))
+        val q = "대상설비"
+        val request = ConversationContext.resolve("또 다른 건 없어?", listOf(ConversationTurn(true, q), ConversationTurn(false, pages[0].body, topicQuestion = q)))
+        val together = FloatArray(768) { if(it < 2) (1.0 / kotlin.math.sqrt(2.0)).toFloat() else 0f }
+        val result = QuestionSearchCoordinator(index(pages, pages)) { together }.search(request)
+        assertEquals("answered", result.status); assertEquals("conversation-more", result.method)
+        assertTrue(result.sources.any { it.chunk.id == 2L }); assertNull(result.generalQuestion)
+        assertTrue(DocumentAnswerPlan.create(q, result.sources).body.contains("연결 상태도 확인"))
+    }
+    @Test fun moreAfterGeneralKnowledgeCanContinueWithTheModelInsteadOfClaimingNoMoreDocuments() {
+        val topic = "커피 추출 원리"
+        val history = listOf(ConversationTurn(true, topic), ConversationTurn(false, GeneralKnowledgeAnswer.NOTICE + "\n\n추출 설명입니다.", topicQuestion = topic))
+        val result = QuestionSearchCoordinator(index()) { vector(3) }.search(ConversationContext.resolve("다른 것도 알려줘", history))
+        assertEquals("conversation-general", result.method); assertEquals(topic, result.generalQuestion)
+        assertTrue(result.sources.isEmpty()); assertTrue(result.searchComplete)
     }
 }

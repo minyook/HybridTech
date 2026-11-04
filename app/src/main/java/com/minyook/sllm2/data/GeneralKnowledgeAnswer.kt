@@ -5,7 +5,7 @@ object GeneralKnowledgeAnswer {
     const val NOTICE = "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다."
     const val LIMIT_NOTICE = "> 답변 길이 한도에 도달했어요. 마지막 내용이 완성되지 않았을 수 있어요. 답변 길이를 늘리거나 질문을 나눠 이어서 확인해 주세요."
     private const val UNCONFIRMED = "구체적인 수치나 작업 가능 여부를 문서 근거 없이 확정할 수 없어요. 해당 장비의 사양이나 현장 절차를 확인해 주세요."
-    fun prompt(question:String) = """
+    fun prompt(question:String):String = """
         사용자의 질문에 한국어 Markdown으로 직접 답하세요. 핵심 답을 먼저 쓰고 필요한 설명을 제목과 목록으로 정리하세요.
         제공 문서 검색을 완료했지만 질문에 직접 답하는 근거를 확인하지 못했습니다. 지금은 일반 지식 답변입니다.
         모르는 사실은 모른다고 하세요. 제공 문서에 있다고 주장하거나 문서명·쪽수·출처를 지어내지 마세요.

@@ -3,6 +3,8 @@ package com.minyook.sllm2.model
 import android.content.Context
 import android.os.SystemClock
 import android.util.Log
+import com.minyook.sllm2.data.ConversationContext
+import com.minyook.sllm2.data.ConversationTurn
 import com.minyook.sllm2.data.GeneralKnowledgeAnswer
 import com.google.ai.edge.litertlm.Backend
 import com.google.ai.edge.litertlm.Content
@@ -28,16 +30,19 @@ class LocalModelRuntime(private val context: Context) {
         onPartialAnswer: (String) -> Unit = {},
         generalKnowledge: Boolean = false,
         onOutputLimit: (Boolean) -> Unit = {},
+        recentConversation: List<ConversationTurn> = emptyList(),
+        latestUserQuestion: String? = null,
     ): String = withContext(Dispatchers.Default) {
         val startedAt = SystemClock.elapsedRealtime()
         val settings = InferenceSettingsPreferences(context).load()
         val outputLimit = AnswerOutputPolicy.limit(settings, supplementOnly, generalKnowledge)
-        val prompt = if(generalKnowledge)GeneralKnowledgeAnswer.prompt(question) + "\n출력 예산은 최대 ${outputLimit ?: settings.contextTokens} 토큰입니다. 예산 안에서 문장과 목록을 완결하고, 불필요하게 항목을 늘리지 마세요." else buildPrompt(
+        val basePrompt = if(generalKnowledge)GeneralKnowledgeAnswer.prompt(question) + "\n출력 예산은 최대 ${outputLimit ?: settings.contextTokens} 토큰입니다. 예산 안에서 문장과 목록을 완결하고, 불필요하게 항목을 늘리지 마세요." else buildPrompt(
             question = question,
             context = evidence,
             compactVoiceAnswer = compactVoiceAnswer,
             supplementOnly = supplementOnly,
         )
+        val prompt = ConversationContext.generationPrompt(basePrompt, recentConversation, latestUserQuestion ?: question, settings.contextTokens, outputLimit ?: ContextTokenPolicy.responseLimit(settings.contextTokens))
         // Conservative byte-token upper bound: skip optional generation instead
         // of cutting a condition/exception from the source plan.
         if (supplementOnly && prompt.toByteArray(Charsets.UTF_8).size + (outputLimit ?: 192) + 64 > settings.contextTokens) return@withContext ""

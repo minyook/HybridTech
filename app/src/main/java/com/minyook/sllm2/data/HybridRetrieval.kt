@@ -129,6 +129,37 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
         val evidence=listOf(RetrievedChunk(chunk,top.fused,selected+context))
         return result.copy(sources=if(review)completeSafety(evidence,question) else evidence,status="answered",message="",suggestions=emptyList())
     }
+    fun relatedChoices(question: String, sources: List<RetrievedChunk>): List<SearchSuggestion> {
+        val selected = sources.flatMap { FocusedEvidence.selected(it) }.map { it.section }.filter { it.isNotBlank() && it.length <= 70 }.distinct()
+        val terms = EvidenceLanguage.terms(question)
+        val other = passages.filter { passage -> terms.any { it in EvidenceLanguage.aliases(passage.section) } }.map { it.section }.filter(String::isNotBlank)
+        return (selected + other).distinctBy { EvidenceLanguage.compact(it) }.take(3).map { SearchSuggestion(it, "$question $it 에 대해 알려줘") }
+    }
+
+    /** Additional evidence is searched in the same topic and kept with its complete safety scope. */
+    fun additional(question: String, vector: FloatArray, seenAnswers: List<String>): List<RetrievedChunk> {
+        val seen = seenAnswers.joinToString(" ") { EvidenceLanguage.compact(it) }
+        val terms = EvidenceLanguage.terms(question)
+        val anchors = terms.filter { it !in EvidenceLanguage.generic }
+        val attributes = terms.filter { it in setOf("시기", "자격", "직무", "주의사항") }
+        if (anchors.isEmpty()) return emptyList() // An unscoped 'more' must not pull unrelated safety procedures.
+        val ranked = passages.mapIndexedNotNull { position, p ->
+            val text = EvidenceLanguage.aliases(p.section + " " + p.text)
+            val pageTitle = chunks.firstOrNull { it.documentId == p.documentId && it.pageNumber == p.page && it.chunkIndex == p.chunkIndex }?.let { pageTitles[it.id] }.orEmpty()
+            if (attributes.any { it !in text && it !in pageTitle }) return@mapIndexedNotNull null
+            if (anchors.none { it in text } || caseBody[position] || prefaces[position]) return@mapIndexedNotNull null
+            val score = vector.indices.sumOf { vector[it].toDouble() * p.vector[it] }
+            if (score < .40) null else p to score
+        }.sortedByDescending { it.second }
+        val best = ranked.firstOrNull()?.second ?: return emptyList()
+        val candidates = ranked.filter { it.second >= best - .06 }.mapNotNull { (p, score) ->
+            val chunk = chunks.firstOrNull { it.documentId == p.documentId && it.pageNumber == p.page && it.chunkIndex == p.chunkIndex } ?: return@mapNotNull null
+            val source = completeSafety(listOf(RetrievedChunk(chunk, score, completeScope(p, chunk))), question)
+            if (source.flatMap { FocusedEvidence.selected(it) }.none { EvidenceLanguage.compact(it.text).let { key -> key.isNotBlank() && key !in seen } }) null else source
+        }.take(2).flatten()
+        return candidates.groupBy { it.chunk.id }.values.map { group -> group.first().copy(evidence = group.flatMap { FocusedEvidence.selected(it) }.distinctBy { it.text }) }
+    }
+
     private fun completeSafety(sources:List<RetrievedChunk>,question:String):List<RetrievedChunk> {
         fun procedure(c:KnowledgeChunk)=Regex("^순\\s*서\\s*실\\s*시\\s*방\\s*법").containsMatchIn(FocusedEvidence.pageBody(c))
         val complete=sources.toMutableList()

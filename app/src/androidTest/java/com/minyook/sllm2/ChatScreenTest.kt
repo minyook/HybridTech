@@ -156,4 +156,13 @@ class ChatScreenTest {
         compose.onNodeWithText("일반 지식 답변").assertIsDisplayed()
         compose.onNodeWithText("참조한 문서").assertDoesNotExist()
     }
+    @Test fun clarificationOptionsAreVisibleEvenWhileTheAnswerIsBeingCommitted() {
+        val options = listOf(com.minyook.sllm2.data.SearchSuggestion("측정 위치", "산소 측정 위치"), com.minyook.sllm2.data.SearchSuggestion("측정 시기", "산소 측정 시기"))
+        ui.value = FieldGuardUiState(activeChatId = "options", messages = listOf(answer.copy(text = "확인할 항목을 선택해 주세요.\n\n1. 측정 위치\n\n2. 측정 시기", suggestions = options, pending = true)), isAnswering = true)
+        show()
+        compose.onNodeWithTag("answerChoices:answer").performScrollTo().assertIsDisplayed()
+        compose.onNode(hasText("측정 위치") and hasAnyAncestor(hasTestTag("answerChoices:answer"))).assertIsNotEnabled()
+        compose.runOnIdle { ui.value = ui.value.copy(messages = ui.value.messages.map { it.copy(pending = false) }, isAnswering = false) }
+        compose.onNode(hasText("측정 위치") and hasAnyAncestor(hasTestTag("answerChoices:answer"))).assertIsEnabled()
+    }
 }

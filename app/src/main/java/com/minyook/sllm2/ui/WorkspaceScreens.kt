@@ -163,7 +163,7 @@ import java.util.Locale
 @Composable private fun WorkspaceAnswerHeader(message:ChatMessageUi){
     val context=LocalContext.current
     var copied by remember(message.id,message.text){mutableStateOf(false)}
-    val origin=when{GeneralKnowledgeAnswer.isGeneral(message.text)->"일반 지식 답변";GeneralKnowledgeAnswer.containsGeneral(message.text)->"문서 · 일반 지식 답변";message.sourceIds.isEmpty()&&message.text.isNotBlank()->"문서 검색 안내";else->"문서 근거 답변"}
+    val origin=when{message.answerStatus?.startsWith("conversation-")==true||message.answerStatus=="no-more"->"대화 이어가기";GeneralKnowledgeAnswer.isGeneral(message.text)->"일반 지식 답변";GeneralKnowledgeAnswer.containsGeneral(message.text)->"문서 · 일반 지식 답변";message.sourceIds.isEmpty()&&message.text.isNotBlank()->"문서 검색 안내";else->"문서 근거 답변"}
         Row(Modifier.fillMaxWidth().padding(top=20.dp,bottom=12.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(9.dp)){
             if(message.pending)CircularProgressIndicator(Modifier.size(22.dp),strokeWidth=2.dp)
             else Surface(color=WorkspaceDesign.Blue,shape=RoundedCornerShape(9.dp)){Text("O₂",color=Color.White,fontSize=14.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(6.dp))}
@@ -174,8 +174,8 @@ import java.util.Locale
 @OptIn(ExperimentalLayoutApi::class)
 @Composable private fun WorkspaceAnswerFooter(message:ChatMessageUi,actions:FieldGuardActions,choicesEnabled:Boolean){
     Column(Modifier.fillMaxWidth().padding(top=12.dp,bottom=12.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){
-        if(!message.pending && message.suggestions.isNotEmpty())FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){
-            message.suggestions.forEach{suggestion->OutlinedButton(enabled=choicesEnabled,onClick={actions.onPreset(suggestion.question)}){Text(suggestion.label,fontSize=12.sp)}}
+        if(message.suggestions.isNotEmpty())FlowRow(modifier=Modifier.testTag("answerChoices:${message.id}"),horizontalArrangement=Arrangement.spacedBy(8.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){
+            message.suggestions.forEach{suggestion->OutlinedButton(enabled=choicesEnabled&&!message.pending,onClick={actions.onPreset(suggestion.question)}){Text(suggestion.label,fontSize=12.sp)}}
         }
         if(message.sourceIds.isNotEmpty()){
             HorizontalDivider(color=WorkspaceDesign.Border)

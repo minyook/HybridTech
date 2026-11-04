@@ -13,7 +13,7 @@ import java.util.UUID
 class ChatHistoryStore(context: Context) {
     private val preferences = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
 
-    data class Turn(val role: Role, val text: String, val sourceIds: List<Long> = emptyList(), val suggestions: List<SearchSuggestion> = emptyList(), val resolvedQuestion: String? = null)
+    data class Turn(val role: Role, val text: String, val sourceIds: List<Long> = emptyList(), val suggestions: List<SearchSuggestion> = emptyList(), val resolvedQuestion: String? = null, val topicQuestion: String? = null, val answerStatus: String? = null)
     enum class Role { USER, ASSISTANT }
     data class Session(
         val id: String,
@@ -41,12 +41,12 @@ class ChatHistoryStore(context: Context) {
     fun find(id: String): Session? = read().firstOrNull { it.id == id }
 
     @Synchronized
-    fun append(id: String, role: Role, text: String, sourceIds: List<Long> = emptyList(), suggestions: List<SearchSuggestion> = emptyList(), resolvedQuestion: String? = null) {
+    fun append(id: String, role: Role, text: String, sourceIds: List<Long> = emptyList(), suggestions: List<SearchSuggestion> = emptyList(), resolvedQuestion: String? = null, topicQuestion: String? = null, answerStatus: String? = null) {
         val updated = read().map { session ->
             if (session.id == id) {
                 session.copy(
                     updatedAtMillis = System.currentTimeMillis(),
-                    turns = (session.turns + Turn(role, text, sourceIds, suggestions, resolvedQuestion)).takeLast(MAX_TURNS),
+                    turns = (session.turns + Turn(role, text, sourceIds, suggestions, resolvedQuestion, topicQuestion, answerStatus)).takeLast(MAX_TURNS),
                 )
             } else session
         }
@@ -58,29 +58,44 @@ class ChatHistoryStore(context: Context) {
         preferences.edit().remove(KEY_SESSIONS).apply()
     }
 
-    private fun read(): List<Session> = runCatching {
-        val stored = JSONArray(preferences.getString(KEY_SESSIONS, "[]"))
+    private fun read(): List<Session> = ChatHistoryJson.decode(preferences.getString(KEY_SESSIONS, "[]") ?: "[]")
+    private fun save(sessions: List<Session>) {
+        preferences.edit().putString(KEY_SESSIONS, ChatHistoryJson.encode(sessions, MAX_SESSIONS)).apply()
+    }
+
+    private companion object {
+        const val PREFERENCES = "local_chat_history"
+        const val KEY_SESSIONS = "sessions"
+        const val MAX_SESSIONS = 20
+        const val MAX_TURNS = 80
+    }
+}
+
+/** Pure JSON codec: legacy chats and contextual metadata use the same local storage format. */
+internal object ChatHistoryJson {
+    fun decode(raw: String): List<ChatHistoryStore.Session> = runCatching {
+        val stored = JSONArray(raw)
         buildList {
             for (index in 0 until stored.length()) {
                 val raw = stored.getJSONObject(index)
                 val turns = raw.optJSONArray("turns") ?: JSONArray()
                 add(
-                    Session(
+                    ChatHistoryStore.Session(
                         id = raw.getString("id"),
                         title = raw.optString("title", "새 대화"),
                         updatedAtMillis = raw.optLong("updatedAt"),
                         turns = buildList {
                             for (turnIndex in 0 until turns.length()) {
                                 val turn = turns.getJSONObject(turnIndex)
-                                val role = runCatching { Role.valueOf(turn.getString("role")) }
-                                    .getOrDefault(Role.ASSISTANT)
+                                val role = runCatching { ChatHistoryStore.Role.valueOf(turn.getString("role")) }
+                                    .getOrDefault(ChatHistoryStore.Role.ASSISTANT)
                                 val sourceIds = turn.optJSONArray("sourceIds") ?: JSONArray()
-                                add(Turn(role, turn.optString("text"), buildList {
+                                add(ChatHistoryStore.Turn(role, turn.optString("text"), buildList {
                                     for (sourceIndex in 0 until sourceIds.length()) add(sourceIds.optLong(sourceIndex))
                                 }.filter { it > 0L }, buildList {
                                     val choices=turn.optJSONArray("suggestions") ?: JSONArray()
                                     for(choiceIndex in 0 until choices.length()){val choice=choices.getJSONObject(choiceIndex);add(SearchSuggestion(choice.getString("label"),choice.getString("question")))}
-                                },turn.optString("resolvedQuestion").takeIf{it.isNotBlank()}))
+                                },turn.optString("resolvedQuestion").takeIf{it.isNotBlank()},turn.optString("topicQuestion").takeIf{it.isNotBlank()},turn.optString("answerStatus").takeIf{it.isNotBlank()}))
                             }
                         },
                     ),
@@ -89,11 +104,11 @@ class ChatHistoryStore(context: Context) {
         }
     }.getOrDefault(emptyList())
 
-    private fun save(sessions: List<Session>) {
+    fun encode(sessions: List<ChatHistoryStore.Session>, maxSessions: Int = 20): String {
         val json = JSONArray()
         sessions
             .sortedByDescending { it.updatedAtMillis }
-            .take(MAX_SESSIONS)
+            .take(maxSessions)
             .forEach { session ->
                 json.put(
                     JSONObject().apply {
@@ -106,6 +121,8 @@ class ChatHistoryStore(context: Context) {
                                     put("role", turn.role.name)
                                     put("text", turn.text)
                                     turn.resolvedQuestion?.let{put("resolvedQuestion",it)}
+                                    turn.topicQuestion?.let{put("topicQuestion",it)}
+                                    turn.answerStatus?.let{put("answerStatus",it)}
                                     put("suggestions",JSONArray().apply{turn.suggestions.forEach{choice->put(JSONObject().put("label",choice.label).put("question",choice.question))}})
                                     put("sourceIds", JSONArray().apply { turn.sourceIds.forEach { put(it) } })
                                 })
@@ -114,13 +131,7 @@ class ChatHistoryStore(context: Context) {
                     },
                 )
             }
-        preferences.edit().putString(KEY_SESSIONS, json.toString()).apply()
+        return json.toString()
     }
 
-    private companion object {
-        const val PREFERENCES = "local_chat_history"
-        const val KEY_SESSIONS = "sessions"
-        const val MAX_SESSIONS = 20
-        const val MAX_TURNS = 80
-    }
-}
+ }

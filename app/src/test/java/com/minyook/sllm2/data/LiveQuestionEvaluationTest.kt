@@ -81,7 +81,7 @@ class LiveQuestionEvaluationTest {
                 calls.add(query)
                 val vector=byQuestion.getValue(query).getJSONArray("vector")
                 FloatArray(vector.length()) { vector.getDouble(it).toFloat() }
-            }.search(q)
+            }.search(ConversationContext.resolve(q, emptyList()))
             val base=DocumentAnswerPlan.create(q,result.sources)
             val body=if(result.sources.isEmpty())result.message else base.body+if(result.message.isNotBlank())"\n\n"+result.message else ""
             val kotlinMs=(System.nanoTime()-started)/1e6
