@@ -1,0 +1,303 @@
+{
+  "date": "2026-11-04",
+  "sourceCommit": "538858b",
+  "scope": "PC JVM production WifiMeterServer + actual Node sender; no Android device/emulator attached",
+  "result": "PASS",
+  "unitTests": {
+    "tests": 101,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2,
+    "passed": 99,
+    "suites": [
+      {
+        "name": "com.minyook.sllm2.data.EquipmentOverviewTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 2.024
+      },
+      {
+        "name": "com.minyook.sllm2.data.FocusedEvidenceTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.022
+      },
+      {
+        "name": "com.minyook.sllm2.data.GeneralKnowledgeAnswerTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.006
+      },
+      {
+        "name": "com.minyook.sllm2.data.HybridRetrievalTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 3.71
+      },
+      {
+        "name": "com.minyook.sllm2.data.LiveQuestionEvaluationTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 2,
+        "seconds": 0.006
+      },
+      {
+        "name": "com.minyook.sllm2.data.NativeAnswerCorpusTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.503
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionAnswerVerifierTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.002
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionEvidencePlannerTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.008
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionSearchCoordinatorTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.531
+      },
+      {
+        "name": "com.minyook.sllm2.data.ReviewedRetrievalEvaluationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 5.649
+      },
+      {
+        "name": "com.minyook.sllm2.data.SemanticTokenizerTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 2.12
+      },
+      {
+        "name": "com.minyook.sllm2.data.SourcePdfCatalogTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.001
+      },
+      {
+        "name": "com.minyook.sllm2.ExampleUnitTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.01
+      },
+      {
+        "name": "com.minyook.sllm2.gas.GasReadingFreshnessTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.001
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterProtocolTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.012
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterRegistryTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.004
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterServerTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 5.113
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterStressTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 47.809
+      },
+      {
+        "name": "com.minyook.sllm2.ui.ChatTimelineTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.012
+      },
+      {
+        "name": "com.minyook.sllm2.ui.MarkdownBlocksTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.001
+      },
+      {
+        "name": "com.minyook.sllm2.ui.SourceDocumentFormatterTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.001
+      },
+      {
+        "name": "com.minyook.sllm2.ui.VoiceConversationLoopTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.005
+      },
+      {
+        "name": "com.minyook.sllm2.ui.VoiceResponseFormatterTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.004
+      },
+      {
+        "name": "com.minyook.sllm2.ui.WorkServerAddressTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.001
+      }
+    ],
+    "skippedReason": "2 opt-in full ONNX RAG corpus evaluations were not requested for this transport test"
+  },
+  "stressScenarios": {
+    "capacity": {
+      "acceptedLiveConnections": 16,
+      "rejectedSeventeenth": true,
+      "releasedSlotReused": true,
+      "scope": "PC loopback transport, not smartphone AP/RF",
+      "passed": true
+    },
+    "handshake-timeout": {
+      "milliseconds": 5001,
+      "scope": "PC loopback transport, not smartphone AP/RF",
+      "passed": true
+    },
+    "invalid-peer-isolation": {
+      "malformedPeers": 2,
+      "scope": "PC loopback transport, not smartphone AP/RF",
+      "healthyPeerContinues": true,
+      "passed": true
+    },
+    "read-timeout": {
+      "milliseconds": 15000,
+      "scope": "PC loopback transport, not smartphone AP/RF",
+      "passed": true,
+      "staleBeforeDisconnect": true
+    },
+    "reconnect-history": {
+      "uniqueIdentities": 80,
+      "sameIdentityReconnects": 20,
+      "scope": "PC loopback transport, not smartphone AP/RF",
+      "passed": true,
+      "retainedRecords": 64
+    },
+    "restart": {
+      "scope": "PC loopback transport, not smartphone AP/RF",
+      "passed": true,
+      "newServerIdentityCount": 3,
+      "statistics": {
+        "note": "ACK RTT includes transport and processing; not one-way sensor latency.",
+        "ackRoundTripMs": {
+          "median": 0.481,
+          "max": 1.557,
+          "p95": 0.673
+        },
+        "rejected": 0,
+        "simulated": true,
+        "accepted": 261,
+        "connections": 6,
+        "errors": 0
+      }
+    },
+    "sixteen": {
+      "scope": "PC loopback transport, not smartphone AP/RF",
+      "heartbeatRttSeenForAll": true,
+      "passed": true,
+      "isolatedIdentities": 16,
+      "statistics": {
+        "note": "ACK RTT includes transport and processing; not one-way sensor latency.",
+        "ackRoundTripMs": {
+          "median": 0.675,
+          "max": 3.696,
+          "p95": 1.219
+        },
+        "rejected": 0,
+        "simulated": true,
+        "accepted": 2208,
+        "connections": 16,
+        "errors": 0
+      }
+    }
+  },
+  "run": {
+    "environment": {
+      "FIELDGUARD_WIFI_AP_STRESS": "1",
+      "FIELDGUARD_EVALUATE_150": "0"
+    },
+    "command": "gradlew.bat :app:testDebugUnitTest --rerun-tasks --offline --console=plain --warning-mode=none",
+    "log": "tmp/wifi-ap-stress-build.log",
+    "rawMetrics": "tmp/wifi-ap-stress-20261104/",
+    "junitReport": "app/build/reports/tests/testDebugUnitTest/index.html"
+  },
+  "notRun": [
+    "Android AP start/reservation/credentials",
+    "AP radio transport, physical gas detectors, range, interference",
+    "Android runtime UI/instrumentation",
+    "screen-off/battery-saver/doze",
+    "AI inference running concurrently with sensor traffic"
+  ],
+  "limitations": [
+    "16 is the TCP software connection cap, not an established smartphone AP capacity",
+    "ACK RTT is PC loopback including receive/parse/ACK; not sensor end-to-end or wireless latency",
+    "Short stress run; not an endurance test",
+    "Injected server restart reused a synthetic token for reconnection testing; an actual restarted AP may change SSID/password/token"
+  ],
+  "productionCodeChanged": false,
+  "apk": "Existing fieldguard-wifi-ap-debug.apk from 2026-11-04 remains unchanged"
+}

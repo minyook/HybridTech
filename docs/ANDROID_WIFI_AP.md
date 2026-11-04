@@ -124,3 +124,7 @@ Remove-Item Env:FIELDGUARD_AP_TOKEN
 수신/알림은 모델 생성과 별도 스레드/서비스 경로이지만 **같은 Android 프로세스**에 있다. AI 네이티브 크래시/OOM에도 감지가 유지된다고 보장하지 않는다. 센서 자체 경보를 우선 유지하고 별도 프로세스·안전 인터록·알람 SLA 검증은 후속 범위다.
 
 참조: [Android Local-only hotspot](https://developer.android.com/develop/connectivity/wifi/localonlyhotspot), [SoftApConfiguration.Builder 공개 API](https://developer.android.com/reference/android/net/wifi/SoftApConfiguration.Builder), [로컬 네트워크 권한](https://developer.android.com/privacy-and-security/local-network-permission), [connectedDevice FGS](https://developer.android.com/develop/background-work/services/fgs/service-types#connected-device).
+
+## 추가 TCP 스트레스 검사 (2026-11-04)
+
+운영 코드 수정 없이 16개 동시 송신·서버 재시작·상한/시간 초과·100회 재접속·불량 송신기 격리의 7개 시나리오를 추가했고 모두 통과했다. 전체 JVM 99개 통과, 선택 실행 2개 제외다. 실제 수신기와 Node 송신기를 사용한 PC loopback 결과이며 AP/무선 시험과 구분한다. [상세 결과·재실행 명령](validation/android-wifi-ap-stress-20261104.md).
