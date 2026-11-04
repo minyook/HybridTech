@@ -10,9 +10,11 @@ class GasReadingFreshnessTest {
         val reading = GasReading(
             oxygenPercent = 20.9,
             receivedAtMillis = 1_000_000L,
-            source = GasReadingSource.BLE,
+            source = GasReadingSource.WIFI_AP,
         )
 
+        assertFalse(reading.copy(source = GasReadingSource.NONE).isFresh(1_000_000L))
+        assertFalse(reading.copy(sessionActive = false).isFresh(1_000_000L))
         assertTrue(reading.isFresh(1_000_000L))
         assertTrue(reading.isFresh(1_059_999L))
         assertFalse(reading.isFresh(1_060_000L))

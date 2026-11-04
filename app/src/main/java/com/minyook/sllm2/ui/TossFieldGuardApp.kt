@@ -86,6 +86,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import com.minyook.sllm2.gas.GasReading
+import com.minyook.sllm2.gas.*
 import com.minyook.sllm2.gas.GasReadingSource
 import com.minyook.sllm2.model.ContextTokenPolicy
 import com.minyook.sllm2.model.InferenceBackend
@@ -336,7 +337,7 @@ private fun TossOnboarding(onStart: () -> Unit) {
             Text("로컬 AI 모델", style = MaterialTheme.typography.titleMedium)
             Text("설치 후 인터넷 없이 문서 근거로 답해요.", style = MaterialTheme.typography.bodySmall)
             HorizontalDivider(color = TossBorder)
-            Text("BLE 가스 측정기", style = MaterialTheme.typography.titleMedium)
+            Text("Wi-Fi AP 가스 감지기", style = MaterialTheme.typography.titleMedium)
             Text("연결되면 실제 수신값을 확인할 수 있어요.", style = MaterialTheme.typography.bodySmall)
         }
         TossPanel(color = TossBlueWeak) { Text("모델 설치 전에도 제공 문서를 검색할 수 있어요.", style = MaterialTheme.typography.bodyMedium, color = TossInk) }
@@ -353,15 +354,16 @@ internal fun TossGasSummary(reading: GasReading, onClick: () -> Unit) {
     TossPanel(modifier = Modifier.clickable(onClick = onClick)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("가스 측정", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-            TossStatusPill(when { !current -> "연결·수신 대기"; reading.source == GasReadingSource.BLE -> "BLE 수신"; reading.source == GasReadingSource.SIMULATION -> "데모 · 실측 아님"; else -> "연결 대기" }, TossSurface, TossMuted)
+            TossStatusPill(when { !current -> "연결·수신 대기"; reading.source == GasReadingSource.WIFI_AP -> "Wi-Fi 수신"; reading.source == GasReadingSource.SIMULATION -> "테스트 · 실측 아님"; else -> "연결 대기" }, TossSurface, TossMuted)
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             TossCompactGas("O₂", reading.oxygenPercent.takeIf { current }, "%")
-            TossCompactGas("H₂S", reading.h2sPpm.takeIf { current }, "")
-            TossCompactGas("CO", reading.carbonMonoxidePpm.takeIf { current }, "")
-            TossCompactGas("LEL", reading.lelPercent.takeIf { current }, "")
+            TossCompactGas("H₂S", reading.h2sPpm.takeIf { current }, "ppm")
+            TossCompactGas("CO", reading.carbonMonoxidePpm.takeIf { current }, "ppm")
+            TossCompactGas("LEL", reading.lelPercent.takeIf { current }, "%")
         }
-        Text(if (current) "마지막 수신 ${reading.receivedAtMillis.localTime()} · 출처를 확인해 주세요." else "새 측정값이 없어요. 현재값으로 사용하지 마세요.", style = MaterialTheme.typography.bodySmall)
+        reading.deviceName?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+        Text(if (current) "최근 측정 ${reading.receivedAtMillis.localTime()} · 출처를 확인해 주세요." else "새 측정값이 없어요. 현재값으로 사용하지 마세요.", style = MaterialTheme.typography.bodySmall)
     }
 }
 
@@ -492,48 +494,7 @@ internal fun WorkspaceVoiceSettings(voice: VoiceUiState, actions: FieldGuardActi
 }
 
 @Composable
-private fun TossSensor(state: FieldGuardUiState, actions: FieldGuardActions) {
-    if (state.sensorConnectionLost) {
-        TossSensorDisconnected(state, actions)
-        return
-    }
-    val now = currentTimeTick()
-    val reading = state.gasReading
-    val fresh = reading.isFresh(now)
-    TossScrollPage {
-        TossPageTitle(if (fresh && reading.source == GasReadingSource.BLE) "측정값을\n확인해요" else "가스 측정기를\n연결해요", state.bluetoothStatus)
-        if (fresh) {
-            TossStatusPill(if (reading.source == GasReadingSource.SIMULATION) "데모 · 실제 측정값 아님" else "BLE 수신 · ${reading.receivedAtMillis.localTime()}", if (reading.source == GasReadingSource.SIMULATION) TossBlueWeak else TossGreenWeak, if (reading.source == GasReadingSource.SIMULATION) TossBlue else TossGreen)
-            TossGasMetrics(reading)
-            TossPanel {
-                Text(if (reading.source == GasReadingSource.SIMULATION) "시뮬레이션 값이에요. 실제 계측값으로 사용하지 마세요." else "수신 시각과 측정기 출처를 함께 확인해 주세요.", style = MaterialTheme.typography.bodyMedium)
-            }
-        } else {
-            TossPanel {
-                Text("현재 표시할 측정값이 없어요.", style = MaterialTheme.typography.titleMedium)
-                Text("실제 BLE 데이터를 새로 받으면 수치를 보여드려요.", style = MaterialTheme.typography.bodySmall)
-            }
-        }
-        TossPanel {
-            Text("Bluetooth LE 측정기", style = MaterialTheme.typography.titleMedium)
-            Text(state.bluetoothStatus, style = MaterialTheme.typography.bodySmall)
-            TossPrimaryButton(if (state.isScanning) "검색 중…" else "기기 검색", actions.onScanBluetooth, modifier = Modifier.testTag("scanBluetooth"), enabled = !state.isScanning)
-            if (state.bluetoothStatus.startsWith("연결됨") || fresh && reading.source == GasReadingSource.BLE) {
-                TossSecondaryButton("연결 해제", actions.onDisconnectDevice)
-            }
-        }
-        if (state.devices.isNotEmpty()) {
-            TossPanel {
-                Text("검색된 기기", style = MaterialTheme.typography.titleMedium)
-                state.devices.forEachIndexed { index, device ->
-                    TossRow(device.name, "${device.address} · ${device.rssi} dBm", { actions.onConnectDevice(device.address) }, "연결")
-                    if (index != state.devices.lastIndex) HorizontalDivider(color = TossBorder)
-                }
-            }
-        }
-        Text("제조사별 통신 규격과 계측 정확도는 실제 장비에서 검증해야 해요. 앱 수치만으로 작업 가능 여부를 판단하지 말아 주세요.", style = MaterialTheme.typography.bodySmall)
-    }
-}
+private fun TossSensor(state: FieldGuardUiState, actions: FieldGuardActions) = WifiApSensorScreen(state, actions)
 
 @Composable
 private fun TossGasMetrics(reading: GasReading) {
@@ -563,21 +524,7 @@ private fun TossGasMetric(label: String, value: Double?, unit: String, modifier:
 }
 
 @Composable
-private fun TossSensorDisconnected(state: FieldGuardUiState, actions: FieldGuardActions) {
-    TossScrollPage {
-        TossPageTitle("측정기 연결이\n끊겼어요", "현재 측정값을 받을 수 없어요.")
-        TossPanel(color = TossRedWeak) {
-            Text("이전 수치는 현재 상태가 아니에요", color = TossRed, style = MaterialTheme.typography.titleMedium)
-            Text("마지막 수신 ${state.lastGasReading.receivedAtMillis.localTime()} · ${state.lastGasReading.deviceName ?: "BLE 측정기"}", style = MaterialTheme.typography.bodySmall)
-        }
-        TossPanel {
-            Text("다음 내용을 확인해 주세요", style = MaterialTheme.typography.titleMedium)
-            listOf("측정기 전원과 거리를 확인해요.", "Bluetooth 연결을 다시 시도해요.", "현장 절차에 따라 계측 상태를 확인해요.").forEach { Text("• $it", style = MaterialTheme.typography.bodyMedium) }
-        }
-        TossPrimaryButton("기기 다시 검색", { actions.onScanBluetooth(); actions.onNavigate(AppDestination.SENSOR) })
-        Text("앱 화면만으로 작업 가능 여부를 판단하지 말아 주세요.", style = MaterialTheme.typography.bodySmall)
-    }
-}
+private fun TossSensorDisconnected(state: FieldGuardUiState, actions: FieldGuardActions) = WifiApSensorScreen(state, actions)
 
 private val checklistTitles = listOf("작업 위치와 출입 경로", "공기 측정 기록", "환기 상태", "감시인과 연락 방법", "구조 장비와 절차")
 private val checklistDescriptions = listOf("현장 계획과 비교", "검교정된 기기 사용 여부", "작업 중 유지 계획", "현장 담당자 확인", "원문 근거 확인")
@@ -671,5 +618,62 @@ private fun TossSystem(state: FieldGuardUiState) {
             Text("서비스가 실행되는 동안 알림 패널에서 마지막 측정값을 확인할 수 있어요.", style = MaterialTheme.typography.bodySmall)
         }
         Text("OS와 제조사에 따라 위젯·알림 모양이 달라질 수 있어요. 수신이 멈춘 값은 현재값으로 사용하지 마세요.", style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+@Composable
+internal fun WifiApSensorScreen(state: FieldGuardUiState, actions: FieldGuardActions) {
+    val ap = state.wifiAp
+    val now = currentTimeTick()
+    TossScrollPage {
+        TossPageTitle("감지기를\nWi-Fi로 연결해요", ap.status)
+        TossPanel {
+            TossStatusPill(when(ap.phase) { ApPhase.OFF -> "AP 꺼짐"; ApPhase.STARTING -> "준비 중"; ApPhase.RUNNING -> "AP 켜짐 · 인터넷 불필요"; ApPhase.ERROR -> "시작 확인 필요" }, TossBlueWeak, TossBlue)
+            if(ap.phase == ApPhase.RUNNING || ap.phase == ApPhase.STARTING) {
+                TossSecondaryButton("AP 끄기", actions.onStopAp, modifier = Modifier.testTag("stopWifiAp"))
+            } else {
+                TossPrimaryButton("휴대폰 AP 시작", actions.onStartAp, modifier = Modifier.testTag("startWifiAp"))
+            }
+            Text("감지기를 휴대폰 Wi-Fi에 연결해 값을 받아요. 통신 규격은 장비 연동 전 시험 버전이에요.", style = MaterialTheme.typography.bodySmall)
+        }
+        if(ap.phase == ApPhase.RUNNING) {
+            TossPanel {
+                Text("감지기에 입력할 연결 정보", style = MaterialTheme.typography.titleMedium)
+                Text("Wi-Fi 이름: ${ap.ssid}")
+                Text("Wi-Fi 암호: ${ap.password}")
+                Text("수신 주소: ${ap.host}:${ap.port}")
+                Text("연결 코드: ${ap.token}", style = MaterialTheme.typography.bodySmall)
+                Text("${ap.band} · AP를 다시 켜면 연결 정보가 바뀌어요.", style = MaterialTheme.typography.bodySmall)
+
+            }
+        }
+        Text("감지기 ${ap.meters.count { it.link != MeterLink.DISCONNECTED }}대 연결", style = MaterialTheme.typography.titleMedium)
+        if(ap.meters.isEmpty()) TossPanel {
+            Text("아직 연결된 감지기가 없어요.")
+            Text("AP를 켠 뒤 감지기에 연결 정보를 입력해 주세요. 테스트 송신기도 같은 방식으로 확인할 수 있어요.", style = MaterialTheme.typography.bodySmall)
+        }
+        ap.meters.forEach { meter ->
+            val current = ap.phase == ApPhase.RUNNING && meter.current && meter.reading().isFresh(now)
+            TossPanel {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(meter.name, style = MaterialTheme.typography.titleMedium)
+                        Text(meter.deviceId, style = MaterialTheme.typography.bodySmall)
+                    }
+                    TextButton(onClick = { actions.onSelectMeter(meter.deviceId) }, modifier = Modifier.testTag("selectMeter_${meter.deviceId}")) {
+                        Text(if(ap.selectedDeviceId == meter.deviceId) "선택됨" else "요약에 표시")
+                    }
+                }
+                Text(if(meter.link == MeterLink.RECEIVING && !current) "수신 지연 · 현재값 없음" else meter.link.label(), color = if(current) TossGreen else TossSecondary)
+                if(meter.test) TossStatusPill("테스트 데이터 · 실측 아님", TossBlueWeak, TossBlue)
+                TossGasMetrics(if(current) meter.reading() else GasReading())
+                val age = meter.sample?.let { (now - meter.receivedAtMillis).coerceAtLeast(0) + it.ageMs }
+                Text("측정 경과 ${age?.let { "${it / 1000.0}초" } ?: "—"} · 왕복 ${meter.rttMs?.let { "%.1f ms".format(java.util.Locale.US, it) } ?: "측정 대기"}", style = MaterialTheme.typography.bodySmall)
+                Text("누락 순번 ${meter.missed} · 중복/역순 ${meter.rejected}", style = MaterialTheme.typography.bodySmall)
+                if(meter.sample?.alarm in setOf("warning", "danger") && ap.phase == ApPhase.RUNNING && meter.hasRecentSample) Text("장비 경보: ${if(meter.sample?.alarm == "danger") "위험" else "주의"}", color = TossRed)
+                if(meter.reason.isNotBlank()) Text(meter.reason, style = MaterialTheme.typography.bodySmall)
+            }
+        }
+        Text("감지기마다 수치를 따로 표시해요. 연결 상태는 작업 승인이나 안전 판정이 아니에요.", style = MaterialTheme.typography.bodySmall)
     }
 }

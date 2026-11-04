@@ -38,7 +38,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Compose wiring tests use local state only; no BLE service or model download starts. */
+/** Compose wiring tests use local state only; no AP service or model download starts. */
 @RunWith(AndroidJUnit4::class)
 class TossNavigationTest {
     @get:Rule val compose = createAndroidComposeRule<WorkspacePreviewActivity>()
@@ -67,7 +67,7 @@ class TossNavigationTest {
         navigateWorkspace(AppDestination.CHAT)
         compose.onNodeWithTag("chatInput").assertIsDisplayed()
         navigateWorkspace(AppDestination.SENSOR)
-        compose.onNodeWithTag("scanBluetooth").assertIsDisplayed()
+        compose.onNodeWithTag("startWifiAp").assertIsDisplayed()
         navigateWorkspace(AppDestination.SETTINGS)
         compose.onNodeWithText("기기 내 Gemma").assertIsDisplayed()
     }
@@ -246,7 +246,7 @@ class TossNavigationTest {
         onNewChat = {}, onLoadChat = {}, onInputChange = onInputChange,
         onSubmit = onSubmit, onPreset = {}, onDownloadModel = {},
         onBackend = {}, onContextTokens = {}, onResponseTokens = {}, onSaveSettings = {},
-        onScanBluetooth = {}, onConnectDevice = {}, onDisconnectDevice = {},
+        onStartAp = {}, onSelectMeter = {}, onStopAp = {},
         onVoiceClick = {}, onVoiceLongClick = {},
         onCompleteOnboarding = onCompleteOnboarding,
         onToggleChecklist = onToggleChecklist,

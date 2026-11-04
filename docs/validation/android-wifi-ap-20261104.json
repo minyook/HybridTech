@@ -1,0 +1,272 @@
+{
+  "date": "2026-11-04",
+  "scope": "Android smartphone Local-only AP prototype; APK and code checks per user instruction",
+  "baseCommit": "5b31600",
+  "build": {
+    "debugApk": "PASS",
+    "androidTestApk": "PASS",
+    "log": "tmp/wifi-ap-build.log",
+    "gradle": "testDebugUnitTest assembleDebug assembleDebugAndroidTest lintDebug --offline"
+  },
+  "unitTests": {
+    "tests": 94,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2,
+    "passed": 92,
+    "suites": [
+      {
+        "name": "com.minyook.sllm2.data.EquipmentOverviewTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 4.48
+      },
+      {
+        "name": "com.minyook.sllm2.data.FocusedEvidenceTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.026
+      },
+      {
+        "name": "com.minyook.sllm2.data.GeneralKnowledgeAnswerTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.007
+      },
+      {
+        "name": "com.minyook.sllm2.data.HybridRetrievalTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 5.672
+      },
+      {
+        "name": "com.minyook.sllm2.data.LiveQuestionEvaluationTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 2,
+        "seconds": 0.007
+      },
+      {
+        "name": "com.minyook.sllm2.data.NativeAnswerCorpusTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.995
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionAnswerVerifierTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.003
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionEvidencePlannerTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.008
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionSearchCoordinatorTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.939
+      },
+      {
+        "name": "com.minyook.sllm2.data.ReviewedRetrievalEvaluationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 8.723
+      },
+      {
+        "name": "com.minyook.sllm2.data.SemanticTokenizerTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 3.827
+      },
+      {
+        "name": "com.minyook.sllm2.data.SourcePdfCatalogTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.002
+      },
+      {
+        "name": "com.minyook.sllm2.ExampleUnitTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.058
+      },
+      {
+        "name": "com.minyook.sllm2.gas.GasReadingFreshnessTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.002
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterProtocolTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.077
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterRegistryTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.005
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterServerTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 5.078
+      },
+      {
+        "name": "com.minyook.sllm2.ui.ChatTimelineTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.016
+      },
+      {
+        "name": "com.minyook.sllm2.ui.MarkdownBlocksTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.001
+      },
+      {
+        "name": "com.minyook.sllm2.ui.SourceDocumentFormatterTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.001
+      },
+      {
+        "name": "com.minyook.sllm2.ui.VoiceConversationLoopTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.007
+      },
+      {
+        "name": "com.minyook.sllm2.ui.VoiceResponseFormatterTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.007
+      },
+      {
+        "name": "com.minyook.sllm2.ui.WorkServerAddressTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 0.001
+      }
+    ],
+    "skippedReason": "2 opt-in full ONNX live question evaluations; FIELDGUARD_EVALUATE_150=0; prior RAG corpus validation remains separate"
+  },
+  "lint": {
+    "error": 0,
+    "warning": 118,
+    "information": 0,
+    "result": "PASS",
+    "report": "app/build/reports/lint-results-debug.html",
+    "warningsNote": "Warnings remain; this is not a zero-warning claim."
+  },
+  "tcpServer": {
+    "result": "PASS",
+    "environment": "PC JVM loopback TCP, not smartphone AP or detector RF",
+    "newProtocolRegistryServerTests": 16,
+    "concurrentSenders": 10,
+    "readingsAcknowledged": 1000,
+    "checks": [
+      "device isolation",
+      "invalid token",
+      "duplicate live ID",
+      "split and coalesced frames",
+      "strict bounded UTF-8/fields/units",
+      "old/duplicate sequence rejection",
+      "staleness with sender age",
+      "fault frame staleness",
+      "disconnect and reconnection ownership",
+      "heartbeat RTT does not refresh measurements",
+      "server stop and port release"
+    ]
+  },
+  "senderCli": {
+    "syntax": "PASS",
+    "localMockSmoke": "PASS",
+    "identities": 3,
+    "framesAcknowledged": 45,
+    "pongs": 3,
+    "invalidFrames": 0,
+    "transportErrors": 0,
+    "environment": "PC Node CLI against local mock; not Android AP; no real credentials used"
+  },
+  "permissions": {
+    "bluetoothRemoved": true,
+    "actualApkVerified": true,
+    "dump": "tmp/wifi-ap-20261104/permissions.txt"
+  },
+  "apk": {
+    "path": "tmp/wifi-ap-20261104/fieldguard-wifi-ap-debug.apk",
+    "bytes": 324757219,
+    "sha256": "cdb12f213f1dd887458312a0b4e2a0e01900b377d3e783c9b7e7ff9a304e90d4"
+  },
+  "deviceValidation": {
+    "apStartAndCredentials": "NOT_RUN",
+    "wifiOverAirMultiDetector": "NOT_RUN",
+    "uiInstrumentationRuntime": "NOT_RUN",
+    "screenOffAndBatterySaver": "NOT_RUN",
+    "realSensorUnitsCalibrationAlarm": "NOT_RUN",
+    "reason": "No USB device connected. User explicitly chose APK and code checks only."
+  },
+  "knownLimits": [
+    "Experimental TCP JSON v1; vendor protocol not supplied",
+    "16 is a software socket limit, not phone Wi-Fi client capacity",
+    "Same Android process as AI; independent transport threads do not provide OOM/crash isolation",
+    "sampleAgeMs excludes transport queue/retransmission time; RTT is not one-way sensor latency",
+    "Shared AP/session token is not per-device identity, TLS or signed telemetry"
+  ],
+  "clipboard": {
+    "result": "REMOVED",
+    "reason": "Automatic approval review rejected secret clipboard copying; connection info remains onscreen only."
+  }
+}

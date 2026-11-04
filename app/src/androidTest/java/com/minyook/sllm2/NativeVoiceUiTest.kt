@@ -23,7 +23,7 @@ class NativeVoiceUiTest {
         }
     }
     private fun actions(start: () -> Unit = {}, stop: () -> Unit = {}, navigate: (AppDestination) -> Unit = {}) = FieldGuardActions(
-        onNavigate = navigate, onNewChat = {}, onLoadChat = {}, onInputChange = {}, onSubmit = {}, onPreset = {}, onDownloadModel = {}, onBackend = {}, onContextTokens = {}, onResponseTokens = {}, onSaveSettings = {}, onScanBluetooth = {}, onConnectDevice = {}, onDisconnectDevice = {}, onVoiceClick = start, onVoiceLongClick = {}, onStopVoice = stop,
+        onNavigate = navigate, onNewChat = {}, onLoadChat = {}, onInputChange = {}, onSubmit = {}, onPreset = {}, onDownloadModel = {}, onBackend = {}, onContextTokens = {}, onResponseTokens = {}, onSaveSettings = {}, onStartAp = {}, onSelectMeter = {}, onStopAp = {}, onVoiceClick = start, onVoiceLongClick = {}, onStopVoice = stop,
     )
     @Test fun microphoneOpensDedicatedConversationAndStartsOnce() {
         val voice = mutableStateOf(VoiceUiState(available = true))

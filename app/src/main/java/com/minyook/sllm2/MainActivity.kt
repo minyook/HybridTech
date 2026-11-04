@@ -22,7 +22,7 @@ import com.minyook.sllm2.ui.FieldGuardViewModel
 import com.minyook.sllm2.ui.TossFieldGuardApp
 import com.minyook.sllm2.ui.VoiceConversationController
 
-/** Compose-only activity shell. RAG, model, BLE and voice work live behind observable state. */
+/** Compose-only activity shell. RAG, model, Wi-Fi AP and voice work live behind observable state. */
 class MainActivity : ComponentActivity() {
     private val viewModel: FieldGuardViewModel by viewModels()
     private lateinit var voiceController: VoiceConversationController
@@ -31,8 +31,9 @@ class MainActivity : ComponentActivity() {
     private val microphonePermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         voiceController.onMicrophonePermissionResult(granted)
     }
-    private val bluetoothPermissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ ->
-        if (hasBluetoothPermissions()) viewModel.scanBluetooth() else viewModel.bluetoothPermissionDenied()
+    private val wifiPermissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        if (hasWifiPermissions()) requestNotificationPermission { viewModel.startAp() }
+        else viewModel.wifiPermissionDenied()
     }
     private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         notificationPermissionContinuation?.invoke(granted)
@@ -69,14 +70,12 @@ class MainActivity : ComponentActivity() {
                     onResponseTokens = viewModel::updateResponseTokens,
                     onAutomaticAnswerLength = viewModel::updateAutomaticAnswerLength,
                     onSaveSettings = viewModel::saveSettings,
-                    onScanBluetooth = {
-                        if (hasBluetoothPermissions()) viewModel.scanBluetooth()
-                        else bluetoothPermissions.launch(bluetoothPermissionList())
+                    onStartAp = {
+                        if (hasWifiPermissions()) requestNotificationPermission { viewModel.startAp() }
+                        else wifiPermissions.launch(wifiPermissionList())
                     },
-                    onConnectDevice = { address ->
-                        requestNotificationPermission { granted -> viewModel.connectDevice(address, granted) }
-                    },
-                    onDisconnectDevice = viewModel::disconnectDevice,
+                    onSelectMeter = viewModel::selectMeter,
+                    onStopAp = viewModel::stopAp,
                     onVoiceClick = { if (state.isAnswering) viewModel.showInputError("앞선 답변이 끝난 뒤 음성 대화를 시작해 주세요.") else voiceController.startQuestion() },
                     onVoiceLongClick = { if (!state.isAnswering) voiceController.toggleWakeWord() },
                     onStopVoice = voiceController::stopQuestion,
@@ -132,13 +131,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun hasBluetoothPermissions(): Boolean = bluetoothPermissionList().all(::hasPermission)
-
-    private fun bluetoothPermissionList(): Array<String> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
-    } else {
-        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
-    }
+    private fun hasWifiPermissions(): Boolean = wifiPermissionList().all(::hasPermission)
+    private fun wifiPermissionList(): Array<String> = buildList {
+        if (Build.VERSION.SDK_INT >= 33) add(Manifest.permission.NEARBY_WIFI_DEVICES)
+        else { add(Manifest.permission.ACCESS_COARSE_LOCATION); add(Manifest.permission.ACCESS_FINE_LOCATION) }
+        if (Build.VERSION.SDK_INT >= 37) add(Manifest.permission.ACCESS_LOCAL_NETWORK)
+    }.toTypedArray()
 
     private fun hasPermission(permission: String): Boolean =
         ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED

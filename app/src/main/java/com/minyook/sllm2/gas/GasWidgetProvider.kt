@@ -10,7 +10,7 @@ import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
 
-/** Home-screen summary. It only renders the last validated BLE measurement. */
+/** Home-screen summary. It only renders the last validated Wi-Fi AP measurement. */
 class GasWidgetProvider : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, widgetIds: IntArray) {
         widgetIds.forEach { widgetId -> manager.updateAppWidget(widgetId, views(context)) }
@@ -39,7 +39,7 @@ class GasWidgetProvider : AppWidgetProvider() {
                     } else if (reading.source == GasReadingSource.SIMULATION) {
                         "데모 시뮬레이션 · 실제 측정값 아님"
                     } else if (reading.receivedAtMillis > 0L) {
-                        "${reading.deviceName ?: "BLE 측정기"} · ${DateFormat.getTimeInstance(DateFormat.SHORT, Locale.KOREA).format(Date(reading.receivedAtMillis))}"
+                        "${reading.deviceName ?: "Wi-Fi AP 측정기"} · ${DateFormat.getTimeInstance(DateFormat.SHORT, Locale.KOREA).format(Date(reading.receivedAtMillis))}"
                     } else {
                         "센서 연결 대기 · 실제 측정값만 표시"
                     },

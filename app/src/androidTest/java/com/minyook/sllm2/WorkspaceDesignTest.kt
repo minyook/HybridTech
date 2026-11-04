@@ -36,7 +36,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
 
-/** Real Compose rendering with inert callbacks; never starts a model, BLE or real work. */
+/** Real Compose rendering with inert callbacks; never starts a model, AP or real work. */
 @RunWith(AndroidJUnit4::class)
 class WorkspaceDesignTest {
     @get:Rule val compose = createAndroidComposeRule<WorkspacePreviewActivity>()
@@ -141,5 +141,5 @@ class WorkspaceDesignTest {
         val directory=File(InstrumentationRegistry.getInstrumentation().targetContext.getExternalFilesDir(null),"design-previews").apply{mkdirs()}
         File(directory,name).outputStream().use{bitmap.compress(Bitmap.CompressFormat.PNG,100,it)}
     }
-    private fun inertActions()=FieldGuardActions(onNavigate={},onNewChat={},onLoadChat={},onInputChange={},onSubmit={},onPreset={},onDownloadModel={},onBackend={},onContextTokens={},onResponseTokens={},onSaveSettings={},onScanBluetooth={},onConnectDevice={},onDisconnectDevice={},onVoiceClick={},onVoiceLongClick={})
+    private fun inertActions()=FieldGuardActions(onNavigate={},onNewChat={},onLoadChat={},onInputChange={},onSubmit={},onPreset={},onDownloadModel={},onBackend={},onContextTokens={},onResponseTokens={},onSaveSettings={},onStartAp={},onSelectMeter={},onStopAp={},onVoiceClick={},onVoiceLongClick={})
 }

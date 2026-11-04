@@ -19,7 +19,7 @@ import com.minyook.sllm2.model.ContextTokenPolicy
 import com.minyook.sllm2.model.InferenceSettings
 import com.minyook.sllm2.model.InferenceSettingsPreferences
 import com.minyook.sllm2.ui.AppDestination
-import com.minyook.sllm2.ui.BleDeviceUi
+import com.minyook.sllm2.gas.*
 import com.minyook.sllm2.ui.ChatMessageUi
 import com.minyook.sllm2.ui.FieldGuardActions
 import com.minyook.sllm2.ui.FieldGuardUiState
@@ -30,7 +30,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.Assert.assertEquals
 
-/** UI wiring tests use inert callbacks, so they never download a model or start BLE services. */
+/** UI wiring tests use inert callbacks, so they never download a model or start AP services. */
 @RunWith(AndroidJUnit4::class)
 class ComposeNavigationTest {
     @get:Rule val compose = createComposeRule()
@@ -47,7 +47,7 @@ class ComposeNavigationTest {
         }
         compose.onNodeWithTag("openDrawer").performClick()
         compose.onNodeWithText("센서 연결 상태").performClick()
-        compose.onNodeWithText("Bluetooth LE 가스 검출기").assertIsDisplayed()
+        compose.onNodeWithText("Wi-Fi AP 가스 감지기").assertIsDisplayed()
         compose.onNodeWithTag("openDrawer").performClick()
         compose.onNodeWithText("설정").performClick()
         compose.onNodeWithText("모델 관리").assertIsDisplayed()
@@ -81,30 +81,13 @@ class ComposeNavigationTest {
     }
 
     @Test
-    fun sensorShowsPermissionAndDiscoveredDeviceStates() {
-        var state by mutableStateOf(
-            FieldGuardUiState(
-                destination = AppDestination.SENSOR,
-                bluetoothStatus = "가스 측정기 검색에는 Bluetooth 권한이 필요합니다.",
-            ),
-        )
+    fun sensorCanRequestApWithoutBluetooth() {
+        var started = false
         compose.setContent {
-            HybridTechApp(
-                state,
-                VoiceUiState(available = true),
-                actions(onScan = {
-                    state = state.copy(
-                        bluetoothStatus = "주변 가스 측정기를 검색하는 중입니다…",
-                        isScanning = true,
-                        devices = listOf(BleDeviceUi("AA:BB:CC:DD:EE:FF", "현장 측정기", -58)),
-                    )
-                }),
-            )
+            HybridTechApp(FieldGuardUiState(destination = AppDestination.SENSOR), VoiceUiState(available = false), actions(onScan = { started = true }))
         }
-        compose.onNodeWithText("가스 측정기 검색에는 Bluetooth 권한이 필요합니다.").assertIsDisplayed()
-        compose.onNodeWithTag("scanBluetooth").performClick()
-        compose.onNodeWithText("현장 측정기").assertIsDisplayed()
-        compose.onNodeWithText("AA:BB:CC:DD:EE:FF · -58 dBm").assertIsDisplayed()
+        compose.onNodeWithTag("startWifiAp").performClick()
+        assertEquals(true, started)
     }
 
     @Test
@@ -166,9 +149,9 @@ class ComposeNavigationTest {
         onContextTokens = {},
         onResponseTokens = {},
         onSaveSettings = {},
-        onScanBluetooth = onScan,
-        onConnectDevice = {},
-        onDisconnectDevice = {},
+        onStartAp = onScan,
+        onSelectMeter = {},
+        onStopAp = {},
         onVoiceClick = {},
         onVoiceLongClick = {},
     )

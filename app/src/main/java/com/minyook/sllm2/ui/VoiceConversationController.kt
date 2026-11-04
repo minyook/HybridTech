@@ -136,6 +136,7 @@ class VoiceConversationController(
 
     private fun startListening(id: Long, wakeWord: Boolean) {
         if (!inForeground || destroyed || !hasMicrophonePermission()) { loop.recognitionError(id, "마이크 권한과 앱 화면을 확인해 주세요."); return }
+        if (Build.VERSION.SDK_INT < 31) { loop.recognitionError(id, "기기 내 음성 인식은 Android 12 이상에서 사용할 수 있어요."); return }
         closeRecognizer()
         try {
             val candidate = SpeechRecognizer.createOnDeviceSpeechRecognizer(context)

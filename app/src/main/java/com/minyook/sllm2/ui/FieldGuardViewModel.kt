@@ -1,16 +1,8 @@
 package com.minyook.sllm2.ui
 
-import android.Manifest
 import android.app.Application
-import android.bluetooth.BluetoothDevice
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.SystemClock
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.Observer
 import androidx.lifecycle.viewModelScope
@@ -26,12 +18,13 @@ import com.minyook.sllm2.data.HybridRetrieval
 import com.minyook.sllm2.data.SemanticEncoder
 import com.minyook.sllm2.data.SearchSuggestion
 import com.minyook.sllm2.data.GeneralKnowledgeAnswer
-import com.minyook.sllm2.gas.BleGasClient
+import com.minyook.sllm2.gas.WifiApHub
+import com.minyook.sllm2.gas.WifiApUiState
+import com.minyook.sllm2.gas.ApPhase
 import com.minyook.sllm2.gas.GasMonitoringService
 import com.minyook.sllm2.gas.GasReading
 import com.minyook.sllm2.gas.GasReadingSource
 import com.minyook.sllm2.gas.GasReadingStore
-import com.minyook.sllm2.gas.GasSimulationService
 import com.minyook.sllm2.model.ContextTokenPolicy
 import com.minyook.sllm2.model.DeviceProfile
 import com.minyook.sllm2.model.InferenceBackend
@@ -82,12 +75,6 @@ data class ChatMessageUi(
     val resolvedQuestion: String? = null,
 )
 
-data class BleDeviceUi(
-    val address: String,
-    val name: String,
-    val rssi: Int,
-)
-
 data class FieldGuardUiState(
     val destination: AppDestination = AppDestination.CHAT,
     val activeChatId: String? = null,
@@ -109,9 +96,7 @@ data class FieldGuardUiState(
     val settingsSaved: Boolean = false,
     val gasReading: GasReading = GasReading(),
     val gasStatus: String = "센서 연결 대기 · 실제 측정값만 표시",
-    val bluetoothStatus: String = "연결된 가스 측정기가 없습니다.",
-    val isScanning: Boolean = false,
-    val devices: List<BleDeviceUi> = emptyList(),
+    val wifiAp: WifiApUiState = WifiApUiState(),
     val onboardingComplete: Boolean = true,
     val documents: List<DocumentUi> = emptyList(),
     val selectedSource: SourceUi? = null,
@@ -127,7 +112,7 @@ data class FieldGuardUiState(
 
 /**
  * UI-independent coordinator for the already proven ObjectBox RAG, LiteRT model,
- * WorkManager download and BLE/foreground service paths.  Compose only observes
+ * WorkManager download and Wi-Fi AP foreground service paths.  Compose only observes
  * [uiState] and sends explicit events back here.
  */
 class FieldGuardViewModel(application: Application) : AndroidViewModel(application) {
@@ -140,7 +125,6 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     private val questionSearchIndex by lazy { appContext.assets.open("knowledge/semantic-index-v1.json").bufferedReader().use { it.readText() } }
     private val history = ChatHistoryStore(appContext)
     private val uiPreferences = appContext.getSharedPreferences("field_guard_ui", Context.MODE_PRIVATE)
-    private val scannedDevices = linkedMapOf<String, BluetoothDevice>()
 
     private val _uiState = kotlinx.coroutines.flow.MutableStateFlow(
         FieldGuardUiState(
@@ -160,45 +144,6 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     )
     val uiState: kotlinx.coroutines.flow.StateFlow<FieldGuardUiState> = _uiState
 
-    private val gasReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
-                GasReadingStore.ACTION_READING_CHANGED -> updateGas(GasReadingStore.current(appContext))
-                GasMonitoringService.ACTION_CONNECTION_STATUS -> updateState {
-                    val message = intent.getStringExtra(GasMonitoringService.EXTRA_STATUS)
-                        .orEmpty().ifBlank { it.bluetoothStatus }
-                    val lost = message.contains("끊겼") || message.contains("연결 오류") || message.contains("연결을 해제")
-                    it.copy(
-                        bluetoothStatus = message,
-                        sensorConnectionLost = lost,
-                        lastGasReading = if (lost && it.gasReading.hasValues) it.gasReading else it.lastGasReading,
-                        destination = if (lost && it.destination == AppDestination.SENSOR) AppDestination.SENSOR_DISCONNECTED else it.destination,
-                    )
-                }
-            }
-        }
-    }
-
-    private val bleClient = BleGasClient(appContext, object : BleGasClient.Listener {
-        override fun onScanResult(device: BluetoothDevice, rssi: Int) {
-            val name = deviceNameOrFallback(device, "이름 없는 BLE 기기")
-            synchronized(scannedDevices) { scannedDevices[device.address] = device }
-            updateState { state ->
-                val devices = state.devices
-                    .filterNot { it.address == device.address }
-                    .plus(BleDeviceUi(device.address, name, rssi))
-                    .sortedByDescending { it.rssi }
-                state.copy(devices = devices, isScanning = true)
-            }
-        }
-
-        override fun onConnectionStatus(message: String) = updateState {
-            it.copy(bluetoothStatus = message, isScanning = message.contains("검색하는 중"), sensorConnectionLost = false)
-        }
-
-        override fun onReading(reading: GasReading) = updateGas(reading)
-    })
-
     private val workManager = WorkManager.getInstance(appContext)
     private val modelWork = workManager.getWorkInfosForUniqueWorkLiveData(ModelDownloadScheduler.UNIQUE_WORK_NAME)
     private val workObserver = Observer<List<WorkInfo>> { infos ->
@@ -214,26 +159,21 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
             }
             pending -> updateState { it.copy(modelStatus = ModelStatus(ModelPhase.DOWNLOADING, 0), modelProgress = null) }
             else -> {
-                if (status.phase == ModelPhase.READY) runCatching { GasSimulationService.start(appContext) }
                 updateState { it.copy(modelStatus = status, modelProgress = null) }
             }
         }
     }
 
     init {
-        ContextCompat.registerReceiver(
-            appContext,
-            gasReceiver,
-            IntentFilter().apply {
-                addAction(GasReadingStore.ACTION_READING_CHANGED)
-                addAction(GasMonitoringService.ACTION_CONNECTION_STATUS)
-            },
-            ContextCompat.RECEIVER_NOT_EXPORTED,
-        )
         modelWork.observeForever(workObserver)
         seedKnowledge()
-        if (_uiState.value.modelStatus.phase == ModelPhase.READY) {
-            runCatching { GasSimulationService.start(appContext) }
+        viewModelScope.launch {
+            WifiApHub.state.collect { ap ->
+                val reading = ap.selected?.reading() ?: GasReading()
+                updateState { it.copy(wifiAp = ap, gasReading = reading,
+                    gasStatus = if(reading.isFresh()) gasStatusFor(reading) else "현재 측정값 없음 · ${ap.status}",
+                    lastGasReading = if(reading.hasValues) reading else it.lastGasReading) }
+            }
         }
     }
 
@@ -480,37 +420,16 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
         updateState { it.copy(modelStatus = ModelStatus(ModelPhase.DOWNLOADING, 0), modelProgress = null) }
     }
 
-    fun scanBluetooth() {
-        synchronized(scannedDevices) { scannedDevices.clear() }
-        updateState { it.copy(devices = emptyList(), bluetoothStatus = "주변 가스 측정기를 검색하는 중입니다…", isScanning = true, sensorConnectionLost = false) }
-        bleClient.scan()
-    }
-
-    fun bluetoothPermissionDenied() = updateState {
-        it.copy(bluetoothStatus = "가스 측정기 검색에는 Bluetooth 권한이 필요합니다.", isScanning = false, sensorConnectionLost = false, destination = AppDestination.SENSOR)
-    }
-
-    fun connectDevice(address: String, notificationsAllowed: Boolean) {
-        val device = synchronized(scannedDevices) { scannedDevices[address] } ?: return
-        val name = deviceNameOrFallback(device, "BLE 가스 측정기")
-        bleClient.stopScan()
-        GasMonitoringService.connect(appContext, address)
-        updateState {
-            it.copy(
-                isScanning = false,
-                sensorConnectionLost = false,
-                bluetoothStatus = if (notificationsAllowed) "$name 연결을 시작했습니다…"
-                else "$name 연결을 시작했습니다. 알림 패널 표시는 알림 권한을 허용하면 사용할 수 있습니다.",
-            )
+    fun startAp() {
+        runCatching { GasMonitoringService.start(appContext) }.onFailure {
+            WifiApHub.update { it.copy(phase = ApPhase.ERROR, status = "AP를 시작하지 못했어요. 앱을 열어 다시 시도해 주세요.") }
         }
     }
-
-    fun disconnectDevice() {
-        GasMonitoringService.disconnect(appContext)
-        val last = _uiState.value.gasReading
-        GasReadingStore.clear(appContext)
-        updateState { it.copy(bluetoothStatus = "가스 측정기 연결을 해제했습니다.", isScanning = false, sensorConnectionLost = false, lastGasReading = last) }
+    fun wifiPermissionDenied() {
+        WifiApHub.update { it.copy(phase = ApPhase.ERROR, status = "AP 연결에 주변 기기 권한(이전 Android는 위치 권한)이 필요해요.") }
     }
+    fun selectMeter(id: String) = WifiApHub.select(id)
+    fun stopAp() = GasMonitoringService.stop(appContext)
 
     fun releaseQuestionSearchMemory() = viewModelScope.launch(Dispatchers.Default) { semanticEncoder.release() }
 
@@ -544,42 +463,21 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
         it.copy(settings = transform(it.settings), settingsSaved = false)
     }
 
-    private fun updateGas(reading: GasReading) = updateState {
-        it.copy(
-            gasReading = reading,
-            gasStatus = gasStatusFor(reading),
-            lastGasReading = if (reading.hasValues) reading else it.lastGasReading,
-        )
-    }
-
     private fun updateState(transform: (FieldGuardUiState) -> FieldGuardUiState) {
         _uiState.update(transform)
-    }
-
-    private fun deviceNameOrFallback(device: BluetoothDevice, fallback: String): String {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            ContextCompat.checkSelfPermission(appContext, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
-        ) return fallback
-        return try {
-            device.name?.takeIf { it.isNotBlank() } ?: fallback
-        } catch (_: SecurityException) {
-            fallback
-        }
     }
 
     override fun onCleared() {
         persistSettings()
         modelWork.removeObserver(workObserver)
-        runCatching { appContext.unregisterReceiver(gasReceiver) }
-        bleClient.close()
         semanticEncoder.release()
         runtime.release()
         super.onCleared()
     }
 
     private fun gasStatusFor(reading: GasReading): String = when {
-        reading.source == GasReadingSource.SIMULATION -> "데모 시뮬레이션 · 실제 측정값 아님"
-        reading.receivedAtMillis > 0L -> "${reading.deviceName ?: "BLE 측정기"} · ${DateFormat.getTimeInstance(DateFormat.MEDIUM, Locale.KOREA).format(Date(reading.receivedAtMillis))}"
+        reading.source == GasReadingSource.SIMULATION -> "테스트 송신기 · 실제 측정값 아님"
+        reading.receivedAtMillis > 0L -> "${reading.deviceName ?: "Wi-Fi 감지기"} · ${DateFormat.getTimeInstance(DateFormat.MEDIUM, Locale.KOREA).format(Date(reading.receivedAtMillis))}"
         else -> "센서 연결 대기 · 실제 측정값만 표시"
     }
 

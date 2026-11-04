@@ -2,7 +2,9 @@
 
 밀폐공간 안전 문서를 기기 안에서 검색하고, 근거와 원문 PDF를 함께 확인하며, 음성 질문·가스 측정·작업 전 점검을 연결하는 **Android 설치형 앱**입니다. 개발 상태는 **프로토타입**이며 현재 개발 대상은 Android입니다. 웹/PWA의 신규 개발은 중단하고 기존 파일은 보존합니다.
 
-**최종 갱신: 2026-11-03.** 문서 검색·답변·대화 기록은 기기 중심으로 동작합니다. 최초 모델/언어 데이터 준비에는 인터넷이 필요할 수 있고, 작업자 요청·감독관 QR 인증·승인 공유에는 별도의 작업 서버가 필요합니다.
+**최종 갱신: 2026-11-04.** 문서 검색·답변·대화 기록은 기기 중심으로 동작합니다. 최초 모델/언어 데이터 준비에는 인터넷이 필요할 수 있고, 작업자 요청·감독관 QR 인증·승인 공유에는 별도의 작업 서버가 필요합니다.
+
+**스마트폰 AP 센서 수신 전환 (2026-11-04):** Android BLE 검색·연결 코드와 Bluetooth 권한, 자동 가스 데모 서비스를 제거했습니다. **센서 연결 상태 → 휴대폰 AP 시작**에서 인터넷 없는 로컬 Wi-Fi를 열고, 감지기별 값·수신 지연·연결 끊김·선택 장비 요약·왕복 시간을 표시합니다. 현재 TCP/JSON v1은 제조사 규격 협의 전 시험 프로토콜입니다. 실제 AP 생성·감지기 무선 시험은 연결된 기기가 없어 미실행이며 이번 범위는 APK·코드 검사입니다. [AP 사용법·통신 규격·정확한 파일 경로](docs/ANDROID_WIFI_AP.md) · [최종 검사 기록](docs/validation/android-wifi-ap-20261104.json).
 
 **정확도 개선·실기기 측정 (2026-11-03):** 기존 기준 **136/150 → 150/150**, 추가 개발 질문 **24/24**, S24 Ultra/Android 16의 문서 질문 **140/140**을 확인했습니다. 명사구 분리·구어체·잘못된 절차/조건 선택을 고치고 문단 정규화와 검색 세션을 재사용합니다. S24 문서 답변 완료는 중앙값 **0.081초**, 95백분위 **0.146초**, **139/140개가 2초 이내**이며 최초 준비가 포함된 최대값은 **3.055초**였습니다. 실제 화면 프레임 표시·음성 시간은 제외합니다. 일반 지식은 별도 CPU 시험에서 완료까지 **12.45~93.51초**가 걸렸으며 이 실행은 최종 검색 전처리 최적화 전입니다. 생성 엔진·프롬프트·설정은 동일합니다. 전체 긴 생성 1~2초나 모든 새 질문의 정확도를 보장하는 결과가 아닙니다. [현재 설계·정확도·측정 범위](docs/ANDROID_RAG_ACCURACY_LATENCY.md) · [S24 질문별 실제 답변·시간](docs/validation/android-s24-answers-20261103.md) · [상세 요약](docs/validation/android-accuracy-latency-20261103.json). [수정 전 136개 통과 기록](docs/ANDROID_150_EVALUATION_20261103.md)은 비교용으로 보존합니다.
 
@@ -25,7 +27,7 @@
 | 로컬 AI | Gemma 4 E2B 다운로드·저장·기기 내 실행, 문맥/출력 설정 | 생성 모델과 검색 모델은 별도. 실제 기기별 연속 실행·발열·취소 안정화는 남아 있음 |
 | 음성 | Android 12+ 지원 서비스의 기기 내 한국어 STT, 로컬 TTS, 듣기→답변→읽기→다시 듣기 | OS 로컬 언어 지원 필요. 화면 이탈/잠금 시 종료. 실제 현장 소음·긴 대화의 정확도는 추가 시험 필요 |
 | 기록 | 기기 내 대화·근거·확인 선택지·추론 설정 저장 | 현재 SharedPreferences 기반이며 저장 한도는 대화 20개·대화당 80턴. 계정/기기 간 대화 동기화는 없음 |
-| BLE | 가스 데이터 수신·신선도·연결 끊김 표시, 포그라운드 서비스·알림·위젯, 별도 데모 | 특정 제조사 측정기의 UUID/패킷·교정·현장 정확도 검증은 미완료 |
+| Wi-Fi AP | 휴대폰 Local-only AP, 감지기별 TCP·JSON 수신/신선도/연결 상태, 선택 장비 요약·알림·위젯, 명시적 테스트 송신기 | BLE·자동 가상값 제거. 제조사 규격·실제 AP/감지기 RF·화면 잠금 검증은 미완료 |
 | 작업자/감독관 | 요청→감독관 점검·승인→작업자 투입/퇴장, 서버 갱신, 일회용 감독관 QR 인증 | 현재 이 부분은 제한된 WebView와 기존 작업 서버를 사용. 완전한 네이티브 업무 화면·운영 계정/권한 관리로의 전환은 아직 없음 |
 
 앱 전체를 WebView로 만든 구조가 아닙니다. 홈·질문·문서·기록·모델·음성·센서는 네이티브이며 **작업 점검/감독관 인증 부분에만 기존 웹 화면·서버 의존성**이 남아 있습니다. 문서 답변은 실제 현장의 작업허가나 안전 판정을 대신하지 않습니다.
@@ -42,7 +44,7 @@
 | iPhone 웹 로컬 AI의 메모리 종료·재적재 문제 | 경량 모델·중단 보호 등 기존 대응 이력 보존, 현재 개발을 Android 앱으로 집중 | iPhone 문제를 해결 완료로 판정하지 않음. 웹/PWA 신규 개발은 중단 |
 | 한 번만 인식하거나 답변을 짧게 잘라 읽던 음성 경로 | 네이티브 연속 대화 상태 흐름·로컬 한국어 준비 조회·본문 전체 분할 읽기 | 현장 소음·전문 용어·숫자·권한/오류 복구·장시간 동작 실기기 검증 |
 | 작업자/감독관 화면만 나뉘고 실제 승인 교환이 부족함 | 서버 권한 검사·양방향 상태 갱신·감독관의 명시적 승인·QR 인증 | 앱 전용 업무 UI, 운영 로그인·현장 배정·감사/백업·닫힌 앱 알림 |
-| BLE 연결 기반만으로 실제 측정기 동작을 보장하기 어려움 | 수신 출처·데모/실제·신선도·연결 끊김 구분 | 실제 장비 규격 확보 후 어댑터/경보 검증 |
+| BLE 기반만으로 장비 통신을 확정하기 어려움 | Wi-Fi AP 수신으로 교체, ID별 값·단위·순번·신선도 검사 | 제조사와 TCP 규격 확정 후 실제 AP 무선·경보·장기 운용 검증 |
 
 150개 개발 질문을 통과했다는 사실을 처음 보는 모든 질문의 정확도로 해석하지 않습니다. 현재 확인 대화가 과도하게 나오는 사례도 남아 있으며, 문서 근거가 충분한데 묻는 경우와 정말 추가 조건이 필요한 경우를 계속 분리해야 합니다.
 
@@ -71,7 +73,8 @@ flowchart TD
   P -->|쉽게 풀어 설명하는 명시적 요청| AI[LiteRT-LM Gemma 보충 생성]
   AI --> V[근거 ID · 수치 · 조건 검사]
   V -->|통과한 보충만| UI
-  B[BLE 측정기] --> G[수신 · 신선도 · 서비스 · 위젯]
+  B[Wi-Fi STA 감지기] --> AP[휴대폰 Local-only AP]
+  AP --> G[장비별 TCP 수신 · 신선도 · 서비스 · 위젯]
   W[작업 점검 WebView] <--> S[기존 작업 서버 · QR · 승인 기록]
 ```
 
@@ -123,7 +126,7 @@ node tools/prepare-semantic.mjs --android-only
 | `app/src/main/java/com/minyook/sllm2/data/ChatHistoryStore.kt` | 기기 대화·근거·확인 선택지 저장 |
 | `app/src/main/java/com/minyook/sllm2/model/` | LiteRT-LM·모델 다운로드·추론 설정 |
 | `app/src/main/java/com/minyook/sllm2/ui/VoiceConversationController.kt`, `VoiceConversationLoop.kt` | 로컬 STT/TTS·대화 상태·오류/중단 |
-| `app/src/main/java/com/minyook/sllm2/gas/` | BLE·실제/데모·모니터링·경보·위젯 |
+| `app/src/main/java/com/minyook/sllm2/gas/` | Local-only AP·장비별 TCP v1·신선도·선택 장비 요약·경보·위젯. 상세 파일은 AP 설계서 참조 |
 | `app/src/main/java/com/minyook/sllm2/ui/NativeWorkPage.kt`, `WorkServerAddress.kt` | 기존 작업 화면 WebView·서버 주소/출처 제한 |
 | `app/src/main/assets/knowledge/` | 87개 쪽 원문과 393개 의미 인덱스 |
 | `app/src/main/assets/source-pdfs/` | 원본 PDF 2종 |
@@ -186,7 +189,7 @@ node tools/prepare-semantic.mjs --android-only
 
 | 구성 | 구현과 역할 | 실행·진입 경로 |
 |---|---|---|
-| Android 설치형 앱 | Kotlin·Compose 화면, 기기 내 RAG/Gemma, 원본 PDF, 음성, BLE 측정·경보·위젯 | `app/` → Android Studio에서 실행 |
+| Android 설치형 앱 | Kotlin·Compose 화면, 기기 내 RAG/Gemma, 원본 PDF, 음성, Wi-Fi AP 수신·경보·위젯 | `app/` → Android Studio에서 실행 |
 | 반응형 웹/PWA · 보존 | 기존 React·TypeScript 화면, 기기 내 Gemma/Apple 경량 AI, 원문 PDF, 대화 기록, 작업 요청·점검. 현재 신규 개발 중단 | `web/` → 기존 개발 5174 / 미리보기 4173 |
 | 기존 작업 서버 | 기기별 세션, 일회용 감독관 QR·최초 관리자 코드, 요청 소유권·승인 권한 검사, 작업 기록. Android 점검 화면의 기존 의존성 | `web/server/` → Vite 개발·미리보기와 함께 실행 |
 | 공통 작업 화면 | 작업자 요청·감독관 점검·승인·투입·대피·종료 | `web/src/features/WorkChecklist.tsx`; 앱은 이 화면을 제한된 WebView로 사용 |
@@ -220,7 +223,7 @@ APK는 **app/build/outputs/apk/debug/app-debug.apk**이며 연결된 S24에 데�
 
 ## 웹/PWA 로컬 음성 대화와 웹 BLE 철회 (2026-10-27)
 
-이번에 추가한 웹 BLE 연결·측정값 공유 화면과 API는 되돌렸습니다. **기존 Android BLE 및 감독관 QR 인증은 유지합니다.**
+이번에 추가한 웹 BLE 연결·측정값 공유 화면과 API는 되돌렸습니다. 당시 Android BLE 및 감독관 QR 인증은 유지했습니다. **2026-11-04 Android BLE도 제거하고 AP로 전환했습니다.**
 
 질문 화면의 **음성 대화 설정 → 로컬 음성 파일 다운로드 → 음성 대화 시작**을 사용합니다. 처음 한 번 켜면 **말하기 → 약 1.2초 침묵 → 기기 내 한국어 인식 → 기존 문서 답변 → 로컬 읽기 → 다시 듣기**를 반복합니다. 매 질문마다 버튼을 누르거나 누르고 있을 필요가 없습니다. 대화 종료·화면 숨김/이동 시 마이크를 닫고 자동 재시작하지 않습니다.
 
@@ -488,7 +491,7 @@ Sllm2/
 | `ui/WebDesignTokens.kt`, `WorkspaceComponents.kt` | 웹에서 생성한 공통 디자인 토큰·아이콘·카드·버튼·입력·배지 |
 | `ui/FieldWorkspaceUi.kt` | 웹 기준 홈·사이드바·문서 표지·설정·토큰 선택 |
 | `ui/WorkspaceScreens.kt` | 질문·답변·출처·문서 검색/필터·기록·원문 화면 |
-| `ui/FieldGuardViewModel.kt` | 앱 상태·기존 RAG/모델/BLE 호출·작업 서버 주소 저장 |
+| `ui/FieldGuardViewModel.kt` | 앱 상태·기존 RAG/모델/AP 호출·작업 서버 주소 저장 |
 | `ui/NativeWorkPage.kt` | 공통 작업 화면 WebView·서버 설정·네이티브 질문 전환 |
 | `ui/WorkServerAddress.kt` | HTTPS/개발 localhost·동일 출처 검증 |
 | `ui/MarkdownText.kt`, `MarkdownBlocks.kt`, `SourcePdfPage.kt` | Markdown 답변·원본 PDF 표시 |
@@ -497,7 +500,7 @@ Sllm2/
 | `data/QuestionEvidencePlanner.kt`, `QuestionAnswerVerifier.kt` | 복합 주제·근거 누락/충돌 검사 |
 | `data/SourcePdfCatalog.kt`, `SourcePdfRepository.kt` | 번들 PDF 판본·해시·실제 쪽 렌더링 |
 | `model/LocalModelRuntime.kt`, `ModelDownloadWorker.kt` | Android LiteRT-LM·모델 다운로드 |
-| `gas/` | BLE 수신·측정 서비스·데모 구분·위젯·알림 |
+| `gas/` | Local-only AP·TCP 수신·감지기별 값·테스트 구분·위젯·알림 |
 
 현재 진입 UI는 `TossFieldGuardApp`입니다. `ui/HybridTechApp.kt`와 `HybridTechTheme.kt`는 이전 화면 구현과 공통 액션 선언을 포함하므로 현재 앱의 기준 화면과 혼동하지 않습니다.
 
@@ -576,7 +579,7 @@ Android의 이전 실기기/APK 결과와 웹의 현재 자동 검사·화면 �
 |---|---|
 | [iPhone HTTPS 시험](docs/IPHONE_TEST.md) | 같은 Wi-Fi·인증서 설치·4172/4174·PWA·키 경로 |
 | [앱·웹 공통 디자인](docs/ANDROID_WEB_DESIGN.md) | 화면 대응·같은 아이콘/색상 생성·캡처 |
-| [Android 현행 설계서](docs/ANDROID_APP_SPEC.md) | 네이티브 화면·RAG·BLE·공통 작업 화면 연결 |
+| [Android 현행 설계서](docs/ANDROID_APP_SPEC.md) | 네이티브 화면·RAG·Wi-Fi AP·공통 작업 화면 연결 |
 | [웹·서버 현행 설계서](docs/webapp/TARGET_ARCHITECTURE.md) | React·Worker·저장소·인증·API 구조 |
 | [작업 흐름 설계](web/docs/workflow.md) | 당일 6자리 코드·역할·작업 상태·승인 조건 |
 | [웹 실행 안내](web/README.md) | 모델·토큰·PWA·서버 명령·배포 설정 |
@@ -584,6 +587,6 @@ Android의 이전 실기기/APK 결과와 웹의 현재 자동 검사·화면 �
 | [Android 오프라인 RAG](docs/OFFLINE_RAG_ARCHITECTURE.md) | 기존 기기 내 근거 검색·검증 |
 | [유지보수 기준](docs/webapp/BUILD_PROMPT.md) | 이후 변경에서 보존할 동작 |
 
-현재 BLE 수신 기반과 데모 구분은 구현되어 있지만 특정 제조사 프로토콜·현장 장비 정확도는 검증 전입니다. 실제 작업허가·현장 안전 판단·대피 절차는 담당자의 현장 확인을 따릅니다.
+현재 Wi-Fi AP 수신 프로토타입은 구현되어 있지만 실제 AP/감지기 무선 연결·제조사 프로토콜·현장 장비 정확도는 검증 전입니다. 실제 작업허가·현장 안전 판단·대피 절차는 담당자의 현장 확인을 따릅니다.
 
 </details>

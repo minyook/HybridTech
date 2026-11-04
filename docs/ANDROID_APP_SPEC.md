@@ -1,5 +1,7 @@
 # O₂ Field Guard Android 앱 현행 설계서
 
+2026-11-04 변경: BLE 코드·권한·검색과 자동 가스 데모 서비스를 제거하고 스마트폰 Local-only AP + 장비별 TCP 수신으로 전환했다. **APK·코드 검사 범위이며 실제 AP/감지기 무선 시험은 미실행**이다. [AP 상세 설계·시험 규격·파일 경로](ANDROID_WIFI_AP.md).
+
 2026-11-03 검색·속도 개선: 연결된 명사구를 보존하고 구어체를 검색에만 정규화한다. 원문 제목·고유 대상 근거와 의미 점수를 함께 검토하고, 연속 절차·필수 조건을 연결한다. 문서 답변은 바로 완료하며 쉽게 풀어달라는 명시적 요청에만 보충을 생성한다. 검색 세션은 재사용하고 Gemma 실행 전·배경 전환 시 해제한다. [현재 정확도·S24 측정·파일 경로](ANDROID_RAG_ACCURACY_LATENCY.md).
 
 2026-10-30 검색 후속 변경: 실제 질문은 `QuestionSearchCoordinator`를 사용한다. 일반 어휘 후보를 의미 검색으로 재검토하고 복합 질문은 각 주제별로 찾는다. 인덱스/토크나이저/최근 질문 벡터를 재사용한다. 완료한 검색에서 직접 근거를 확인하지 못한 주제만 일반 지식 안내를 붙여 로컬 Markdown 생성을 시도한다. 검색 오류·진짜 모호성은 부재와 구분한다. [현재 설계·검증·속도 한계](ANDROID_REVIEWED_RAG.md).
@@ -25,17 +27,17 @@
 
 ## 1. 제품 목적과 구현 범위
 
-O₂ Field Guard는 밀폐공간 작업자가 기본 제공 안전 문서를 질문하고 해당 PDF 쪽을 확인하며, BLE 가스 측정 상태와 작업 전 점검 항목을 한 기기에서 확인하는 Android **프로토타입**이다. 질문·답변·이전 단순 점검은 기기에 저장하며 새 작업 요청·점검/승인은 설정한 작업 서버에 저장한다. 첫 AI 모델 다운로드에는 인터넷이 필요하지만, 이미 준비된 문서 검색과 로컬 모델 추론에는 별도 질문 서버가 없다.
+O₂ Field Guard는 밀폐공간 작업자가 기본 제공 안전 문서를 질문하고 해당 PDF 쪽을 확인하며, Wi-Fi AP 감지기 수신 상태와 작업 전 점검 항목을 한 기기에서 확인하는 Android **프로토타입**이다. 질문·답변·이전 단순 점검은 기기에 저장하며 새 작업 요청·점검/승인은 설정한 작업 서버에 저장한다. 첫 AI 모델 다운로드에는 인터넷이 필요하지만, 이미 준비된 문서 검색과 로컬 모델 추론에는 별도 질문 서버가 없다.
 
 | 영역 | 현재 구현 |
 | --- | --- |
 | 문서 | 기본 PDF 2개와 쪽별 검색 데이터 87개. 2022 안전 가이드 84쪽, 2026 자율점검표 3쪽. 문서·쪽·검색 근거 연결 |
 | 질문 | 로컬 검색, 선택된 쪽을 이용한 Gemma 4 E2B 답변, 모델 부재·실패 시 근거 원문 표시, 로컬 대화 기록 |
-| 측정 | 일반 형식의 BLE 패킷 수신, O₂·H₂S·CO·LEL 표시, 60초 신선도, 연결 끊김/과거값 표시, 별도 데모 시뮬레이션 |
+| 측정 | 스마트폰 Local-only AP·TCP JSON v1, ID별 값·순번·신선도·연결 상태, 테스트 표시. 실제 장비 규격 협의 전 |
 | 점검 | 같은 웹 화면/API로 작업 요청·감독관 5항목 점검·승인·투입/퇴장. 이전 단순 기기 체크도 보존. 실제 작업허가 자동 인증은 없음 |
 | 음성 | 지원 단말의 기기 내 한국어 음성 인식, 전경에서만 호출어 `오투야`, 조건·표를 보존한 전체 본문 로컬 TTS·연속 대화 |
-| 기기 기능 | 포그라운드 BLE 서비스, 측정 알림과 홈 화면 위젯, 모델 다운로드 알림 |
-| 운영 범위 | 대화·모델·BLE는 기기 중심. 새 작업 기록은 서버 공유. 개인 계정·현장 배정·사용자 PDF 업로드·제조사별 검증된 측정기 드라이버는 없음 |
+| 기기 기능 | 포그라운드 Wi-Fi AP 서비스, 측정 알림과 홈 화면 위젯, 모델 다운로드 알림 |
+| 운영 범위 | 대화·모델·AP 수신은 기기 중심. 새 작업 기록은 서버 공유. 개인 계정·현장 배정·사용자 PDF 업로드·제조사별 검증된 측정기 드라이버는 없음 |
 
 안전 수치가 보인다는 이유로 앱이 작업 가능·진입 가능을 판정하지 않는다. 제공 문서의 인용과 현장 절차 확인을 돕는 도구다.
 
@@ -54,9 +56,9 @@ flowchart LR
   RAG --> PDF["번들 PDF 2개·87쪽 추출 데이터"]
   VM --> LLM["LiteRT-LM / Gemma 4 E2B"]
   VM --> CHAT["SharedPreferences 대화·점검·설정"]
-  METER["BLE 측정기"] --> BLE["BleGasClient / MonitoringService"]
-  DEMO["GasSimulationService"] --> GAS["GasReadingStore"]
-  BLE --> GAS
+  METER["Wi-Fi 감지기"] --> AP["GasMonitoringService / Local-only AP"]
+  AP --> TCP["WifiMeterServer / ID별 Registry"]
+  TCP --> GAS["선택 장비 GasReadingStore"]
   GAS --> UI
   GAS --> WIDGET["위젯·알림"]
 ```
@@ -71,14 +73,14 @@ flowchart LR
 
 | 화면 (`AppDestination`) | 현재 보이는 내용과 주요 동작 |
 | --- | --- |
-| 온보딩 | 로컬 문서 2개·87개 쪽, 로컬 AI, BLE, 첫 모델 다운로드와 안전 안내를 보여주고 시작 |
+| 온보딩 | 로컬 문서 2개·87개 쪽, 로컬 AI, Wi-Fi AP, 첫 모델 다운로드와 안전 안내를 보여주고 시작 |
 | `HOME` 홈 | 웹과 같은 소개 카드·방패, 문서/PDF/모델 준비, 현장 준비 카드·빠른 질문, 네이티브 가스 요약 |
 | `CHAT` 문서 질문 | 빠른 질문 3개, 질문 입력·전송·음성 진입, 진행 중 표시, 답변과 근거 쪽, 최근 답변·기록 이동 |
 | `HISTORY` 대화 기록 | 저장된 대화 목록, 대화 열기, 새 대화 |
 | `SOURCE` 근거 문서 | 문서명·쪽수, **PDF 원본 / 읽기 좋은 보기 / 실제 추출 텍스트** 전환, 앞뒤 근거 이동, PDF 확대 75~200% |
 | `VOICE` 음성 질문 | 연속 대화 시작·종료, 한국어 준비 조회/다운로드, 로컬 읽기 설정, 전경 호출어 대기, 인식/응답 상태 |
-| `SENSOR` 가스 측정 | O₂/H₂S/CO/LEL, 수신 출처·시각, BLE 검색·기기 선택·연결/끊기, 데모와 실제 측정 구분 |
-| `SENSOR_DISCONNECTED` 센서 상태 | 연결 끊김 안내, 과거값을 현재값과 구분해 표시, 다시 검색 |
+| `SENSOR` 가스 측정 | AP 시작/종료·연결 정보·감지기별 O₂/H₂S/CO/LEL·지연/끊김·왕복 ms·선택 장비 요약 |
+| `SENSOR_DISCONNECTED` 센서 상태 | 동일 AP 화면으로 연결, 현재값 마스킹·개별 기기 재접속 상태 |
 | `CHECKLIST` 작업 전 점검 | `NativeWorkPage.kt`의 같은 서버 웹 화면, 작업자 본인 요청·투입/퇴장 |
 | `SUPERVISOR` 감독관 인증 | 오늘의 숫자 6자리 입력 후 서버 인증된 점검·승인 화면 |
 | `WORK_SERVER` 현장 작업 서버 | HTTPS origin 저장, 디버그 USB localhost 허용 |
@@ -90,7 +92,7 @@ flowchart LR
 | `DATA` 내 데이터 | 기기 대화 수, 기본 문서·색인, 마지막 가스값, 대화 전체 삭제 확인 |
 | `SYSTEM` 위젯과 알림 | 측정 상태의 홈 화면 위젯·알림 안내와 오래된 값 비표시 설명 |
 
-화면 상태에는 온보딩 여부, 선택된 근거와 돌아갈 화면, 질문 입력·오류·응답 진행, 모델 상태/진행률, 검색 결과, BLE 검색·연결 상태, 체크 5개, 현재/마지막 가스값 등이 포함된다. 화면 데이터 구조는 [FieldGuardUiState](../app/src/main/java/com/minyook/sllm2/ui/FieldGuardViewModel.kt)와 음성 상태를 참조한다.
+화면 상태에는 온보딩 여부, 선택된 근거와 돌아갈 화면, 질문 입력·오류·응답 진행, 모델 상태/진행률, 검색 결과, AP 시작/종료·감지기별 연결 상태, 체크 5개, 현재/마지막 가스값 등이 포함된다. 화면 데이터 구조는 [FieldGuardUiState](../app/src/main/java/com/minyook/sllm2/ui/FieldGuardViewModel.kt)와 음성 상태를 참조한다.
 
 ### 현재 디자인 토큰
 
@@ -129,19 +131,15 @@ Compose의 밝은 화면, 둥근 카드, 짧은 한국어 문구가 기본이다
 
 현재 다운로드 소스는 빌드 설정의 외부 모델 URL이다. 파일 크기 조건은 확인하지만 모델 파일의 암호학적 해시나 서명 매니페스트 검증은 아직 구현되어 있지 않다. 따라서 모델 공급·무결성 체계를 운영 수준으로 완료했다고 표현하지 않는다.
 
-## 6. 가스 측정·시뮬레이션
+## 6. Wi-Fi AP 가스 수신
 
-### 6.1 수신과 표시
+`GasMonitoringService`가 사용자가 켠 Local-only AP 예약과 AP 주소에만 바인딩한 `WifiMeterServer`를 소유한다. `WifiMeterProtocol`은 유계 UTF-8 JSON 프레임과 명시적 단위·순번·장비 ID·연결 코드를 검사한다. `WifiMeterRegistry`는 감지기별 값을 분리하고 선택한 장비 하나만 `GasReadingStore`로 내보낸다.
 
-[GasReading](../app/src/main/java/com/minyook/sllm2/gas/GasReading.kt)은 nullable O₂ %, H₂S ppm, CO ppm, LEL %, 수신 시각, 기기 이름, `NONE`/`BLE`/`SIMULATION` 출처를 갖는다. 값이 있고 수신 후 **60초 미만**이며 시각이 유효할 때만 신선하다. 신선하지 않은 현재 수치는 `—`로 표시하고 마지막 값을 과거값으로 구분한다. BLE 세션이 시작되면 이전 값을 먼저 지운다.
+신선도는 장비별 `max(3000ms, intervalMs×3)`이며 센서 자체 측정 경과시간도 포함한다. 센서 오류·끊김·지연에는 현재값을 숨긴다. heartbeat는 측정값의 신선도를 갱신하지 않는다. 화면 250ms/저장·알림·위젯 최대 1초 갱신이다. AP 연결 정보는 세션 메모리에만 남고 이전 세션을 자동 복원하지 않는다.
 
-[BleGasClient](../app/src/main/java/com/minyook/sllm2/gas/BleGasClient.kt)는 BLE 기기를 검색하고 GATT에 연결해 알림/표시 가능한 특성을 구독한다. [GasPacketParser](../app/src/main/java/com/minyook/sllm2/gas/GasReading.kt)는 UTF-8 JSON, `key=value`, 4열 CSV 형태와 이름 별칭을 받아 범위상 그럴듯한 값만 통과시킨다. 이는 **제조사 프로토콜·단위·CRC·검교정 검증이 아니다**. 특정 실측 장비와 정확성이 확인된 완성 드라이버로 간주하지 않는다.
+BLE 클라이언트·Bluetooth 권한·관대한 CSV/키=값 파서·자동 데모 서비스는 제거했다. 테스트 송신기의 `test:true`는 실측과 구별해 표시한다. 모델 준비가 가스값을 생성하지 않는다. 장비 경보를 전달하는 기능은 있으며 수치에서 앱이 작업 가능을 판정하지 않는다. 감지기 자체 경보·AI와 프로세스 격리·현장 검증은 후속 사항이다.
 
-[GasMonitoringService](../app/src/main/java/com/minyook/sllm2/gas/GasMonitoringService.kt)는 사용자가 연결한 BLE 세션을 포그라운드 서비스로 유지하고 상태 알림을 갱신한다. [GasWidgetProvider](../app/src/main/java/com/minyook/sllm2/gas/GasWidgetProvider.kt)와 알림도 오래된 수치를 현재값으로 보여주지 않는다.
-
-### 6.2 데모
-
-[GasSimulationService](../app/src/main/java/com/minyook/sllm2/gas/GasSimulationService.kt)는 시연용 가스값을 약 20초 간격으로 만들고 `SIMULATION` 출처를 붙인다. 로컬 모델 준비 후 자동 시작 경로가 있으며 실제 BLE 연결을 시작하면 중지된다. 데모 수치를 실측이나 작업허가 근거로 사용하지 않는다. 자동 시뮬레이션이 있다는 점은 웹앱 이전 시 특히 주의해야 한다.
+정확한 API 버전 분기·연결 방법·메시지 예시·파일 경로·보안 및 검증 한계는 [Wi-Fi AP 설계](ANDROID_WIFI_AP.md)를 따른다. TCP 동시 연결 소프트웨어 한도 16은 휴대폰의 실제 무선 수용량이 아니다.
 
 ## 7. 음성, 점검, 저장
 
@@ -166,7 +164,7 @@ Android 12 이상의 기기 내 인식기만 사용합니다. 한 번 시작하�
 | AI 모델 | 첫 다운로드에 인터넷 필요; 이후 `noBackupFilesDir/models`에서 로컬 추론 |
 | 작업 API | 설정한 같은 서버의 `/api/`에 작업 요청·점검·승인·투입/퇴장 저장. 대화·가스 업로드 API와 개인 계정은 없음 |
 
-[AndroidManifest](../app/src/main/AndroidManifest.xml)에는 인터넷, 마이크, 알림, BLE 스캔/연결, 구형 Android의 위치·Bluetooth, 포그라운드 서비스 권한이 선언되어 있다. 실제 요청 시점은 기능에 맞춰 `MainActivity`에서 처리한다. `android:allowBackup=true`이며 [backup_rules.xml](../app/src/main/res/xml/backup_rules.xml)과 [data_extraction_rules.xml](../app/src/main/res/xml/data_extraction_rules.xml)은 기본 템플릿이다. **앱 서버로 보내지 않는다는 사실이 OS 백업 가능성까지 배제한다는 뜻은 아니다.**
+[AndroidManifest](../app/src/main/AndroidManifest.xml)에는 인터넷, 마이크, 알림, Wi-Fi 상태/변경·주변 기기·로컬 네트워크, Android 12L 이하 위치, 포그라운드 서비스 권한이 선언되어 있다. 실제 요청 시점은 기능에 맞춰 `MainActivity`에서 처리한다. `android:allowBackup=true`이며 [backup_rules.xml](../app/src/main/res/xml/backup_rules.xml)과 [data_extraction_rules.xml](../app/src/main/res/xml/data_extraction_rules.xml)은 기본 템플릿이다. **앱 서버로 보내지 않는다는 사실이 OS 백업 가능성까지 배제한다는 뜻은 아니다.**
 
 ### 공통 작업 화면과 감독관 코드
 
@@ -181,7 +179,7 @@ Android 12 이상의 기기 내 인식기만 사용합니다. 한 번 시작하�
 - 문서 근거가 없으면 근거 없음으로 답하고 안전 수치나 절차를 꾸며내지 않는다. AI 모델 미설치·실패 시 문서 검색과 근거 원문 보기는 남는다.
 - PDF 원본 복사·검증·렌더링 실패 시 추출 텍스트로 정보를 확인할 수 있다.
 - 센서가 없거나 연결이 끊기거나 값이 오래되면 현재값을 숨긴다. 마지막 값과 데모는 현재 실측과 구분한다.
-- 현재 BLE 파서는 범위 검사를 하지만 특정 제조사의 GATT UUID, 패킷 규격, 단위·CRC·검교정, 임계치·경보 검증은 없다. 현장 실측 정확도를 보장하지 않는다.
+- 현재 TCP JSON v1은 시험 규격이다. 제조사 감지기의 실제 Wi-Fi AP 연결·단위·검교정·경보·연속 운용 검증은 없다. 현장 실측 정확도를 보장하지 않는다.
 - 대화/점검은 로컬 중심이다. 개인 계정, 대화·모델의 기기 간 동기화, 사용자 문서 업로드, 실제 작업허가 자동 인증, 서버 AI·가스 수집은 현재 앱 기능이 아니다. 새 작업 요청·감독관 점검/승인 기록만 같은 서버에서 공유한다.
 - 음성은 Android 기기 내 인식 지원에 의존한다. 모든 Android 단말에서 동일하게 작동한다는 주장은 할 수 없다.
 

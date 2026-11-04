@@ -97,9 +97,9 @@ data class FieldGuardActions(
     val onContextTokens: (Int) -> Unit,
     val onResponseTokens: (Int) -> Unit,
     val onSaveSettings: () -> Unit,
-    val onScanBluetooth: () -> Unit,
-    val onConnectDevice: (String) -> Unit,
-    val onDisconnectDevice: () -> Unit,
+    val onStartAp: () -> Unit,
+    val onSelectMeter: (String) -> Unit,
+    val onStopAp: () -> Unit,
     val onVoiceClick: () -> Unit,
     val onVoiceLongClick: () -> Unit,
     val onAutomaticAnswerLength: (Boolean) -> Unit = {},
@@ -161,7 +161,7 @@ fun HybridTechApp(
             }
             val subtitle = when (state.destination) {
                 AppDestination.CHAT -> state.knowledgeStatus
-                AppDestination.SENSOR -> "Bluetooth LE 가스 검출기"
+                AppDestination.SENSOR -> "Wi-Fi AP 가스 감지기"
                 AppDestination.SETTINGS -> "온디바이스 모델 및 추론"
                 else -> state.knowledgeStatus
             }
@@ -409,36 +409,7 @@ private fun ChatComposer(state: FieldGuardUiState, voice: VoiceUiState, actions:
 
 @Composable
 private fun SensorScreen(state: FieldGuardUiState, actions: FieldGuardActions, padding: PaddingValues) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(padding),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
-        item { SensorGasCard(state.gasReading, state.gasStatus) }
-        item {
-            FieldCard {
-                Text("Bluetooth LE 가스 검출기", style = MaterialTheme.typography.titleLarge)
-                Text(state.bluetoothStatus, style = MaterialTheme.typography.bodyMedium, color = HybridMuted, modifier = Modifier.padding(top = 5.dp))
-                Row(Modifier.padding(top = 14.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = actions.onScanBluetooth, modifier = Modifier.testTag("scanBluetooth")) { Text(if (state.isScanning) "검색 중…" else "기기 검색") }
-                    if (state.bluetoothStatus.startsWith("연결")) OutlinedButton(onClick = actions.onDisconnectDevice) { Text("연결 해제") }
-                }
-            }
-        }
-        if (state.devices.isNotEmpty()) {
-            item { Text("검색된 기기", style = MaterialTheme.typography.titleMedium) }
-            items(state.devices, key = { it.address }) { device ->
-                FieldCard(onClick = { actions.onConnectDevice(device.address) }) {
-                    Text(device.name, style = MaterialTheme.typography.titleMedium)
-                    Text("${device.address} · ${device.rssi} dBm", color = HybridMuted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 3.dp))
-                    Text("탭하여 연결", color = HybridTeal, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
-                }
-            }
-        }
-        item {
-            Text("BLE 알림 채널의 JSON, key=value 또는 O₂/H₂S/CO/LEL 4열 CSV 패킷을 자동 해석합니다. 실제 계측값이 수신될 때만 저장·알림·위젯에 반영됩니다.", color = HybridMuted, style = MaterialTheme.typography.bodyMedium)
-        }
-    }
+    Box(Modifier.padding(padding)) { WifiApSensorScreen(state, actions) }
 }
 
 @Composable

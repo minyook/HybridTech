@@ -21,7 +21,6 @@ import androidx.work.workDataOf
 import com.minyook.sllm2.BuildConfig
 import com.minyook.sllm2.MainActivity
 import com.minyook.sllm2.R
-import com.minyook.sllm2.gas.GasSimulationService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.BufferedInputStream
@@ -107,9 +106,6 @@ class ModelDownloadWorker(
                 if (!part.renameTo(target)) throw IOException("다운로드 파일을 완성 상태로 바꾸지 못했습니다.")
 
                 state.markReady()
-                // The download itself is a foreground task, so the labelled demo card can
-                // appear immediately after preparation even if the activity was closed.
-                runCatching { GasSimulationService.start(applicationContext) }
                 setProgress(workDataOf("downloadedBytes" to actualBytes, "totalBytes" to actualBytes))
                 Result.success()
             } finally {
