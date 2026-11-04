@@ -50,9 +50,8 @@ object FocusedEvidence {
                     if(Regex("^(?:\\d+|[가-하])\\.$").matches(unit.text.trim()))return@forEach
                     val key = unit.text.replace(Regex("\\s+"), " ")
                     if (!seen.add(key)) return@forEach
-                    if (unit.section.isNotBlank() && unit.section != section) { section = unit.section; add("**${unit.section}**") }
-                    val visible = unit.text.replace(Regex("\\d+(?:\\.\\d+)?(?:\\s*[~～]\\s*\\d+(?:\\.\\d+)?)?\\s*(?:%|ppm|cm|mmAq|m3/min|미터|센티미터|초|분|시간|회|개소)(?:\\s*(?:이상|미만|이하|초과))?", RegexOption.IGNORE_CASE)) { "**${it.value}**" }
-                    add("- $visible")
+                    if (unit.section.isNotBlank() && unit.section != section) { section = unit.section; add("### ${unit.section}") }
+                    addAll(AnswerMarkdown.evidenceLines(unit.text))
                 }
             }.joinToString("\n\n")
         }.filter(String::isNotBlank).joinToString("\n\n")

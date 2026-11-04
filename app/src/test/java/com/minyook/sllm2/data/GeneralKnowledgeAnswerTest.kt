@@ -28,4 +28,10 @@ class GeneralKnowledgeAnswerTest {
         assertNull(GeneralKnowledgeAnswer.partial("제공된 문서에는 그 내용이 없습니다.","새로운 질문"))
         assertNotNull(GeneralKnowledgeAnswer.partial("전압은 전기적 전위 차이를 뜻합니다.","전압의 의미가 뭐야?"))
     }
+    @Test fun reachedLimitIsVisibleInsteadOfPretendingTheAnswerFinished() {
+        val answer = GeneralKnowledgeAnswer.finish("핵심 설명입니다.\n\n- **아직 이어지는 조건", "일반 원리", outputLimitReached = true)
+        assertTrue(answer.contains("**아직 이어지는 조건**"))
+        assertTrue(answer.endsWith(GeneralKnowledgeAnswer.LIMIT_NOTICE))
+        assertFalse(GeneralKnowledgeAnswer.finish("완결된 설명입니다.", "일반 원리").contains(GeneralKnowledgeAnswer.LIMIT_NOTICE))
+    }
 }

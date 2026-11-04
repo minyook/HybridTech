@@ -1,6 +1,7 @@
 package com.minyook.sllm2.ui
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -21,5 +22,28 @@ class MarkdownBlocksTest {
         val blocks=markdownBlocks("A | B\n18~23.5%\n<img src='https://example.invalid/a'>")
         assertTrue(blocks.all{it is MarkdownBlock.Line})
         assertEquals("18~23.5%",(blocks[1] as MarkdownBlock.Line).text)
+    }
+    @Test fun raggedTableRowsNeverLoseExtraCells() {
+        val table = markdownBlocks("|A|B|\n|---|---|\n|1|2|기존에는 사라진 내용|").single() as MarkdownBlock.Table
+        assertEquals(3, table.rows[0].size)
+        assertEquals("기존에는 사라진 내용", table.rows[1][2])
+    }
+    @Test fun literalPipesInsideCodeStayInOneCell() {
+        val table = markdownBlocks("|항목|값|\n|---|---|\n|원문|`A|B`|").single() as MarkdownBlock.Table
+        assertEquals(listOf("원문", "`A|B`"), table.rows[1])
+    }
+    @Test fun nestedListsAndLongNumbersKeepTheirBody() {
+        assertEquals(MarkdownListEntry("•", "조건을 확인합니다.", 2), markdownListEntry("    *   조건을 확인합니다."))
+        assertEquals("100.", markdownListEntry("100. 마지막 항목")!!.marker)
+        assertNull(markdownListEntry("23.5% 미만"))
+        assertNull(markdownListEntry("-12도"))
+    }
+    @Test fun inlineEmphasisCodeLinksAndDividersAreParsedWithoutRawSyntax() {
+        val runs = markdownInline("**강조**와 *설명*, `A|B`, [원문](https://example.invalid)")
+        assertTrue(runs.any { it.bold && it.text == "강조" })
+        assertTrue(runs.any { it.italic && it.text == "설명" })
+        assertTrue(runs.any { it.code && it.text == "A|B" })
+        assertEquals("강조와 설명, A|B, 원문 (https://example.invalid)", runs.joinToString("") { it.text })
+        assertEquals(MarkdownBlock.Divider, markdownBlocks("---").single())
     }
 }

@@ -343,17 +343,22 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
             val generalQuestion=resolution.generalQuestion.takeIf{resolution.searchComplete}
             val general = if(generalQuestion!=null){
                 if(modelPreferences.status().phase!=ModelPhase.READY)GeneralKnowledgeAnswer.NOTICE+"\n\n일반 지식 답변에 사용할 로컬 AI 모델이 필요해요. 설정에서 모델을 다운로드해 주세요."
-                else try{
+                else {
+                var lastGeneralBody: String? = null
+                var outputLimitReached = false
+                try{
                     semanticEncoder.release()
-                    val raw=runtime.generate(generalQuestion,"",compactVoiceAnswer,generalKnowledge=true,onPartialAnswer={partial->
+                    val raw=runtime.generate(generalQuestion,"",compactVoiceAnswer,generalKnowledge=true,onOutputLimit={ outputLimitReached = it },onPartialAnswer={partial->
                         GeneralKnowledgeAnswer.partial(partial,generalQuestion)?.let{body->
+                            lastGeneralBody = body
                             val combined=if(sources.isEmpty())body else plan.body+"\n\n"+body
                             updateState{state->state.copy(messages=state.messages.map{if(it.id==pending.id)it.copy(text=combined,sourceIds=sourceIds,sourceLabels=plan.sourceLabels) else it})}
                             recordFirstBody("general")
                         }
                     })
-                    GeneralKnowledgeAnswer.finish(raw,generalQuestion)
-                }catch(cancelled:CancellationException){throw cancelled}catch(_:Exception){GeneralKnowledgeAnswer.NOTICE+"\n\n로컬 AI 답변을 완료하지 못했어요. 모델 상태를 확인한 뒤 다시 질문해 주세요."}
+                    GeneralKnowledgeAnswer.finish(raw,generalQuestion,outputLimitReached)
+                }catch(cancelled:CancellationException){throw cancelled}catch(_:Exception){(lastGeneralBody ?: GeneralKnowledgeAnswer.NOTICE)+"\n\n> 답변 생성이 중단됐어요. 위 내용은 완료된 답변의 일부예요. 모델 상태를 확인한 뒤 다시 질문해 주세요."}
+                }
             }else ""
             val supplement = if (generalQuestion==null && resolution.status=="answered" && plan.supplementRequested && modelPreferences.status().phase == ModelPhase.READY) {
                 try {

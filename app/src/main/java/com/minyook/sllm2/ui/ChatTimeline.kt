@@ -20,6 +20,7 @@ internal sealed interface ChatTimelineRow {
             is MarkdownBlock.Code -> "answerCode"
             is MarkdownBlock.Table -> "answerTable"
             is MarkdownBlock.Line -> "answerLine"
+            MarkdownBlock.Divider -> "answerDivider"
         }
     }
     data class Footer(val message: ChatMessageUi) : ChatTimelineRow {

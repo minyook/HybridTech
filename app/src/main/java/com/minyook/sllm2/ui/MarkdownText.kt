@@ -24,6 +24,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,8 +58,13 @@ fun MarkdownText(markdown: String, modifier: Modifier = Modifier) {
                 }
                 return
             }
+            if (block == MarkdownBlock.Divider) {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color(0xFFE8EDF4)); return
+            }
             val original=(block as MarkdownBlock.Line).text
-            val line = original.trimEnd()
+            val line = original.trim()
+            val list = markdownListEntry(original)
+            val heading = Regex("^(#{1,6})\\s+(.+?)(?:\\s+#+)?$").find(line)
             when {
                 line.isBlank() -> Spacer(Modifier.padding(vertical = 3.dp))
                 line.startsWith(">") || line.startsWith("※") -> Text(
@@ -66,41 +72,34 @@ fun MarkdownText(markdown: String, modifier: Modifier = Modifier) {
                     modifier = Modifier.fillMaxWidth().background(Color(0xFFEEF5FF)).padding(horizontal = 17.dp, vertical = 12.dp),
                     style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFF5A7294)),
                 )
-                line.startsWith("### ") -> Text(inlineMarkdown(line.removePrefix("### ")), fontSize=15.sp,lineHeight=24.sp,fontWeight=FontWeight.Bold,color=Color(0xFF24344B), modifier = Modifier.padding(top = 12.dp, bottom = 6.dp))
-                line.startsWith("## ") -> Text(inlineMarkdown(line.removePrefix("## ")),fontSize=18.sp,lineHeight=28.sp,fontWeight=FontWeight.Bold,color=Color(0xFF24344B), modifier = Modifier.padding(top = 14.dp, bottom = 8.dp))
-                line.startsWith("# ") -> Text(inlineMarkdown(line.removePrefix("# ")),fontSize=23.sp,lineHeight=35.sp,fontWeight=FontWeight.Bold,color=Color(0xFF24344B), modifier = Modifier.padding(top = 24.dp, bottom = 13.dp))
-                line.startsWith("- ") || line.startsWith("* ") -> MarkdownListItem("•", line.drop(2))
-                line.matches(Regex("^\\d+[.)]\\s+.*")) -> MarkdownListItem(line.takeWhile { !it.isWhitespace() }, line.substringAfter(' '))
-                line.isNotEmpty() && line[0] in "•□○●❶❷❸❹❺❻❼❽❾❿①②③④⑤⑥⑦⑧⑨⑩" -> MarkdownListItem(line.take(1), line.drop(1).trim())
-                else -> Text(inlineMarkdown(line), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(vertical = 1.dp))
+                heading != null -> {
+                    val level = heading.groupValues[1].length
+                    Text(inlineMarkdown(heading.groupValues[2]), fontSize = (if(level == 1) 21 else if(level == 2) 18 else 15).sp,
+                        lineHeight = 28.sp, fontWeight = FontWeight.Bold, color = Color(0xFF24344B),
+                        modifier = Modifier.padding(top = 12.dp, bottom = 5.dp))
+                }
+                list != null -> MarkdownListItem(list)
+                else -> Text(inlineMarkdown(line), style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 26.sp), modifier = Modifier.padding(vertical = 1.dp))
             }
 }
 
-@Composable private fun MarkdownListItem(marker: String, body: String) {
-    Row(Modifier.fillMaxWidth().padding(vertical=3.dp), horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-        Text(marker, fontSize=13.sp,lineHeight=24.sp,color=Color(0xFF6B7F98),modifier=Modifier.width(22.dp))
-        Text(inlineMarkdown(body), fontSize=14.sp,lineHeight=24.sp,color=Color(0xFF38485B),modifier=Modifier.weight(1f))
+@Composable private fun MarkdownListItem(item: MarkdownListEntry) {
+    Row(Modifier.fillMaxWidth().padding(start = (item.depth * 12).dp).padding(vertical = 3.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(item.marker, fontSize = 13.sp, lineHeight = 26.sp, color = Color(0xFF6B7F98), modifier = Modifier.width(maxOf(22, item.marker.length * 8).dp))
+        Text(inlineMarkdown(item.body), fontSize = 15.sp, lineHeight = 26.sp, color = Color(0xFF38485B), modifier = Modifier.weight(1f))
     }
 }
 
-private val inlineToken = Regex("(\\*\\*.+?\\*\\*)|(`.+?`)")
 @Composable private fun inlineMarkdown(source: String): AnnotatedString = remember(source) { buildAnnotatedString {
-    var cursor = 0
-    inlineToken.findAll(source).forEach { match ->
-        append(source.substring(cursor, match.range.first))
-        val value = match.value
+    markdownInline(source).forEach { run ->
         val start = length
-        when {
-            value.startsWith("**") -> {
-                append(value.removePrefix("**").removeSuffix("**"))
-                addStyle(SpanStyle(fontWeight = FontWeight.Bold,color=Color(0xFF243E62)), start, length)
-            }
-            else -> {
-                append(value.removePrefix("`").removeSuffix("`"))
-                addStyle(SpanStyle(fontFamily = FontFamily.Monospace, background = Color(0xFFEDF2F9),color=Color(0xFF315C91)), start, length)
-            }
-        }
-        cursor = match.range.last + 1
+        append(run.text)
+        addStyle(SpanStyle(
+            fontWeight = if(run.bold) FontWeight.Bold else null,
+            fontStyle = if(run.italic) FontStyle.Italic else null,
+            fontFamily = if(run.code) FontFamily.Monospace else null,
+            background = if(run.code) Color(0xFFEDF2F9) else Color.Unspecified,
+            color = if(run.code) Color(0xFF315C91) else if(run.bold) Color(0xFF243E62) else Color.Unspecified,
+        ), start, length)
     }
-    append(source.substring(cursor))
 } }

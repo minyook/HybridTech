@@ -19,6 +19,7 @@ class LocalModelRuntime(private val context: Context) {
     @Volatile private var engine: Engine? = null
     @Volatile private var activeBackendName = "unknown"
 
+    @OptIn(com.google.ai.edge.litertlm.ExperimentalApi::class)
     suspend fun generate(
         question: String,
         evidence: String,
@@ -26,11 +27,12 @@ class LocalModelRuntime(private val context: Context) {
         supplementOnly: Boolean = false,
         onPartialAnswer: (String) -> Unit = {},
         generalKnowledge: Boolean = false,
+        onOutputLimit: (Boolean) -> Unit = {},
     ): String = withContext(Dispatchers.Default) {
         val startedAt = SystemClock.elapsedRealtime()
         val settings = InferenceSettingsPreferences(context).load()
-        val outputLimit = if (supplementOnly) minOf(settings.responseTokens, 192) else if(generalKnowledge)minOf(settings.responseTokens,768) else settings.responseTokens.takeUnless { settings.automaticAnswerLength }
-        val prompt = if(generalKnowledge)GeneralKnowledgeAnswer.prompt(question) else buildPrompt(
+        val outputLimit = AnswerOutputPolicy.limit(settings, supplementOnly, generalKnowledge)
+        val prompt = if(generalKnowledge)GeneralKnowledgeAnswer.prompt(question) + "\n출력 예산은 최대 ${outputLimit ?: settings.contextTokens} 토큰입니다. 예산 안에서 문장과 목록을 완결하고, 불필요하게 항목을 늘리지 마세요." else buildPrompt(
             question = question,
             context = evidence,
             compactVoiceAnswer = compactVoiceAnswer,
@@ -60,6 +62,8 @@ class LocalModelRuntime(private val context: Context) {
                     lastPartialUpdateAt = now
                 }
             }
+            val decoded = runCatching { conversation.getBenchmarkInfo().lastDecodeTokenCount }.getOrNull()
+            onOutputLimit(outputLimit != null && decoded != null && decoded >= outputLimit)
         }
         val finishedAt = SystemClock.elapsedRealtime()
         Log.i(

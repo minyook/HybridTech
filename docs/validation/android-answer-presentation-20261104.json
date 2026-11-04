@@ -1,0 +1,269 @@
+{
+  "date": "2026-11-04",
+  "baseCommit": "34bc5ec",
+  "scope": "Android answer formatting, stable partial rendering and output budget; PC JVM/ONNX evaluation and compile/lint; not real-device generation/UI",
+  "unitTests": {
+    "tests": 115,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 7,
+    "passed": 108,
+    "suites": [
+      {
+        "name": "com.minyook.sllm2.data.AnswerMarkdownTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.EquipmentOverviewTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.FocusedEvidenceTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.GeneralKnowledgeAnswerTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.HybridRetrievalTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.LiveQuestionEvaluationTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.NativeAnswerCorpusTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionAnswerVerifierTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionEvidencePlannerTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionSearchCoordinatorTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.ReviewedRetrievalEvaluationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.SemanticTokenizerTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.SourcePdfCatalogTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ExampleUnitTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.gas.GasReadingFreshnessTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterProtocolTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterRegistryTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterServerTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterStressTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 7
+      },
+      {
+        "name": "com.minyook.sllm2.model.AnswerOutputPolicyTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.ChatTimelineTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.MarkdownBlocksTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.SourceDocumentFormatterTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.VoiceConversationLoopTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.VoiceResponseFormatterTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.WorkServerAddressTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "skippedReason": "7 opt-in Wi-Fi stress scenarios not repeated for this answer-only change; the 2 ONNX corpus evaluations were executed"
+  },
+  "questionEvaluation": {
+    "original": {
+      "total": 150,
+      "passed": 150,
+      "failed": 0,
+      "hashes": {
+        "semanticIndex": "12ece1e7e7d1a3e46ace5491f35beddacf945f36b68abba8903d264c6bf9f4cd",
+        "questions": "91dc740d32b1d55bd4dd2355bbee9c38f4fd79177b5d10a89f00d359aaade208",
+        "corpus": "2c8e9edcc986c9e0c65f66d9a4784d88462656702669ba5a7182c98a86bfebae",
+        "rubric": "d2083c4b22e6eb5b6967ce73eb5722a318d52072050b2c9516d73a19bd6f2ecb"
+      }
+    },
+    "additional": {
+      "total": 24,
+      "passed": 24,
+      "failed": 0,
+      "hashes": {
+        "semanticIndex": "12ece1e7e7d1a3e46ace5491f35beddacf945f36b68abba8903d264c6bf9f4cd",
+        "questions": null,
+        "corpus": "2c8e9edcc986c9e0c65f66d9a4784d88462656702669ba5a7182c98a86bfebae",
+        "rubric": "f075e031b797c20dc215e516ef5a6ff33f4176e29d480196f6063741d2713b0e"
+      }
+    },
+    "generation": "NOT_RUN; source retrieval and display composition only",
+    "independentHoldout": false
+  },
+  "build": {
+    "debugApk": "PASS",
+    "instrumentationApk": "PASS",
+    "lint": {
+      "Error": 0,
+      "Warning": 118
+    },
+    "log": "tmp/answer-format-build.log",
+    "finalUiInheritanceCheck": {
+      "result": "PASS",
+      "log": "tmp/answer-format-ui-build.log",
+      "scope": "Title/header style inheritance compile and lint; runtime visuals not exercised"
+    }
+  },
+  "checks": [
+    "automatic/manual token budgets, no hidden 768 cap",
+    "complete streaming sentence/block, not bare list markers or decimal prefixes",
+    "unfinished emphasis/code closure without inventing text",
+    "circled numbered items separated while diagram ranges preserved",
+    "document conditions and measured ranges retained",
+    "PDF checklist column headers and broken polite endings cleaned",
+    "all table cells retained including surplus cells and code pipes",
+    "nested lists, long markers, italics, links as visible text, horizontal rules"
+  ],
+  "files": {
+    "design": "docs/ANDROID_ANSWER_PRESENTATION.md",
+    "samples": "docs/validation/android-answer-presentation-samples-20261104.md",
+    "originalEvaluation": "tmp/answer-format-20261104/evaluation/progress.json",
+    "additionalEvaluation": "tmp/answer-format-20261104/evaluation/additional/progress.json"
+  },
+  "apk": {
+    "path": "tmp/answer-format-20261104/fieldguard-answer-format-debug.apk",
+    "bytes": 324889941,
+    "sha256": "8313a96b6b51a5fdaa7018b4ad479a7265e9324fbd173c842ab763839a3147e1"
+  },
+  "notRun": [
+    "real LiteRT/Gemma output and limit metadata on S24",
+    "continuous generated chat, memory/thermal behavior",
+    "Compose frame/visual/touch/keyboard checks"
+  ],
+  "limitations": [
+    "Previously saved truncated answers cannot be reconstructed; ask again",
+    "PDF extraction cleanup is conservative and does not repair every fused table sentence or typo",
+    "Completion-token metadata is a pinned experimental SDK API, not an exhaustive finish-reason signal",
+    "Larger generated output may take longer; no new 1-2 second generation guarantee"
+  ]
+}
