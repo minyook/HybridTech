@@ -1,6 +1,7 @@
 package com.minyook.sllm2.model
 
 import android.content.Context
+import android.app.ActivityManager
 import android.os.SystemClock
 import android.util.Log
 import com.minyook.sllm2.data.ConversationContext
@@ -18,7 +19,10 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 /** Owns one native engine for the visible process; the downloaded model itself stays persistent on disk. */
-class LocalModelRuntime(private val context: Context) {
+class LocalModelRuntime(
+    private val context: Context,
+    private val loadSettings: () -> InferenceSettings = { InferenceSettingsPreferences(context).load() },
+) {
     private val lock = Any()
     @Volatile private var engine: Engine? = null
     @Volatile private var activeBackendName = "unknown"
@@ -37,9 +41,9 @@ class LocalModelRuntime(private val context: Context) {
         onMetrics: (GenerationMetrics) -> Unit = {},
     ): String = withContext(Dispatchers.Default) {
         val startedAt = SystemClock.elapsedRealtime()
-        val settings = InferenceSettingsPreferences(context).load()
+        val settings = loadSettings()
         val outputLimit = AnswerOutputPolicy.limit(settings, supplementOnly, generalKnowledge)
-        val basePrompt = if(generalKnowledge)GeneralKnowledgeAnswer.prompt(question) + "\n출력 예산은 최대 ${outputLimit ?: settings.contextTokens} 토큰입니다. 예산 안에서 문장과 목록을 완결하고, 불필요하게 항목을 늘리지 마세요." else buildPrompt(
+        val basePrompt = if(generalKnowledge)GeneralKnowledgeAnswer.prompt(question,evidence) + "\n출력 예산은 최대 ${outputLimit ?: settings.contextTokens} 토큰입니다. 예산 안에서 문장과 목록을 완결하고, 불필요하게 항목을 늘리지 마세요." else buildPrompt(
             question = question,
             context = evidence,
             compactVoiceAnswer = compactVoiceAnswer,
@@ -80,7 +84,7 @@ class LocalModelRuntime(private val context: Context) {
                     lastPartialUpdateAt = now
                 }
             }
-            runCatching { conversation.getBenchmarkInfo() }.getOrNull()?.let { benchmark ->
+            runCatching { conversation.getBenchmarkInfo() }.onFailure { Log.w(TAG,"Native benchmark unavailable: ${it.javaClass.simpleName}: ${it.message}") }.getOrNull()?.let { benchmark ->
                 prefillTokens = benchmark.lastPrefillTokenCount
                 decodeTokens = benchmark.lastDecodeTokenCount
                 decodeTokensPerSecond = benchmark.lastDecodeTokensPerSecond
@@ -107,13 +111,23 @@ class LocalModelRuntime(private val context: Context) {
         activeBackendName = "unknown"
     }
 
+    /** Search and generation remain sequential; this avoids unloading a healthy GPU model. */
+    fun prepareForSemanticSearch():Boolean {
+        if(engine==null)return false
+        val info=ActivityManager.MemoryInfo().also { (context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).getMemoryInfo(it) }
+        val keep=EngineReusePolicy.retainForSearch(activeBackendName,DeviceProfile.read(context).totalRamGb,info.availMem,info.lowMemory)
+        Log.i(TAG,"retainForSearch=$keep backend=$activeBackendName availableRamMb=${info.availMem/1024/1024}")
+        if(!keep)release()
+        return keep
+    }
+
     private fun initializeIfNeeded(): Engine = synchronized(lock) {
         engine?.let { return@synchronized it }
         val modelPath = ModelFiles.finalFile(context).takeIf { it.exists() }
             ?: throw IllegalStateException("다운로드된 Gemma 4 E2B 모델이 없습니다.")
         val cacheDirectory = File(context.noBackupFilesDir, "litert-cache").apply { mkdirs() }
         val profile = DeviceProfile.read(context)
-        val settings = InferenceSettingsPreferences(context).load()
+        val settings = loadSettings()
         val candidates = when (settings.backend) {
             InferenceBackend.CPU -> listOf(Backend.CPU())
             InferenceBackend.GPU -> listOf(Backend.GPU(), Backend.CPU())

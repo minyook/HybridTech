@@ -25,6 +25,7 @@ internal class QuestionSearchCoordinator(
         val resolved = search(request.query)
         if (request.kind != FollowUpKind.MORE || resolved.status in setOf("search-error", "live-state")) return resolved
         if (resolved.answerBody != null) {
+            if (resolved.generalQuestion != null) return resolved
             val alreadyShown = request.seenAnswers.any { EvidenceLanguage.compact(resolved.answerBody) in EvidenceLanguage.compact(it) }
             return if (!alreadyShown) resolved else resolved.copy(status = "no-more", sources = emptyList(), answerBody = null, message = "앞선 ‘${request.topic}’에 관해 이미 보여드린 내용 외에 추가로 확인한 근거는 없어요. 더 궁금한 조건이나 장비를 말씀해 주세요.")
         }

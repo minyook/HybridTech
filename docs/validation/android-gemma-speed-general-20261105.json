@@ -1,0 +1,1017 @@
+{
+  "date": "2026-11-05",
+  "platform": "samsung SM-S928N / Android 16",
+  "scope": "Real Galaxy S24 Ultra Gemma generation + document/general dialogue integration and PC RAG regressions. No cloud inference. Frame rendering/STT/TTS not timed. Not independent factual approval of generated rescue advice.",
+  "unitTests": {
+    "tests": 156,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 7,
+    "passed": 149,
+    "suites": [
+      {
+        "name": "com.minyook.sllm2.data.AnswerMarkdownTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.ChatHistoryJsonTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.ConversationContextTest",
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.ConversationRetrievalEvaluationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.EquipmentDialogueEvaluationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.EquipmentDialogueTest",
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.EquipmentOverviewTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.FocusedEvidenceTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.GeneralKnowledgeAnswerTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.HybridRetrievalTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.LiveQuestionEvaluationTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.NativeAnswerCorpusTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionAnswerVerifierTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionEvidencePlannerTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.QuestionSearchCoordinatorTest",
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.ReviewedRetrievalEvaluationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.SemanticTokenizerTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.data.SourcePdfCatalogTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ExampleUnitTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.gas.GasReadingFreshnessTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterProtocolTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterRegistryTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterServerTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.gas.WifiMeterStressTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 7
+      },
+      {
+        "name": "com.minyook.sllm2.model.AnswerOutputPolicyTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.model.EngineReusePolicyTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.ChatTimelineTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.MarkdownBlocksTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.SourceDocumentFormatterTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.VoiceConversationLoopTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.VoiceResponseFormatterTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "com.minyook.sllm2.ui.WorkServerAddressTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ]
+  },
+  "lint": {
+    "Error": 0,
+    "Fatal": 0,
+    "Warning": 111
+  },
+  "apk": {
+    "path": "C:\\Users\\limmi\\AndroidStudioProjects\\Sllm2\\tmp\\gemma-s24-20261105\\fieldguard-gemma-gpu-general-debug.apk",
+    "bytes": 324511490,
+    "sha256": "ce45bc02297cac7d5c05df12a4b573c810d411fe6bb08f58d3c746cc92894323",
+    "installedOnDevice": true
+  },
+  "fixedRegression": {
+    "original150": 150,
+    "additional24": 24,
+    "sourceCorpusAndRubricsChanged": false
+  },
+  "settingsAfter": {
+    "backend": "GPU",
+    "automatic_answer_length": "true",
+    "context_tokens": "8192",
+    "response_tokens": "4096"
+  },
+  "settingsChanges": "Only backend CPU -> GPU after matched device tests. User context 8192, output 4096 and automatic length retained. Benchmark overrides were in-memory only.",
+  "benchmarks": {
+    "cpu-8192": {
+      "platform": "samsung SM-S928N / Android 16",
+      "scope": "Actual production LocalModelRuntime/Gemma; direct general generation, no document answer, no UI frames/audio/history writes. Settings injected in memory only.",
+      "requestedBackend": "CPU",
+      "contextTokens": 8192,
+      "thinkingEnabled": false,
+      "originalSettings": {
+        "backend": "CPU",
+        "contextTokens": 8192,
+        "responseTokens": 4096,
+        "automaticAnswerLength": true
+      },
+      "runLabel": "cpu-8192",
+      "phase": "complete",
+      "results": [
+        {
+          "case": "cold-short",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 한국어로 세 문장 이내의 짧은 답변을 써줘.",
+          "maxOutputTokens": 128,
+          "firstValidatedSentenceMs": 8235,
+          "totalMs": 15477,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "CPU",
+            "initializationMs": 845,
+            "firstNativeTextMs": 7008,
+            "generationTotalMs": 15473,
+            "promptBytes": 1197
+          },
+          "before": {
+            "availableRamBytes": 4766449664,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 34.6
+          },
+          "after": {
+            "availableRamBytes": 2768723968,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 34.8
+          },
+          "rawAnswer": "구름이 생기고 비가 내리는 원리는 물의 순환과 응결 과정입니다.\n\n*   **증발과 상승:** 태양열로 지표면의 물이 기화하여 수증기가 되어 대기 중으로 상승합니다.\n*   **응결:** 상승한 수증기는 공기 중의 냉각으로 인해 차가워지고, 이로 인해 수증기가 작은 물방울이나 얼음 결정으로 뭉치면서 구름이 형성됩니다.\n*   **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 커지면",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다.\n\n구름이 생기고 비가 내리는 원리는 물의 순환과 응결 과정입니다.\n\n- **증발과 상승:** 태양열로 지표면의 물이 기화하여 수증기가 되어 대기 중으로 상승합니다.\n- **응결:** 상승한 수증기는 공기 중의 냉각으로 인해 차가워지고, 이로 인해 수증기가 작은 물방울이나 얼음 결정으로 뭉치면서 구름이 형성됩니다.\n- **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 커지면"
+        },
+        {
+          "case": "warm-short-1",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 한국어로 세 문장 이내의 짧은 답변을 써줘.",
+          "maxOutputTokens": 128,
+          "firstValidatedSentenceMs": 5273,
+          "totalMs": 12882,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "CPU",
+            "initializationMs": 0,
+            "firstNativeTextMs": 3658,
+            "generationTotalMs": 12880,
+            "promptBytes": 1197
+          },
+          "before": {
+            "availableRamBytes": 2768723968,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 34.8
+          },
+          "after": {
+            "availableRamBytes": 3024220160,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35
+          },
+          "rawAnswer": "구름이 생기고 비가 내리는 원리는 물의 순환과 응결 과정입니다.\n\n*   **증발과 상승:** 태양열로 지표면의 물이 기화하여 수증기가 되어 대기 중으로 상승합니다.\n*   **응결:** 상승한 수증기는 공기 중의 냉각으로 인해 차가워지고, 이로 인해 수증기가 작은 물방울이나 얼음 결정으로 뭉치면서 구름이 형성됩니다.\n*   **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 커지면",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다.\n\n구름이 생기고 비가 내리는 원리는 물의 순환과 응결 과정입니다.\n\n- **증발과 상승:** 태양열로 지표면의 물이 기화하여 수증기가 되어 대기 중으로 상승합니다.\n- **응결:** 상승한 수증기는 공기 중의 냉각으로 인해 차가워지고, 이로 인해 수증기가 작은 물방울이나 얼음 결정으로 뭉치면서 구름이 형성됩니다.\n- **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 커지면"
+        },
+        {
+          "case": "warm-short-2",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 한국어로 세 문장 이내의 짧은 답변을 써줘.",
+          "maxOutputTokens": 128,
+          "firstValidatedSentenceMs": 4959,
+          "totalMs": 12630,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "CPU",
+            "initializationMs": 2,
+            "firstNativeTextMs": 3510,
+            "generationTotalMs": 12627,
+            "promptBytes": 1197
+          },
+          "before": {
+            "availableRamBytes": 3024220160,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35
+          },
+          "after": {
+            "availableRamBytes": 3018100736,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35
+          },
+          "rawAnswer": "구름이 생기고 비가 내리는 원리는 물의 순환과 응결 과정입니다.\n\n*   **증발과 상승:** 태양열로 지표면의 물이 기화하여 수증기가 되어 대기 중으로 상승합니다.\n*   **응결:** 상승한 수증기는 공기 중의 냉각으로 인해 차가워지고, 이로 인해 수증기가 작은 물방울이나 얼음 결정으로 뭉치면서 구름이 형성됩니다.\n*   **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 커지면",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다.\n\n구름이 생기고 비가 내리는 원리는 물의 순환과 응결 과정입니다.\n\n- **증발과 상승:** 태양열로 지표면의 물이 기화하여 수증기가 되어 대기 중으로 상승합니다.\n- **응결:** 상승한 수증기는 공기 중의 냉각으로 인해 차가워지고, 이로 인해 수증기가 작은 물방울이나 얼음 결정으로 뭉치면서 구름이 형성됩니다.\n- **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 커지면"
+        },
+        {
+          "case": "warm-long",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 증발, 상승과 냉각, 응결, 물방울의 성장, 강수 과정을 순서대로 자세히 설명해줘. 한국어 Markdown으로 각 과정의 이유와 연결을 포함해 써줘.",
+          "maxOutputTokens": 384,
+          "firstValidatedSentenceMs": 6886,
+          "totalMs": 33109,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "CPU",
+            "initializationMs": 2,
+            "firstNativeTextMs": 3578,
+            "generationTotalMs": 33105,
+            "promptBytes": 1324
+          },
+          "before": {
+            "availableRamBytes": 3018100736,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35
+          },
+          "after": {
+            "availableRamBytes": 3457884160,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35
+          },
+          "rawAnswer": "구름이 생겨 비가 내리는 과정은 증발, 상승, 냉각, 응결, 물방울의 성장, 그리고 강수라는 일련의 물리적 현상으로 설명될 수 있습니다.\n\n1. **증발 (Evaporation):**\n   * 태양열에 의해 지표면의 물(바다, 호수, 식물 등)이 기체 상태의 수증기로 변하여 대기 중으로 올라가는 과정입니다. 이는 물이 에너지를 흡수하여 액체에서 기체로 상변화하는 현상입니다.\n\n2. **상승 (Ascent):**\n   * 증발로 생성된 수증기는 대기 중의 열역학적 불안정성(예: 지표면의 따뜻하고 가벼운 공기가 상승하는 현상)에 의해 위로 상승하게 됩니다. 상승하면서 공기의 온도는 점차 낮아집니다.\n\n3. **냉각 (Cooling):**\n   * 공기가 상승함에 따라 기체의 압력이 낮아지고, 기체 분자 간의 운동 에너지가 감소하면서 공기의 온도가 계속해서 낮아집니다.\n\n4. **응결 (Condensation):**\n   * 온도가 충분히 낮아지면, 공기 중의 수증기 분자들이 서로 충돌하여 에너지를 잃고 액체 상태의 물방울(또는 얼음 결정)로 뭉치는 현상입니다. 이 과정은 구름의 형성의 핵심 단계입니다.\n\n5. **물방울의 성장 (Droplet Growth):**\n   * 응결된 수증기 입자들이 주변의 다른 수증기 분자들과 계속해서 충돌하고 합쳐지면서 크기가 점차 커져서 눈에 보이는 구름 방울이 됩니다.",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다.\n\n구름이 생겨 비가 내리는 과정은 증발, 상승, 냉각, 응결, 물방울의 성장, 그리고 강수라는 일련의 물리적 현상으로 설명될 수 있습니다.\n\n1. **증발 (Evaporation):**\n   - 태양열에 의해 지표면의 물(바다, 호수, 식물 등)이 기체 상태의 수증기로 변하여 대기 중으로 올라가는 과정입니다. 이는 물이 에너지를 흡수하여 액체에서 기체로 상변화하는 현상입니다.\n\n2. **상승 (Ascent):**\n   - 증발로 생성된 수증기는 대기 중의 열역학적 불안정성(예: 지표면의 따뜻하고 가벼운 공기가 상승하는 현상)에 의해 위로 상승하게 됩니다. 상승하면서 공기의 온도는 점차 낮아집니다.\n\n3. **냉각 (Cooling):**\n   - 공기가 상승함에 따라 기체의 압력이 낮아지고, 기체 분자 간의 운동 에너지가 감소하면서 공기의 온도가 계속해서 낮아집니다.\n\n4. **응결 (Condensation):**\n   - 온도가 충분히 낮아지면, 공기 중의 수증기 분자들이 서로 충돌하여 에너지를 잃고 액체 상태의 물방울(또는 얼음 결정)로 뭉치는 현상입니다. 이 과정은 구름의 형성의 핵심 단계입니다.\n\n5. **물방울의 성장 (Droplet Growth):**\n   - 응결된 수증기 입자들이 주변의 다른 수증기 분자들과 계속해서 충돌하고 합쳐지면서 크기가 점차 커져서 눈에 보이는 구름 방울이 됩니다."
+        }
+      ],
+      "settingsUnchanged": true
+    },
+    "gpu-8192": {
+      "platform": "samsung SM-S928N / Android 16",
+      "scope": "Actual production LocalModelRuntime/Gemma; direct general generation, no document answer, no UI frames/audio/history writes. Settings injected in memory only.",
+      "requestedBackend": "GPU",
+      "contextTokens": 8192,
+      "thinkingEnabled": false,
+      "originalSettings": {
+        "backend": "CPU",
+        "contextTokens": 8192,
+        "responseTokens": 4096,
+        "automaticAnswerLength": true
+      },
+      "runLabel": "gpu-8192",
+      "phase": "complete",
+      "results": [
+        {
+          "case": "cold-short",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 한국어로 세 문장 이내의 짧은 답변을 써줘.",
+          "maxOutputTokens": 128,
+          "firstValidatedSentenceMs": 6847,
+          "totalMs": 8569,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "GPU",
+            "initializationMs": 5041,
+            "firstNativeTextMs": 6071,
+            "generationTotalMs": 8565,
+            "promptBytes": 1197
+          },
+          "before": {
+            "availableRamBytes": 5709619200,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35.8
+          },
+          "after": {
+            "availableRamBytes": 3854249984,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35.1
+          },
+          "rawAnswer": "구름이 생겨 비가 내리는 원리는 수증기 응결과 중력에 의해 설명됩니다. 대기 중의 수증기가 냉각되어 물방울이나 얼음 결정으로 응결하면서 구름을 형성합니다. 이 물방울들이 충분히 무거워지면 중력에 의해 지표로 떨어져 비나 눈이 됩니다.",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다.\n\n구름이 생겨 비가 내리는 원리는 수증기 응결과 중력에 의해 설명됩니다. 대기 중의 수증기가 냉각되어 물방울이나 얼음 결정으로 응결하면서 구름을 형성합니다. 이 물방울들이 충분히 무거워지면 중력에 의해 지표로 떨어져 비나 눈이 됩니다."
+        },
+        {
+          "case": "warm-short-1",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 한국어로 세 문장 이내의 짧은 답변을 써줘.",
+          "maxOutputTokens": 128,
+          "firstValidatedSentenceMs": 1175,
+          "totalMs": 2812,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "GPU",
+            "initializationMs": 1,
+            "firstNativeTextMs": 423,
+            "generationTotalMs": 2810,
+            "promptBytes": 1197
+          },
+          "before": {
+            "availableRamBytes": 3853991936,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35.1
+          },
+          "after": {
+            "availableRamBytes": 3846520832,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35.1
+          },
+          "rawAnswer": "구름이 생겨 비가 내리는 원리는 수증기 응결과 중력에 의해 설명됩니다. 대기 중의 수증기가 냉각되어 물방울이나 얼음 결정으로 응결하면서 구름을 형성합니다. 이 물방울들이 충분히 무거워지면 중력에 의해 지표로 떨어져 비나 눈이 됩니다.",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다.\n\n구름이 생겨 비가 내리는 원리는 수증기 응결과 중력에 의해 설명됩니다. 대기 중의 수증기가 냉각되어 물방울이나 얼음 결정으로 응결하면서 구름을 형성합니다. 이 물방울들이 충분히 무거워지면 중력에 의해 지표로 떨어져 비나 눈이 됩니다."
+        },
+        {
+          "case": "warm-short-2",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 한국어로 세 문장 이내의 짧은 답변을 써줘.",
+          "maxOutputTokens": 128,
+          "firstValidatedSentenceMs": 1193,
+          "totalMs": 2842,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "GPU",
+            "initializationMs": 3,
+            "firstNativeTextMs": 430,
+            "generationTotalMs": 2837,
+            "promptBytes": 1197
+          },
+          "before": {
+            "availableRamBytes": 3846520832,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35.1
+          },
+          "after": {
+            "availableRamBytes": 3844984832,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35.1
+          },
+          "rawAnswer": "구름이 생겨 비가 내리는 원리는 수증기 응결과 중력에 의해 설명됩니다. 대기 중의 수증기가 냉각되어 물방울이나 얼음 결정으로 응결하면서 구름을 형성합니다. 이 물방울들이 충분히 무거워지면 중력에 의해 지표로 떨어져 비나 눈이 됩니다.",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다.\n\n구름이 생겨 비가 내리는 원리는 수증기 응결과 중력에 의해 설명됩니다. 대기 중의 수증기가 냉각되어 물방울이나 얼음 결정으로 응결하면서 구름을 형성합니다. 이 물방울들이 충분히 무거워지면 중력에 의해 지표로 떨어져 비나 눈이 됩니다."
+        },
+        {
+          "case": "warm-long",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 증발, 상승과 냉각, 응결, 물방울의 성장, 강수 과정을 순서대로 자세히 설명해줘. 한국어 Markdown으로 각 과정의 이유와 연결을 포함해 써줘.",
+          "maxOutputTokens": 384,
+          "firstValidatedSentenceMs": 1853,
+          "totalMs": 18742,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "GPU",
+            "initializationMs": 3,
+            "firstNativeTextMs": 441,
+            "generationTotalMs": 18734,
+            "promptBytes": 1324
+          },
+          "before": {
+            "availableRamBytes": 3844984832,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35.1
+          },
+          "after": {
+            "availableRamBytes": 3819802624,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35.5
+          },
+          "rawAnswer": "구름이 생겨 비가 내리는 과정은 증발, 상승과 냉각, 응결, 물방울의 성장, 그리고 강수라는 일련의 물리적 현상으로 설명될 수 있습니다.\n\n1. **증발 (Evaporation):**\n    * **원리:** 태양열로 인해 지표면의 물(바다, 호수, 습한 공기 등)이 액체 상태의 물 분자(수증기)로 변하여 공기 중으로 올라가는 과정입니다.\n    * **이유:** 물 분자는 주변의 열에너지를 흡수하여 액체 상태를 벗어나 기체 상태로 전환됩니다.\n\n2. **상승과 냉각 (Ascent and Cooling):**\n    * **원리:** 증발된 수증기는 대기 중으로 이동하며 위로 상승합니다. 공기가 상승하면 기압이 낮아지므로, 수증기는 주변 공기와 함께 기압 감소로 인해 온도가 낮아집니다.\n    * **이유:** 기체가 상승할 때 주변 압력이 낮아지면 기체의 온도는 냉각됩니다.\n\n3. **응결 (Condensation):**\n    * **원리:** 공기 중의 수증기가 충분히 냉각되어 포화 수증기압 이하로 내려가면, 공기 중의 미세한 입자(먼지, 오염 물질 등)를 핵으로 삼아 액체 상태의 물방울(응결핵)로 맺히는 과정입니다.\n    * **이유:** 온도가 낮아지면 수증기가 더 이상 기체 상태로 존재할 수 없으므로, 주변의 냉각된 공기 속에서 수증기가 다시 액체 상태로 상변화합니다.\n\n4. **물방울",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다.\n\n구름이 생겨 비가 내리는 과정은 증발, 상승과 냉각, 응결, 물방울의 성장, 그리고 강수라는 일련의 물리적 현상으로 설명될 수 있습니다.\n\n1. **증발 (Evaporation):**\n    - **원리:** 태양열로 인해 지표면의 물(바다, 호수, 습한 공기 등)이 액체 상태의 물 분자(수증기)로 변하여 공기 중으로 올라가는 과정입니다.\n    - **이유:** 물 분자는 주변의 열에너지를 흡수하여 액체 상태를 벗어나 기체 상태로 전환됩니다.\n\n2. **상승과 냉각 (Ascent and Cooling):**\n    - **원리:** 증발된 수증기는 대기 중으로 이동하며 위로 상승합니다. 공기가 상승하면 기압이 낮아지므로, 수증기는 주변 공기와 함께 기압 감소로 인해 온도가 낮아집니다.\n    - **이유:** 기체가 상승할 때 주변 압력이 낮아지면 기체의 온도는 냉각됩니다.\n\n3. **응결 (Condensation):**\n    - **원리:** 공기 중의 수증기가 충분히 냉각되어 포화 수증기압 이하로 내려가면, 공기 중의 미세한 입자(먼지, 오염 물질 등)를 핵으로 삼아 액체 상태의 물방울(응결핵)로 맺히는 과정입니다.\n    - **이유:** 온도가 낮아지면 수증기가 더 이상 기체 상태로 존재할 수 없으므로, 주변의 냉각된 공기 속에서 수증기가 다시 액체 상태로 상변화합니다.\n\n4. **물방울**"
+        }
+      ],
+      "settingsUnchanged": true
+    },
+    "cpu-4096": {
+      "platform": "samsung SM-S928N / Android 16",
+      "scope": "Actual production LocalModelRuntime/Gemma; direct general generation, no document answer, no UI frames/audio/history writes. Settings injected in memory only.",
+      "requestedBackend": "CPU",
+      "contextTokens": 4096,
+      "thinkingEnabled": false,
+      "originalSettings": {
+        "backend": "CPU",
+        "contextTokens": 8192,
+        "responseTokens": 4096,
+        "automaticAnswerLength": true
+      },
+      "runLabel": "cpu-4096",
+      "phase": "complete",
+      "results": [
+        {
+          "case": "cold-short",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 한국어로 세 문장 이내의 짧은 답변을 써줘.",
+          "maxOutputTokens": 128,
+          "firstValidatedSentenceMs": 3359,
+          "totalMs": 7732,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "CPU",
+            "initializationMs": 382,
+            "firstNativeTextMs": 2514,
+            "generationTotalMs": 7729,
+            "promptBytes": 1197
+          },
+          "before": {
+            "availableRamBytes": 5822951424,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 34.3
+          },
+          "after": {
+            "availableRamBytes": 4777304064,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 34.3
+          },
+          "rawAnswer": "구름이 생기고 비가 내리는 원리는 물의 순환과 응결 과정입니다.\n\n*   **증발과 상승:** 태양열로 지표면의 물이 기화하여 수증기가 되어 대기 중으로 상승합니다.\n*   **응결:** 상승한 수증기는 공기 중의 냉각으로 인해 차가워지고, 이로 인해 수증기가 작은 물방울이나 얼음 결정으로 뭉치면서 구름이 형성됩니다.\n*   **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 커지면",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다.\n\n구름이 생기고 비가 내리는 원리는 물의 순환과 응결 과정입니다.\n\n- **증발과 상승:** 태양열로 지표면의 물이 기화하여 수증기가 되어 대기 중으로 상승합니다.\n- **응결:** 상승한 수증기는 공기 중의 냉각으로 인해 차가워지고, 이로 인해 수증기가 작은 물방울이나 얼음 결정으로 뭉치면서 구름이 형성됩니다.\n- **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 커지면"
+        },
+        {
+          "case": "warm-short-1",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 한국어로 세 문장 이내의 짧은 답변을 써줘.",
+          "maxOutputTokens": 128,
+          "firstValidatedSentenceMs": 2579,
+          "totalMs": 7473,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "CPU",
+            "initializationMs": 1,
+            "firstNativeTextMs": 1686,
+            "generationTotalMs": 7471,
+            "promptBytes": 1197
+          },
+          "before": {
+            "availableRamBytes": 4777304064,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 34.3
+          },
+          "after": {
+            "availableRamBytes": 4937191424,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 34.3
+          },
+          "rawAnswer": "구름이 생기고 비가 내리는 원리는 물의 순환과 응결 과정입니다.\n\n*   **증발과 상승:** 태양열로 지표면의 물이 기화하여 수증기가 되어 대기 중으로 상승합니다.\n*   **응결:** 상승한 수증기는 공기 중의 냉각으로 인해 차가워지고, 이로 인해 수증기가 작은 물방울이나 얼음 결정으로 뭉치면서 구름이 형성됩니다.\n*   **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 커지면",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다.\n\n구름이 생기고 비가 내리는 원리는 물의 순환과 응결 과정입니다.\n\n- **증발과 상승:** 태양열로 지표면의 물이 기화하여 수증기가 되어 대기 중으로 상승합니다.\n- **응결:** 상승한 수증기는 공기 중의 냉각으로 인해 차가워지고, 이로 인해 수증기가 작은 물방울이나 얼음 결정으로 뭉치면서 구름이 형성됩니다.\n- **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 커지면"
+        },
+        {
+          "case": "warm-short-2",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 한국어로 세 문장 이내의 짧은 답변을 써줘.",
+          "maxOutputTokens": 128,
+          "firstValidatedSentenceMs": 2894,
+          "totalMs": 8846,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "CPU",
+            "initializationMs": 2,
+            "firstNativeTextMs": 1968,
+            "generationTotalMs": 8843,
+            "promptBytes": 1197
+          },
+          "before": {
+            "availableRamBytes": 4937191424,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 34.3
+          },
+          "after": {
+            "availableRamBytes": 4767813632,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 34.6
+          },
+          "rawAnswer": "구름이 생기고 비가 내리는 원리는 물의 순환과 응결 과정입니다.\n\n*   **증발과 상승:** 태양열로 지표면의 물이 기화하여 수증기가 되어 대기 중으로 상승합니다.\n*   **응결:** 상승한 수증기는 공기 중의 냉각으로 인해 차가워지고, 이로 인해 수증기가 작은 물방울이나 얼음 결정으로 뭉치면서 구름이 형성됩니다.\n*   **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 커지면",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다.\n\n구름이 생기고 비가 내리는 원리는 물의 순환과 응결 과정입니다.\n\n- **증발과 상승:** 태양열로 지표면의 물이 기화하여 수증기가 되어 대기 중으로 상승합니다.\n- **응결:** 상승한 수증기는 공기 중의 냉각으로 인해 차가워지고, 이로 인해 수증기가 작은 물방울이나 얼음 결정으로 뭉치면서 구름이 형성됩니다.\n- **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 커지면"
+        },
+        {
+          "case": "warm-long",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 증발, 상승과 냉각, 응결, 물방울의 성장, 강수 과정을 순서대로 자세히 설명해줘. 한국어 Markdown으로 각 과정의 이유와 연결을 포함해 써줘.",
+          "maxOutputTokens": 384,
+          "firstValidatedSentenceMs": 4972,
+          "totalMs": 23879,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "CPU",
+            "initializationMs": 1,
+            "firstNativeTextMs": 2505,
+            "generationTotalMs": 23874,
+            "promptBytes": 1324
+          },
+          "before": {
+            "availableRamBytes": 4767805440,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 34.6
+          },
+          "after": {
+            "availableRamBytes": 4785696768,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 34.6
+          },
+          "rawAnswer": "구름이 생겨 비가 내리는 과정은 증발, 상승, 냉각, 응결, 물방울의 성장, 그리고 강수라는 일련의 물리적 현상으로 설명될 수 있습니다.\n\n1. **증발 (Evaporation):**\n   * 태양열에 의해 지표면의 물(바다, 호수, 식물 등)이 기체 상태의 수증기로 변하여 대기 중으로 올라가는 과정입니다. 이는 물이 에너지를 흡수하여 액체에서 기체로 상변화하는 현상입니다.\n\n2. **상승 (Ascent):**\n   * 증발로 생성된 수증기는 대기 중의 열역학적 불안정성(예: 지표면의 따뜻하고 가벼운 공기가 상승하는 현상)에 의해 위로 상승하게 됩니다. 상승하면서 공기의 온도는 점차 낮아집니다.\n\n3. **냉각 (Cooling):**\n   * 공기가 상승함에 따라 기체의 압력이 낮아지고, 기체 분자 간의 운동 에너지가 감소하면서 공기의 온도가 계속해서 낮아집니다.\n\n4. **응결 (Condensation):**\n   * 온도가 충분히 낮아지면, 공기 중의 수증기 분자들이 서로 충돌하여 에너지를 잃고 액체 상태의 물방울(또는 얼음 결정)로 뭉치는 현상입니다. 이 과정은 구름의 형성의 핵심 단계입니다.\n\n5. **물방울의 성장 (Droplet Growth):**\n   * 응결된 수증기 입자들이 주변의 다른 수증기 분자들과 계속해서 충돌하고 합쳐지면서 크기가 점차 커져서 눈에 보이는 구름 방울이 됩니다.",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다.\n\n구름이 생겨 비가 내리는 과정은 증발, 상승, 냉각, 응결, 물방울의 성장, 그리고 강수라는 일련의 물리적 현상으로 설명될 수 있습니다.\n\n1. **증발 (Evaporation):**\n   - 태양열에 의해 지표면의 물(바다, 호수, 식물 등)이 기체 상태의 수증기로 변하여 대기 중으로 올라가는 과정입니다. 이는 물이 에너지를 흡수하여 액체에서 기체로 상변화하는 현상입니다.\n\n2. **상승 (Ascent):**\n   - 증발로 생성된 수증기는 대기 중의 열역학적 불안정성(예: 지표면의 따뜻하고 가벼운 공기가 상승하는 현상)에 의해 위로 상승하게 됩니다. 상승하면서 공기의 온도는 점차 낮아집니다.\n\n3. **냉각 (Cooling):**\n   - 공기가 상승함에 따라 기체의 압력이 낮아지고, 기체 분자 간의 운동 에너지가 감소하면서 공기의 온도가 계속해서 낮아집니다.\n\n4. **응결 (Condensation):**\n   - 온도가 충분히 낮아지면, 공기 중의 수증기 분자들이 서로 충돌하여 에너지를 잃고 액체 상태의 물방울(또는 얼음 결정)로 뭉치는 현상입니다. 이 과정은 구름의 형성의 핵심 단계입니다.\n\n5. **물방울의 성장 (Droplet Growth):**\n   - 응결된 수증기 입자들이 주변의 다른 수증기 분자들과 계속해서 충돌하고 합쳐지면서 크기가 점차 커져서 눈에 보이는 구름 방울이 됩니다."
+        }
+      ],
+      "settingsUnchanged": true
+    },
+    "gpu-4096": {
+      "platform": "samsung SM-S928N / Android 16",
+      "scope": "Actual production LocalModelRuntime/Gemma; direct general generation, no document answer, no UI frames/audio/history writes. Settings injected in memory only.",
+      "requestedBackend": "GPU",
+      "contextTokens": 4096,
+      "thinkingEnabled": false,
+      "originalSettings": {
+        "backend": "CPU",
+        "contextTokens": 8192,
+        "responseTokens": 4096,
+        "automaticAnswerLength": true
+      },
+      "runLabel": "gpu-4096",
+      "phase": "complete",
+      "results": [
+        {
+          "case": "cold-short",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 한국어로 세 문장 이내의 짧은 답변을 써줘.",
+          "maxOutputTokens": 128,
+          "firstValidatedSentenceMs": 13928,
+          "totalMs": 17192,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "GPU",
+            "initializationMs": 12315,
+            "firstNativeTextMs": 13296,
+            "generationTotalMs": 17189,
+            "promptBytes": 1197
+          },
+          "before": {
+            "availableRamBytes": 5768376320,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35.2
+          },
+          "after": {
+            "availableRamBytes": 3779141632,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35.2
+          },
+          "rawAnswer": "구름이 생겨 비가 내리는 원리는 물의 증발과 응결 과정입니다.\n\n*   **증발:** 태양열로 인해 지표면의 물이 기체 상태의 수증기로 변합니다.\n*   **응결:** 이 수증기가 대기 중의 차갑고 건조한 공기 속에서 냉각되어 작은 물방울이나 얼음 결정으로 뭉치면서 구름을 형성합니다.\n*   **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 무거워지면 중력에 의해 비,",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다.\n\n구름이 생겨 비가 내리는 원리는 물의 증발과 응결 과정입니다.\n\n- **증발:** 태양열로 인해 지표면의 물이 기체 상태의 수증기로 변합니다.\n- **응결:** 이 수증기가 대기 중의 차갑고 건조한 공기 속에서 냉각되어 작은 물방울이나 얼음 결정으로 뭉치면서 구름을 형성합니다.\n- **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 무거워지면 중력에 의해 비,"
+        },
+        {
+          "case": "warm-short-1",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 한국어로 세 문장 이내의 짧은 답변을 써줘.",
+          "maxOutputTokens": 128,
+          "firstValidatedSentenceMs": 867,
+          "totalMs": 3620,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "GPU",
+            "initializationMs": 0,
+            "firstNativeTextMs": 313,
+            "generationTotalMs": 3619,
+            "promptBytes": 1197
+          },
+          "before": {
+            "availableRamBytes": 3779141632,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35.2
+          },
+          "after": {
+            "availableRamBytes": 3788681216,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35.3
+          },
+          "rawAnswer": "구름이 생겨 비가 내리는 원리는 물의 증발과 응결 과정입니다.\n\n*   **증발:** 태양열로 인해 지표면의 물이 기체 상태의 수증기로 변합니다.\n*   **응결:** 이 수증기가 대기 중의 차갑고 건조한 공기 속에서 냉각되어 작은 물방울이나 얼음 결정으로 뭉치면서 구름을 형성합니다.\n*   **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 무거워지면 중력에 의해 비,",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다.\n\n구름이 생겨 비가 내리는 원리는 물의 증발과 응결 과정입니다.\n\n- **증발:** 태양열로 인해 지표면의 물이 기체 상태의 수증기로 변합니다.\n- **응결:** 이 수증기가 대기 중의 차갑고 건조한 공기 속에서 냉각되어 작은 물방울이나 얼음 결정으로 뭉치면서 구름을 형성합니다.\n- **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 무거워지면 중력에 의해 비,"
+        },
+        {
+          "case": "warm-short-2",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 한국어로 세 문장 이내의 짧은 답변을 써줘.",
+          "maxOutputTokens": 128,
+          "firstValidatedSentenceMs": 825,
+          "totalMs": 3642,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "GPU",
+            "initializationMs": 1,
+            "firstNativeTextMs": 316,
+            "generationTotalMs": 3639,
+            "promptBytes": 1197
+          },
+          "before": {
+            "availableRamBytes": 3788681216,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35.3
+          },
+          "after": {
+            "availableRamBytes": 3799113728,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35.3
+          },
+          "rawAnswer": "구름이 생겨 비가 내리는 원리는 물의 증발과 응결 과정입니다.\n\n*   **증발:** 태양열로 인해 지표면의 물이 기체 상태의 수증기로 변합니다.\n*   **응결:** 이 수증기가 대기 중의 차갑고 건조한 공기 속에서 냉각되어 작은 물방울이나 얼음 결정으로 뭉치면서 구름을 형성합니다.\n*   **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 무거워지면 중력에 의해 비,",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다.\n\n구름이 생겨 비가 내리는 원리는 물의 증발과 응결 과정입니다.\n\n- **증발:** 태양열로 인해 지표면의 물이 기체 상태의 수증기로 변합니다.\n- **응결:** 이 수증기가 대기 중의 차갑고 건조한 공기 속에서 냉각되어 작은 물방울이나 얼음 결정으로 뭉치면서 구름을 형성합니다.\n- **강수:** 구름 속의 물방울이나 얼음 결정이 충분히 무거워지면 중력에 의해 비,"
+        },
+        {
+          "case": "warm-long",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 증발, 상승과 냉각, 응결, 물방울의 성장, 강수 과정을 순서대로 자세히 설명해줘. 한국어 Markdown으로 각 과정의 이유와 연결을 포함해 써줘.",
+          "maxOutputTokens": 384,
+          "firstValidatedSentenceMs": 1701,
+          "totalMs": 11626,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "GPU",
+            "initializationMs": 4,
+            "firstNativeTextMs": 463,
+            "generationTotalMs": 11622,
+            "promptBytes": 1324
+          },
+          "before": {
+            "availableRamBytes": 3799113728,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 35.3
+          },
+          "after": {
+            "availableRamBytes": 3392557056,
+            "lowMemory": false,
+            "thermalStatus": 1,
+            "batteryTemperatureC": 35.3
+          },
+          "rawAnswer": "구름이 생겨 비가 내리는 과정은 증발, 상승과 냉각, 응결, 물방울의 성장, 그리고 강수라는 일련의 물리적 현상으로 설명될 수 있습니다.\n\n1. **증발 (Evaporation):**\n    * **원리:** 태양열에 의해 지표면의 물(바다, 호수, 습한 토양 등)이 액체 상태의 수증기(기체)로 변하는 과정입니다.\n    * **연결:** 이 수증기는 대기 중으로 이동하여 구름을 형성할 수 있는 물질적 기반을 마련합니다.\n\n2. **상승과 냉각 (Ascent and Cooling):**\n    * **원리:** 증발된 수증기는 대기 중의 상승 기류(예: 열대 지역의 대류, 기압 차이 등)에 의해 위로 이동합니다. 기체가 상승함에 따라 주변의 기압이 낮아지면서 기체의 온도는 점차 낮아집니다.\n    * **연결:** 온도가 낮아지면 수증기의 상태가 변하게 됩니다.\n\n3. **응결 (Condensation):**\n    * **원리:** 상승하여 냉각된 수증기의 온도가 대기 중의 특정 물질(응결핵, Condensation Nuclei)의 포화 수증기압 이하로 떨어지면, 수증기가 다시 액체 상태의 작은 물방울이나 얼음 결정으로 변하는 과정입니다.\n    * **연결:** 응결핵은 구름을 형성하는 씨앗 역할을 하며, 수증기가 액체로 변하면서 구름의 물질적 구성 요소가 됩니다.\n\n4. **물방울의 성장 (Water Droplet Growth):**\n    * **원리:** 응",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서에서 직접 근거를 확인하지 못해 모델의 일반 지식으로 답변합니다.\n\n구름이 생겨 비가 내리는 과정은 증발, 상승과 냉각, 응결, 물방울의 성장, 그리고 강수라는 일련의 물리적 현상으로 설명될 수 있습니다.\n\n1. **증발 (Evaporation):**\n    - **원리:** 태양열에 의해 지표면의 물(바다, 호수, 습한 토양 등)이 액체 상태의 수증기(기체)로 변하는 과정입니다.\n    - **연결:** 이 수증기는 대기 중으로 이동하여 구름을 형성할 수 있는 물질적 기반을 마련합니다.\n\n2. **상승과 냉각 (Ascent and Cooling):**\n    - **원리:** 증발된 수증기는 대기 중의 상승 기류(예: 열대 지역의 대류, 기압 차이 등)에 의해 위로 이동합니다. 기체가 상승함에 따라 주변의 기압이 낮아지면서 기체의 온도는 점차 낮아집니다.\n    - **연결:** 온도가 낮아지면 수증기의 상태가 변하게 됩니다.\n\n3. **응결 (Condensation):**\n    - **원리:** 상승하여 냉각된 수증기의 온도가 대기 중의 특정 물질(응결핵, Condensation Nuclei)의 포화 수증기압 이하로 떨어지면, 수증기가 다시 액체 상태의 작은 물방울이나 얼음 결정으로 변하는 과정입니다.\n    - **연결:** 응결핵은 구름을 형성하는 씨앗 역할을 하며, 수증기가 액체로 변하면서 구름의 물질적 구성 요소가 됩니다.\n\n4. **물방울의 성장 (Water Droplet Growth):**\n    - **원리:** 응"
+        }
+      ],
+      "settingsUnchanged": true
+    },
+    "release-gpu-8192": {
+      "platform": "samsung SM-S928N / Android 16",
+      "scope": "Actual production LocalModelRuntime/Gemma; direct general generation, no document answer, no UI frames/audio/history writes. Settings injected in memory only.",
+      "requestedBackend": "GPU",
+      "contextTokens": 8192,
+      "thinkingEnabled": false,
+      "originalSettings": {
+        "backend": "CPU",
+        "contextTokens": 8192,
+        "responseTokens": 4096,
+        "automaticAnswerLength": true
+      },
+      "runLabel": "release-gpu-8192",
+      "phase": "complete",
+      "results": [
+        {
+          "case": "cold-short",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 한국어로 세 문장 이내의 짧은 답변을 써줘.",
+          "maxOutputTokens": 128,
+          "firstValidatedSentenceMs": 6277,
+          "totalMs": 7906,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "GPU",
+            "initializationMs": 4525,
+            "firstNativeTextMs": 5418,
+            "generationTotalMs": 7900,
+            "promptBytes": 1320
+          },
+          "before": {
+            "availableRamBytes": 5287055360,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 32.9
+          },
+          "after": {
+            "availableRamBytes": 3144970240,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 32.9
+          },
+          "rawAnswer": "구름은 따뜻하고 습한 공기가 상승하여 기온이 낮아지면서 수증기가 응결되어 형성됩니다. 이 응결된 물방울들이 모여서 비나 눈을 내리게 됩니다. 따라서 구름이 생기고 비가 내리는 과정은 대기 중의 수증기 이동과 응결이라는 물리적 현상으로 설명됩니다.",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서로 확인한 사실과 구분되는 AI의 일반 설명입니다.\n\n구름은 따뜻하고 습한 공기가 상승하여 기온이 낮아지면서 수증기가 응결되어 형성됩니다. 이 응결된 물방울들이 모여서 비나 눈을 내리게 됩니다. 따라서 구름이 생기고 비가 내리는 과정은 대기 중의 수증기 이동과 응결이라는 물리적 현상으로 설명됩니다."
+        },
+        {
+          "case": "warm-short-1",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 한국어로 세 문장 이내의 짧은 답변을 써줘.",
+          "maxOutputTokens": 128,
+          "firstValidatedSentenceMs": 1190,
+          "totalMs": 2667,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "GPU",
+            "initializationMs": 2,
+            "firstNativeTextMs": 421,
+            "generationTotalMs": 2665,
+            "promptBytes": 1320
+          },
+          "before": {
+            "availableRamBytes": 3144970240,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 32.9
+          },
+          "after": {
+            "availableRamBytes": 3084144640,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 33.7
+          },
+          "rawAnswer": "구름은 따뜻하고 습한 공기가 상승하여 기온이 낮아지면서 수증기가 응결되어 형성됩니다. 이 응결된 물방울들이 모여서 비나 눈을 내리게 됩니다. 따라서 구름이 생기고 비가 내리는 과정은 대기 중의 수증기 이동과 응결이라는 물리적 현상으로 설명됩니다.",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서로 확인한 사실과 구분되는 AI의 일반 설명입니다.\n\n구름은 따뜻하고 습한 공기가 상승하여 기온이 낮아지면서 수증기가 응결되어 형성됩니다. 이 응결된 물방울들이 모여서 비나 눈을 내리게 됩니다. 따라서 구름이 생기고 비가 내리는 과정은 대기 중의 수증기 이동과 응결이라는 물리적 현상으로 설명됩니다."
+        },
+        {
+          "case": "warm-short-2",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 한국어로 세 문장 이내의 짧은 답변을 써줘.",
+          "maxOutputTokens": 128,
+          "firstValidatedSentenceMs": 1120,
+          "totalMs": 2534,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "GPU",
+            "initializationMs": 0,
+            "firstNativeTextMs": 376,
+            "generationTotalMs": 2532,
+            "promptBytes": 1320
+          },
+          "before": {
+            "availableRamBytes": 3084144640,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 33.7
+          },
+          "after": {
+            "availableRamBytes": 3170738176,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 33.7
+          },
+          "rawAnswer": "구름은 따뜻하고 습한 공기가 상승하여 기온이 낮아지면서 수증기가 응결되어 형성됩니다. 이 응결된 물방울들이 모여서 비나 눈을 내리게 됩니다. 따라서 구름이 생기고 비가 내리는 과정은 대기 중의 수증기 이동과 응결이라는 물리적 현상으로 설명됩니다.",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서로 확인한 사실과 구분되는 AI의 일반 설명입니다.\n\n구름은 따뜻하고 습한 공기가 상승하여 기온이 낮아지면서 수증기가 응결되어 형성됩니다. 이 응결된 물방울들이 모여서 비나 눈을 내리게 됩니다. 따라서 구름이 생기고 비가 내리는 과정은 대기 중의 수증기 이동과 응결이라는 물리적 현상으로 설명됩니다."
+        },
+        {
+          "case": "warm-long",
+          "question": "구름이 생겨 비가 내리는 원리를 설명해줘. 증발, 상승과 냉각, 응결, 물방울의 성장, 강수 과정을 순서대로 자세히 설명해줘. 한국어 Markdown으로 각 과정의 이유와 연결을 포함해 써줘.",
+          "maxOutputTokens": 384,
+          "firstValidatedSentenceMs": 1710,
+          "totalMs": 11724,
+          "outputLimitReached": false,
+          "metrics": {
+            "backend": "GPU",
+            "initializationMs": 4,
+            "firstNativeTextMs": 496,
+            "generationTotalMs": 11721,
+            "promptBytes": 1398
+          },
+          "before": {
+            "availableRamBytes": 2989731840,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 33.7
+          },
+          "after": {
+            "availableRamBytes": 2977660928,
+            "lowMemory": false,
+            "thermalStatus": 0,
+            "batteryTemperatureC": 33.7
+          },
+          "rawAnswer": "구름이 생기고 비가 내리는 과정은 증발, 상승과 냉각, 응결, 물방울의 성장, 그리고 강수라는 일련의 물리적 현상으로 설명됩니다.\n\n1. **증발 (Evaporation):**\n    * **원리:** 태양열에 의해 지표면의 물(바다, 호수, 흙 등)이 액체 상태의 수증기(기체)로 변하는 과정입니다.\n    * **연결:** 이 수증기가 대기 중으로 이동하기 시작하는 출발점입니다.\n\n2. **상승과 냉각 (Ascent and Cooling):**\n    * **원리:** 증발된 수증기는 대기 중으로 이동하면서 공기의 흐름이나 다른 요인에 의해 위로 상승합니다. 상승함에 따라 주변 공기의 압력이 낮아지고 온도가 급격히 낮아집니다.\n    * **연결:** 온도가 낮아지면 수증기가 더 이상 기체 상태로 유지되기 어려워집니다.\n\n3. **응결 (Condensation):**\n    * **원리:** 상승하여 냉각된 수증기는 주변 공기보다 온도가 낮은 상태가 되어 공기 중의 미세한 입자(먼지, 오염 물질 등)를 핵으로 삼아 다시 액체 상태의 작은 물방울(응결핵)로 뭉치게 됩니다.\n    * **연결:** 수증기가 액체 상태로 변하는 첫 단계이며, 이 작은 물방울들이 모여 구름을 형성하는 기초가 됩니다.\n\n4. **물방울의 성장 (Water Droplet Growth):**\n    * **원리:** 응결된 작은 물방울들은 주변의 다른 수증기나 미세한 입자",
+          "displayAnswer": "> **일반 지식 안내**: 제공 문서로 확인한 사실과 구분되는 AI의 일반 설명입니다.\n\n구름이 생기고 비가 내리는 과정은 증발, 상승과 냉각, 응결, 물방울의 성장, 그리고 강수라는 일련의 물리적 현상으로 설명됩니다.\n\n1. **증발 (Evaporation):**\n    - **원리:** 태양열에 의해 지표면의 물(바다, 호수, 흙 등)이 액체 상태의 수증기(기체)로 변하는 과정입니다.\n    - **연결:** 이 수증기가 대기 중으로 이동하기 시작하는 출발점입니다.\n\n2. **상승과 냉각 (Ascent and Cooling):**\n    - **원리:** 증발된 수증기는 대기 중으로 이동하면서 공기의 흐름이나 다른 요인에 의해 위로 상승합니다. 상승함에 따라 주변 공기의 압력이 낮아지고 온도가 급격히 낮아집니다.\n    - **연결:** 온도가 낮아지면 수증기가 더 이상 기체 상태로 유지되기 어려워집니다.\n\n3. **응결 (Condensation):**\n    - **원리:** 상승하여 냉각된 수증기는 주변 공기보다 온도가 낮은 상태가 되어 공기 중의 미세한 입자(먼지, 오염 물질 등)를 핵으로 삼아 다시 액체 상태의 작은 물방울(응결핵)로 뭉치게 됩니다.\n    - **연결:** 수증기가 액체 상태로 변하는 첫 단계이며, 이 작은 물방울들이 모여 구름을 형성하는 기초가 됩니다.\n\n4. **물방울의 성장 (Water Droplet Growth):**\n    - **원리:** 응결된 작은 물방울들은 주변의 다른 수증기나 미세한 입자"
+        }
+      ],
+      "interveningSearch": {
+        "gpuRetained": true,
+        "searchMs": 3962,
+        "memory": {
+          "availableRamBytes": 2989731840,
+          "lowMemory": false,
+          "thermalStatus": 0,
+          "batteryTemperatureC": 33.7
+        }
+      },
+      "settingsUnchanged": true
+    }
+  },
+  "releaseDialogue": {
+    "scope": "Actual Android dialogue + document search + general Gemma inference. No chat/history writes; inference settings overridden in memory only. Raw model text retained for review, not an independent factual grade.",
+    "results": [
+      {
+        "question": "필요한 도구는 먼데?",
+        "query": "필요한 도구는 먼데?",
+        "method": "inventory",
+        "documentMs": 2094,
+        "generalRequested": false,
+        "sourceBody": "### 측정 장비\n\n- 가스농도 측정기에 이상이 없는지 확인하십시오.\n\n- 예를 들어, 깨끗한 야외 공기에서 산소농도를 측정했을 때 산소농도가 **20.9%**를 초과하거나 미만으로 나타나 면 교정 또는 센서교체가 필요한 상황입니다.\n\n- 그 밖의 다른 유해가스도 표준가스를 이용하여 측정기의 이상 유 무를 확인하거나 정기적인 검교정을 통해 정상상태를 유지해야 합니다.\n\n- 탱크 등 깊은 장소의 농도를 측정할 때에는 고무호스나 PV C로 된 채기관을 연결하여 측정하십시오.\n\n- (채기관은 1m 마다 작은 눈금으로, 5m 마다 큰 눈금으로 표시)\n\n### 조명 장비\n\n- 어두운 밀폐공간 내부에서 측정을 위해 전등을 사용하는 경우, 가연성가스가 차 있을 수 있으므로 방폭구조의 전등을 사용하십시오.\n\n### 환기 장비\n\n- 환기팬은 정압이 **40mmAq 이상**이고, 용량(m 3/min)이 밀폐공간 체적(m3)의 **40% 이상**의 것으로 준비합니다.\n\n- (예시 : 체적이 600m3인 경우, 환기팬 용량은 600×0.4=**240m3/min**)\n\n- 송풍관(덕트) 길이는 환기팬 제조사에서 제시한 길이를 초과하지 않아야 하며 제조사에서 별도 제 시하지 않는 경우 **15미터**를 넘기지 않도록 합니다.\n\n- 송풍관(덕트)은 가급적 구부리는 부위가 적게 하고, 용접불꽃 등에 의한 구멍이 나지 않도록 난연재 질을 사용합니다.\n\n- 폭발위험지역 내에서는 방폭형 구조를 사용합니다.\n\n- 정전 등에 의하여 환기가 중단되는 등 응급상황 발생시 작업근로자는 즉시 밀폐공간 외부로 대피할 수 있어야 합니다.\n\n- (환기가 어려울 경우의 조치) 환기를 통해서도 적정공기 상태를 유지하기 어려운 경우 또는 폭발이나 산화 등의 위험으로 환기를 실시할 수 없는 경우에는 송기마스크 또는 공기호흡기 착용 등 추가적인 보호조치를 취해야 합니다.\n\n### 보호장구 종류\n\n1. 호흡기 보호를 위한 호흡용 보호 구,\n\n2. 추락사고 예방을 위한 안전대, 보호가드, 구명 밧줄,\n\n3. 구조용 삼각대 등이 있습니다.\n\n### 호흡용 보호구(공기호흡기 또는 송기마스크)\n\n- 이러한 보호장구는 작업이나 긴급상황에서 언제든지 즉시 사용 가능한 상태로 유지하여야 하 며, 근로자들에게 사용방법 등에 관한 충분한 교육과 훈련을 실시해야 합니다.\n\n- 기본적으로 호흡용 보호구를 착용하지 않더라도 작업할 수 있도록 환기를 통해 밀폐공간 내부를 적정 공기 상태로 만드는 것이 중요합니다.\n\n- 환기를 할 수 없거나 환기만으로 불충분한 경우에는 호흡용보호구를 반드시 착용하고 출입하여야 합 니다.\n\n- 유해가스가 지속적으로 발생하여 환기만으로 적정공기를 유지하기 힘든 경우\n\n- 탱크, 화학설비, 수도나 도수관 등 구조적으로 충분히 환기가 힘든 경우\n\n- 응급상황이 발생하여 충분히 환기시킬 시간적 여유가 없는 경우\n\n- 밀폐공간은 장소가 협소하여 공기호흡기를 착용하고 들어가기 어려울 수 있습니다.\n\n- 이 경우 외부에서 공기를 공급하는 방식의 송기마스크를 착 용하는 것이 더 안전할 수 있습니다.\n\n- 다만, 송기마스크의 송기라인이 꼬이거나 끊어지지 않도록 잘 관리하여 야 하며, 정전 등으로 공기공급이 중단되는 경우가 없도록 대비하여야 합 니다.\n\n### 추락 방지·구조 장비\n\n- 밀폐공간은 용기·탱크 등 시설 내부, 지하, 갱, 맨홀, 피트로 들어가는 경우 승강구나 오르내리는 사다 리가 있을 수 있습니다.\n\n- 따라서 들어가는 과정이나 내부에서 작업할 때 추락 위험이 있습니다.\n\n- 탱크 바닥이나 기타 습기 찬 환경의 바닥, 사다리 발판이 매우 미끄러울 수 있습니다.\n\n- 이러한 추락위험에 대비하기 위해 안전대와, 구명 밧줄을 착용하여야 합니다.\n\n- 응급상황 발생 시 구조하기 위한 구조용 삼각대, 사다리, 섬유로프 등을 갖추어 두어야 합니다.\n\n### 연락용 설비\n\n- 사업주는 밀폐공간에서 작업하는 동안 그 작업장과 외부의 감시인 간에 항상 연락을 취할 수 있는 설비를 설치하여야 합니다."
+      },
+      {
+        "question": "구조용 삼각대 등에 대해 알려줘",
+        "query": "구조용 삼각대 등에 대해 알려줘",
+        "method": "heading",
+        "documentMs": 8,
+        "generalRequested": false,
+        "sourceBody": "### 구조용 삼각대 등\n\n- 응급상황 발생 시 구조하기 위한 구조용 삼각대, 사다리, 섬유로프 등을 갖추어 두어야 합니다."
+      },
+      {
+        "question": "얼마나 필요해?",
+        "query": "구조용 삼각대 준비 수량",
+        "method": "equipment-quantity",
+        "documentMs": 60,
+        "totalMs": 14656,
+        "generalRequested": true,
+        "rawGeneral": "구조용 삼각대 준비 수량은 현장 상황과 작업 구역의 특성에 따라 달라지므로, 구체적인 준비 수량은 현장 안전 관리 계획을 통해 결정되어야 합니다.\n\n필요한 준비 수량 판단 기준은 다음과 같습니다.\n\n*   **작업 구역 및 구조 대상의 규모:** 구조 대상이 되는 공간의 크기, 접근 난이도, 예상되는 인원수 등을 고려해야 합니다.\n*   **응급상황 발생 시나리오:** 예상되는 재난 상황(예: 질식, 추락 등)의 심각성과 발생 가능성을 기준으로 필요한 구조 장비의 종류와 양을 산정해야 합니다.\n*   **현장 환경 및 작업 조건:** 작업 환경(예: 접근성, 조명 상태, 환기 조건)과 작업자의 숙련도를 고려하여 장비의 안정성과 사용 편의성을 확보해야 합니다.\n\n필요한 확인 질문은 다음과 같습니다.\n\n*   구조 대상이 되는 밀폐공간의 예상 크기 및 구조적 특성은 어떻게 됩니까?",
+        "generated": "> **일반 지식 안내**: 제공 문서로 확인한 사실과 구분되는 AI의 일반 설명입니다.\n\n구조용 삼각대 준비 수량은 현장 상황과 작업 구역의 특성에 따라 달라지므로, 구체적인 준비 수량은 현장 안전 관리 계획을 통해 결정되어야 합니다.\n\n필요한 준비 수량 판단 기준은 다음과 같습니다.\n\n- **작업 구역 및 구조 대상의 규모:** 구조 대상이 되는 공간의 크기, 접근 난이도, 예상되는 인원수 등을 고려해야 합니다.\n- **응급상황 발생 시나리오:** 예상되는 재난 상황(예: 질식, 추락 등)의 심각성과 발생 가능성을 기준으로 필요한 구조 장비의 종류와 양을 산정해야 합니다.\n- **현장 환경 및 작업 조건:** 작업 환경(예: 접근성, 조명 상태, 환기 조건)과 작업자의 숙련도를 고려하여 장비의 안정성과 사용 편의성을 확보해야 합니다.\n\n필요한 확인 질문은 다음과 같습니다.\n\n- 구조 대상이 되는 밀폐공간의 예상 크기 및 구조적 특성은 어떻게 됩니까?",
+        "sourceBody": "**관련 장비 항목에서는 구조용 삼각대의 고정 준비 수량을 확인하지 못했어요.**\n\n\n장비 구비·착용 의무가 정해져 있다는 뜻과 고정 개수가 정해져 있다는 뜻은 달라요. 미확인 수량은 현장 작업·구조 계획과 해당 장비의 사용 조건을 확인해야 해요.\n\n### 문서에서 확인한 내용\n\n- 응급상황 발생 시 구조하기 위한 구조용 삼각대, 사다리, 섬유로프 등을 갖추어 두어야 합니다.",
+        "backend": "GPU",
+        "initializationMs": 4880,
+        "firstNativeTextMs": 7593
+      },
+      {
+        "question": "아니 갯수를 물어보잖아 삼각대 갯수",
+        "query": "구조용 삼각대 준비 수량",
+        "method": "equipment-quantity",
+        "documentMs": 16,
+        "totalMs": 7658,
+        "generalRequested": true,
+        "rawGeneral": "구조용 삼각대의 필요 수량은 현장 상황과 작업 구역의 특성에 따라 달라지므로 구체적인 준비 수량은 현장 안전 관리 계획을 통해 결정되어야 합니다.\n\n필요한 수량 판단 기준은 다음과 같습니다.\n\n*   **작업 구역 및 구조 대상의 규모:** 구조 대상이 되는 공간의 크기, 접근 난이도, 예상되는 인원수 등을 고려해야 합니다.\n*   **응급상황 발생 시나리오:** 예상되는 재난 상황(예: 질식, 추락 등)의 심각성과 발생 가능성을 기준으로 필요한 구조 장비의 종류와 양을 산정해야 합니다.\n*   **현장 환경 및 작업 조건:** 작업 환경(예: 접근성, 조명 상태, 환기 조건)과 작업자의 숙련도를 고려하여 장비의 안정성과 사용 편의성을 확보해야 합니다.\n\n필요한 확인 질문은 다음과 같습니다.\n\n*   구조 대상이 되는 밀폐공간의 예상 크기 및 구조적 특성은 어떻게 됩니까?",
+        "generated": "> **일반 지식 안내**: 제공 문서로 확인한 사실과 구분되는 AI의 일반 설명입니다.\n\n구조용 삼각대의 필요 수량은 현장 상황과 작업 구역의 특성에 따라 달라지므로 구체적인 준비 수량은 현장 안전 관리 계획을 통해 결정되어야 합니다.\n\n필요한 수량 판단 기준은 다음과 같습니다.\n\n- **작업 구역 및 구조 대상의 규모:** 구조 대상이 되는 공간의 크기, 접근 난이도, 예상되는 인원수 등을 고려해야 합니다.\n- **응급상황 발생 시나리오:** 예상되는 재난 상황(예: 질식, 추락 등)의 심각성과 발생 가능성을 기준으로 필요한 구조 장비의 종류와 양을 산정해야 합니다.\n- **현장 환경 및 작업 조건:** 작업 환경(예: 접근성, 조명 상태, 환기 조건)과 작업자의 숙련도를 고려하여 장비의 안정성과 사용 편의성을 확보해야 합니다.\n\n필요한 확인 질문은 다음과 같습니다.\n\n- 구조 대상이 되는 밀폐공간의 예상 크기 및 구조적 특성은 어떻게 됩니까?",
+        "sourceBody": "**관련 장비 항목에서는 구조용 삼각대의 고정 준비 수량을 확인하지 못했어요.**\n\n\n장비 구비·착용 의무가 정해져 있다는 뜻과 고정 개수가 정해져 있다는 뜻은 달라요. 미확인 수량은 현장 작업·구조 계획과 해당 장비의 사용 조건을 확인해야 해요.\n\n### 문서에서 확인한 내용\n\n- 응급상황 발생 시 구조하기 위한 구조용 삼각대, 사다리, 섬유로프 등을 갖추어 두어야 합니다.",
+        "backend": "GPU",
+        "initializationMs": 5,
+        "firstNativeTextMs": 1011
+      },
+      {
+        "question": "구름이 생겨 비가 내리는 원리를 세 문장으로 설명해줘",
+        "query": "구름이 생겨 비가 내리는 원리를 세 문장으로 설명해줘",
+        "method": "reviewed-semantic",
+        "documentMs": 3321,
+        "totalMs": 7727,
+        "generalRequested": true,
+        "rawGeneral": "구름은 대기 중의 수증기가 응결하여 물방울이나 얼음 결정이 되어 형성되는 현상입니다. 이 과정은 공기 중의 수증기가 냉각되어 포화 수증기압 이하로 내려앉으면서 기체 상태에서 액체 상태로 변하는 물리적 변화를 통해 일어납니다. 이러한 응결 과정이 충분히 일어나면 물방울이 충분히 커져서 비나 눈과 같은 형태로 지표면에 떨어지게 됩니다.",
+        "generated": "> **일반 지식 안내**: 제공 문서로 확인한 사실과 구분되는 AI의 일반 설명입니다.\n\n구름은 대기 중의 수증기가 응결하여 물방울이나 얼음 결정이 되어 형성되는 현상입니다. 이 과정은 공기 중의 수증기가 냉각되어 포화 수증기압 이하로 내려앉으면서 기체 상태에서 액체 상태로 변하는 물리적 변화를 통해 일어납니다. 이러한 응결 과정이 충분히 일어나면 물방울이 충분히 커져서 비나 눈과 같은 형태로 지표면에 떨어지게 됩니다.",
+        "sourceBody": "제공 문서에서 질문에 직접 답할 근거를 찾지 못했어요. 문서에 있는 용어나 확인할 조건을 조금 더 구체적으로 말씀해 주세요.",
+        "backend": "GPU",
+        "initializationMs": 3,
+        "firstNativeTextMs": 1145
+      }
+    ],
+    "phase": "complete",
+    "settingsUnchanged": true
+  },
+  "limitations": [
+    "Cold means a new engine in the test process with existing driver/model disk caches; not a first-ever clean install.",
+    "128/384 output-token limits are benchmark conditions. Some bounded long outputs are cut off, so their durations are not completion times for every requested detailed point.",
+    "Same prompts/settings across CPU/GPU can still yield different text/length; raw duration ratio is not an exact token throughput speedup.",
+    "Native SDK getBenchmarkInfo is unavailable because BenchmarkParams is not enabled in EngineSettings; exact input/output token counts and tokens/sec are not measured. Output limit false is not a reliable completeness guarantee in these runs.",
+    "The final short GPU output was manually inspected as three complete sentences; measured warm times do not include first engine preparation or rendered frames/audio.",
+    "Generated dialogue validation checks continuation and useful general text, not expert factual accuracy. Model explanation quality remains a limitation.",
+    "GPU retention is conditional on >=8 GiB RAM, >=2 GiB currently available and no low-memory flag, and background cleanup. All devices or memory pressure states are not validated."
+  ]
+}

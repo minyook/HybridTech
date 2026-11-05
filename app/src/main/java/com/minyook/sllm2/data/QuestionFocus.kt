@@ -18,9 +18,12 @@ internal object QuestionFocus {
         Entity("환기팬", Regex("환기팬|송풍기")),
     )
     fun targets(text: String) = entities.filter { it.matches(text) }
+    fun requestText(text: String): String = text.trim()
+        .replace(Regex("^(?:아니요?|그게\\s*아니라|내\\s*말은)[,，\\s]*"), "")
+        .replace(Regex("(?:갯수|개수|수량)(?:를|을|가|은|는)?\\s*(?:물어보잖아|물었잖아|물어봤잖아|묻잖아|물어본거야|묻는거야)"), "수량 ")
     private val count = Regex("개수|갯수|수량|몇\\s*(?:개(?!소|월)|대|벌|세트|본|가닥)|각각\\s*몇|(?:\\d+|한|두|세|네)\\s*(?:개(?!소|월)|대|벌|세트|본|가닥)(?:면|씩|만|로|가|는|를|야|도|\\s|$)")
     private val otherMeasure = Regex("길이|미터|몇\\s*m|하중|높이|전압|간격|농도|몇\\s*회|몇\\s*시간", RegexOption.IGNORE_CASE)
-    fun quantity(text: String) = count.containsMatchIn(text) && !otherMeasure.containsMatchIn(text)
+    fun quantity(text: String) = (count.containsMatchIn(text) || Regex("얼마나\\s*(?:필요|준비|챙)").containsMatchIn(text)) && !otherMeasure.containsMatchIn(text)
     fun comparison(text: String) = Regex("차이|비교|어떻게\\s*달라|뭐가\\s*달라").containsMatchIn(text)
     fun people(text: String): String? = Regex("(?:\\d+|한|두|세|네|다섯|여섯)\\s*명|(?:일|이|삼|사)\\s*인(?:이|일|이면|분)").find(text)?.value
     fun statedCount(text: String): String? = Regex("(?:\\d+|한|두|세|네|다섯|여섯)\\s*(?:개|대|벌|세트|본|가닥)").find(text)?.value
@@ -32,7 +35,7 @@ internal object QuestionFocus {
     }
     fun bareQuantity(question: String) = quantity(question) && targets(question).isEmpty() && quantityRemainder(question).isBlank()
     private fun quantityRemainder(question: String): String {
-        var rest = question
+        var rest = requestText(question)
         targets(question).forEach { rest = rest.replace(it.forms, " ") }
         rest = rest.replace(Regex("\\d+|한|두|세|네|다섯|여섯"), " ")
         rest = rest.replace(Regex("그럼|그러면|그거|그건|각각|개수|갯수|수량|몇|인원|명|정해진|정해져|정해|정도|어느|얼마나|챙겨야|챙겨|챙기|준비해야|준비|필요|고정|기준|조건|있나요|있나|있어|없어|돼요|되나|될까|가능|되는|이면|면|하나|해야|해줘|해요|돼|해|게|것|건|지|요|는|은|이|가|을|를|의|과|와|랑|하고|등등|등|에|로|도|만|씩|개|대|벌|세트|본|가닥|좀|\\s|[?？,.·()]"), "")
@@ -41,6 +44,8 @@ internal object QuestionFocus {
 
     /** Covers an omitted subject and a narrowed named subset; explicit new nouns use normal search. */
     fun followUp(asked: String, topic: String): String? {
+        val cleaned = requestText(asked)
+        if (cleaned != asked) return followUp(cleaned, topic)
         val prior = targets(topic)
         if (prior.isEmpty()) return null
         val named = targets(asked)

@@ -50,7 +50,7 @@ class EquipmentDialogueTest {
         val request = ConversationContext.resolve("갯수는 어느정도로 챙겨?", transcript())
         val quantity = resolver.resolve(request.query)!!
         val answer = DocumentAnswerPlan.create(request.answerQuestion, quantity)
-        assertEquals("equipment-quantity", quantity.method); assertNull(quantity.generalQuestion)
+        assertEquals("equipment-quantity", quantity.method); assertEquals(request.query,quantity.generalQuestion)
         assertTrue(answer.body.take(160).contains("고정 준비 수량을 확인하지 못했어요"))
         assertTrue(answer.body.contains("안전대")); assertTrue(answer.body.contains("구명줄")); assertTrue(answer.body.contains("구조용 삼각대"))
         assertEquals(1,Regex("고정 준비 수량").findAll(answer.body).count()); assertFalse(answer.body.contains("습기 찬 환경"))
@@ -107,5 +107,21 @@ class EquipmentDialogueTest {
         assertEquals(FollowUpKind.NEW, fresh.kind)
         val continued = ConversationContext.resolve("그거 쉽게 설명해줘", transcript() + ConversationTurn(true,fresh.asked,fresh.query,fresh.topic) + ConversationTurn(false,"커피 설명입니다.",topicQuestion=fresh.topic))
         assertEquals(FollowUpKind.EXPLAIN,continued.kind); assertTrue(continued.query.contains("커피")); assertFalse(continued.query.contains("삼각대"))
+    }
+    @Test fun screenshotAmountAndCorrectionKeepTheActualEquipmentInsteadOfOfferingUnrelatedChoices() {
+        val history = listOf(ConversationTurn(true,"필요한 도구는 먼데?"),ConversationTurn(false,"### 구조용 삼각대 등\n\n- 응급상황에 대비해 구조용 삼각대 등을 갖춥니다.",topicQuestion="필요한 도구는 먼데?",sourceIds=listOf(37)))
+        val amount = ConversationContext.resolve("얼마나 필요해?",history)
+        assertEquals(FollowUpKind.FOLLOW_UP,amount.kind); assertEquals(listOf("구조용 삼각대"),QuestionFocus.targets(amount.query).map { it.name }); assertTrue(QuestionFocus.quantity(amount.query))
+        val correction = ConversationContext.resolve("아니 갯수를 물어보잖아 삼각대 갯수",history)
+        val result = EquipmentDetailAnswer(corpus()).resolve(QuestionUnderstanding.normalize(correction.query))!!
+        assertEquals("equipment-quantity",result.method);assertNotNull(result.generalQuestion)
+        assertFalse(result.answerBody!!.contains("관리감독자"));assertTrue(result.answerBody!!.contains("고정 준비 수량"))
+    }
+    @Test fun aColloquialToolListIsAnInventoryRatherThanOneTripodParagraph() {
+        val q = QuestionUnderstanding.normalize("필요한 도구는 먼데?")
+        val result = EquipmentOverview(corpus()).resolve(q)!!
+        assertEquals("inventory",result.method)
+        val body = DocumentAnswerPlan.create(q,result).body
+        assertTrue(body.contains("측정기"));assertTrue(body.contains("전등"));assertTrue(body.contains("환기"));assertTrue(body.contains("삼각대"))
     }
 }

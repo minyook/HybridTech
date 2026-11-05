@@ -41,4 +41,23 @@ class GeneralKnowledgeAnswerTest {
         val prompt = GeneralKnowledgeAnswer.prompt("구명줄 개수")
         assertTrue(prompt.contains("이번 질문의 초점")); assertTrue(prompt.contains("안전 수량"))
     }
+    @Test fun usefulGeneralExplanationSurvivesAnUnverifiedCountParagraph() {
+        val raw="삼각대 준비 수량을 정할 때는 동시에 사용하는 작업 구역과 인양 구성을 함께 살펴야 해요.\n\n삼각대는 1대만 준비하면 됩니다.\n\n장비의 호환성과 사용 설명서의 설치 조건도 확인해야 해요."
+        val answer=GeneralKnowledgeAnswer.finish(raw,"삼각대 갯수")
+        assertTrue(answer.contains("동시에 사용하는 작업 구역"));assertTrue(answer.contains("호환성과 사용 설명서"))
+        assertFalse(answer.contains("1대만"));assertFalse(answer.contains("구체적인 수치나 작업 가능 여부를 문서 근거 없이"))
+        assertNotNull(GeneralKnowledgeAnswer.partial(raw,"삼각대 갯수"))
+    }
+    @Test fun safeNumberedExplanationsAreNotRejectedAsProductSpecifications() {
+        val raw="1. 전압은 제품의 명판에서 확인할 수 있어요.\n\n2. 연결하려는 전원과의 호환성을 확인하세요."
+        assertTrue(GeneralKnowledgeAnswer.acceptable(raw,"이 전등 전압은?"))
+        assertTrue(GeneralKnowledgeAnswer.finish(raw,"이 전등 전압은?").contains("명판"))
+        val prompt=GeneralKnowledgeAnswer.prompt("삼각대 수량","구조용 삼각대 등을 갖추어 두어야 합니다.")
+        assertTrue(prompt.contains("문서에 없다는 이유만으로 답변을 거절하지 마세요"));assertTrue(prompt.contains("이미 표시한 문서"))
+    }
+    @Test fun anExplicitShortRequestDoesNotForceExtraListsWhileDetailedAnswersKeepTheirScope() {
+        assertTrue(GeneralKnowledgeAnswer.prompt("구름이 생기는 원리를 세 문장으로 설명해줘").contains("1~3개의 완결 문장만"))
+        assertTrue(GeneralKnowledgeAnswer.prompt("구름이 생기는 원리를 자세히 설명해줘").contains("Markdown 답변 본문"))
+        assertFalse(GeneralKnowledgeAnswer.prompt("구름이 생기는 원리를 자세히 설명해줘").contains("1~3개의 완결 문장만"))
+    }
 }

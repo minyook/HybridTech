@@ -108,6 +108,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        viewModel.onAppForeground()
         hideSystemNavigationBar()
         voiceController.onResume(viewModel.uiState.value.destination in setOf(AppDestination.CHAT, AppDestination.VOICE))
     }

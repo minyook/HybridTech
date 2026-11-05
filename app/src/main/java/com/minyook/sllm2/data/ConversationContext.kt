@@ -78,6 +78,15 @@ object ConversationContext {
         if (topic.isNotBlank()) QuestionFocus.followUp(value, topic)?.let { query ->
             return request(if (explain.containsMatchIn(compact)) FollowUpKind.EXPLAIN else FollowUpKind.FOLLOW_UP, query, query)
         }
+        if (QuestionFocus.bareQuantity(value) && answer?.sourceIds?.isNotEmpty() == true) {
+            val headings = answer.text.lines().filter { it.trimStart().startsWith('#') }.joinToString(" ")
+            val targets = if(QuestionFocus.targets(topic).isEmpty() && Regex("장비|도구|준비물|보호구|장구").containsMatchIn(topic))
+                QuestionFocus.targets(answer.text) else QuestionFocus.targets(headings)
+            if (targets.isNotEmpty()) {
+                val query = QuestionFocus.followUp(value, targets.joinToString(" · ") { it.name })
+                if (query != null) return request(FollowUpKind.FOLLOW_UP, query, query)
+            }
+        }
         val explicitSubjects = EvidenceLanguage.terms(value).filter { it in EvidenceLanguage.vocabulary && it !in EvidenceLanguage.generic }
         val priorSubjects = EvidenceLanguage.aliases(topic + " " + answer?.text.orEmpty())
         val newSubject = explicitSubjects.any { it !in EvidenceLanguage.aliases(topic) }
@@ -129,6 +138,7 @@ object ConversationContext {
                 question.put("assistantOmitted", true)
                 val headings = pair.filterNot { it.user }.flatMap { turn -> turn.text.lines().mapNotNull { line ->
                     Regex("^#{1,6}\\s+(.+)$").find(line)?.groupValues?.get(1)
+                        ?: Regex("^\\s*(?:[-*+] |\\d+[.)] )\\*\\*([^*]+)\\*\\*").find(line)?.groupValues?.get(1)
                 } }.filter { it.length <= 70 }.distinct().take(6)
                 val outline = JSONObject().put("role", "assistant").put("discussedHeadings", JSONArray(headings)).put("fullAnswerOmitted", true)
                 val compact = listOf(question) + if(headings.isEmpty()) emptyList() else listOf(outline)

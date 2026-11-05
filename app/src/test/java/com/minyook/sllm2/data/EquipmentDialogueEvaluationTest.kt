@@ -48,7 +48,7 @@ class EquipmentDialogueEvaluationTest {
             if (request.kind!=c.kind) errors += "대화 종류 ${request.kind} != ${c.kind}"
             if (QuestionFocus.targets(request.query).map { it.name }!=c.names) errors += "대상 불일치"
             if (result.status!="answered") errors += "직접 답변 실패: ${result.status}"
-            if (result.generalQuestion!=null || plan.supplementRequested) errors += "불필요한 생성 요청"
+            if ((result.generalQuestion!=null)!=c.count || plan.supplementRequested) errors += "일반 수량 설명/문서 답변 생성 분기 불일치"
             if (c.count && !body.take(160).contains("고정 준비 수량을 확인하지 못했어요")) errors += "첫 문장에 수량 확인 결과 누락"
             if (!c.count && c.names.contains("구조용 삼각대") && !body.take(700).contains("구조용 삼각대, 사다리, 섬유로프")) errors += "삼각대의 구조 용도 누락"
             if (c.asked.contains("차이") && !body.take(180).contains("비교")) errors += "첫 문장에 비교 요청 반영 누락"
@@ -56,7 +56,7 @@ class EquipmentDialogueEvaluationTest {
             if (c.condition!=null && !body.contains("충분하다고 단정할 수는 없어요")) errors += "미확인 수량을 계산/승인"
             if (c.names.any { !body.contains(it) }) errors += "요청 대상의 설명 누락"
             if (Regex("어떤 종류|작업의 종류|몇 개씩 준비하면 됩니다").containsMatchIn(body)) errors += "불필요한 재질문/임의 수량"
-            results.put(JSONObject().put("step",i+1).put("asked",c.asked).put("resolvedQuestion",request.query).put("kind",request.kind.name).put("method",result.method).put("expectedTargets",JSONArray(c.names)).put("expectedAttribute",if(c.count)"quantity" else "role/usage").put("pass",errors.isEmpty()).put("errors",JSONArray(errors)).put("pcSearchCompositionMs",ms).put("pages",JSONArray(result.sources.map { it.chunk.pageNumber })).put("answerMarkdown",body))
+            results.put(JSONObject().put("step",i+1).put("asked",c.asked).put("resolvedQuestion",request.query).put("kind",request.kind.name).put("method",result.method).put("expectedTargets",JSONArray(c.names)).put("expectedAttribute",if(c.count)"quantity" else "role/usage").put("pass",errors.isEmpty()).put("errors",JSONArray(errors)).put("generalGenerationRequested",result.generalQuestion!=null).put("pcSearchCompositionMs",ms).put("pages",JSONArray(result.sources.map { it.chunk.pageNumber })).put("answerMarkdown",body))
             history += ConversationTurn(true,c.asked,request.query,request.topic)
             history += ConversationTurn(false,body,topicQuestion=request.topic,answerStatus=result.status,sourceIds=plan.sourceIds,suggestions=result.suggestions)
         }

@@ -43,6 +43,7 @@ internal class EquipmentDetailAnswer(chunks: List<KnowledgeChunk>) {
         val sources = selected.values.flatten().groupBy { it.chunk.id }.values.map { group ->
             RetrievedChunk(group.first().chunk, 1.0, group.flatMap { it.units }.distinctBy { it.order }.sortedBy { it.order })
         }
+        val unconfirmedQuantity = quantity && selected.any { (target, list) -> list.none { section -> section.units.any { countFor(target, it) } } }
         val body = if (quantity) {
             val withCount = selected.filter { (target, list) -> list.any { section -> section.units.any { countFor(target, it) } } }.keys
             buildString {
@@ -87,6 +88,6 @@ internal class EquipmentDetailAnswer(chunks: List<KnowledgeChunk>) {
                 missing.joinToString("") { "\n\n- **${it.name}**: 관련 항목을 이번 확인에서 찾지 못했어요." } +
                 if (remaining.isEmpty()) "" else "\n\n### 사용 조건과 주의사항\n\n" + FocusedEvidence.format(remaining)
         }
-        return SearchResolution(question, sources, if (missing.isEmpty()) "answered" else "partial", message = "", method = if (quantity) "equipment-quantity" else "equipment-detail", searchComplete = true, answerBody = body)
+        return SearchResolution(question, sources, if (missing.isEmpty()) "answered" else "partial", message = "", method = if (quantity) "equipment-quantity" else "equipment-detail", searchComplete = true, answerBody = body, generalQuestion = question.takeIf { unconfirmedQuantity })
     }
 }

@@ -5,6 +5,8 @@ package com.minyook.sllm2.data
 internal object QuestionUnderstanding {
     fun normalize(question:String):String {
         var q=question
+            .let(QuestionFocus::requestText)
+            .replace(Regex("(?<![가-힣])먼데(?=[?？\\s]|$)"),"뭔데")
             .replace(Regex("(?<![가-힣])(?:잴|잰|재는|재야|재나요|재면|재고|재볼|재지)(?:\\s|[?？]|$)")," 측정 ")
             .replace(Regex("위아래(?:랑|로|를)?"),"수직")
             .replace(Regex("가로(?:로|를)?"),"수평")

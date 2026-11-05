@@ -125,6 +125,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     private val inferencePreferences = InferenceSettingsPreferences(appContext)
     private val repository = KnowledgeRepository()
     private val runtime = LocalModelRuntime(appContext)
+    @Volatile private var appForeground = true
     private val semanticEncoder = SemanticEncoder(appContext)
     private val questionSearchIndex by lazy { appContext.assets.open("knowledge/semantic-index-v1.json").bufferedReader().use { it.readText() } }
     private val history = ChatHistoryStore(appContext)
@@ -333,7 +334,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
             history.append(chatId, ChatHistoryStore.Role.USER, asked, resolvedQuestion=resolved, topicQuestion=request.topic)
             val searchStarted=SystemClock.elapsedRealtime()
             val resolution = repository.searchQuestion(request,questionSearchIndex){query->
-                semanticEncoder.cachedVector(query) ?: run { runtime.release();semanticEncoder.encode(query) }
+                semanticEncoder.cachedVector(query) ?: run { runtime.prepareForSemanticSearch();semanticEncoder.encode(query) }
             }
             android.util.Log.i("FieldGuardAnswerLatency","searchMs=${SystemClock.elapsedRealtime()-searchStarted} method=${resolution.method} status=${resolution.status} complete=${resolution.searchComplete}")
             val sources = resolution.sources
@@ -352,7 +353,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
                 var outputLimitReached = false
                 try{
                     semanticEncoder.release()
-                    val raw=runtime.generate(generalQuestion,"",compactVoiceAnswer,generalKnowledge=true,recentConversation=request.turns,latestUserQuestion=request.asked,onMetrics={android.util.Log.i("FieldGuardGenerationLatency",it.toString())},onOutputLimit={ outputLimitReached = it },onPartialAnswer={partial->
+                    val raw=runtime.generate(generalQuestion,plan.context(),compactVoiceAnswer,generalKnowledge=true,recentConversation=request.turns,latestUserQuestion=request.asked,onMetrics={android.util.Log.i("FieldGuardGenerationLatency",it.toString())},onOutputLimit={ outputLimitReached = it },onPartialAnswer={partial->
                         GeneralKnowledgeAnswer.partial(partial,generalQuestion)?.let{body->
                             lastGeneralBody = body
                             val combined=if(sources.isEmpty())body else plan.body+"\n\n"+body
@@ -390,7 +391,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
                 val message = "문서 답변 처리에 실패했어요. 다시 시작해 주세요."
                 updateState { state -> state.copy(isAnswering = false, inputError = message, messages = state.messages.map { if (it.id == pending.id) it.copy(text = message, pending = false) else it }) }
                 onFailure?.invoke(message)
-            } }
+            } } finally { if(!appForeground) { semanticEncoder.release();runtime.release() } }
         }
     }
 
@@ -440,7 +441,11 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     fun selectMeter(id: String) = WifiApHub.select(id)
     fun stopAp() = GasMonitoringService.stop(appContext)
 
-    fun releaseQuestionSearchMemory() = viewModelScope.launch(Dispatchers.Default) { semanticEncoder.release() }
+    fun onAppForeground() { appForeground = true }
+    fun releaseQuestionSearchMemory():kotlinx.coroutines.Job {
+        appForeground = false
+        return viewModelScope.launch(Dispatchers.Default) { semanticEncoder.release();if(!_uiState.value.isAnswering)runtime.release() }
+    }
 
     fun persistSettings() {
         val current = _uiState.value.settings

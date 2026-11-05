@@ -9,7 +9,10 @@ data class DocumentAnswerPlan(val question: String, val body: String, val eviden
     val supplementRequested = !directAnswer && evidence.isNotEmpty() && Regex("쉽게|풀어|AI\\s*(?:로|가)\\s*(?:설명|보충)",RegexOption.IGNORE_CASE).containsMatchIn(question) && !Regex("승인|작업\\s*가능|들어가도|출입해도").containsMatchIn(question)
     val sourceLabels = sources.associate { it.chunk.id to "${it.chunk.sourceKind} · ${it.chunk.pageNumber}쪽" }
     val sourceIds = sources.map { it.chunk.id }.distinct()
-    fun context(): String = evidence.joinToString("\n\n") { "[${it.id}] ${it.section}\n${it.text}" }
+    fun context(): String = evidence.joinToString("\n\n") { passage ->
+        val title=sources.firstOrNull { it.chunk.id==passage.sourceId }?.chunk?.documentTitle.orEmpty()
+        "[${passage.id}] $title · ${passage.section}\n${passage.text}"
+    }
     companion object {
         fun create(question: String, resolution: SearchResolution, knowledgeReady: Boolean = true): DocumentAnswerPlan {
             val plan = create(question, resolution.sources, knowledgeReady)
