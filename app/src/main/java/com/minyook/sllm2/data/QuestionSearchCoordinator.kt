@@ -24,6 +24,10 @@ internal class QuestionSearchCoordinator(
         }
         val resolved = search(request.query)
         if (request.kind != FollowUpKind.MORE || resolved.status in setOf("search-error", "live-state")) return resolved
+        if (resolved.answerBody != null) {
+            val alreadyShown = request.seenAnswers.any { EvidenceLanguage.compact(resolved.answerBody) in EvidenceLanguage.compact(it) }
+            return if (!alreadyShown) resolved else resolved.copy(status = "no-more", sources = emptyList(), answerBody = null, message = "앞선 ‘${request.topic}’에 관해 이미 보여드린 내용 외에 추가로 확인한 근거는 없어요. 더 궁금한 조건이나 장비를 말씀해 주세요.")
+        }
         if (resolved.searchComplete && resolved.generalQuestion != null && request.previousAnswer?.text?.let(GeneralKnowledgeAnswer::containsGeneral) == true) return resolved.copy(method = "conversation-general")
         val vector = try { encode(QuestionUnderstanding.normalize(request.query)) } catch (_: Exception) { return SearchResolution(request.query, status = "search-error", method = "conversation-more", message = "앞선 주제의 추가 검색을 완료하지 못했어요. 문서가 없다는 뜻은 아니에요.") }
         if (vector.size != 768 || vector.any { !it.isFinite() } || vector.all { it == 0f }) return SearchResolution(request.query, status = "search-error", method = "conversation-more", message = "추가 검색의 의미 벡터를 확인하지 못했어요. 다시 시도해 주세요.")
@@ -37,7 +41,7 @@ internal class QuestionSearchCoordinator(
         if(Regex("^(그거|그것|그건|이거|이것|이건)(어떻게|어케|하는데|해|알려줘|설명해줘|뭐야|좀|는|을|에)*$").matches(EvidenceLanguage.compact(question)))return SearchResolution(question,status="clarify",message="어떤 대상을 말하는지 알려 주세요. 앞선 질문이 없는 상태에서는 ‘그거’의 대상을 확인할 수 없어요.",method="reference-clarification")
         val query=QuestionUnderstanding.normalize(question)
         val fast=index.resolve(query,null,fastOnly=true).copy(question=question)
-        if(fast.status=="live-state"||fast.method in setOf("heading","inventory"))return fast
+        if(fast.status=="live-state"||fast.answerBody!=null||fast.method in setOf("heading","inventory"))return fast
         val parts=parts(question)
         if(parts.size>8)return SearchResolution(question,status="clarify",message="한 번에 확인할 주제가 많아요. 질문을 8개 이하의 주제로 나누어 주세요.",method="question-limit")
         val sharedGas=parts.size>1&&parts.dropLast(1).all{Regex("^(산소|유해가스|일산화탄소|이산화탄소|황화수소)$").matches(EvidenceLanguage.compact(it))}&&EvidenceLanguage.terms(parts.last()).any{it in setOf("측정","농도","기준")}

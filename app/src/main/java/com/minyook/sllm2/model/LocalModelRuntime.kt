@@ -10,6 +10,8 @@ import com.google.ai.edge.litertlm.Backend
 import com.google.ai.edge.litertlm.Content
 import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.litertlm.EngineConfig
+import com.google.ai.edge.litertlm.ConversationConfig
+import com.google.ai.edge.litertlm.ThinkingConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
@@ -32,6 +34,7 @@ class LocalModelRuntime(private val context: Context) {
         onOutputLimit: (Boolean) -> Unit = {},
         recentConversation: List<ConversationTurn> = emptyList(),
         latestUserQuestion: String? = null,
+        onMetrics: (GenerationMetrics) -> Unit = {},
     ): String = withContext(Dispatchers.Default) {
         val startedAt = SystemClock.elapsedRealtime()
         val settings = InferenceSettingsPreferences(context).load()
@@ -53,12 +56,22 @@ class LocalModelRuntime(private val context: Context) {
         var lastChunkAt = 0L
         var chunks = 0
         var lastPartialUpdateAt = 0L
-        activeEngine.createConversation().use { conversation ->
+        var prefillTokens: Int? = null
+        var decodeTokens: Int? = null
+        var decodeTokensPerSecond: Double? = null
+        // LiteRT-LM 0.17.1 supports this explicitly. Do not generate hidden
+        // reasoning tokens before the first visible answer; retain output settings.
+        activeEngine.createConversation(ConversationConfig(
+            thinkingConfig = ThinkingConfig(enableThinking = false, thinkingTokenBudget = 0),
+            extraContext = mapOf("enable_thinking" to false),
+        )).use { conversation ->
             conversation.sendMessageAsync(prompt, maxOutputToken = outputLimit).collect { partial ->
+                val before = response.length
                 partial.contents.contents
                     .filterIsInstance<Content.Text>()
                     .forEach { text -> response.append(text.text) }
                 val now = SystemClock.elapsedRealtime()
+                if (response.length == before) return@collect
                 if (firstChunkAt == 0L) firstChunkAt = now
                 lastChunkAt = now
                 chunks++
@@ -67,10 +80,17 @@ class LocalModelRuntime(private val context: Context) {
                     lastPartialUpdateAt = now
                 }
             }
-            val decoded = runCatching { conversation.getBenchmarkInfo().lastDecodeTokenCount }.getOrNull()
-            onOutputLimit(outputLimit != null && decoded != null && decoded >= outputLimit)
+            runCatching { conversation.getBenchmarkInfo() }.getOrNull()?.let { benchmark ->
+                prefillTokens = benchmark.lastPrefillTokenCount
+                decodeTokens = benchmark.lastDecodeTokenCount
+                decodeTokensPerSecond = benchmark.lastDecodeTokensPerSecond
+            }
+            onOutputLimit(outputLimit != null && decodeTokens != null && decodeTokens >= outputLimit)
         }
         val finishedAt = SystemClock.elapsedRealtime()
+        onMetrics(GenerationMetrics(activeBackendName, engineReadyAt - startedAt,
+            firstChunkAt.takeIf { it > 0 }?.minus(startedAt), finishedAt - startedAt,
+            prompt.toByteArray(Charsets.UTF_8).size, prefillTokens, decodeTokens, decodeTokensPerSecond))
         Log.i(
             TAG,
             "backend=$activeBackendName initMs=${engineReadyAt - startedAt} firstChunkMs=${if (firstChunkAt == 0L) -1 else firstChunkAt - engineReadyAt} " +
@@ -173,6 +193,12 @@ class LocalModelRuntime(private val context: Context) {
 
     private companion object {
         const val TAG = "FieldGuardInference"
-        const val PARTIAL_UPDATE_INTERVAL_MS = 200L
+        const val PARTIAL_UPDATE_INTERVAL_MS = 80L
     }
 }
+
+/** First native text chunk is not yet a validated UI sentence or full answer. */
+data class GenerationMetrics(
+    val backend: String, val initializationMs: Long, val firstChunkMs: Long?, val totalMs: Long,
+    val promptBytes: Int, val prefillTokens: Int?, val decodeTokens: Int?, val decodeTokensPerSecond: Double?,
+)

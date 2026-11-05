@@ -3,14 +3,18 @@ package com.minyook.sllm2.data
 import org.json.JSONObject
 
 data class PlannedPassage(val id: String, val sourceId: Long, val text: String, val section: String)
-data class DocumentAnswerPlan(val question: String, val body: String, val evidence: List<PlannedPassage>, val sources: List<RetrievedChunk>) {
+data class DocumentAnswerPlan(val question: String, val body: String, val evidence: List<PlannedPassage>, val sources: List<RetrievedChunk>, val directAnswer: Boolean = false) {
     // Source answers finish immediately. A reason/comparison question already
     // answered by the document must not spend seconds regenerating the same text.
-    val supplementRequested = evidence.isNotEmpty() && Regex("쉽게|풀어|AI\\s*(?:로|가)\\s*(?:설명|보충)",RegexOption.IGNORE_CASE).containsMatchIn(question) && !Regex("승인|작업\\s*가능|들어가도|출입해도").containsMatchIn(question)
+    val supplementRequested = !directAnswer && evidence.isNotEmpty() && Regex("쉽게|풀어|AI\\s*(?:로|가)\\s*(?:설명|보충)",RegexOption.IGNORE_CASE).containsMatchIn(question) && !Regex("승인|작업\\s*가능|들어가도|출입해도").containsMatchIn(question)
     val sourceLabels = sources.associate { it.chunk.id to "${it.chunk.sourceKind} · ${it.chunk.pageNumber}쪽" }
     val sourceIds = sources.map { it.chunk.id }.distinct()
     fun context(): String = evidence.joinToString("\n\n") { "[${it.id}] ${it.section}\n${it.text}" }
     companion object {
+        fun create(question: String, resolution: SearchResolution, knowledgeReady: Boolean = true): DocumentAnswerPlan {
+            val plan = create(question, resolution.sources, knowledgeReady)
+            return if (knowledgeReady && resolution.answerBody != null) plan.copy(body = resolution.answerBody, directAnswer = true) else plan
+        }
         fun create(question: String, sources: List<RetrievedChunk>, knowledgeReady: Boolean = true): DocumentAnswerPlan {
             val evidence = sources.flatMap { source -> FocusedEvidence.selected(source).map { unit -> PlannedPassage("e${source.chunk.id}-${unit.order}", source.chunk.id, unit.text, unit.section) } }
             val body = if (!knowledgeReady) "문서 검색 데이터를 준비하고 있어요. 준비가 끝난 뒤 다시 질문해 주세요." else FocusedEvidence.format(sources)

@@ -5,7 +5,7 @@ import kotlin.math.ln
 import kotlin.math.sqrt
 
 data class SearchSuggestion(val label: String, val question: String)
-data class SearchResolution(val question: String, val sources: List<RetrievedChunk> = emptyList(), val status: String = "unconfirmed", val message: String = "질문에 직접 답할 근거를 아직 확인하지 못했어요. 궁금한 대상과 알고 싶은 내용을 함께 알려 주세요.", val suggestions: List<SearchSuggestion> = emptyList(), val semantic: Boolean = false, val method: String = "", val searchComplete: Boolean = false, val generalQuestion: String? = null)
+data class SearchResolution(val question: String, val sources: List<RetrievedChunk> = emptyList(), val status: String = "unconfirmed", val message: String = "질문에 직접 답할 근거를 아직 확인하지 못했어요. 궁금한 대상과 알고 싶은 내용을 함께 알려 주세요.", val suggestions: List<SearchSuggestion> = emptyList(), val semantic: Boolean = false, val method: String = "", val searchComplete: Boolean = false, val generalQuestion: String? = null, val answerBody: String? = null)
 internal data class SemanticPassage(val id:String,val documentId:String,val page:Int,val chunkIndex:Int,val section:String,val text:String,val orders:List<Int>,val units:List<EvidencePassage>,val searchText:String,val sourceBody:String,val vector:FloatArray)
 internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:String) {
     private val root = JSONObject(json)
@@ -16,6 +16,7 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
     }.filter { p -> chunks.any { it.documentId==p.documentId && it.pageNumber==p.page && it.chunkIndex==p.chunkIndex && it.body==p.sourceBody } } }
     private val lexical = FocusedRetriever(chunks)
     private val equipment = EquipmentOverview(chunks)
+    private val equipmentDetail = EquipmentDetailAnswer(chunks)
     private val passageTexts = passages.map{EvidenceLanguage.aliases(it.searchText)}
     private val pageUnits = chunks.associate{it.id to FocusedEvidence.units(it)}
     private val pageTexts = chunks.associate{it.id to EvidenceLanguage.aliases(it.body)}
@@ -43,6 +44,7 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
         }
         val tokenQuestion=if(review)question.replace(Regex("(?<=[가-힣])(?:과|와)\\s+")," ") else question
         val tokens=EvidenceLanguage.terms(tokenQuestion).filterNot{Regex("^(그거|그건|그것|그러면|그럼|후속|질문)").containsMatchIn(it)}
+        equipmentDetail.resolve(question)?.let { return it }
         equipment.resolve(question)?.let { return it }
         val sources=if(fastOnly)emptyList() else lexical.retrieve(question,splitQuestion=!review)
         val unknown=specification.findAll(question).map{it.value}.distinct().filter{s->chunks.none{EvidenceLanguage.compact(s) in EvidenceLanguage.compact(it.body)}}.toList()

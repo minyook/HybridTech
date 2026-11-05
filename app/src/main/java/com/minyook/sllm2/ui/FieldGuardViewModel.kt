@@ -337,7 +337,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
             }
             android.util.Log.i("FieldGuardAnswerLatency","searchMs=${SystemClock.elapsedRealtime()-searchStarted} method=${resolution.method} status=${resolution.status} complete=${resolution.searchComplete}")
             val sources = resolution.sources
-            val basePlan = DocumentAnswerPlan.create(request.answerQuestion, sources, repository.documentCount() > 0)
+            val basePlan = DocumentAnswerPlan.create(request.answerQuestion, resolution, repository.documentCount() > 0)
             val plan = if(sources.isEmpty()) basePlan.copy(body=resolution.message) else if(resolution.message.isNotBlank())basePlan.copy(body=basePlan.body+"\n\n"+resolution.message) else basePlan
             val sourceIds = plan.sourceIds
             withContext(Dispatchers.Main) {
@@ -352,7 +352,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
                 var outputLimitReached = false
                 try{
                     semanticEncoder.release()
-                    val raw=runtime.generate(generalQuestion,"",compactVoiceAnswer,generalKnowledge=true,recentConversation=request.turns,latestUserQuestion=request.asked,onOutputLimit={ outputLimitReached = it },onPartialAnswer={partial->
+                    val raw=runtime.generate(generalQuestion,"",compactVoiceAnswer,generalKnowledge=true,recentConversation=request.turns,latestUserQuestion=request.asked,onMetrics={android.util.Log.i("FieldGuardGenerationLatency",it.toString())},onOutputLimit={ outputLimitReached = it },onPartialAnswer={partial->
                         GeneralKnowledgeAnswer.partial(partial,generalQuestion)?.let{body->
                             lastGeneralBody = body
                             val combined=if(sources.isEmpty())body else plan.body+"\n\n"+body

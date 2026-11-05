@@ -41,7 +41,7 @@ class ConversationRetrievalEvaluationTest {
         for ((number, asked) in steps.withIndex()) {
             val request = ConversationContext.resolve(asked, history)
             val result = search.search(request)
-            val plan = DocumentAnswerPlan.create(request.answerQuestion, result.sources)
+            val plan = DocumentAnswerPlan.create(request.answerQuestion, result)
             val body = if(result.sources.isEmpty()) result.message else plan.body + if(result.message.isBlank()) "" else "\n\n" + result.message
             val pages = result.sources.filter { it.chunk.documentId.contains("2022") }.map { it.chunk.pageNumber }
             val expected = expectedPages[number]

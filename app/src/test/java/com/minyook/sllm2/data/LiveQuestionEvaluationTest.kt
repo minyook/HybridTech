@@ -82,7 +82,7 @@ class LiveQuestionEvaluationTest {
                 val vector=byQuestion.getValue(query).getJSONArray("vector")
                 FloatArray(vector.length()) { vector.getDouble(it).toFloat() }
             }.search(ConversationContext.resolve(q, emptyList()))
-            val base=DocumentAnswerPlan.create(q,result.sources)
+            val base=DocumentAnswerPlan.create(q,result)
             val body=if(result.sources.isEmpty())result.message else base.body+if(result.message.isNotBlank())"\n\n"+result.message else ""
             val kotlinMs=(System.nanoTime()-started)/1e6
             val pages=result.sources.filter{it.chunk.documentId==rubric.getString("documentId")}.map{it.chunk.pageNumber}.distinct()

@@ -57,25 +57,26 @@ class AndroidQuestionLatencyEvaluationTest {
                     encoder.cachedVector(query)?:run{runtime.release();val t=SystemClock.elapsedRealtimeNanos();encoder.encode(query).also{calls++;encodeMs+=(SystemClock.elapsedRealtimeNanos()-t)/1e6}}
                 }
                 val searchMs=(SystemClock.elapsedRealtimeNanos()-started)/1e6
-                val plan=DocumentAnswerPlan.create(question,resolution.sources)
+                val plan=DocumentAnswerPlan.create(question,resolution)
                 var body=if(resolution.sources.isEmpty())resolution.message else plan.body+if(resolution.message.isNotBlank())"\n\n"+resolution.message else ""
                 var firstBodyMs=if(resolution.sources.isNotEmpty())(SystemClock.elapsedRealtimeNanos()-started)/1e6 else -1.0
                 var firstGeneratedMs = -1.0
                 var generationMs=0.0;var generation="not-requested";var error=""
+                var nativeMetrics:com.minyook.sllm2.model.GenerationMetrics?=null
                 val general=resolution.generalQuestion.takeIf{resolution.searchComplete}
                 if(includeGeneration&&(general!=null||resolution.status=="answered"&&plan.supplementRequested)){
                     encoder.release()
                     val t=SystemClock.elapsedRealtimeNanos()
                     try {
                         if(general!=null){
-                            val raw=runtime.generate(general,"",generalKnowledge=true,onPartialAnswer={partial->
+                            val raw=runtime.generate(general,"",generalKnowledge=true,onMetrics={nativeMetrics=it},onPartialAnswer={partial->
                                 GeneralKnowledgeAnswer.partial(partial,general)?.let{if(firstGeneratedMs<0)firstGeneratedMs=(SystemClock.elapsedRealtimeNanos()-started)/1e6;if(firstBodyMs<0)firstBodyMs=firstGeneratedMs}
                             })
                             val generated=GeneralKnowledgeAnswer.finish(raw,general)
                             body=if(resolution.sources.isEmpty())generated else body+"\n\n"+generated
                             if(firstBodyMs<0)firstBodyMs=(SystemClock.elapsedRealtimeNanos()-started)/1e6
                         }else{
-                            val raw=runtime.generate(question,plan.context(),supplementOnly=true)
+                            val raw=runtime.generate(question,plan.context(),supplementOnly=true,onMetrics={nativeMetrics=it})
                             body=AnswerSupplementVerifier.compose(plan,AnswerSupplementVerifier.fromJson(raw,plan))
                         }
                         generation="completed"
@@ -87,7 +88,8 @@ class AndroidQuestionLatencyEvaluationTest {
                     .put("pages",JSONArray(resolution.sources.map{it.chunk.pageNumber})).put("searchMs",searchMs).put("encoderMs",encodeMs).put("encoderCalls",calls)
                     .put("sources",JSONArray(resolution.sources.map{JSONObject().put("documentId",it.chunk.documentId).put("page",it.chunk.pageNumber)}))
                     .put("firstBodyStateMs",firstBodyMs).put("firstGeneratedBodyStateMs",firstGeneratedMs).put("generationMs",generationMs).put("generation",generation).put("error",error)
-                    .put("totalMs",(SystemClock.elapsedRealtimeNanos()-started)/1e6).put("answerMarkdown",body))
+                    .put("totalMs",(SystemClock.elapsedRealtimeNanos()-started)/1e6).put("answerMarkdown",body)
+                    .put("nativeMetrics",nativeMetrics?.let { m -> JSONObject().put("backend",m.backend).put("initializationMs",m.initializationMs).put("firstChunkMs",m.firstChunkMs).put("generationTotalMs",m.totalMs).put("promptBytes",m.promptBytes).put("prefillTokens",m.prefillTokens).put("decodeTokens",m.decodeTokens).put("decodeTokensPerSecond",m.decodeTokensPerSecond).put("thinkingEnabled",false) } ?: JSONObject.NULL))
                 if(i+1 in setOf(1,39,113)&&resolution.sources.isNotEmpty()){
                     val repeatStarted=SystemClock.elapsedRealtimeNanos()
                     val repeated=repository.searchQuestion(question,json){query->encoder.cachedVector(query)?:encoder.encode(query)}

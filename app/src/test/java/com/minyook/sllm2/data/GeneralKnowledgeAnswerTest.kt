@@ -34,4 +34,11 @@ class GeneralKnowledgeAnswerTest {
         assertTrue(answer.endsWith(GeneralKnowledgeAnswer.LIMIT_NOTICE))
         assertFalse(GeneralKnowledgeAnswer.finish("완결된 설명입니다.", "일반 원리").contains(GeneralKnowledgeAnswer.LIMIT_NOTICE))
     }
+    @Test fun equipmentCountsWithoutDocumentEvidenceAreNotInventedByTheModel() {
+        assertNull(GeneralKnowledgeAnswer.partial("삼각대는 1대만 준비하면 됩니다.","삼각대 몇 대 필요해?"))
+        assertNull(GeneralKnowledgeAnswer.partial("안전대는 두 개씩 준비하세요.","안전대 개수"))
+        assertNotNull(GeneralKnowledgeAnswer.partial("현장 조건을 확인하지 않아 수량을 확정할 수 없어요.","안전대 개수"))
+        val prompt = GeneralKnowledgeAnswer.prompt("구명줄 개수")
+        assertTrue(prompt.contains("이번 질문의 초점")); assertTrue(prompt.contains("안전 수량"))
+    }
 }

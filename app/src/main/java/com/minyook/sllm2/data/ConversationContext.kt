@@ -43,9 +43,10 @@ object ConversationContext {
         val lastUserIndex = turns.indexOfLast { it.user }
         val answer = turns.drop(lastUserIndex + 1).lastOrNull { !it.user }
         fun anchor(turn: ConversationTurn): String? {
-            turn.topicQuestion?.takeIf { it.isNotBlank() }?.let { return it }
+            turn.topicQuestion?.takeIf { it.isNotBlank() && !QuestionFocus.bareQuantity(it) }?.let { return it }
             val candidate = (turn.resolvedQuestion ?: turn.text).substringBefore("\n후속 질문:").trim()
             val short = EvidenceLanguage.compact(candidate)
+            if (QuestionFocus.bareQuantity(candidate)) return null
             if (choiceFeedback.containsMatchIn(short) || (candidate.length < 70 && EvidenceLanguage.terms(candidate).none { it in EvidenceLanguage.vocabulary && it !in EvidenceLanguage.generic } && (more.containsMatchIn(short) || explain.containsMatchIn(short) || referent.containsMatchIn(short)))) return null
             return candidate.takeIf { it.isNotBlank() }
         }
@@ -74,6 +75,9 @@ object ConversationContext {
         }
         if (selected != null) return request(FollowUpKind.CHOICE, selected.question, selected.question)
         if (choiceIndex != null && answer?.suggestions?.isNotEmpty() == true) return request(FollowUpKind.SHOW_CHOICES)
+        if (topic.isNotBlank()) QuestionFocus.followUp(value, topic)?.let { query ->
+            return request(if (explain.containsMatchIn(compact)) FollowUpKind.EXPLAIN else FollowUpKind.FOLLOW_UP, query, query)
+        }
         val explicitSubjects = EvidenceLanguage.terms(value).filter { it in EvidenceLanguage.vocabulary && it !in EvidenceLanguage.generic }
         val priorSubjects = EvidenceLanguage.aliases(topic + " " + answer?.text.orEmpty())
         val newSubject = explicitSubjects.any { it !in EvidenceLanguage.aliases(topic) }
