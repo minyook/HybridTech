@@ -126,7 +126,7 @@ import java.util.Locale
                         }
                     }}
                 }
-                if(rows.isNotEmpty())item(key="conversationEnd",contentType="end"){Spacer(Modifier.height(1.dp).testTag("conversationEnd"))}
+                if(rows.isNotEmpty())item(key="conversationEnd",contentType="end"){Spacer(Modifier.fillMaxWidth().height(1.dp).testTag("conversationEnd"))}
             }
             if(awayFromEnd&&messages.isNotEmpty())FilledTonalButton(onClick={follow=true;jumpRequest++},modifier=Modifier.align(Alignment.BottomCenter).padding(bottom=8.dp).testTag("scrollLatest")){Text("최근 답변으로 이동 ↓",fontSize=12.sp)}
             }

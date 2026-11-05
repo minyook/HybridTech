@@ -5,6 +5,11 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -19,6 +24,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -46,16 +53,7 @@ fun MarkdownText(markdown: String, modifier: Modifier = Modifier) {
                 return
             }
             if(block is MarkdownBlock.Table) {
-                Surface(color=Color.White,shape=RoundedCornerShape(12.dp),border=BorderStroke(1.dp,Color(0xFFE1E8F2)),modifier=Modifier.fillMaxWidth().padding(vertical=15.dp)) {
-                    Column(Modifier.horizontalScroll(rememberScrollState())) {
-                        block.rows.forEachIndexed { rowIndex,row ->
-                            Row(Modifier.background(if(rowIndex==0)Color(0xFFEDF4FF) else if(rowIndex%2==0)Color(0xFFFAFCFF) else Color.White)) {
-                                row.forEach { cell -> Text(inlineMarkdown(cell),fontSize=13.sp,lineHeight=22.sp,fontWeight=if(rowIndex==0)FontWeight.Bold else FontWeight.Normal,color=if(rowIndex==0)Color(0xFF3E5E88) else Color(0xFF4E5968),modifier=Modifier.width(160.dp).padding(horizontal=15.dp,vertical=12.dp)) }
-                            }
-                            if(rowIndex<block.rows.lastIndex)HorizontalDivider(color=Color(0xFFE8EDF4))
-                        }
-                    }
-                }
+                MarkdownTable(block)
                 return
             }
             if (block == MarkdownBlock.Divider) {
@@ -81,6 +79,50 @@ fun MarkdownText(markdown: String, modifier: Modifier = Modifier) {
                 list != null -> MarkdownListItem(list)
                 else -> Text(inlineMarkdown(line), style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 26.sp), modifier = Modifier.padding(vertical = 1.dp))
             }
+}
+
+@Composable private fun MarkdownTable(block:MarkdownBlock.Table) {
+    val columns=block.rows.maxOfOrNull { it.size } ?: return
+    val key=block.rows.hashCode()
+    val scroll=rememberScrollState()
+    BoxWithConstraints(Modifier.fillMaxWidth().padding(vertical=12.dp).testTag("markdownTable:$key")) {
+        val widths=markdownTableWidths(columns,maxWidth.value-2)
+        val wide=widths.sum()+columns-1>maxWidth.value+1
+        Column {
+            Surface(color=Color.White,shape=RoundedCornerShape(12.dp),border=BorderStroke(1.dp,Color(0xFFDCE5F0)),modifier=Modifier.fillMaxWidth()) {
+                Column {
+                    block.rows.forEachIndexed { rowIndex,row ->
+                        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).background(if(rowIndex==0)Color(0xFFEDF4FF) else if(rowIndex%2==0)Color(0xFFF8FAFD) else Color.White)) {
+                            if(wide) {
+                                MarkdownTableCell(row.getOrElse(0){""},widths[0],rowIndex,0,key)
+                                Box(Modifier.width(1.dp).fillMaxHeight().background(Color(0xFFE1E8F2)))
+                                Row(Modifier.weight(1f).horizontalScroll(scroll).testTag("tableScroll:$key:$rowIndex")) {
+                                    for(column in 1 until columns) {
+                                        MarkdownTableCell(row.getOrElse(column){""},widths[column],rowIndex,column,key)
+                                        if(column<columns-1)Box(Modifier.width(1.dp).fillMaxHeight().background(Color(0xFFE1E8F2)))
+                                    }
+                                }
+                            }else{
+                                for(column in 0 until columns) {
+                                    MarkdownTableCell(row.getOrElse(column){""},widths[column],rowIndex,column,key)
+                                    if(column<columns-1)Box(Modifier.width(1.dp).fillMaxHeight().background(Color(0xFFE1E8F2)))
+                                }
+                            }
+                        }
+                        if(rowIndex<block.rows.lastIndex)HorizontalDivider(color=Color(0xFFE1E8F2))
+                    }
+                }
+            }
+            if(wide)Text("표를 좌우로 밀어 다른 열을 확인하세요",fontSize=11.sp,color=Color(0xFF758397),modifier=Modifier.padding(top=7.dp))
+        }
+    }
+}
+
+@Composable private fun MarkdownTableCell(value:String,width:Float,row:Int,column:Int,key:Int) {
+    Box(Modifier.width(width.dp).fillMaxHeight().padding(horizontal=10.dp,vertical=10.dp),contentAlignment=Alignment.CenterStart) {
+        Text(inlineMarkdown(value),fontSize=13.sp,lineHeight=21.sp,fontWeight=if(row==0||column==0)FontWeight.SemiBold else FontWeight.Normal,
+            color=if(row==0)Color(0xFF35587F) else Color(0xFF38485B),modifier=Modifier.testTag("tableCell:$key:$row:$column"))
+    }
 }
 
 @Composable private fun MarkdownListItem(item: MarkdownListEntry) {

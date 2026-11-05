@@ -107,6 +107,7 @@ internal object VoiceResponseFormatter {
     fun forSpeech(markdown: String): String = markdown.lineSequence().map(String::trim)
         .filter { it.isNotBlank() && !it.startsWith("> 출처:") && !it.startsWith("출처:") && !Regex("\\|?\\s*[-:]+(?:\\s*\\|\\s*[-:]+)+\\s*\\|?").matches(it) }
         .map { it.replace(Regex("^#{1,6}\\s+"), "").removePrefix("- ").removePrefix("> ")
+            .replace(Regex("<br\\s*/?>",RegexOption.IGNORE_CASE), ", ")
             .replace(Regex("!?\\[([^]]*)]\\([^)]*\\)"), "$1").replace("**", "").replace("`", "").replace('|', ' ') }
         .joinToString(" ").replace(Regex("\\s+"), " ").trim()
 

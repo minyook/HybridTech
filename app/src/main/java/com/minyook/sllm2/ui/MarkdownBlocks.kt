@@ -50,6 +50,10 @@ private fun markdownCells(raw: String): List<String> {
     val cells = mutableListOf<String>(); val cell = StringBuilder(); var index = 0; var ticks = 0
     while (index < line.length) {
         val char = line[index]
+        if(ticks==0 && char=='<') {
+            val br=Regex("^<br\\s*/?>",RegexOption.IGNORE_CASE).find(line.substring(index))
+            if(br!=null) { cell.append('\n');index+=br.value.length;continue }
+        }
         if (char == '\\' && index + 1 < line.length && line[index + 1] == '|') { cell.append('|'); index += 2; continue }
         if (char == '`') {
             val run = line.drop(index).takeWhile { it == '`' }.length
@@ -61,6 +65,15 @@ private fun markdownCells(raw: String): List<String> {
     }
     cells += cell.toString().trim()
     return cells
+}
+
+/** Compact three-column source tables fit phones; wide data tables keep readable cells. */
+internal fun markdownTableWidths(columns:Int,available:Float):List<Float> {
+    if(columns<=0)return emptyList()
+    val minimum=when(columns) { 1->listOf(160f);2->listOf(104f,190f);3->listOf(96f,124f,112f);else->List(columns){104f} }
+    val weights=when(columns) { 1->listOf(1f);2->listOf(.35f,.65f);3->listOf(.25f,.45f,.30f);else->List(columns){1f/columns} }
+    val extra=(available-minimum.sum()-(columns-1)).coerceAtLeast(0f)
+    return minimum.mapIndexed { i,width -> width+extra*weights[i] }
 }
 
 internal data class MarkdownListEntry(val marker: String, val body: String, val depth: Int)

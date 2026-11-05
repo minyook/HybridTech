@@ -1,0 +1,605 @@
+{
+  "date": "2026-11-05",
+  "baselineCommit": "7e2fe6e",
+  "scope": "Android source table restoration and rendering; web, original source chunks, semantic index and model settings unchanged",
+  "sourceExtraction": {
+    "method": "pdfplumber PDF cell coordinates; cell text checked against exact chunk span; no inference/forward-fill",
+    "tableCount": 4,
+    "dataRows": 24,
+    "cellsIncludingHeaders": 129,
+    "visualReviewPages": [
+      12,
+      13,
+      14
+    ],
+    "rejectedCandidates": [
+      {
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 7,
+        "bbox": [
+          104.88133333333333,
+          445.83099999999996,
+          515.9050666666666,
+          647.606
+        ],
+        "accepted": false,
+        "reason": "empty/merged cells require separate manual review",
+        "cells": [
+          [
+            "강제반응탑",
+            "보일러 연통 내부",
+            "보일러 연통 내부",
+            "음식물 저장 호퍼",
+            "주류발효탱크"
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "식품발표 및 저장조",
+            "하수처리장 침전지",
+            "오수처리장 정화조",
+            "분뇨처리장",
+            "냉동창고 내부"
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "폐수침전조",
+            "반응기",
+            "원료저장탱크",
+            "용접, 비파괴 배관 내부",
+            "공기정화장치"
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "내부 지하 피트",
+            "콘크리트 양생장소",
+            "바지선 부력탱크",
+            "하수도 맨홀",
+            "상수도 맨홀"
+          ]
+        ]
+      },
+      {
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 12,
+        "bbox": [
+          340.1878,
+          537.1921714285714,
+          507.4538125,
+          607.6014666666666
+        ],
+        "accepted": false,
+        "reason": "empty/merged cells require separate manual review",
+        "cells": [
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ]
+        ]
+      },
+      {
+        "documentId": "confined_space_checklist_2026",
+        "page": 1,
+        "bbox": [
+          57.1856,
+          115.793,
+          535.872,
+          769.199
+        ],
+        "accepted": false,
+        "reason": "empty/merged cells require separate manual review",
+        "cells": [
+          [
+            "사 업 장 명 (현장명)",
+            "",
+            "대 표 자 (안전보건관리책임자)",
+            ""
+          ],
+          [
+            "소 재 지",
+            "",
+            "",
+            ""
+          ],
+          [
+            "근 로 자 수 (공사금액)",
+            "",
+            "",
+            ""
+          ],
+          [
+            "전 화 번 호 (팩스번호)",
+            "",
+            "담당자명 (연락처)",
+            ""
+          ],
+          [
+            "○ 점검일자 : ○ 점 검 자 소 속 : 소 속 : 소 속 : 소 속 : ○ 사업장 대표 직책 ○ 근로자대표 근로자 대표",
+            ": 2026. . . 직 책 : 직 책 : 직 책 : 직 책 : 표 확인 표 확인 표",
+            "성명 성명 성명 성명 성명 성명",
+            "(서명) (서명) (서명) (서명) (서명) (서명)"
+          ]
+        ]
+      }
+    ],
+    "tables": [
+      {
+        "id": "confined_space_safety_guide_2022-p12-t1",
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 12,
+        "chunkIndex": 0,
+        "sourceBodySha256": "309c8e110f0995426f76cc9ca41e78072dfd4c51e6b97ae79fda37c3c18d6f4e",
+        "pdfSha256": "3d634673ef6a90fb3ece60fec7ef21d3d6654277aff9edef4843a7bd187eab88",
+        "title": "황화수소 농도별 인체 영향",
+        "rawText": "│황화수소 농도별 인체 영향 │ 농도(ppm) 건강영향 노출시간 10 8시간 작업시 노출기준 8시간 50~100 가벼운 자극(눈, 기도) 3시간 200~300 상당한 자극 1시간 500~700 의식불명, 사망 30~1시간 >1,000 의식불명, 사망 수분",
+        "headers": [
+          "농도(ppm)",
+          "건강영향",
+          "노출시간"
+        ],
+        "rows": [
+          [
+            "10",
+            "8시간 작업시 노출기준",
+            "8시간"
+          ],
+          [
+            "50~100",
+            "가벼운 자극(눈, 기도)",
+            "3시간"
+          ],
+          [
+            "200~300",
+            "상당한 자극",
+            "1시간"
+          ],
+          [
+            "500~700",
+            "의식불명, 사망",
+            "30~1시간"
+          ],
+          [
+            ">1,000",
+            "의식불명, 사망",
+            "수분"
+          ]
+        ],
+        "bbox": [
+          126.29598571428572,
+          271.55424999999997,
+          513.07,
+          364.27129999999994
+        ]
+      },
+      {
+        "id": "confined_space_safety_guide_2022-p13-t1",
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 13,
+        "chunkIndex": 0,
+        "sourceBodySha256": "413c50d40d9222df8e0449dbda8e15c44c13feceae13d178b5c3a095e0efa203",
+        "pdfSha256": "3d634673ef6a90fb3ece60fec7ef21d3d6654277aff9edef4843a7bd187eab88",
+        "title": "일산화탄소 농도별 인체 영향",
+        "rawText": "│일산화탄소 농도별 인체 영향│ 농도(ppm) 건강영향 노출시간 30 8시간 작업시 노출기준 8시간 200 가벼운 두통과 불쾌감 3시간 600 두통, 불쾌감 1시간 1000~2,000 1000~2,000 1000~2,000 정신혼란, 메스꺼움, 두통 2시간 현기증 1.5시간 심계항진(두근거림) 30분 2,000~2,500 의식불명 30분",
+        "headers": [
+          "농도(ppm)",
+          "건강영향",
+          "노출시간"
+        ],
+        "rows": [
+          [
+            "30",
+            "8시간 작업시 노출기준",
+            "8시간"
+          ],
+          [
+            "200",
+            "가벼운 두통과 불쾌감",
+            "3시간"
+          ],
+          [
+            "600",
+            "두통, 불쾌감",
+            "1시간"
+          ],
+          [
+            "1000~2,000",
+            "정신혼란, 메스꺼움, 두통",
+            "2시간"
+          ],
+          [
+            "1000~2,000",
+            "현기증",
+            "1.5시간"
+          ],
+          [
+            "1000~2,000",
+            "심계항진(두근거림)",
+            "30분"
+          ],
+          [
+            "2,000~2,500",
+            "의식불명",
+            "30분"
+          ]
+        ],
+        "bbox": [
+          126.47463333333333,
+          289.55424999999997,
+          513.07,
+          413.94049999999993
+        ]
+      },
+      {
+        "id": "confined_space_safety_guide_2022-p13-t2",
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 13,
+        "chunkIndex": 0,
+        "sourceBodySha256": "413c50d40d9222df8e0449dbda8e15c44c13feceae13d178b5c3a095e0efa203",
+        "pdfSha256": "3d634673ef6a90fb3ece60fec7ef21d3d6654277aff9edef4843a7bd187eab88",
+        "title": "유해가스",
+        "rawText": "유해가스 주된 위험 외관 및 냄새 아르곤(Ar) •산소 치환 •바닥에 축적 가능 무색, 무취 질소가스(N2) •산소 치환 무색, 무취(징후 없음) 이산화탄소(CO2) •산소 치환 •유독성 •바닥에 축적 가능 무색, 무취 염소(Cl2) •유독성 - 폐와 눈 자극 •바닥에 축적 가능 녹황색, 톡 쏘는 냄새 이산화질소(NO2) •유독성 - 폐에 심한 자극 •바닥에 축적 가능 적갈색, 쏘는 냄새 이산화황(SO2) •유독성 - 폐에 심한 자극 •바닥에 축적 가능 무색, 썩은 냄새 휘발유증기 •화재와 폭발 •바닥에 축적 가능 무색, 달콤한 냄새 메탄(CH4) •화재와 폭발 •상부에 축적 가능 무색, 무취(징후 없음)",
+        "headers": [
+          "유해가스",
+          "주된 위험",
+          "외관 및 냄새"
+        ],
+        "rows": [
+          [
+            "아르곤(Ar)",
+            "•산소 치환 •바닥에 축적 가능",
+            "무색, 무취"
+          ],
+          [
+            "질소가스(N2)",
+            "•산소 치환",
+            "무색, 무취(징후 없음)"
+          ],
+          [
+            "이산화탄소(CO2)",
+            "•산소 치환 •유독성 •바닥에 축적 가능",
+            "무색, 무취"
+          ],
+          [
+            "염소(Cl2)",
+            "•유독성 - 폐와 눈 자극 •바닥에 축적 가능",
+            "녹황색, 톡 쏘는 냄새"
+          ],
+          [
+            "이산화질소(NO2)",
+            "•유독성 - 폐에 심한 자극 •바닥에 축적 가능",
+            "적갈색, 쏘는 냄새"
+          ],
+          [
+            "이산화황(SO2)",
+            "•유독성 - 폐에 심한 자극 •바닥에 축적 가능",
+            "무색, 썩은 냄새"
+          ],
+          [
+            "휘발유증기",
+            "•화재와 폭발 •바닥에 축적 가능",
+            "무색, 달콤한 냄새"
+          ],
+          [
+            "메탄(CH4)",
+            "•화재와 폭발 •상부에 축적 가능",
+            "무색, 무취(징후 없음)"
+          ]
+        ],
+        "bbox": [
+          126.47463333333333,
+          544.6221999999999,
+          513.07,
+          697.6932
+        ]
+      },
+      {
+        "id": "confined_space_safety_guide_2022-p14-t1",
+        "documentId": "confined_space_safety_guide_2022",
+        "page": 14,
+        "chunkIndex": 0,
+        "sourceBodySha256": "f59bf55f65f4e1aa3452701bfdcdc168a16990b3d11b9360beb19327917b72a1",
+        "pdfSha256": "3d634673ef6a90fb3ece60fec7ef21d3d6654277aff9edef4843a7bd187eab88",
+        "title": "최근 10년간(2012~2021) 질식재해 발생추이",
+        "rawText": "│최근 10년간(2012~2021) 질식재해 발생추이│ 구 분 계 2012201320142015201620172018201920202021 발생건수 196 26 28 27 19 19 14 15 16 14 18 재해자수 348 35 55 41 25 33 23 26 24 25 61 사망자수 165 20 31 16 14 14 18 14 13 14 11 부상자수 183 15 24 25 11 19 5 12 11 11 50",
+        "headers": [
+          "구 분",
+          "계",
+          "2012",
+          "2013",
+          "2014",
+          "2015",
+          "2016",
+          "2017",
+          "2018",
+          "2019",
+          "2020",
+          "2021"
+        ],
+        "rows": [
+          [
+            "발생건수",
+            "196",
+            "26",
+            "28",
+            "27",
+            "19",
+            "19",
+            "14",
+            "15",
+            "16",
+            "14",
+            "18"
+          ],
+          [
+            "재해자수",
+            "348",
+            "35",
+            "55",
+            "41",
+            "25",
+            "33",
+            "23",
+            "26",
+            "24",
+            "25",
+            "61"
+          ],
+          [
+            "사망자수",
+            "165",
+            "20",
+            "31",
+            "16",
+            "14",
+            "14",
+            "18",
+            "14",
+            "13",
+            "14",
+            "11"
+          ],
+          [
+            "부상자수",
+            "183",
+            "15",
+            "24",
+            "25",
+            "11",
+            "19",
+            "5",
+            "12",
+            "11",
+            "11",
+            "50"
+          ]
+        ],
+        "bbox": [
+          105.91632,
+          594.8161999999999,
+          513.07,
+          675.5663999999999
+        ]
+      }
+    ]
+  },
+  "jvm": {
+    "tests": 165,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 7,
+    "suites": 33,
+    "passed": 158
+  },
+  "quality150": {
+    "scope": "PC JVM: current Android QuestionSearchCoordinator + DocumentAnswerPlan; actual pinned query model on PC ONNX CPU. No Android device, UI, STT/TTS, or Gemma generation execution.",
+    "phase": "complete",
+    "total": 150,
+    "completed": 150,
+    "passed": 150,
+    "failed": 0,
+    "hashes": {
+      "semanticIndex": "12ece1e7e7d1a3e46ace5491f35beddacf945f36b68abba8903d264c6bf9f4cd",
+      "questions": "91dc740d32b1d55bd4dd2355bbee9c38f4fd79177b5d10a89f00d359aaade208",
+      "corpus": "2c8e9edcc986c9e0c65f66d9a4784d88462656702669ba5a7182c98a86bfebae",
+      "rubric": "d2083c4b22e6eb5b6967ce73eb5722a318d52072050b2c9516d73a19bd6f2ecb"
+    }
+  },
+  "additional24": {
+    "scope": "PC JVM: current Android QuestionSearchCoordinator + DocumentAnswerPlan; actual pinned query model on PC ONNX CPU. No Android device, UI, STT/TTS, or Gemma generation execution.",
+    "phase": "complete",
+    "total": 24,
+    "completed": 24,
+    "passed": 24,
+    "failed": 0,
+    "hashes": {
+      "semanticIndex": "12ece1e7e7d1a3e46ace5491f35beddacf945f36b68abba8903d264c6bf9f4cd",
+      "questions": null,
+      "corpus": "2c8e9edcc986c9e0c65f66d9a4784d88462656702669ba5a7182c98a86bfebae",
+      "rubric": "f075e031b797c20dc215e516ef5a6ff33f4176e29d480196f6063741d2713b0e"
+    }
+  },
+  "deviceSearch": {
+    "device": "SM-S928N",
+    "scope": "Real installed Android ObjectBox repository + production coordinator + ONNX query encoder + answer assembly; no Gemma, UI frame or audio timing; no chat/history writes",
+    "passed": 5,
+    "total": 5,
+    "results": [
+      {
+        "question": "그 밖의 유해가스의 주된 위험과 외관 및 냄새 알려줘",
+        "expectedPage": 13,
+        "expectedHeader": "유해가스",
+        "status": "answered",
+        "pages": [
+          13
+        ],
+        "tableCount": 1,
+        "pass": true,
+        "millis": 5245.699634,
+        "answerMarkdown": "### 유해가스\n\n| 유해가스 | 주된 위험 | 외관 및 냄새 |\n| --- | --- | --- |\n| 아르곤(Ar) | 산소 치환<br>바닥에 축적 가능 | 무색, 무취 |\n| 질소가스(N2) | 산소 치환 | 무색, 무취(징후 없음) |\n| 이산화탄소(CO2) | 산소 치환<br>유독성<br>바닥에 축적 가능 | 무색, 무취 |\n| 염소(Cl2) | 유독성 - 폐와 눈 자극<br>바닥에 축적 가능 | 녹황색, 톡 쏘는 냄새 |\n| 이산화질소(NO2) | 유독성 - 폐에 심한 자극<br>바닥에 축적 가능 | 적갈색, 쏘는 냄새 |\n| 이산화황(SO2) | 유독성 - 폐에 심한 자극<br>바닥에 축적 가능 | 무색, 썩은 냄새 |\n| 휘발유증기 | 화재와 폭발<br>바닥에 축적 가능 | 무색, 달콤한 냄새 |\n| 메탄(CH4) | 화재와 폭발<br>상부에 축적 가능 | 무색, 무취(징후 없음) |"
+      },
+      {
+        "question": "메탄은 어디에 쌓이고 냄새가 나?",
+        "expectedPage": 13,
+        "expectedHeader": "유해가스",
+        "status": "answered",
+        "pages": [
+          13
+        ],
+        "tableCount": 1,
+        "pass": true,
+        "millis": 78.607552,
+        "answerMarkdown": "### 유해가스\n\n| 유해가스 | 주된 위험 | 외관 및 냄새 |\n| --- | --- | --- |\n| 아르곤(Ar) | 산소 치환<br>바닥에 축적 가능 | 무색, 무취 |\n| 질소가스(N2) | 산소 치환 | 무색, 무취(징후 없음) |\n| 이산화탄소(CO2) | 산소 치환<br>유독성<br>바닥에 축적 가능 | 무색, 무취 |\n| 염소(Cl2) | 유독성 - 폐와 눈 자극<br>바닥에 축적 가능 | 녹황색, 톡 쏘는 냄새 |\n| 이산화질소(NO2) | 유독성 - 폐에 심한 자극<br>바닥에 축적 가능 | 적갈색, 쏘는 냄새 |\n| 이산화황(SO2) | 유독성 - 폐에 심한 자극<br>바닥에 축적 가능 | 무색, 썩은 냄새 |\n| 휘발유증기 | 화재와 폭발<br>바닥에 축적 가능 | 무색, 달콤한 냄새 |\n| 메탄(CH4) | 화재와 폭발<br>상부에 축적 가능 | 무색, 무취(징후 없음) |"
+      },
+      {
+        "question": "일산화탄소 농도별 인체 영향과 노출시간 알려줘",
+        "expectedPage": 13,
+        "expectedHeader": "농도(ppm)",
+        "status": "answered",
+        "pages": [
+          13
+        ],
+        "tableCount": 1,
+        "pass": true,
+        "millis": 95.696667,
+        "answerMarkdown": "- 혈액 내 헤모글로빈은 공기 중 산소와 결합하여 온몸에 산소를 운반하게 되는데, 산소와 일 산화탄소가 함께 존재하는 상황에서는 산소와 결합하지 않고 일산화탄소와 결합하여 결국 체내 산소부족 상황을 일으킵니다.\n\n### 일산화탄소 농도별 인체 영향\n\n| 농도(ppm) | 건강영향 | 노출시간 |\n| --- | --- | --- |\n| 30 | 8시간 작업시 노출기준 | 8시간 |\n| 200 | 가벼운 두통과 불쾌감 | 3시간 |\n| 600 | 두통, 불쾌감 | 1시간 |\n| 1000~2,000 | 정신혼란, 메스꺼움, 두통 | 2시간 |\n| 1000~2,000 | 현기증 | 1.5시간 |\n| 1000~2,000 | 심계항진(두근거림) | 30분 |\n| 2,000~2,500 | 의식불명 | 30분 |\n\n- 그 밖의 유해가스에 의한 건강장해4 산업현장에서는 다양한 가스를 직접 사용하기도 하고, 부산물로서 발생하기도 합니다.\n\n- 일산화탄소(CO) 중독3 일산화탄소는 무색·무취의 기체로 주로 고체연료가 불완전 연소되면서 발생하여 중독을 일 으킵니다.\n\n- 이러한 가스들은 그 자체의 독성으로 근로자 건강에 영향을 주기도 하지만 밀폐된 공간에 많은 양이 존재할 경우에는 그만큼 공기량이 줄어 산소부족상황을 일으킵니다."
+      },
+      {
+        "question": "황화수소 농도별 인체 영향과 노출시간 알려줘",
+        "expectedPage": 12,
+        "expectedHeader": "농도(ppm)",
+        "status": "answered",
+        "pages": [
+          12
+        ],
+        "tableCount": 1,
+        "pass": true,
+        "millis": 85.460677,
+        "answerMarkdown": "- 낮은 농도에서는 가벼운 자극을 주는 정도이지만 고농도에서는 폐조직을 손상시키거나 호 흡을 마비시켜 사망에 이르게 하기도 합니다.\n\n### 황화수소 농도별 인체 영향\n\n| 농도(ppm) | 건강영향 | 노출시간 |\n| --- | --- | --- |\n| 10 | 8시간 작업시 노출기준 | 8시간 |\n| 50~100 | 가벼운 자극(눈, 기도) | 3시간 |\n| 200~300 | 상당한 자극 | 1시간 |\n| 500~700 | 의식불명, 사망 | 30~1시간 |\n| >1,000 | 의식불명, 사망 | 수분 |\n\n- 황화수소(H2S) 중독2 황화수소는 계란 썩는 냄새가 나는 가스로 화학산업에서 사용하기도 하지만, 미생물이 유기 물을 분해하는 과정에서도 발생하여 중독을 일으킵니다.\n\n- 황화수소가 고농도인 경우 후각을 마비시켜 냄새를 못 느끼게 만들어 위험장소에 그냥 들어가는 경우가 많으므로 냄새 만으로 판단해서는 안 됩니다.\n\n- 분뇨나 오·폐수, 펄프액 등이 있는 장소에서 황화수소가 특히 위험한 이유는 가만히 놔둘 때 는 황화수소가 적게 발생할 수 있지만 이를 밟고 다니거나 휘젓거나, 또는 섞으면 녹아있던 황화수소가 순간 고농도로 발생하여 치명적인 영향을 줄 수 있습니다.\n\n- 이를 거품효과(Soda can effect)*라고 부릅니다.\n\n- 거품효과(Soda can effect) 거품효과란 탄산 캔 음료를 흔들어 따면 거품이 넘 쳐 나오는 것처럼 분뇨, 오수, 펄프액 및 부패하기 쉬운 물질을 휘저을 경우 녹아 있던 황화수소, 암모니아 , 탄산가스가 급격히 발생하는 현상을 말합니다."
+      },
+      {
+        "question": "최근 10년간 질식재해 발생추이",
+        "expectedPage": 14,
+        "expectedHeader": "구 분",
+        "status": "answered",
+        "pages": [
+          14
+        ],
+        "tableCount": 1,
+        "pass": true,
+        "millis": 74.556042,
+        "answerMarkdown": "### 연도별 질식재해 발생현황\n\n- 재해자수는 ‘13년 55명을 정점으로 꾸준히 감소하여 ’17년 23명까지 감소하다가 ’21년에 61 명으로 증가하였습니다.\n\n### 최근 10년간(2012~2021) 질식재해 발생추이\n\n| 구 분 | 계 | 2012 | 2013 | 2014 | 2015 | 2016 | 2017 | 2018 | 2019 | 2020 | 2021 |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| 발생건수 | 196 | 26 | 28 | 27 | 19 | 19 | 14 | 15 | 16 | 14 | 18 |\n| 재해자수 | 348 | 35 | 55 | 41 | 25 | 33 | 23 | 26 | 24 | 25 | 61 |\n| 사망자수 | 165 | 20 | 31 | 16 | 14 | 14 | 18 | 14 | 13 | 14 | 11 |\n| 부상자수 | 183 | 15 | 24 | 25 | 11 | 19 | 5 | 12 | 11 | 11 | 50 |\n\n### 연도별 질식재해 발생현황\n\n- 5 얼마나 많은 질식재해가 발생하나요?\n\n- 최근 10년간 밀폐공간 질식재해가 196건 발생하여 348명이 부상을 입거나 사망하였으며, 이 러한 재해는 매년 지속적 발생*하고 있습니다.\n\n- 연평균 질식 사망자 약 17명 발생"
+      }
+    ]
+  },
+  "deviceUi": {
+    "device": "SM-S928N",
+    "android": "16",
+    "tableRendering": {
+      "tests": 2,
+      "passed": 2
+    },
+    "chatRegression": {
+      "tests": 11,
+      "passed": 10,
+      "blocked": 1,
+      "reason": "OS clipboard read denied because another app had window focus; source/copy test needs foreground recheck"
+    },
+    "scope": "Inert Compose activity using real source cells and production Markdown/WorkspaceChat; no production chat history writes",
+    "endAnchor": "Made end spacer fill the list width so the end anchor has nonzero bounds; all five formerly failing end visibility checks passed after this correction"
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 111
+  },
+  "apk": {
+    "path": "tmp/table-layout-20261105/fieldguard-source-tables-debug.apk",
+    "bytes": 324815790,
+    "sha256": "e422fceb0138df2665942334f19657037aea4db5b64423037b1beb97374eb7e8",
+    "installedWithDataPreserved": true
+  },
+  "limits": [
+    "Four verified source tables, not arbitrary PDF table understanding",
+    "Blank/merged cells and picture grids not forward-filled",
+    "Source H2S 30~1시간 notation preserved without inventing a unit",
+    "Existing saved answers are not rewritten; resend the question",
+    "Retrieval/assembly times are not Gemma generation or rendered-frame times",
+    "No guarantee for every unseen question or device"
+  ]
+}

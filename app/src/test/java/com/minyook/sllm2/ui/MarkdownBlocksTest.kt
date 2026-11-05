@@ -6,6 +6,17 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MarkdownBlocksTest {
+    @Test fun cellBreaksAreRenderedWithoutSplittingRowsOrChangingInlineCode() {
+        val table=markdownBlocks("|가스|위험|\n|---|---|\n|메탄|화재<br>상부 축적<BR />무취|\n|코드|`<br>`|").single() as MarkdownBlock.Table
+        assertEquals("화재\n상부 축적\n무취",table.rows[1][1])
+        assertEquals("`<br>`",table.rows[2][1])
+    }
+    @Test fun phoneTablesFitAndWideTablesKeepReadableMinimumWidths() {
+        assertEquals(370f,markdownTableWidths(3,370f).sum()+2,.01f)
+        assertTrue(markdownTableWidths(3,280f).all{it>=96f})
+        assertTrue(markdownTableWidths(12,370f).all{it>=104f})
+        assertEquals(emptyList<Float>(),markdownTableWidths(0,370f))
+    }
     @Test fun tableKeepsUnitsAndEscapedPipes() {
         val table=markdownBlocks("| 항목 | 값 |\n| --- | --- |\n| O₂ | 18~23.5% |\n| 방법 | A\\|B |").single() as MarkdownBlock.Table
         assertEquals(listOf("O₂","18~23.5%"),table.rows[1])

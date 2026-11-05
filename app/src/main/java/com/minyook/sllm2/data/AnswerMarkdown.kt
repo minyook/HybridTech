@@ -68,6 +68,7 @@ object AnswerMarkdown {
     fun evidenceLines(raw: String): List<String> {
         val clean = raw.replace('\u00a0', ' ').replace("\u200b", "").replace(Regex("[ \\t]+"), " ").trim()
             .replace(checklistHeader, "").replace(brokenEnding, "$1$2")
+        if(clean.startsWith("| ") && clean.lines().getOrNull(1)?.contains("---")==true)return listOf(clean)
         return clean.replace(numbered) { match ->
             val prefix = if (match.range.first == 0) "" else "\n"
             "$prefix${match.groupValues[1]} "

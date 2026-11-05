@@ -1,9 +1,15 @@
 package com.minyook.sllm2.ui
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Assert.assertFalse
 import org.junit.Test
 
 class VoiceResponseFormatterTest {
+    @Test fun sourceTableLineBreaksDoNotSpeakHtmlSyntaxOrLoseValues() {
+        val text=VoiceResponseFormatter.forSpeech("|가스|위험|\n|---|---|\n|메탄|화재와 폭발<br>상부에 축적 가능|")
+        assertTrue(text.contains("메탄"));assertTrue(text.contains("화재와 폭발, 상부에 축적 가능"));assertFalse(text.contains("<br>"))
+    }
     @Test
     fun preservesDetailedAnswerWithoutMarkdownOrSourceMetadata() {
         val answer = """

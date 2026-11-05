@@ -38,7 +38,7 @@ object FocusedEvidence {
         return units.ifEmpty { if (body.isBlank()) emptyList() else listOf(EvidencePassage(body, "", 0, 0)) }
     }
 
-    fun selected(source: RetrievedChunk) = source.evidence ?: units(source.chunk)
+    fun selected(source: RetrievedChunk) = SourceTables.restore(source.chunk,source.evidence ?: units(source.chunk))
     fun format(sources: List<RetrievedChunk>): String {
         if (sources.isEmpty()) return "제공 문서에서 질문에 직접 답할 근거를 찾지 못했어요. 문서에 있는 용어나 확인할 조건을 조금 더 구체적으로 말씀해 주세요."
         val seen = mutableSetOf<String>()
