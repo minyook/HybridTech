@@ -577,9 +577,25 @@
     },
     "chatRegression": {
       "tests": 11,
-      "passed": 10,
-      "blocked": 1,
-      "reason": "OS clipboard read denied because another app had window focus; source/copy test needs foreground recheck"
+      "passed": 11,
+      "blocked": 0,
+      "scope": "All 11 cases passed across the original batch and the isolated foreground clipboard recheck; not one 11/11 batch run",
+      "initialBatch": {
+        "tests": 11,
+        "passed": 10,
+        "blocked": 1,
+        "reason": "OS clipboard read denied because another app had window focus"
+      },
+      "clipboardRecheck": {
+        "date": "2026-11-05",
+        "tests": 1,
+        "passed": 1,
+        "failed": 0,
+        "runnerSeconds": 1.219,
+        "method": "sourceAndCopyUseTheOriginalFullAnswerAfterBlockSplitting",
+        "confirmed": "Source navigation and copying the original full answer after timeline block splitting",
+        "condition": "User explicitly kept the test screen foreground for the recheck"
+      }
     },
     "scope": "Inert Compose activity using real source cells and production Markdown/WorkspaceChat; no production chat history writes",
     "endAnchor": "Made end spacer fill the list width so the end anchor has nonzero bounds; all five formerly failing end visibility checks passed after this correction"
