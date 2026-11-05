@@ -17,6 +17,7 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
     private val lexical = FocusedRetriever(chunks)
     private val equipment = EquipmentOverview(chunks)
     private val equipmentDetail = EquipmentDetailAnswer(chunks)
+    private val gasDescription by lazy { GasDescriptionAnswer(chunks) }
     private val passageTexts = passages.map{EvidenceLanguage.aliases(it.searchText)}
     private val pageUnits = chunks.associate{it.id to FocusedEvidence.units(it)}
     private val pageTexts = chunks.associate{it.id to EvidenceLanguage.aliases(it.body)}
@@ -44,6 +45,7 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
         }
         val tokenQuestion=if(review)question.replace(Regex("(?<=[가-힣])(?:과|와)\\s+")," ") else question
         val tokens=EvidenceLanguage.terms(tokenQuestion).filterNot{Regex("^(그거|그건|그것|그러면|그럼|후속|질문)").containsMatchIn(it)}
+        gasDescription.resolve(question)?.let { return it }
         equipmentDetail.resolve(question)?.let { return it }
         equipment.resolve(question)?.let { return it }
         val sources=if(fastOnly)emptyList() else lexical.retrieve(question,splitQuestion=!review)

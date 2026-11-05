@@ -52,6 +52,33 @@ for document, filename in documents:
                 continue
             body = chunk["body"]
             body_key, positions = canonical(body)
+            # A labelled concentration diagram has no grid. Read the text below
+            # each aligned label by x coordinates; never zip the flattened text.
+            caption = re.search(r"│(산소농도별\s*인체\s*영향)│", body)
+            if caption:
+                words = page.extract_words(x_tolerance=2, y_tolerance=5)
+                labels = sorted([w for w in words if re.fullmatch(r"산소농도\d+(?:\.\d+)?%", clean(w["text"]))], key=lambda w: w["x0"])
+                if len(labels) >= 3 and max(w["top"] for w in labels) - min(w["top"] for w in labels) < 2:
+                    centers = [(w["x0"] + w["x1"]) / 2 for w in labels]
+                    xs = [centers[0] - (centers[1] - centers[0]) / 2] + [(a + b) / 2 for a, b in zip(centers, centers[1:])] + [centers[-1] + (centers[-1] - centers[-2]) / 2]
+                    top = max(w["bottom"] for w in labels) + 3
+                    following = [w["top"] for w in words if w["top"] > top and w["height"] > labels[0]["height"] + 1 and w["x1"] - w["x0"] > page.width / 3]
+                    bottom = min(following) - 4 if following else top
+                    def diagram_text(left, right):
+                        text = clean(page.crop((left, top, right, bottom)).extract_text(x_tolerance=2, y_tolerance=5))
+                        # Only repair spaces inside known words broken by column wrapping.
+                        for word in ("증가", "메스꺼움", "근력저하", "불능", "의식불명"):
+                            text = re.sub(r"\s*".join(word), word, text)
+                        return re.sub(r"불능\s+으로", "불능으로", text)
+                    rows = [[clean(label["text"]).removeprefix("산소농도"), diagram_text(left, right)] for label, left, right in zip(labels, xs, xs[1:])]
+                    last_key = canonical(rows[-1][-1])[0]
+                    start = caption.start()
+                    end_key = body_key.find(last_key, len(canonical(body[:caption.end()])[0])) if last_key else -1
+                    end = positions[end_key + len(last_key) - 1] + 1 if end_key >= 0 else start
+                    if end > start and all(cell and canonical(cell)[0] in canonical(body[start:end])[0] for row in rows for cell in row):
+                        record = dict(id=f"{document}-p{number}-t1", documentId=document, page=number, chunkIndex=chunk["chunkIndex"], sourceBodySha256=hashlib.sha256(body.encode()).hexdigest(), pdfSha256=pdf_hash, title=clean(caption.group(1)), rawText=body[start:end], headers=["산소농도", "인체 영향"], rows=rows, bbox=[xs[0], labels[0]["top"], xs[-1], bottom])
+                        records.append(record)
+                        audit.append(dict(documentId=document, page=number, bbox=record["bbox"], accepted=True, id=record["id"], method="aligned concentration labels and column crops", cells=[record["headers"]] + rows))
             for table in page.find_tables():
                 if table.bbox[1] < 40 or table.bbox[0] < 40 or table.bbox[2] > page.width - 40 or len(table.rows) < 3:
                     continue  # Printing marks, diagrams and non-table margins.

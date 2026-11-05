@@ -36,6 +36,7 @@ internal object SourceTables {
         val hash=MessageDigest.getInstance("SHA-256").digest(chunk.body.toByteArray(Charsets.UTF_8)).joinToString("") { "%02x".format(it) }
         return candidates.filter { it.value.sourceBodySha256==hash && SourcePdfCatalog.find(chunk.documentId)?.sha256==it.value.pdfSha256 }
     }
+    fun verified(chunk:KnowledgeChunk):List<SourceTable> = matching(chunk).map{it.value}
 
     /** Restore a whole table when retrieval selects any of its cells. Preserve
      * surrounding paragraphs and warnings, including text sharing a legacy unit. */

@@ -1,0 +1,18 @@
+{
+  "scope": "Development regression cases for subject/attribute scope, not an unseen holdout or generated-model quality score",
+  "oxygenForbidden": ["아르곤", "휘발유증기", "일산화탄소 농도별", "황화수소의 농도", "측정 시기", "호랑이굴", "영향│"],
+  "cases": [
+    {"asked":"산소도 알려줘","required":["21%","18%","16%","|"],"oxygen":true},
+    {"asked":"산소도 알려줘","prior":"유해가스 주된 위험과 외관 및 냄새 알려줘","required":["21%","18%"],"oxygen":true},
+    {"asked":"추가로 산소도 알려줘","prior":"산소와 유해가스의 종류 알려줘","required":["21%","18%"],"oxygen":true},
+    {"asked":"그럼 산소는?","prior":"일산화탄소 농도별 인체 영향","required":["18%","16%"],"oxygen":true},
+    {"asked":"산소만 설명해줘","prior":"황화수소 알려줘","required":["21%","18%"],"oxygen":true},
+    {"asked":"O2도 알려줘","prior":"일산화탄소 알려줘","required":["21%","18%"],"oxygen":true},
+    {"asked":"산소농도별 인체 영향 알려줘","required":["18%","16%","12%","10%","8%","6%","|"],"oxygen":true},
+    {"asked":"산소 농도 기준만 알려줘","required":["18%","23.5%"],"oxygen":true,"forbidden":["16%","일산화탄소","황화수소"]},
+    {"asked":"일산화탄소도 알려줘","prior":"산소 알려줘","required":["무색","불완전","농도(ppm)"],"forbidden":["아르곤","휘발유증기","산소농도별","건강장해4"]},
+    {"asked":"황화수소도 알려줘","prior":"일산화탄소 알려줘","required":["후각","냄새","농도(ppm)"],"forbidden":["아르곤","휘발유증기","일산화탄소 농도별"]},
+    {"asked":"이산화탄소 냄새 알려줘","required":["이산화탄소(CO2)","무취"],"forbidden":["아르곤","질소가스","메탄(CH4)"]},
+    {"asked":"메탄도 알려줘","prior":"산소 알려줘","required":["메탄(CH4)","상부에 축적"],"forbidden":["아르곤","질소가스","염소(Cl2)"]}
+  ]
+}

@@ -4,6 +4,21 @@ package com.minyook.sllm2.data
 internal object SourceTableData {
     val tables: List<SourceTable> = listOf(
         SourceTable(
+            "confined_space_safety_guide_2022-p11-t1", "confined_space_safety_guide_2022", 11, 0,
+            "1ef05a1012fce9d528cd66291aebefe8a6d6152521bbd43d261edfd9f7c9ba18", "3d634673ef6a90fb3ece60fec7ef21d3d6654277aff9edef4843a7bd187eab88",
+            "산소농도별 인체 영향",
+            "│산소농도별 인체 영향│ 산소농도18% 산소농도16% 산소농도12% 산소농도10% 산소농도8% 산소농도6% 안전한계이나 연속환기 필요 호흡, 맥박의 증 가, 두통, 메스꺼 움, 토할 것 같음 어지럼증, 토할 것 같음, 근력저 하, 체중지지 불 능 으로 추락 안면창백, 의식 불명, 구토 실신혼절, 7~8분 이내에 사망 순간에 혼절, 호흡정지, 경련, 6분 이상이면 사망",
+            listOf("산소농도", "인체 영향"),
+            listOf(
+                listOf("18%", "안전한계이나 연속환기 필요"),
+                listOf("16%", "호흡, 맥박의 증가, 두통, 메스꺼움, 토할 것 같음"),
+                listOf("12%", "어지럼증, 토할 것 같음, 근력저하, 체중지지 불능으로 추락"),
+                listOf("10%", "안면창백, 의식불명, 구토"),
+                listOf("8%", "실신혼절, 7~8분 이내에 사망"),
+                listOf("6%", "순간에 혼절, 호흡정지, 경련, 6분 이상이면 사망"),
+            ),
+        ),
+        SourceTable(
             "confined_space_safety_guide_2022-p12-t1", "confined_space_safety_guide_2022", 12, 0,
             "309c8e110f0995426f76cc9ca41e78072dfd4c51e6b97ae79fda37c3c18d6f4e", "3d634673ef6a90fb3ece60fec7ef21d3d6654277aff9edef4843a7bd187eab88",
             "황화수소 농도별 인체 영향",

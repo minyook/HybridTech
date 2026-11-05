@@ -48,6 +48,26 @@ class SourceTableRenderingTest {
         val bitmap=compose.onRoot().captureToImage().asAndroidBitmap()
         File(dir,"$name.png").outputStream().use{bitmap.compress(Bitmap.CompressFormat.PNG,100,it)}
     }
+    @Test fun oxygenAnswerRendersOnlyItsOwnFactsAndConcentrationRows() {
+        val context=compose.activity
+        KnowledgeSeeder(context).seedIfNeeded()
+        val json=context.assets.open("knowledge/semantic-index-v1.json").bufferedReader().use{it.readText()}
+        val result=KnowledgeRepository().searchQuestion("산소도 알려줘",json){error("An explicit source description should not need generation or neural review")}
+        val plan=DocumentAnswerPlan.create("산소도 알려줘",result)
+        assertEquals("gas-description",result.method)
+        compose.setContent {MaterialTheme {
+            Column(Modifier.width(390.dp).fillMaxHeight().background(Color(0xFFF7F9FE)).verticalScroll(rememberScrollState()).padding(12.dp)) {
+                MarkdownText("## 질문: 산소도 알려줘\n\n"+plan.body)
+            }
+        }}
+        compose.onNodeWithText("산소농도").assertIsDisplayed()
+        compose.onNodeWithText("16%").assertIsDisplayed()
+        compose.onAllNodes(hasText("일산화탄소",substring=true)).assertCountEquals(0)
+        compose.onAllNodes(hasText("아르곤",substring=true)).assertCountEquals(0)
+        screenshot("oxygen-answer-top")
+        compose.onNodeWithText("6%").performScrollTo().assertIsDisplayed()
+        screenshot("oxygen-answer-bottom")
+    }
     @Test fun gasRowsStayAlignedAndReadableAtPhoneWidth() {
         val table=show(13);val key=table.rows.hashCode()
         compose.onAllNodes(hasTestTag("tableScroll:$key:0")).assertCountEquals(0)

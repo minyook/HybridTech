@@ -75,6 +75,11 @@ object ConversationContext {
         }
         if (selected != null) return request(FollowUpKind.CHOICE, selected.question, selected.question)
         if (choiceIndex != null && answer?.suggestions?.isNotEmpty() == true) return request(FollowUpKind.SHOW_CHOICES)
+        GasQuestionFocus.parse(value)?.let { gas ->
+            val previous=GasQuestionFocus.named(topic)
+            if(topic.isNotBlank()&&(previous.any{it!=gas.subject}||"유해가스" in EvidenceLanguage.compact(topic)))
+                return request(FollowUpKind.NEW,gas.query,gas.query)
+        }
         if (topic.isNotBlank()) QuestionFocus.followUp(value, topic)?.let { query ->
             return request(if (explain.containsMatchIn(compact)) FollowUpKind.EXPLAIN else FollowUpKind.FOLLOW_UP, query, query)
         }

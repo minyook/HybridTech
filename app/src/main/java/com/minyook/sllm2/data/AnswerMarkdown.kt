@@ -68,6 +68,8 @@ object AnswerMarkdown {
     fun evidenceLines(raw: String): List<String> {
         val clean = raw.replace('\u00a0', ' ').replace("\u200b", "").replace(Regex("[ \\t]+"), " ").trim()
             .replace(checklistHeader, "").replace(brokenEnding, "$1$2")
+            .replace(Regex("산소결\\s+핍증"),"산소결핍증").replace(Regex("일\\s+산화탄소"),"일산화탄소")
+            .replace(Regex("호\\s+흡"),"호흡").replace(Regex("유기\\s+물"),"유기물").replace(Regex("일\\s+으킵니다"),"일으킵니다")
         if(clean.startsWith("| ") && clean.lines().getOrNull(1)?.contains("---")==true)return listOf(clean)
         return clean.replace(numbered) { match ->
             val prefix = if (match.range.first == 0) "" else "\n"
