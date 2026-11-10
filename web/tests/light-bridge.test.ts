@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 실제 고정 SDK에서 네이티브 Cache.add 네트워크 경로를 차단하고 입력 배치를 제한한다 / SDK 계약이 바뀌면 메모리 제한 없이 빌드하는 대신 명시적으로 실패한다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 실제 고정 SDK에서 네이티브 Cache.add 네트워크 경로를 차단하고 입력 배치를 제한한다, SDK 계약이 바뀌면 메모리 제한 없이 빌드하는 대신 명시적으로 실패한다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { expect, it } from 'vitest';

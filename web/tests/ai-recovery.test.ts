@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 준비 중 페이지가 종료된 뒤 새 런타임에서 미완료 단계가 복원된다 / 정상 완료는 자기 기록만 지우고 다른 화면의 진행 기록은 지우지 않는다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 준비 중 페이지가 종료된 뒤 새 런타임에서 미완료 단계가 복원된다, 정상 완료는 자기 기록만 지우고 다른 화면의 진행 기록은 지우지 않는다, 저장소 접근 오류는 예외를 누적하거나 앱을 종료시키지 않는다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 let values:Map<string,string>;
 beforeEach(()=>{vi.resetModules();values=new Map();vi.stubGlobal('localStorage',{getItem:(key:string)=>values.get(key)??null,setItem:(key:string,value:string)=>values.set(key,value),removeItem:(key:string)=>values.delete(key)});});

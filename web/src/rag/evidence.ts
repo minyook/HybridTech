@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 문서의 근거 문단 분리·선택·표시 순서를 만든다. 검색과 모델 답변 계획이 같은 근거 단위를 사용한다.
+ * 연결 모듈: ../types, ./text.
+ */
 import type { Source } from '../types';
 import { compactText, genericTerms, pageBody, queryTerms } from './text';
 

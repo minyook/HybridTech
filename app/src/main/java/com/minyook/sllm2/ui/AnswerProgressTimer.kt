@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 화면에 보이는 pending 답변의 경과 시간을 단조 시계로 갱신한다. 전체 추론 상태를 매초 다시 기록하지 않는다.
+ */
 package com.minyook.sllm2.ui
 
 import android.os.SystemClock

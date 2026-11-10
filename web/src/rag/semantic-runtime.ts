@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 메인 화면의 질문 벡터 요청을 의미 검색 Worker로 전달하고 완료/오류·수명을 관리한다.
+ * 연결 모듈: ../ai/runtime, ../ai/engine-lease, ./semantic-assets.
+ */
 import {holdAIForAudio} from '../ai/runtime';
 import {acquireEngineLease} from '../ai/engine-lease';
 import {SEMANTIC_MARKER,semanticInstalled,semanticRecovery} from './semantic-assets';

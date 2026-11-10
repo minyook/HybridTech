@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 기본 문서/정적 리소스와 웹 실행 자산을 준비한다. 앱의 Android-only 검색 자산 준비와 구분한다.
+ */
 import { cp, mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { deflateSync } from 'node:zlib';

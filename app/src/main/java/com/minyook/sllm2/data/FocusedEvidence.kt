@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 원문을 절/문단으로 나누고 선택 근거를 표시한다. FocusedRetriever의 어휘 순위와 SourceTables 복원을 같은 파일에서 연결한다.
+ */
 package com.minyook.sllm2.data
 
 import kotlin.math.ln
@@ -5,7 +8,11 @@ import kotlin.math.sqrt
 
 data class EvidencePassage(val text: String, val section: String, val order: Int, val group: Int)
 
-/** Source layout is cleaned for display only. ObjectBox pages and PDF citations stay unchanged. */
+/**
+ * 문서 페이지를 절/문단 단위로 나누고 선택된 근거를 Markdown으로 조립한다.
+ * Retriever가 evidence를 지정하면 그 범위를 사용하고 SourceTables로 검증된 표 구조를 복원한다.
+ * DocumentAnswerPlan의 화면 본문과 모델 근거가 같은 선택 문단을 공유한다. 원문 DB/PDF 쪽은 바꾸지 않는다.
+ */
 object FocusedEvidence {
     fun pageBody(chunk: KnowledgeChunk): String = chunk.body
         .replace(Regex("^제1장\\s*질식과\\s*밀폐공간제2장[\\s\\S]*?안전작업\\s*가이드\\s*\\d+\\s*"), "")

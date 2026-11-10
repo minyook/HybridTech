@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 로컬 모델의 범위 읽기/ReadableStream을 구성하고 읽기 지표를 모은다. 파일 검증이나 질문 생성 정책과 별도 계층이다.
+ */
 // Bound input buffers rather than relying on the browser's Blob.stream chunk size.
 export const MODEL_READ_CHUNK_BYTES=1024*1024;
 export interface ModelReaderStats {readCount:number;bytesRead:number;maxReadBytes:number}

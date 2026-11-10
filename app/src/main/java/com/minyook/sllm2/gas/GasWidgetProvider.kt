@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 저장된 최신 장비 스냅샷을 홈 화면 RemoteViews로 표시한다. 직접 연결/측정을 시작하지 않는다.
+ * 연결 모듈: com.minyook.sllm2.R.
+ */
 package com.minyook.sllm2.gas
 
 import android.appwidget.AppWidgetManager
@@ -11,6 +15,10 @@ import java.util.Date
 import java.util.Locale
 
 /** Home-screen summary. It only renders the last validated Wi-Fi AP measurement. */
+/**
+ * 홈 화면 위젯의 RemoteViews 어댑터. 서비스의 GasReadingStore 갱신과 시스템 위젯 갱신에서 호출된다.
+ * 현재 세션의 신선한 채널 값만 표시하고 오래된 기록은 현재 측정으로 보여주지 않는다. 자체 센서 연결은 하지 않는다.
+ */
 class GasWidgetProvider : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, widgetIds: IntArray) {
         widgetIds.forEach { widgetId -> manager.updateAppWidget(widgetId, views(context)) }

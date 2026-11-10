@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 의미 검색 Worker에서 tokenizer/ONNX 질문 인코딩을 수행해 벡터를 반환한다. 생성 모델 Worker와 구분한다.
+ * 연결 모듈: ./semantic-assets.
+ */
 import {env,AutoModel,AutoTokenizer,type PreTrainedModel} from '@huggingface/transformers';
 import {SEMANTIC_CACHE,semanticKey} from './semantic-assets';
 self.onmessage=async(event:MessageEvent<{question:string}>)=>{

@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 장비의 수량/용도 후속 질문과 실제 문서 응답을 검증하는 JVM 회귀 검사다.
+ * 검사 예: screenshotAndAttributeChangesRemainDirectAndComplete
+ * 실행: :app:testDebugUnitTest. 외부 자산/평가/스트레스의 선택 조건은 본문의 환경 변수/Assume을 확인한다.
+ */
 package com.minyook.sllm2.data
 
 import org.json.JSONArray
@@ -12,7 +17,7 @@ class EquipmentDialogueEvaluationTest {
     @Test fun screenshotAndAttributeChangesRemainDirectAndComplete() {
         val app = (if (File("src/main/assets").exists()) File(".") else File("app")).canonicalFile
         val root = app.parentFile
-        val out = File(root, "tmp/dialogue-focus-20261105").apply { mkdirs() }
+        val out = File(root, "app/build/reports/fieldguard/dialogue-focus").apply { mkdirs() }
         val source = JSONObject(File(app,"src/main/assets/knowledge/seed_chunks_v1.json").readText()).getJSONArray("chunks")
         val chunks = (0 until source.length()).map { i -> val c = source.getJSONObject(i); KnowledgeChunk(id=i+1L,documentId=c.getString("documentId"),documentTitle=c.getString("documentTitle"),sourceKind=c.getString("sourceKind"),pageNumber=c.getInt("pageNumber"),chunkIndex=c.getInt("chunkIndex"),body=c.getString("body")) }
         val preparedAt = System.nanoTime()

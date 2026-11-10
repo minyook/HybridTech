@@ -1,0 +1,3 @@
+W/native  (20090): W0000 00:00:1794273840.169061   20167 llm_litert_compiled_model_executor.cc:1190] Invalid decode and sample result. The sampled token is casted to 0 to avoid crash.
+W/native  (20090): W0000 00:00:1794273840.182849   20167 llm_litert_compiled_model_executor.cc:1190] Invalid decode and sample result. The sampled token is casted to 0 to avoid crash.
+W/native  (20090): W0000 00:00:1794273840.196760   20167 llm_litert_compiled_model_executor.cc:1190] Invalid decode and sample result. The sampled token is casted to 0 to avoid crash.

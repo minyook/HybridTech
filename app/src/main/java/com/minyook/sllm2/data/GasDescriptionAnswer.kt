@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 단일 가스의 대상과 요청 속성을 구분해 원문 절/검수 표 행으로 직접 답한다. 이전 전체 가스 주제를 임의로 상속하지 않는다.
+ */
 package com.minyook.sllm2.data
 
 import java.text.Normalizer
@@ -57,6 +60,11 @@ internal object GasQuestionFocus {
 
 /** Assemble only the requested substance's real source section/row and attribute.
  * A mention of oxygen in another gas's mechanism is not an oxygen description. */
+/**
+ * HybridRetrieval의 단일 가스 직접 응답 경로. GasQuestionFocus의 대상/속성으로 원문 절과 검수 표의 행을 선택한다.
+ * 앞선 유해가스 전체 목록을 단일 산소 질문에 붙이지 않고 실제 근거/출처를 SearchResolution으로 반환한다.
+ * 생성 모델로 농도·조건을 새로 만들지 않는다. 복합/범위 밖 질문은 일반 검색 경로가 판단하도록 넘긴다.
+ */
 internal class GasDescriptionAnswer(private val chunks:List<KnowledgeChunk>) {
     private data class Block(val chunk:KnowledgeChunk,val subject:GasQuestionFocus.Subject,val units:List<EvidencePassage>)
     private val blocks by lazy {

@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 새 표현 질문의 실제 제품 검색 결과을 검증하는 JVM 회귀 검사다.
+ * 검사 예: evaluateOriginal150WithProductionCoordinatorAndRealQueryEmbeddings, evaluateAdditionalExpressionsWithRealQueryEmbeddings, evaluate
+ * 실행: :app:testDebugUnitTest. 외부 자산/평가/스트레스의 선택 조건은 본문의 환경 변수/Assume을 확인한다.
+ */
 package com.minyook.sllm2.data
 
 import org.json.JSONArray
@@ -12,6 +17,52 @@ import java.time.Instant
 
 /** Opt-in measurement, not a replacement for device/Gemma/UI tests or an unseen holdout. */
 class LiveQuestionEvaluationTest {
+    /** 실제 사용자 문장과 고정 검색 모델로 주제 선택 메뉴가 되살아나지 않는지 확인한다. */
+    @Test fun originalSupervisorQuestionDoesNotOfferTopicChoicesWithRealEmbeddings() {
+        assumeTrue(System.getenv("FIELDGUARD_DIRECT_QUESTION") == "1")
+        val app = if (File("src/main/assets").exists()) File(".").canonicalFile else File("app").canonicalFile
+        val root = app.parentFile
+        val out = File(root, "app/build/reports/fieldguard/direct-answers").apply { mkdirs() }
+        val questions = listOf(
+            "밀폐공간 작업을 중단했다가 다시 시작할 때 감독관이 확인할 사항을 핵심 5개로 정리해줘. 각 항목은 한 문장으로 설명해줘.",
+            "산소 및 유해가스 측정방법 알려줘",
+        )
+        val tokenizer = SemanticTokenizer(File(app,"src/main/assets/semantic-model/tokenizer.json").readText())
+        val queries = questions.flatMap { listOf(it, QuestionUnderstanding.normalize(it)) }.distinct()
+        File(out,"tokenized-queries.json").writeText(JSONArray(queries.map { q ->
+            JSONObject().put("question",q).put("ids",JSONArray(tokenizer.encode("task: search result | query: $q").toList()))
+        }).toString())
+        File(out,"progress.json").writeText("{}")
+        val process = ProcessBuilder("node",File(root,"tools/embed-android-evaluation.mjs").absolutePath,out.absolutePath)
+            .directory(root).redirectErrorStream(true).start()
+        val log = process.inputStream.bufferedReader().use { it.readText() }
+        File(out,"embedding.log").writeText(log)
+        assertEquals(log,0,process.waitFor())
+        val encoded = JSONObject(File(out,"query-vectors.json").readText()).getJSONArray("queries")
+        val vectors = (0 until encoded.length()).associate { i ->
+            val row=encoded.getJSONObject(i); val vector=row.getJSONArray("vector")
+            row.getString("question") to FloatArray(vector.length()){vector.getDouble(it).toFloat()}
+        }
+        val seed = JSONObject(File(app,"src/main/assets/knowledge/seed_chunks_v1.json").readText()).getJSONArray("chunks")
+        val chunks = (0 until seed.length()).map { i -> val row=seed.getJSONObject(i)
+            KnowledgeChunk(id=i+1L,documentId=row.getString("documentId"),documentTitle=row.getString("documentTitle"),sourceKind=row.getString("sourceKind"),pageNumber=row.getInt("pageNumber"),chunkIndex=row.getInt("chunkIndex"),body=row.getString("body"))
+        }
+        val search = QuestionSearchCoordinator(HybridRetrieval(chunks,File(app,"src/main/assets/knowledge/semantic-index-v1.json").readText())){vectors.getValue(it)}
+        val results=JSONArray()
+        questions.forEach { q ->
+            val result=search.search(ConversationContext.resolve(q,emptyList()))
+            assertTrue(q,result.status in setOf("answered","no-evidence"))
+            assertTrue(q,result.suggestions.isEmpty())
+            assertFalse(q,result.message.contains("선택"))
+            if(result.generalQuestion!=null)assertEquals(q,result.generalQuestion)
+            val plan=DocumentAnswerPlan.create(q,result)
+            results.put(JSONObject().put("question",q).put("status",result.status).put("method",result.method)
+                .put("suggestions",result.suggestions.size).put("generalQuestion",result.generalQuestion?:JSONObject.NULL)
+                .put("pages",JSONArray(result.sources.map{it.chunk.pageNumber})).put("documentBody",plan.body))
+        }
+        File(out,"results.json").writeText(JSONObject().put("scope","PC production Kotlin routing with actual pinned ONNX query embeddings; no device UI or Gemma generation").put("results",results).toString(2))
+    }
+
     @Test fun evaluateOriginal150WithProductionCoordinatorAndRealQueryEmbeddings() {
         evaluate(false)
     }
@@ -22,7 +73,7 @@ class LiveQuestionEvaluationTest {
         assumeTrue("Set FIELDGUARD_EVALUATE_150=1 for this slower, local-model evaluation", System.getenv("FIELDGUARD_EVALUATE_150") == "1")
         val app = if (File("src/main/assets").exists()) File(".").canonicalFile else File("app").canonicalFile
         val root = app.parentFile
-        val baseOut = File(root, System.getenv("FIELDGUARD_EVALUATION_DIR") ?: "tmp/evaluation-150-20261103")
+        val baseOut = File(root, System.getenv("FIELDGUARD_EVALUATION_DIR") ?: "app/build/reports/fieldguard/evaluation-150")
         val out = (if(additional)File(baseOut,"additional") else baseOut).apply { mkdirs() }
         val rubricFile = File(app, if(additional)"src/test/resources/additional-questions-20261103.json" else "src/androidTest/assets/rag-evaluation/evaluation-150.json")
         val rubric = JSONObject(rubricFile.readText())

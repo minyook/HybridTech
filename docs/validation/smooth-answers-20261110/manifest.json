@@ -1,0 +1,49 @@
+{
+  "files": [
+    {
+      "file": "chat-ui-tests-final.log",
+      "bytes": 8908,
+      "sha256": "cc0e98273f36b7d01b0aae795305cfd1a885450c77f3b8d3f33d6b5e90eafbe4"
+    },
+    {
+      "file": "field-answer-final.png",
+      "bytes": 1543399,
+      "sha256": "057d2dededea2548f2eeda9e16827dce96816e61126106b534ed0f649dd51789"
+    },
+    {
+      "file": "field-off-final-instrumentation.log",
+      "bytes": 1475,
+      "sha256": "889d2d2c438ef702194f73d911b2617303d4cf8051a1d1e7fa6b2493d3e22b32"
+    },
+    {
+      "file": "field-smooth-instrumentation.log",
+      "bytes": 1475,
+      "sha256": "f1fcb2c757bbe228eb630b975a7070a6977d8814f4aff244be897ec3703253c9"
+    },
+    {
+      "file": "final-build.log",
+      "bytes": 9695,
+      "sha256": "5817947f2691f45241d7d3e3ba24781754539a4aef46e7087e812999471e3864"
+    },
+    {
+      "file": "reference-field-off-before-length-fix.json",
+      "bytes": 4856,
+      "sha256": "cc00265c96f5a937695e784b7fdf89d0526a5306127bd73d7f58a69937b58a7f"
+    },
+    {
+      "file": "reference-field-off.json",
+      "bytes": 7049,
+      "sha256": "54e40b3313270a9315a75bb98e3e08db0f8b10891c81269f9c9918d1b32729ba"
+    },
+    {
+      "file": "reference-field-smooth.json",
+      "bytes": 7051,
+      "sha256": "f1f6d61a108bd008544fb9f5e3f7d6acc6baaab62967f4e8689295f5a5c7cb23"
+    },
+    {
+      "file": "reference-smooth.json",
+      "bytes": 10088,
+      "sha256": "a6eb84dece69c3e0935d508757e07fa891b189f34b8c64f210504f054762d60b"
+    }
+  ]
+}

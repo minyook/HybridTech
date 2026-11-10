@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹용 Gemma 배포 메타데이터와 다운로드 진입점을 정의한다. 파일 저장/검증은 model.ts에 위임한다.
+ * 연결 모듈: ./model.
+ */
 import { installModel } from './model';
 
 // Official web artifact pinned to an immutable Hugging Face revision.

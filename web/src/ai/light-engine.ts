@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 경량 WebLLM Worker 생성 실행기. 근거 계획과 선택적 보충 정책을 사용해 응답 프로토콜로 돌려준다.
+ * 연결 모듈: ./light-model, ../rag/answer-plan, ./protocol.
+ */
 import type { MLCEngine } from '@mlc-ai/web-llm';
 import { LIGHT_MODEL, lightModelInstalled } from './light-model';
 import { acceptedSupplement, composeAnswer, createAnswerPlan, supplementPrompt, SUPPLEMENT_SYSTEM } from '../rag/answer-plan';

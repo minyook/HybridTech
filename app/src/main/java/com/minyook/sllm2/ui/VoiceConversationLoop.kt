@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 듣기·답변·읽기·재시도 상태 전이와 시도 ID를 관리한다. OS API는 Port 구현에 맡겨 JVM에서 검증 가능하다.
+ */
 package com.minyook.sllm2.ui
 
 internal enum class VoicePhase { OFF, LISTENING, WAITING, ANSWERING, SPEAKING, ERROR }
@@ -9,7 +12,12 @@ internal data class VoiceLoopState(
     val error: String? = null,
 )
 
-/** Foreground, half-duplex conversation. All callbacks carry the originating attempt ID. */
+/**
+ * OS API와 분리한 전경·반이중 음성 대화 상태 머신. Controller가 Port의 실제 장치 동작을 구현한다.
+ * LISTENING → ANSWERING → SPEAKING → WAITING 순으로 다음 듣기를 예약한다.
+ * stop/재시작마다 activeId를 교체해 이전 인식·생성·읽기 완료가 새 대화를 진행시키지 못하게 한다.
+ * 상태는 Controller의 VoiceUiState로 변환되어 Compose에 표시되며 순수 JVM 테스트가 가능하다.
+ */
 internal class VoiceConversationLoop(private val port: Port) {
     interface Port {
         fun listen(id: Long, wakeWord: Boolean)

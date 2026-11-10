@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 경량 모델 manifest·조각별 무결성·CacheStorage 다운로드/삭제를 관리한다. 경량 실행 경로의 설치 상태를 제공한다.
+ * 연결 모듈: ./light-manifest.json, ./capabilities.
+ */
 import { sha256 } from '@noble/hashes/sha2.js';
 import manifest from './light-manifest.json';
 import { browserAIFeatures } from './capabilities';

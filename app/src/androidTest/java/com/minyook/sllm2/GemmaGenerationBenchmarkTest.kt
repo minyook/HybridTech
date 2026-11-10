@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 실제 모델 backend·초기화·생성 지연을 검증하는 Android 계측 검사다.
+ * 검사 예: measureNativeGeneration, publish, memory
+ * 실행: 연결된 Android 기기/에뮬레이터의 AndroidJUnitRunner. opt-in 인자는 본문 assume/arguments 조건을 확인한다.
+ */
 package com.minyook.sllm2
 
 import android.app.ActivityManager

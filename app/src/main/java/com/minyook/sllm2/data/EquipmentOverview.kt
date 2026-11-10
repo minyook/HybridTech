@@ -1,8 +1,14 @@
+/* 소스 안내
+ * 준비물/장비 목록 질문에서 여러 용도의 실제 문서 절을 모아 직접 응답한다. 세부 속성 질문은 상세/일반 검색으로 넘긴다.
+ */
 package com.minyook.sllm2.data
 
-/** An inventory question has several complementary answers, not competing
- * interpretations. These are equipment concepts, never question/page answers.
- * Every displayed item and condition still comes from the current corpus. */
+/**
+ * HybridRetrieval의 장비 목록 직접 응답기. 측정·조명·환기·보호·구조·연락의 원문 절을 함께 모은다.
+ * 준비물 목록은 상호 보완 항목이므로 서로 경쟁하는 선택지로 되묻지 않는다.
+ * 분류 규칙은 장비 개념만 정의하고 표시할 설명/조건은 현재 문서에서 가져온다.
+ * 사양·가격·수량 같은 세부 속성을 일반 목록으로 대체하지 않고 다른 검색/상세 경로로 넘긴다.
+ */
 internal class EquipmentOverview(private val chunks: List<KnowledgeChunk>) {
     private enum class Scope { ALL, PROTECTION, RESCUE }
     private data class Family(

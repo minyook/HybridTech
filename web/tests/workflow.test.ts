@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 작업 요청·감독관 점검·투입 / 작업자가 요청하고 감독관만 승인한 뒤 작업자가 투입을 확인한다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 작업 요청·감독관 점검·투입, 작업자가 요청하고 감독관만 승인한 뒤 작업자가 투입을 확인한다, 다른 작업자는 승인된 작업을 투입 상태로 바꿀 수 없다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { describe, expect, it } from 'vitest';
 import { airProblems, approvalProblems, createWork, inspectionItems, transitionWork, type Actor, type Inspection, type WorkOrder } from '../src/workflow/work';
 const worker:Actor={id:'worker-1',role:'worker',name:'테스트 작업자'};

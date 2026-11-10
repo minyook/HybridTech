@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 기존 페이지 순위/질문 분리 어댑터을 검증하는 JVM 회귀 검사다.
+ * 검사 예: separatesCprAndOxygenMeasurement, ranksTheProcedurePagesAheadOfTheTableOfContentsAndGeneralLimits, page
+ * 실행: :app:testDebugUnitTest. 외부 자산/평가/스트레스의 선택 조건은 본문의 환경 변수/Assume을 확인한다.
+ */
 package com.minyook.sllm2.data
 
 import org.junit.Assert.assertEquals

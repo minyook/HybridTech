@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 로컬 STT/TTS와 순수 음성 상태 머신을 연결한다. 인식된 질문은 공통 ViewModel 경로로 넘긴다.
+ */
 package com.minyook.sllm2.ui
 
 import android.content.Context
@@ -34,7 +37,14 @@ data class VoiceUiState(
     val error: String? = null,
 )
 
-/** Native on-device recognition only. No network recognizer or external voice-input activity. */
+/**
+ * MainActivity가 소유하는 Android 음성 장치 어댑터. 로컬 SpeechRecognizer와 설치된 한국어 TTS를 관리한다.
+ * VoiceConversationLoop의 listen/answer/speak 명령을 실제 OS 호출과 ViewModel 질문 콜백에 연결한다.
+ * 최종 인식 문장은 submitVoiceQuestion을 통해 텍스트와 같은 검색/생성 경로로 전달하고,
+ * 완료 답변은 TTS로 분할 재생한 뒤 다음 듣기로 이어진다. 재생 중에는 마이크를 닫는다.
+ * 모든 재시도/답변/음성 콜백은 시도 ID와 전경 상태를 확인한다. 배경 전환·화면 이탈·destroy는 음성을 정리한다.
+ * 네트워크 인식기나 원격 TTS로 자동 전환하지 않으며 로컬 언어 데이터 준비는 OS 서비스에 요청한다.
+ */
 class VoiceConversationController(
     private val context: Context,
     private val hasMicrophonePermission: () -> Boolean,
@@ -134,6 +144,7 @@ class VoiceConversationController(
     }
     private fun report(message: String) { loop.stop(); _state.value = _state.value.copy(error = message, status = message); onError(message) }
 
+    /** 해당 시도 전용 인식기를 연다. 부분 인식은 질문을 보내지 않고 최종 결과만 상태 머신에 돌려준다. */
     private fun startListening(id: Long, wakeWord: Boolean) {
         if (!inForeground || destroyed || !hasMicrophonePermission()) { loop.recognitionError(id, "마이크 권한과 앱 화면을 확인해 주세요."); return }
         if (Build.VERSION.SDK_INT < 31) { loop.recognitionError(id, "기기 내 음성 인식은 Android 12 이상에서 사용할 수 있어요."); return }
@@ -190,6 +201,7 @@ class VoiceConversationController(
         val ready = voice != null && engine.setVoice(voice) == TextToSpeech.SUCCESS
         _state.value = _state.value.copy(ttsAvailable = ready)
     }
+    /** 최종 Markdown의 조건/표 값을 읽기용으로 정리하고 TTS 길이 한도에 맞춘 묶음을 순서대로 재생한다. */
     private fun speakAnswer(id: Long, text: String) {
         selectLocalVoice()
         if (!_state.value.ttsAvailable) { loop.speechFailed(id, "설치된 로컬 한국어 읽기 음성이 없어요. 기기 TTS에 한국어를 설치하거나 ‘답변 읽기’를 끄고 다시 시작해 주세요."); return }

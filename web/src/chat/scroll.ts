@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 웹 채팅의 사용자 읽기 위치·끝 따라가기 판단을 DOM 어댑터와 분리한 순수 제어기다.
+ */
 export interface ScrollMetrics { top:number;maximum:number;generating:boolean;responseEndVisible:boolean }
 export function responseEndIsVisible(end:number,visibleTop:number,visibleBottom:number){
   return visibleBottom>visibleTop&&end>=visibleTop+16&&end<=visibleBottom;

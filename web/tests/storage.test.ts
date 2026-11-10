@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 기기 기록 / 대화가 새 조회에서도 복원되며 같은 ID를 중복 저장하지 않는다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 기기 기록, 대화가 새 조회에서도 복원되며 같은 ID를 중복 저장하지 않는다, 점검 상태와 메모, 초안을 보존한다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { allChats, allChecklists, clearRecords, deleteChat, getSetting, saveChat, saveChecklist, setSetting } from '../src/storage/db';

@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 3GB 파일의 끝부분을 읽어도 앞부분을 순차 읽기하거나 캐시하지 않는다 / 보존·되감기·폐기 후 읽기는 같은 로컬 바이트를 다시 읽고 앞선 데이터를 보관하지 않는다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 3GB 파일의 끝부분을 읽어도 앞부분을 순차 읽기하거나 캐시하지 않는다, 보존·되감기·폐기 후 읽기는 같은 로컬 바이트를 다시 읽고 앞선 데이터를 보관하지 않는다, 큰 C++ 읽기는 1MiB 이하로 나누어 WASM에 복사한다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { expect,it,vi } from 'vitest';
 import { Buffer } from 'node:buffer';
 import { FileModelReader } from '../src/ai/file-model-reader';

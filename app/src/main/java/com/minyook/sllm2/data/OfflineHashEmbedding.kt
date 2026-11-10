@@ -1,12 +1,15 @@
+/* 소스 안내
+ * 기존 엔티티 적재용 결정적 384차원 해시 벡터. 현재 질문의 신경망 의미 검색은 SemanticEncoder의 별도 768차원 경로다.
+ */
 package com.minyook.sllm2.data
 
 import java.util.Locale
 import kotlin.math.sqrt
 
 /**
- * A tiny, deterministic bootstrap embedder. It lets the bundled knowledge base
- * work immediately and stays below 2 KB of code/zero model bytes. A production
- * EmbeddingGemma adapter can replace this without changing ObjectBox's schema.
+ * KnowledgeSeeder가 기존 KnowledgeChunk.embedding 필드에 기록하는 결정적 384차원 해시 벡터.
+ * 현재 앱의 의미 검색 모델은 이 클래스가 아니라 SemanticEncoder + semantic-index-v1.json이다.
+ * 해시 충돌이나 이 벡터의 유사도만으로 문서 출처를 결정하지 않는다.
  */
 object OfflineHashEmbedding {
     const val DIMENSIONS = 384

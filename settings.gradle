@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 저장소/플러그인 해석과 app 모듈 포함을 정의하는 Gradle 진입 설정이다.
+ */
 pluginManagement {
     repositories {
         google {

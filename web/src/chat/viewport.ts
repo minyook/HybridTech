@@ -1,3 +1,6 @@
+/* 소스 안내
+ * visual/layout viewport 변화로 채팅의 표시 가능 영역을 계산한다. 브라우저 이벤트와 상태 전달을 제어한다.
+ */
 export interface ChatViewportSample {
   width:number;height:number;layoutHeight:number;offsetTop:number;scale:number;screenHeight:number;editorFocused:boolean;
 }

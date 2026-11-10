@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 소스 안내
+가스 측정 알림용 사용자 정의 레이아웃 리소스. 현재 GasMonitoringService는 NotificationCompat 표준 알림을 구성하며 이 레이아웃을 직접 참조하지 않는다.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"

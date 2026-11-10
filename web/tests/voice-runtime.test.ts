@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 음성 모델이 없으면 마이크 준비 뒤 임의 다운로드나 Worker 적재를 하지 않는다 / 화면 진입·종료·재시도 클릭만으로 다른 세션의 완료 미확인 기록을 지우지 않는다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 음성 모델이 없으면 마이크 준비 뒤 임의 다운로드나 Worker 적재를 하지 않는다, 화면 진입·종료·재시도 클릭만으로 다른 세션의 완료 미확인 기록을 지우지 않는다, 저장 모델로 인식한 뒤 Worker·공유 메모리 잠금을 정리하고 미완료 기록을 지운다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import {afterEach,beforeEach,expect,it,vi} from 'vitest';
 const fixture=vi.hoisted(()=>({installed:true,release:vi.fn(),unlock:vi.fn()}));
 vi.mock('../src/ai/runtime',()=>({holdAIForAudio:async()=>fixture.release}));

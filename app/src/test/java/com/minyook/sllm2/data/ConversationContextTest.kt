@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 대화의 대상·후속 초점·선택지와 프롬프트 예산을 검증하는 JVM 회귀 검사다.
+ * 검사 예: user, answer, screenshotMoreAndMissingChoicesStayInTheOriginalTopic
+ * 실행: :app:testDebugUnitTest. 외부 자산/평가/스트레스의 선택 조건은 본문의 환경 변수/Assume을 확인한다.
+ */
 package com.minyook.sllm2.data
 
 import org.json.JSONArray
@@ -63,12 +68,13 @@ class ConversationContextTest {
         assertFalse(prompt.contains("조건을 제외하지"))
         assertEquals("", ConversationContext.promptHistory(history, 10))
     }
-    @Test fun missingChoiceInstructionsAreRemovedAndRealChoicesAreAlsoReadableInTheBody() {
-        val empty = SearchResolution("질문", status = "clarify", message = "아래 항목 중 궁금한 범위를 선택해 주세요.").withVisibleChoices()
-        assertFalse(empty.message.contains("아래 항목")); assertTrue(empty.suggestions.isEmpty())
-        val visible = empty.copy(suggestions = choices).withVisibleChoices()
-        assertTrue(visible.message.contains("1. 측정 위치")); assertTrue(visible.message.contains("2. 측정 시기"))
-        assertEquals(visible, visible.withVisibleChoices())
+    @Test fun explicitSupervisorQuestionRetainsItsRequestedItemCountAndWording() {
+        val question = "밀폐공간 작업을 중단했다가 다시 시작할 때 감독관이 확인할 사항을 핵심 5개로 정리해줘. 각 항목은 한 문장으로 설명해줘."
+        val request = ConversationContext.resolve(question, emptyList())
+        assertEquals(FollowUpKind.NEW, request.kind)
+        assertEquals(question, request.asked)
+        assertEquals(question, request.answerQuestion)
+        assertFalse(GeneralKnowledgeAnswer.prefersBrief(request.query, automaticLength = true))
     }
     @Test fun actualDomainQuestionsAreNotMistakenForUiFeedbackOrMemoryRecall() {
         assertEquals(FollowUpKind.NEW, ConversationContext.resolve("작업 점검 항목이 없으면 어떻게 해?", emptyList()).kind)
@@ -101,5 +107,18 @@ class ConversationContextTest {
         assertTrue(memory.contains("discussedHeadings")); assertTrue(memory.contains("원두 선택"))
         assertFalse(memory.contains("긴 설명과 조건")); assertTrue(memory.contains("fullAnswerOmitted"))
         assertTrue(memory.toByteArray(Charsets.UTF_8).size <= 500)
+    }
+
+    @Test fun briefHistoryBudgetKeepsLatestQuestionAndDocumentContextIntact() {
+        val documentContext = "문서 근거와 필수 조건입니다."
+        val latest = "그럼 얼마나 필요해?"
+        val history = listOf(user("삼각대 알려줘"), answer("이전 장문 설명입니다. ".repeat(40)))
+        val brief = ConversationContext.generationPrompt(documentContext, history, latest, 8192, 160, maxHistoryBytes = 768)
+        val full = ConversationContext.generationPrompt(documentContext, history, latest, 8192, 160)
+        assertTrue(brief.startsWith(documentContext))
+        assertTrue(brief.endsWith(latest))
+        assertTrue(brief.contains("삼각대 알려줘"))
+        assertFalse(brief.contains("이전 장문 설명"))
+        assertTrue(full.contains("이전 장문 설명"))
     }
 }

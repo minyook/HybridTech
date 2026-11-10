@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 기준 스타일에서 동기화한 Android 색상·치수·아이콘 리소스 매핑. Workspace 화면 구성요소가 참조한다.
+ * 연결 모듈: com.minyook.sllm2.R.
+ */
 // Generated from web/src/style.css and ui.tsx. Do not edit by hand.
 package com.minyook.sllm2.ui
 

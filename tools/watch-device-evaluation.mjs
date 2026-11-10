@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 단말 평가 결과의 진행/파일 변경을 관찰해 로컬 평가 페이지 자료를 갱신하는 도구다.
+ */
 // Read-only ADB export for the local evaluation viewer. No device data/settings writes.
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';

@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 추출한 PDF 텍스트에 표시용 문단 경계만 추가한다. 원문 단어·수치·DB 본문은 재작성하지 않는다.
+ */
 package com.minyook.sllm2.ui
 
 /** Adds display-only paragraph breaks to PDF text without rewriting source words or numbers. */

@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: closes the encoder before releasing its exclusive lease and clears a completed operation / keeps an incomplete marker after abort so another question cannot silently reload the model. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: closes the encoder before releasing its exclusive lease and clears a completed operation, keeps an incomplete marker after abort so another question cannot silently reload the model, does not initialize an encoder after a previous incomplete operation
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import {afterEach,beforeEach,expect,it,vi} from 'vitest';
 const state=vi.hoisted(()=>({installed:true,recovery:false,release:vi.fn(),unlock:vi.fn(),hold:vi.fn(),lease:vi.fn()}));
 vi.mock('../src/ai/runtime',()=>({holdAIForAudio:()=>state.hold()}));

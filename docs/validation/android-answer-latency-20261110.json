@@ -1,0 +1,48 @@
+{
+  "date": "2026-11-10",
+  "platform": "Android",
+  "scope": "Code and APK verification only. No new on-device generation or end-to-end latency measurement.",
+  "changes": [
+    "Prepare the portable E2B engine while the foreground chat is idle, guarded by backend, ABI and RAM availability; generate no warmup answer.",
+    "Direct document responses do not wait for preparation. Semantic encoding waits for the preparation job to end before loading its encoder.",
+    "Retain the engine when only answer length settings change.",
+    "Honor explicit numbered per-item sentence requests without an introduction or repeated conclusion. Output token limits and final answer content are not truncated by this change.",
+    "Write Android JVM evaluation artifacts to app/build/reports/fieldguard instead of the project root tmp directory."
+  ],
+  "unit": {
+    "discovered": 197,
+    "passed": 187,
+    "skipped": 10,
+    "failures": 0,
+    "errors": 0
+  },
+  "realQueryRegression": {
+    "queries": 2,
+    "passed": 2,
+    "scope": "Actual pinned ONNX query embeddings and production Kotlin retrieval; no device UI or Gemma generation.",
+    "localReport": "app/build/reports/fieldguard/direct-answers/results.json"
+  },
+  "build": {
+    "appApk": "passed",
+    "instrumentationApk": "passed; not executed on device",
+    "lintErrors": 0,
+    "lintWarnings": 109,
+    "finalBuildElapsed": "1m 23s",
+    "log": "app/build/reports/fieldguard/answer-latency-build.log"
+  },
+  "apk": {
+    "path": "app/build/outputs/apk/debug/app-debug.apk",
+    "bytes": 319443065,
+    "sha256": "bafec780f3d1b61553ce9be768b664f89e6647dc132c40a7b42eb20b2b55ba42",
+    "signature": "APK Signature Scheme v2 verified",
+    "containsNewPreparationCode": true,
+    "installedOnDevice": false
+  },
+  "latencyTarget": {
+    "fullAnswerSeconds": "8-9",
+    "status": "not measured after this change; not claimed achieved",
+    "reason": "User requested code and APK verification without a connected test phone. Preparation changes do not establish faster native decoding throughput.",
+    "previousIsolatedFixture": "docs/validation/android-smooth-answers-20261110.json"
+  },
+  "rootTmpCreated": false
+}

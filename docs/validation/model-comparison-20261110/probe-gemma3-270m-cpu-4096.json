@@ -1,0 +1,56 @@
+{
+  "modelId": "gemma3-270m",
+  "requestedBackend": "CPU",
+  "scope": "Diagnostic short prompts, separate from the 12-case detailed comparison; do not pool timings.",
+  "shortPromptOutputTokens": 256,
+  "contextTokens": 4096,
+  "rows": [
+    {
+      "question": "Explain why oxygen is important for breathing in three sentences.",
+      "rawAnswer": "오일은 우리 몸에 필수적인 물질입니다. 우리 몸의 에너지원으로, 우리 몸의 활동을 촉진하고, 우리 몸의 기능을 유지하는 데 중요한 역할을 합니다. 특히, 우리 몸의 활동을 돕고, 우리 몸의 건강을 유지하는 데 도움을 주어, 우리 삶의 질을 향상시키는 데 기여합니다.",
+      "error": "",
+      "maxOutputTokens": 256,
+      "generalKnowledge": true,
+      "totalMs": 3426,
+      "actualBackend": "CPU",
+      "initializationMs": 1350,
+      "promptBytes": 1132,
+      "firstNativeTextMs": 2149,
+      "modelFileName": "gemma3-270m-it-q8.litertlm",
+      "effectiveContextTokens": 4096,
+      "fallbackReason": ""
+    },
+    {
+      "question": "산소가 호흡에 필요한 이유를 한국어 세 문장으로 설명해줘.",
+      "rawAnswer": "```\n산소가 호흡에 필요한 이유를 한국어 세 문장으로 설명해줘.\n최대 256 토큰 안에서 답변을 완결하세요.\n```",
+      "error": "",
+      "maxOutputTokens": 256,
+      "generalKnowledge": true,
+      "totalMs": 1541,
+      "actualBackend": "CPU",
+      "initializationMs": 1,
+      "promptBytes": 1152,
+      "firstNativeTextMs": 749,
+      "modelFileName": "gemma3-270m-it-q8.litertlm",
+      "effectiveContextTokens": 4096,
+      "fallbackReason": ""
+    },
+    {
+      "question": "가상 현장입니다. 지하 탱크 청소 전 측정값이 산소 18.0%, 이산화탄소 1.4%, 일산화탄소 29ppm, 황화수소 9ppm으로 나왔습니다. 관리자는 측정 숫자가 기준 안이면 곧바로 들어가자고 합니다. 각 수치와 경계값을 표로 비교하고, 측정 외에 확인할 조건, 환기와 재측정 순서, 감시인과 감독자의 확인 사항을 단계별로 자세히 설명해 주세요. 최종 작업 승인은 확정하지 말고 미확인 조건을 정리해 주세요.\n\n가상 작업현장에 대한 상세 비교 시험입니다.\n질문의 요구 항목을 모두 다루고, 제공 근거의 절차·조건·예외와 판단 이유를 자세히 설명하세요.\n한국어 Markdown으로 현장 상황 정리, 단계별 대응, 조건별 비교표, 담당자별 확인 사항을 구성하세요.\n질문에 관련된 원문 내용을 충분히 설명하고 마지막에는 현장에서 확인할 체크리스트를 작성하세요.\n모르는 현장 정보와 문서에서 확인되지 않는 항목은 구분하고, 확인할 대상을 제시하세요.\n근거 없는 수치·장비 사양·필수 수량·작업 승인과 문서에 없는 조건을 만들지 마세요.\n질문 범위 안에서 출력 예산을 활용해 충분히 서술하고 문장과 표를 완결하세요.",
+      "rawAnswer": "네, 한국어로 답하겠습니다.",
+      "error": "",
+      "maxOutputTokens": 2048,
+      "generalKnowledge": false,
+      "totalMs": 5589,
+      "actualBackend": "CPU",
+      "initializationMs": 20,
+      "promptBytes": 7308,
+      "firstNativeTextMs": 5423,
+      "modelFileName": "gemma3-270m-it-q8.litertlm",
+      "effectiveContextTokens": 4096,
+      "fallbackReason": ""
+    }
+  ],
+  "phase": "complete",
+  "settingsUnchanged": true
+}

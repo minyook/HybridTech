@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 고정 EmbeddingGemma tokenizer.json의 BPE 병합·특수 토큰·UTF-8 fallback을 재현한다. SemanticEncoder의 ONNX 입력 토큰을 만든다.
+ */
 package com.minyook.sllm2.data
 
 import org.json.JSONObject

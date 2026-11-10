@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 음성 전용 화면·설정·텍스트 복귀을 검증하는 Android 계측 검사다.
+ * 검사 예: foregroundFixture, microphoneOpensDedicatedConversationAndStartsOnce, readingStateKeepsStopButtonAvailable
+ * 실행: 연결된 Android 기기/에뮬레이터의 AndroidJUnitRunner. opt-in 인자는 본문 assume/arguments 조건을 확인한다.
+ */
 package com.minyook.sllm2
 
 import android.graphics.Bitmap

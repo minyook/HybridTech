@@ -1,0 +1,60 @@
+{
+  "date": "2026-11-10",
+  "scope": "Reorganize root README around current implementation; document every owned source/script/resource/test in the inventory, with detailed KDoc on processing boundaries.",
+  "coverage": {
+    "documentedFiles": 314,
+    "missingHeaders": 0,
+    "androidProductionKotlin": 68,
+    "androidJvmTestFiles": 38,
+    "androidDeviceTestFiles": 18,
+    "webTestFiles": 45,
+    "inventory": "docs/validation/developer-documentation-20261110/source-inventory.json"
+  },
+  "codeComparison": {
+    "checkedFiles": 318,
+    "commentOnlyChangedFiles": 314,
+    "nonCommentChanges": 0,
+    "method": "Compare source characters excluding comments/whitespace while preserving string literals; XML declaration spacing may change. Four frozen .qa comparison copies were checked but not annotated."
+  },
+  "documentation": {
+    "README.md": {
+      "links": 86,
+      "missingTargets": 0,
+      "sha256": "9c455bdd46338e3e187693177eebb375c3e2d440c096dde7a85179c24095a779"
+    },
+    "docs/CODE_MAP.md": {
+      "links": 315,
+      "missingTargets": 0,
+      "sha256": "0561d1992f06c0a8a5334d2af7eca3aa8f4ca7058a4a2dea1ce6d340853db288"
+    }
+  },
+  "verification": {
+    "androidUnit": {
+      "discovered": 191,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 10,
+      "passed": 181
+    },
+    "androidAppAndTestApkBuild": "passed",
+    "lint": {
+      "errors": 0,
+      "warnings": 112
+    },
+    "typescript": "passed",
+    "webTests": {
+      "filesPassed": 45,
+      "testsPassed": 542,
+      "failed": 0
+    },
+    "syntax": {
+      "javascriptScripts": 21,
+      "pythonScripts": 2,
+      "xmlResources": 36,
+      "passed": true
+    },
+    "gitWhitespace": "passed"
+  },
+  "deviceTestsThisChange": "not rerun; comments/documentation only. Prior measured device results retain their original scope.",
+  "artifactDirectory": "tmp/developer-docs-20261110"
+}

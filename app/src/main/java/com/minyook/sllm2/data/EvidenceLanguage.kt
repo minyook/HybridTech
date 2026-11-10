@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 질문과 문서가 공유하는 도메인 어휘·별칭·어절 정규화 규칙. FocusedRetriever/HybridRetrieval이 후보 점수와 범위를 계산할 때 사용한다.
+ */
 package com.minyook.sllm2.data
 
 import java.text.Normalizer

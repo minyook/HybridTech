@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 이전 AI 작업의 시작·단계·완료 여부를 기록해 미완료 작업의 자동 재시도 루프를 제어한다. 기록만으로 OS 종료 원인을 확정하지 않는다.
+ */
 export const AI_OPERATION_KEY='fieldguard-ai-operation';
 export const AI_STAGES=['verification','runtime','engine','generation','conversation','prefill','decode','cleanup'] as const;
 export type AIStage=typeof AI_STAGES[number];

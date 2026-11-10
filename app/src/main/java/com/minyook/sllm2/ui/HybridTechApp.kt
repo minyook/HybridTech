@@ -1,3 +1,7 @@
+/* 소스 안내
+ * FieldGuardActions 계약과 별도 UI 구현을 보유한다. 실제 MainActivity의 화면 루트는 TossFieldGuardApp이다.
+ * 연결 모듈: com.minyook.sllm2.data.ChatHistoryStore, com.minyook.sllm2.gas.GasReading, com.minyook.sllm2.model.ContextTokenPolicy, com.minyook.sllm2.model.InferenceBackend, com.minyook.sllm2.model.ModelPhase.
+ */
 package com.minyook.sllm2.ui
 
 import androidx.activity.compose.BackHandler
@@ -85,6 +89,10 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.roundToInt
 
+/**
+ * Compose 화면에서 외부 기능으로 나가는 이벤트 계약. MainActivity가 각 콜백을 ViewModel/음성 컨트롤러에 연결한다.
+ * 화면은 저장소·추론 엔진·권한 요청기를 직접 생성하지 않으므로 동일 화면을 독립적인 계측 fixture에서도 사용한다.
+ */
 data class FieldGuardActions(
     val onNavigate: (AppDestination) -> Unit,
     val onNewChat: () -> Unit,
@@ -115,6 +123,12 @@ data class FieldGuardActions(
     val onSaveChecklist: () -> Unit = {},
     val onClearChatHistory: () -> Unit = {},
     val onSaveWorkServer: (String) -> Unit = {},
+    val onSelectModel: (com.minyook.sllm2.model.LocalModel) -> Unit = {},
+    val onDownloadWithToken: (String) -> Unit = {},
+    val onDownloadNpu: (String) -> Unit = {},
+    val onStartModelComparison: () -> Unit = {},
+    val onStopModelComparison: () -> Unit = {},
+    val onReviewModelComparison: (Int, Boolean) -> Unit = { _, _ -> },
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

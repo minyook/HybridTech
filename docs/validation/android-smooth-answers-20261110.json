@@ -1,0 +1,108 @@
+{
+  "date": "2026-11-10",
+  "platform": "Android only",
+  "device": {
+    "model": "Galaxy S24 Ultra SM-S928N",
+    "soc": "SM8650",
+    "android": "16"
+  },
+  "change": "Reveal verifier-accepted generated text in small frame-paced groups; preserve documents/history, output limits and final text. Coalesce text layout to ~30 updates/s. Fix per-item one-sentence requests.",
+  "tests": {
+    "unit": {
+      "discovered": 191,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 10,
+      "passed": 181
+    },
+    "chatComposeDevice": {
+      "passed": 13,
+      "failures": 0
+    },
+    "nativeGenerationDevice": {
+      "finalRuns": 4,
+      "passed": 4,
+      "accuracyGate": "not assessed; model output is not a reviewed safety manual"
+    },
+    "lint": {
+      "Error": 0,
+      "Fatal": 0,
+      "Warning": 112
+    },
+    "debugApkBuild": "passed",
+    "testApkBuild": "passed",
+    "apkSignatureVerification": "passed"
+  },
+  "apk": {
+    "path": "C:\\Users\\limmi\\AndroidStudioProjects\\Sllm2\\tmp\\smooth-answer-20261110\\fieldguard-smooth-answer-debug.apk",
+    "bytes": 319437040,
+    "sha256": "f6a0e5e8052b691550a2acb90c333270207c59a479ade60f203c303bd2745dc7",
+    "installedOnS24": true
+  },
+  "conditions": {
+    "model": "Gemma 4 E2B",
+    "backend": "GPU",
+    "contextTokens": 4096,
+    "testOutputLimitTokens": 1024,
+    "outputLimitReached": false,
+    "normalSettingsChanged": false,
+    "userChatsWritten": false,
+    "comparisonStoreWritten": false,
+    "warmupWithoutChatUiMs": 11762,
+    "warmupBeforeRecordingMs": 11493
+  },
+  "timings": [
+    {
+      "question": "밀폐공간 작업을 중단했다가 다시 시작할 때 감독관이 확인할 사항을 핵심 5개로 정리해줘. 각 항목은 한 문장으로 설명해줘.",
+      "outputChars": 532,
+      "decodeTokens": 277,
+      "sameRawOutput": true,
+      "numberedItems": 5,
+      "withoutChatUi": {
+        "totalMs": 13768,
+        "firstAcceptedBodyMs": 1349,
+        "firstNativeTextMs": 811,
+        "tokensPerSecond": 21.250920600812762
+      },
+      "withChatUiAndRecording": {
+        "totalMs": 18498,
+        "firstAcceptedBodyMs": 896,
+        "firstNativeTextMs": 468,
+        "tokensPerSecond": 15.294724243357622
+      }
+    },
+    {
+      "question": "밀폐공간 인명구조용 삼각대 준비 수량을 정할 때 확인할 조건을 핵심 4개로 설명해줘. 임의의 대수는 정하지 말고, 각 항목은 한 문장으로 정리해줘.",
+      "outputChars": 421,
+      "decodeTokens": 220,
+      "sameRawOutput": true,
+      "numberedItems": 4,
+      "withoutChatUi": {
+        "totalMs": 14074,
+        "firstAcceptedBodyMs": 2287,
+        "firstNativeTextMs": 759,
+        "tokensPerSecond": 16.358911298013897
+      },
+      "withChatUiAndRecording": {
+        "totalMs": 16651,
+        "firstAcceptedBodyMs": 2788,
+        "firstNativeTextMs": 836,
+        "tokensPerSecond": 13.776431470028667
+      }
+    }
+  ],
+  "scope": [
+    "Questions explicitly request four/five items, each in one sentence. Not an unrestricted long-answer comparison.",
+    "Forced native generation with no RAG. Product document-first responses have a different path.",
+    "First accepted body time excludes subsequent UI frame scheduling. Native first text is unverified.",
+    "One run per question/condition. Screen rendering and recording are combined, not independently profiled.",
+    "No claim of 8-9 second completion, improved native decoding throughput, general factual accuracy or all-device performance.",
+    "Compose keyboard checks use controlled viewport resizing, not every physical IME.",
+    "Preview is a 22 second clip of only the temporary test app. Unrelated apps are excluded."
+  ],
+  "artifacts": {
+    "directory": "docs/validation/smooth-answers-20261110",
+    "preview": "C:\\Users\\limmi\\AndroidStudioProjects\\Sllm2\\tmp\\smooth-answer-20261110\\field-answer-preview.mp4",
+    "screenshot": "docs/validation/smooth-answers-20261110/field-answer-final.png"
+  }
+}

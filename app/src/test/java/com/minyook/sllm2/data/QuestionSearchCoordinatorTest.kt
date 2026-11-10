@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 오류/모호성/일반 생성 허용과 복합 질문 검색 순서을 검증하는 JVM 회귀 검사다.
+ * 검사 예: domainNormalizationIsIdempotentAndDoesNotRewriteAccidentOrMeasurementHoses, nounConjunctionsStayInOneQuestionWhileExplicitQuestionsSplit, vector
+ * 실행: :app:testDebugUnitTest. 외부 자산/평가/스트레스의 선택 조건은 본문의 환경 변수/Assume을 확인한다.
+ */
 package com.minyook.sllm2.data
 
 import org.json.JSONArray
@@ -82,13 +87,26 @@ class QuestionSearchCoordinatorTest {
             assertEquals("clarify",result.status);assertFalse(result.searchComplete);assertNull(result.generalQuestion)
         }
     }
-    @Test fun choiceFeedbackUsesPreviousOptionsWithoutInvokingTheEncoder() {
+    @Test fun oldChoiceFeedbackSearchesTheOriginalTopicWithoutOfferingChoicesAgain() {
         val options = listOf(SearchSuggestion("첫 항목", "대상설비"), SearchSuggestion("두 번째 항목", "다른 대상"))
         val history = listOf(ConversationTurn(true, "대상설비"), ConversationTurn(false, "선택해 주세요.", suggestions = options))
         val request = ConversationContext.resolve("항목이 안보이는데?", history)
-        val result = QuestionSearchCoordinator(index()) { error("UI repair must not search") }.search(request)
-        assertEquals("conversation-choices", result.method); assertNull(result.generalQuestion)
-        assertTrue(result.message.contains("1. 첫 항목")); assertEquals(options, result.suggestions)
+        val result = QuestionSearchCoordinator(index()) { vector(0) }.search(request)
+        assertEquals("answered", result.status)
+        assertNull(result.generalQuestion)
+        assertTrue(result.suggestions.isEmpty())
+        assertFalse(result.message.contains("첫 항목"))
+    }
+    @Test fun tiedCandidatesContinueWithTheOriginalQuestionInsteadOfAThreeTopicMenu() {
+        val question = "밀폐공간 작업을 중단했다가 다시 시작할 때 감독관이 확인할 사항을 핵심 5개로 정리해줘. 각 항목은 한 문장으로 설명해줘."
+        val tied = FloatArray(768) { if(it < 2) (1.0 / kotlin.math.sqrt(2.0)).toFloat() else 0f }
+        val result = QuestionSearchCoordinator(index()) { tied }.search(question)
+        assertEquals("no-evidence", result.status)
+        assertEquals(question, result.generalQuestion)
+        assertTrue(result.searchComplete)
+        assertTrue(result.sources.isEmpty())
+        assertTrue(result.suggestions.isEmpty())
+        assertFalse(result.message.contains("선택"))
     }
     @Test fun moreWithoutNewSupportedEvidenceDoesNotClaimTheOriginalTopicIsAbsent() {
         val history = listOf(ConversationTurn(true, "대상설비"), ConversationTurn(false, chunks[0].body, topicQuestion = "대상설비"))

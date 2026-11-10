@@ -1,3 +1,6 @@
+/* 소스 안내
+ * ObjectBox 조회와 재사용 검색 인덱스를 조정한다. ViewModel의 질문을 QuestionSearchCoordinator로 전달한다.
+ */
 package com.minyook.sllm2.data
 
 
@@ -13,7 +16,12 @@ data class KnowledgeDocument(
     val chunkCount: Int,
 )
 
-/** ObjectBox pages stay unchanged; questions use only focused source-linked passages. */
+/**
+ * ObjectBox 문서와 질문 검색 계층을 연결하는 저장소 어댑터.
+ * ViewModel의 searchQuestion 호출을 받아 HybridRetrieval 캐시를 준비하고 QuestionSearchCoordinator로 넘긴다.
+ * 결과의 원본 문서 ID/쪽/선택 문단은 DocumentAnswerPlan과 PDF 출처 열기에 사용한다.
+ * 문서 내용이 바뀌면 인덱스를 재구성하며 표시용 정리로 DB의 원문을 덮어쓰지 않는다.
+ */
 class KnowledgeRepository {
     private val box = ObjectBoxStore.store.boxFor(KnowledgeChunk::class.java)
 
@@ -35,6 +43,7 @@ class KnowledgeRepository {
     }
     fun prepareQuestionIndex(semanticIndex:String) { questionIndex(semanticIndex) }
     fun resolveQuestion(question: String, semanticIndex: String, vector: FloatArray?): SearchResolution = questionIndex(semanticIndex).resolve(question, vector)
+    /** 실제 앱 검색 진입점. retrieve와 달리 의미 재검토·모호성·검색 오류·일반 생성 허용을 함께 결정한다. */
     fun searchQuestion(question:String,semanticIndex:String,encode:(String)->FloatArray):SearchResolution = QuestionSearchCoordinator(questionIndex(semanticIndex),encode).search(question)
     fun searchQuestion(request:ConversationRequest,semanticIndex:String,encode:(String)->FloatArray):SearchResolution = QuestionSearchCoordinator(questionIndex(semanticIndex),encode).search(request)
     fun retrieve(question: String, limit: Int = 4): List<RetrievedChunk> = if (question.isBlank()) emptyList() else retriever().rank(question).take(limit.coerceAtLeast(1))

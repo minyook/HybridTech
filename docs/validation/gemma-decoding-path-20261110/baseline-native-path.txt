@@ -1,0 +1,2 @@
+W/native  (13786): W0000 00:00:1794277515.935558   13841 sampler_factory.cc:408] OpenCL sampler not available, falling back to statically linked C API: UNAVAILABLE: ERROR: [third_party/odml/litert_lm/runtime/components/sampler_factory.cc:324]
+W/native  (13786): └ Could not load shared library libLiteRtTopKOpenClSampler.so: dlopen failed: library "libLiteRtTopKOpenClSampler.so" not found.

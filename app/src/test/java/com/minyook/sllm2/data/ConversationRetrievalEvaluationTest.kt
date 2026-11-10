@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 연속 발화의 실제 검색 근거와 확인 선택지을 검증하는 JVM 회귀 검사다.
+ * 검사 예: chainedQuestionsAndScreenshotRepairUseTheRealDocumentIndex
+ * 실행: :app:testDebugUnitTest. 외부 자산/평가/스트레스의 선택 조건은 본문의 환경 변수/Assume을 확인한다.
+ */
 package com.minyook.sllm2.data
 
 import org.json.JSONArray
@@ -13,7 +18,7 @@ class ConversationRetrievalEvaluationTest {
         assumeTrue("FIELDGUARD_EVALUATE_150=1", System.getenv("FIELDGUARD_EVALUATE_150") == "1")
         val app = (if(File("src/main/assets").exists()) File(".") else File("app")).canonicalFile
         val root = app.parentFile
-        val out = File(root, "tmp/conversation-20261104/evaluation").apply { mkdirs() }
+        val out = File(root, "app/build/reports/fieldguard/conversation").apply { mkdirs() }
         val steps = listOf(
             "산소 유해가스 측정방법", "그럼 언제 해야 해?", "누가 해야 해?", "또 다른 건 없어?", "항목이 안보이는데?",
             "심폐소생술 알려줘", "그럼 언제까지 반복해?", "그럼 호흡이 돌아오면?", "다른 얘기: 커피 추출 원리", "그거 쉽게 설명해줘",

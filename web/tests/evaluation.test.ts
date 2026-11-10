@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 18개 단일·8개 복합·4개 문서 밖 질문의 원문 페이지 회귀 평가. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 18개 단일·8개 복합·4개 문서 밖 질문의 원문 페이지 회귀 평가
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { readFileSync } from 'node:fs';
 import { expect, it } from 'vitest';
 import evaluation from './evaluation.json';

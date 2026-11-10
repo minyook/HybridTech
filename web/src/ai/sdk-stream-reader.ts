@@ -1,3 +1,7 @@
+/* 소스 안내
+ * SDK가 기대하는 ReadableStream 데이터 읽기 인터페이스를 어댑트한다. 범위/수명 계약을 모델 스트림 경로와 맞춘다.
+ * 연결 모듈: ../../node_modules/@litert-lm/core/dist/readable_stream_data_stream_wrapper.js, ./file-model-reader, ./model-stream.
+ */
 // This exact SDK-internal boundary is redirected only by build-ai-worker.mjs.
 // Keep the upstream implementation for unregistered streams (desktop/default).
 import { ReadableStreamDataStreamWrapper as UpstreamReader } from '../../node_modules/@litert-lm/core/dist/readable_stream_data_stream_wrapper.js';

@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 원본 PDF/본문 해시와 함께 관리하는 검수 표/도식 데이터. SourceTables가 선택 근거에 적용하며 셀 변경 시 원본 대조가 필요하다.
+ */
 package com.minyook.sllm2.data
 
 // Generated from PDF cell coordinates by tools/extract-source-tables.py. Do not edit cells manually.

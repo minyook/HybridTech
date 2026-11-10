@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 메인 화면과 생성 Worker 사이의 요청/부분 응답/완료/오류 타입 계약. 양쪽 런타임이 공유한다.
+ * 연결 모듈: ./preferences, ./recovery, ./execution, ./model-stream, ./diagnostics 등.
+ */
 import type { AISettings } from './preferences';
 import type { AIStage } from './recovery';
 import type { AIExecutionProfile } from './execution';

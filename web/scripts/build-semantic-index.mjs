@@ -1,3 +1,6 @@
+/* 소스 안내
+ * PC에서 원문 항목/절을 인코딩해 웹/Android가 읽는 고정 의미 인덱스를 만든다. prepare-semantic의 모델 파일 준비와 다른 단계다.
+ */
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';

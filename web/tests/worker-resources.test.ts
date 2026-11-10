@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 현재 힙 뷰에서 크기를 읽고 WebGPU 오류를 내용 없이 종류로만 기록한다 / 예상하지 못한 장치 손실만 기록하고 명시적 destroy는 오류로 기록하지 않는다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 현재 힙 뷰에서 크기를 읽고 WebGPU 오류를 내용 없이 종류로만 기록한다, 예상하지 못한 장치 손실만 기록하고 명시적 destroy는 오류로 기록하지 않는다, 아직 SDK 런타임이 없으면 표본만 생략한다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import {expect,it,vi} from 'vitest';
 import {WorkerResources} from '../src/ai/worker-resources';
 it('현재 힙 뷰에서 크기를 읽고 WebGPU 오류를 내용 없이 종류로만 기록한다',()=>{

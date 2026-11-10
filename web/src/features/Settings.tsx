@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 자산/모델/음성/저장소/인증 설정 화면. 비동기 작업과 진단 내보내기를 해당 서비스 모듈에 위임한다.
+ * 연결 모듈: ../ai/runtime, ../ai/engine-lease, ../ai/capabilities, ../ai/useAIStatus, ../ai/preferences 등.
+ */
 import { useEffect, useRef, useState } from 'react';
 import { prepareAI, releaseModel, retryAIWithReducedContext, holdAIForAudio } from '../ai/runtime';
 import {acquireEngineLease} from '../ai/engine-lease';

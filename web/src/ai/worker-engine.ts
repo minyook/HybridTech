@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 일반 웹 Worker 안의 모델 열기·executor·생성/정리를 소유한다. protocol 응답을 메인 runtime으로 전달한다.
+ * 연결 모듈: ./model, ./protocol, ./model-stream, ./execution, ./worker-resources 등.
+ */
 import { Engine, getGlobalLiteRtLm, loadLiteRtLm, SamplerType, setupDefaultWebGpuDevice } from '@litert-lm/core';
 import { verifyStoredModel } from './model';
 import type { AIModelSource, AIReply, AIRequest, GenerationResult, TokenUsage } from './protocol';

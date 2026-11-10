@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 서버 관리자 CLI의 당일 코드 확인·교체·회수 진입점. 같은 store 규칙을 사용하며 클라이언트에 기본 코드를 넣지 않는다.
+ * 연결 모듈: ./store.ts.
+ */
 import { createWorkStore } from './store.ts';
 
 const [command] = process.argv.slice(2);

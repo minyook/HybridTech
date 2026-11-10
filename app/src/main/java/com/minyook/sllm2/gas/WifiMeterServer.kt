@@ -1,3 +1,6 @@
+/* 소스 안내
+ * AP 주소에 바인딩한 TCP 수신기. 연결별 인증/검증/ACK와 heartbeat를 수행하고 결과를 registry에 반영한다.
+ */
 package com.minyook.sllm2.gas
 
 import org.json.JSONObject
@@ -12,7 +15,12 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
-/** TCP v1 receiver. Bound to a supplied AP address, never to all interfaces. */
+/**
+ * GasMonitoringService가 AP IPv4에만 바인딩해 소유하는 TCP v1 수신기.
+ * 연결별 작업자가 hello 인증 → reading 검증/ACK → pong RTT 갱신을 처리하고 registry에 상태를 기록한다.
+ * 소프트웨어 연결 슬롯과 프레임 크기를 제한하며 한 장비 ID의 이전 연결이 새 연결의 상태를 덮지 않게 한다.
+ * UI에 직접 접근하지 않는다. 서비스가 registry를 읽어 StateFlow/알림으로 전달하며 close가 모든 소켓을 닫는다.
+ */
 class WifiMeterServer(address:InetAddress,port:Int,private val token:String,val registry:WifiMeterRegistry=WifiMeterRegistry()):AutoCloseable {
     private val running=AtomicBoolean(true)
     private val sockets=ConcurrentHashMap<Socket,Peer>()
@@ -38,6 +46,7 @@ class WifiMeterServer(address:InetAddress,port:Int,private val token:String,val 
             try{workers.execute{receive(peer)}}catch(_:Exception){sockets.remove(socket);socket.close();slots.release()}
         }catch(_:Exception){if(running.get()){close();break}}
     }
+    /** TCP read 경계와 메시지 경계를 분리한다. 파싱/인증 오류나 응답 제한 시간 초과는 해당 연결을 종료한다. */
     private fun receive(peer:Peer){
         var reason="연결 종료"
         try{

@@ -1,3 +1,6 @@
+/* 소스 안내
+ * QR 인증 링크의 생성/파싱을 담당한다. 추출한 토큰은 access 모듈을 통해 서버에서 교환해야 한다.
+ */
 const tokenPattern=/^[A-Za-z0-9_-]{43}$/;
 export function invitationURL(origin:string,token:string){
   if(!tokenPattern.test(token))throw Error('QR 인증 정보의 형식이 올바르지 않아요.');

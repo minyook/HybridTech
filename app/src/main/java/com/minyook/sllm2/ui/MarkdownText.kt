@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 파싱된 Markdown의 텍스트·표·코드·목록을 Compose로 표시한다. 넓은 표의 가로 스크롤도 이 계층에서 처리한다.
+ */
 package com.minyook.sllm2.ui
 
 import androidx.compose.foundation.background
@@ -45,6 +48,7 @@ fun MarkdownText(markdown: String, modifier: Modifier = Modifier) {
     }
 }
 
+/** ChatTimeline 또는 MarkdownText가 전달한 한 블록을 그린다. 파싱과 실제 표시를 분리해 lazy 구성이 가능하다. */
 @Composable internal fun MarkdownBlockText(block: MarkdownBlock) {
             if(block is MarkdownBlock.Code) {
                 Surface(color=Color(0xFF202B3E),shape=RoundedCornerShape(13.dp),modifier=Modifier.fillMaxWidth().padding(vertical=15.dp)) {

@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 문서/정적 자산 manifest·무결성·캐시 준비·조회와 Service Worker 등록을 관리한다.
+ * 연결 모듈: ../types.
+ */
 import type { AssetManifest, Asset } from '../types';
 
 export const assetUrl = (path: string) => new URL(import.meta.env.BASE_URL + path, location.href).href;

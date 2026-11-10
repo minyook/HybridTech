@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 고정 의미 검색 모델의 다운로드·검증·캐시/복구 상태를 관리한다. runtime이 설치된 검색 자산을 사용한다.
+ * 연결 모듈: ../offline/assets, ../../../tools/semantic-model-files.json.
+ */
 import {assetUrl} from '../offline/assets';
 import {sha256} from '@noble/hashes/sha2.js';
 import {bytesToHex} from '@noble/hashes/utils.js';

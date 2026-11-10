@@ -1,0 +1,33 @@
+{
+  "date": "2026-11-10",
+  "change": "Remove Android topic-choice generation, choice-list text assembly and selection buttons. Preserve the original concrete question for general explanation when completed retrieval cannot establish direct evidence.",
+  "unit": {
+    "discovered": 193,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 10,
+    "passed": 183
+  },
+  "realQueryRegression": {
+    "passed": 2,
+    "scope": "PC production Kotlin routing with actual pinned ONNX query embeddings; no device UI or Gemma generation",
+    "results": "docs/validation/direct-answers-20261110/real-query-results.json"
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 112
+  },
+  "appAndTestApkBuild": "passed",
+  "signature": "verified",
+  "deviceUiTest": {
+    "status": "not run",
+    "reason": "No connected ADB device; the updated no-choice Compose test compiled."
+  },
+  "apk": {
+    "path": "C:\\Users\\limmi\\AndroidStudioProjects\\Sllm2\\tmp\\direct-answer-20261110\\fieldguard-direct-answer-debug.apk",
+    "bytes": 318901956,
+    "sha256": "9951e6254dff2e047b30c4519ddac574fb0a6248ef212ef8cad6cc67184070b0",
+    "installedOnDevice": false
+  },
+  "compatibility": "Existing transcript text and legacy suggestion metadata are preserved. Old metadata no longer renders selection buttons. Search errors/live approval and genuinely missing subjects retain their distinct handling."
+}

@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 제목, 강조, 목록, GFM 표와 코드를 의미 있는 HTML로 렌더링한다 / 모델이 만든 HTML이나 이미지로 코드를 실행하거나 외부 요청을 만들지 않는다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 제목, 강조, 목록, GFM 표와 코드를 의미 있는 HTML로 렌더링한다, 모델이 만든 HTML이나 이미지로 코드를 실행하거나 외부 요청을 만들지 않는다, 수치 범위의 물결표를 취소선으로 바꾸지 않는다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { renderToStaticMarkup } from 'react-dom/server';
 import { expect, it } from 'vitest';
 import { TextContent } from '../src/ui';

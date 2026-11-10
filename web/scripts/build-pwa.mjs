@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 빌드 결과의 정적 자산을 수집해 PWA 오프라인 파일/manifest를 만든다. 서버 API의 영속 저장을 대체하지 않는다.
+ */
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';

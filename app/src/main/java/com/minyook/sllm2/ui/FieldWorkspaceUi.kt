@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 홈·사이드바·문서/설정 등의 공통 화면 구성. 상태는 읽고 기능 명령은 FieldGuardActions로 전달한다.
+ * 연결 모듈: com.minyook.sllm2.model.ContextTokenPolicy, com.minyook.sllm2.model.InferenceBackend, com.minyook.sllm2.model.ModelPhase, com.minyook.sllm2.model.LocalModel.
+ */
 package com.minyook.sllm2.ui
 
 import androidx.compose.foundation.BorderStroke
@@ -14,6 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -21,10 +27,14 @@ import androidx.compose.ui.unit.sp
 import com.minyook.sllm2.model.ContextTokenPolicy
 import com.minyook.sllm2.model.InferenceBackend
 import com.minyook.sllm2.model.ModelPhase
+import com.minyook.sllm2.model.LocalModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+// TossFieldGuardApp이 사용하는 내비게이션과 홈/보관함/설정 등 공통 화면 구성.
+// 각 화면은 FieldGuardUiState를 읽고 FieldGuardActions로 이벤트를 전달한다. 실제 기능 처리는 ViewModel이 맡는다.
+// 채팅 목록/입력은 WorkspaceScreens, 원문 렌더는 SourcePdfPage, 점검 업무는 NativeWorkPage에 분리되어 있다.
 internal val workspaceNavigation = listOf(
     AppDestination.HOME to "홈", AppDestination.CHAT to "문서 질문",
     AppDestination.LIBRARY to "문서 보관함", AppDestination.CHECKLIST to "작업 전 점검",
@@ -212,24 +222,66 @@ internal fun workspaceSection(destination: AppDestination) = when(destination) {
 }
 @Composable internal fun WorkspaceModelPanel(state:FieldGuardUiState,actions:FieldGuardActions,modifier:Modifier=Modifier){
     val phase=state.modelStatus.phase
+    val model = state.settings.model
+    val uriHandler = LocalUriHandler.current
+    var token by remember(model) { mutableStateOf("") }
     WorkspaceCard(modifier){
         WorkspaceCardTitle(WorkspaceSymbol.CPU,"기기 내 Gemma","질문과 답변은 기기 안에서 처리해요")
+        WorkspaceSelect("사용할 모델", model.title, LocalModel.entries.map { it.title }, enabled=!state.isAnswering && !state.isComparing) { title ->
+            if (!state.isAnswering && !state.isComparing) actions.onSelectModel(LocalModel.entries.first { it.title == title })
+        }
+        Text(LocalModel.entries.joinToString("\n") { item ->
+            "${item.title} · ${if(state.modelStatuses[item]?.phase == ModelPhase.READY) "저장됨" else if(state.modelStatuses[item]?.phase == ModelPhase.DOWNLOADING) "다운로드 중" else "미설치"}"
+        }, fontSize=12.sp, lineHeight=21.sp, color=WorkspaceDesign.Muted)
         WorkspaceBadge(when(phase){ModelPhase.READY->"모델 파일 저장됨";ModelPhase.DOWNLOADING->"모델 다운로드 중";ModelPhase.FAILED->"모델 준비 실패";else->"모델 다운로드 필요"},green=phase==ModelPhase.READY,blue=phase==ModelPhase.DOWNLOADING)
         WorkspaceNotice(when(phase){ModelPhase.READY->"저장된 모델은 질문할 때 앱에서 자동으로 준비해요.";ModelPhase.DOWNLOADING->"모델 다운로드 중 · ${state.modelProgress?.let{"$it%"}?:"크기 확인 중"}";ModelPhase.FAILED->state.modelStatus.failureMessage?:"다운로드를 다시 시도해 주세요.";else->"모델을 다운로드하면 기기 안에서 답변을 만들 수 있어요."},warning=phase==ModelPhase.FAILED)
         Text("모델 파일은 한 번 다운로드하면 이 기기에 저장돼요. 실행 준비에는 기기 메모리와 시간이 필요해요.",fontSize=12.sp,lineHeight=21.sp,color=Color(0xFF8B95A1))
         Surface(color=Color(0xFFF8FAFF),shape=RoundedCornerShape(13.dp)){
             Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){
-                Row(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalAlignment=Alignment.CenterVertically){WorkspaceIcon(WorkspaceSymbol.CPU);Text("Gemma 4 E2B",fontSize=14.sp,fontWeight=FontWeight.Bold)}
-                WorkspaceBadge("Android용 · 2.59 GB",blue=true)
+                Row(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalAlignment=Alignment.CenterVertically){WorkspaceIcon(WorkspaceSymbol.CPU);Text(model.title,fontSize=14.sp,fontWeight=FontWeight.Bold)}
+                WorkspaceBadge("Android용 · ${model.sizeLabel}",blue=true)
+                if ((model.requiresAccessToken || phase == ModelPhase.FAILED) &&
+                    (phase != ModelPhase.READY || state.npuModel != null && state.npuStatus.phase != ModelPhase.READY)) {
+                    Text("모델 페이지에서 이용 약관에 동의한 계정의 Hugging Face 읽기 토큰을 입력하세요. 입력한 토큰은 기기에 암호화 저장돼요.",fontSize=12.sp,lineHeight=20.sp,color=WorkspaceDesign.Muted)
+                    TextButton(onClick={uriHandler.openUri(model.modelPage)}) { Text("모델 페이지와 이용 약관 열기") }
+                    TextButton(onClick={uriHandler.openUri("https://huggingface.co/settings/tokens")}) { Text("읽기 토큰 발급 페이지 열기") }
+                    OutlinedTextField(token, {token=it}, Modifier.fillMaxWidth(), label={Text("Hugging Face 읽기 토큰")},
+                        placeholder={Text("저장한 토큰이 있으면 비워두세요")}, singleLine=true, visualTransformation=PasswordVisualTransformation(),
+                        enabled=phase != ModelPhase.DOWNLOADING)
+                }
                 Text("한 번 다운로드하면 인터넷 없이 사용할 수 있어요. 별도의 실행 버튼은 필요 없어요.",fontSize=12.sp,lineHeight=20.sp,color=WorkspaceDesign.Muted)
-                WorkspaceButton(when(phase){ModelPhase.READY->"Gemma 4 E2B 다운로드 완료";ModelPhase.DOWNLOADING->"Gemma 4 E2B 다운로드 중";ModelPhase.FAILED->"Gemma 4 E2B 다시 다운로드";else->"Gemma 4 E2B 다운로드 받기"},actions.onDownloadModel,Modifier.fillMaxWidth().testTag("downloadGemma"),enabled=phase !in setOf(ModelPhase.READY,ModelPhase.DOWNLOADING),icon=WorkspaceSymbol.DOWNLOAD)
+                WorkspaceButton(when(phase){ModelPhase.READY->"${model.title} 다운로드 완료";ModelPhase.DOWNLOADING->"${model.title} 다운로드 중";ModelPhase.FAILED->"${model.title} 다시 다운로드";else->"${model.title} 다운로드 받기"},
+                    {if(token.isBlank())actions.onDownloadModel() else {actions.onDownloadWithToken(token);token=""}},
+                    Modifier.fillMaxWidth().testTag("downloadGemma"),enabled=phase !in setOf(ModelPhase.READY,ModelPhase.DOWNLOADING),icon=WorkspaceSymbol.DOWNLOAD)
                 if(phase==ModelPhase.DOWNLOADING)LinearProgressIndicator(progress={((state.modelProgress?:0)/100f).coerceIn(0f,1f)},modifier=Modifier.fillMaxWidth())
             }
         }
+        val npu = state.npuModel
+        if (npu == null) {
+            Text("이 기기·모델 조합의 NPU 추가 파일은 아직 연결되지 않았어요. 자동 실행은 GPU와 CPU를 사용해요.",
+                fontSize=12.sp,lineHeight=20.sp,color=WorkspaceDesign.Muted)
+        } else {
+            Text("NPU 추가 파일 · ${npu.soc.uppercase()}",fontSize=14.sp,fontWeight=FontWeight.Bold)
+            Text("약 ${npu.bytes / 1_000_000} MB · 자동 또는 NPU 우선에서 사용해요. 이 파일의 앱 문맥 한도는 ${npu.contextLimit}토큰이며 긴 요청은 범용 모델로 전환될 수 있어요.",
+                fontSize=12.sp,lineHeight=20.sp,color=WorkspaceDesign.Muted)
+            WorkspaceButton(when(state.npuStatus.phase) {
+                ModelPhase.READY -> "NPU 추가 파일 저장됨"
+                ModelPhase.DOWNLOADING -> "NPU 다운로드 중 · ${state.npuProgress?.let { "$it%" } ?: "크기 확인 중"}"
+                else -> "NPU 추가 파일 다운로드"
+            }, {actions.onDownloadNpu(token);token=""}, Modifier.fillMaxWidth(),
+                enabled=phase == ModelPhase.READY && state.npuStatus.phase !in setOf(ModelPhase.READY,ModelPhase.DOWNLOADING) && !state.isComparing,
+                icon=WorkspaceSymbol.DOWNLOAD)
+            state.npuStatus.failureMessage?.let { WorkspaceNotice(it,warning=true) }
+        }
+        state.lastInference?.let { metrics ->
+            WorkspaceNotice("최근 AI 실제 실행 · ${metrics.backend}" +
+                if(metrics.fallbackReason.isBlank()) "" else "\n${metrics.fallbackReason}")
+        }
+        WorkspaceModelComparison(state, actions)
     }
 }
 @Composable internal fun WorkspaceTokenSettings(state:FieldGuardUiState,actions:FieldGuardActions){
-    val limit=state.deviceProfile?.let(ContextTokenPolicy::deviceLimit)?:ContextTokenPolicy.MIN_CONTEXT_TOKENS
+    val limit=minOf(state.settings.model.contextLimit, state.deviceProfile?.let(ContextTokenPolicy::deviceLimit)?:ContextTokenPolicy.MIN_CONTEXT_TOKENS)
     WorkspaceCard{
         WorkspaceCardTitle(WorkspaceSymbol.SETTINGS,"AI 토큰 설정","답변 길이와 AI가 사용할 문맥 크기를 조절해요")
         val outputField: @Composable () -> Unit = { WorkspaceSelect("최대 답변 토큰",if(state.settings.automaticAnswerLength)"자동 · 문맥 한도 내" else "${state.settings.responseTokens} 토큰",listOf("자동 · 문맥 한도 내")+(listOf(128,256,512,1024,1536,2048,4096,8192)+state.settings.responseTokens).distinct().sorted().filter{it<=ContextTokenPolicy.responseLimit(state.settings.contextTokens)}.map{"$it 토큰"}){
@@ -240,16 +292,16 @@ internal fun workspaceSection(destination: AppDestination) = when(destination) {
         else Row(horizontalArrangement=Arrangement.spacedBy(20.dp)) { Column(Modifier.weight(1f)){outputField()};Column(Modifier.weight(1f)){contextField()} }
         Text("한 번의 답변 길이와 질문·문서 근거에 사용할 공간이에요. 이 기기의 메모리 한도 안에서 선택할 수 있어요.",fontSize=11.sp,lineHeight=19.sp,color=Color(0xFF8B95A1))
         WorkspaceSelect("실행 방식",state.settings.backend.label,InferenceBackend.entries.map{it.label}){label->actions.onBackend(InferenceBackend.entries.first{it.label==label})}
-        WorkspaceButton(if(state.settingsSaved)"토큰 설정 저장됨" else "토큰 설정 저장",actions.onSaveSettings,enabled=!state.isAnswering)
+        WorkspaceButton(if(state.settingsSaved)"토큰 설정 저장됨" else "토큰 설정 저장",actions.onSaveSettings,enabled=!state.isAnswering && !state.isComparing)
         Text("저장한 설정은 다음 질문부터 적용돼요. 기기 내 실행이므로 토큰별 API 요금은 없어요.",fontSize=11.sp,lineHeight=19.sp,color=Color(0xFF8B95A1))
     }
 }
-@Composable internal fun WorkspaceSelect(label:String,value:String,options:List<String>,choose:(String)->Unit){
+@Composable internal fun WorkspaceSelect(label:String,value:String,options:List<String>,enabled:Boolean=true,choose:(String)->Unit){
     var expanded by remember{mutableStateOf(false)}
     Column(Modifier.fillMaxWidth(),verticalArrangement=Arrangement.spacedBy(9.dp)){
         Text(label,fontSize=12.sp,fontWeight=FontWeight.SemiBold,color=Color(0xFF586577))
         Box{
-            Surface(color=Color(0xFFFAFBFD),shape=RoundedCornerShape(10.dp),border=BorderStroke(1.dp,Color(0xFFE1E7EF)),modifier=Modifier.fillMaxWidth().clickable{expanded=true}.testTag("select-$label")){
+            Surface(color=Color(0xFFFAFBFD),shape=RoundedCornerShape(10.dp),border=BorderStroke(1.dp,Color(0xFFE1E7EF)),modifier=Modifier.fillMaxWidth().clickable(enabled=enabled){expanded=true}.testTag("select-$label")){
                 Row(Modifier.padding(14.dp),verticalAlignment=Alignment.CenterVertically){Text(value,modifier=Modifier.weight(1f),fontSize=13.sp);Text("⌄",color=WorkspaceDesign.Muted)}
             }
             DropdownMenu(expanded,onDismissRequest={expanded=false}){options.forEach{option->DropdownMenuItem(text={Text(option,fontSize=13.sp)},onClick={choose(option);expanded=false})}}

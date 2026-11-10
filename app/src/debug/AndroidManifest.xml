@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 소스 안내
+debug 전용 계측 Activity 등록. 제품 릴리스 진입과 구분한다.
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
         <activity android:name=".WorkspacePreviewActivity" android:exported="false" android:excludeFromRecents="true" />

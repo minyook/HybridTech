@@ -1,3 +1,7 @@
+/* 소스 안내
+ * SQLite의 작업·세션·QR·당일 인증 코드·revision·만료/취소를 소유한다. API/CLI가 주입한 store를 사용한다.
+ * 연결 모듈: ../src/workflow/work.ts.
+ */
 import { DatabaseSync } from 'node:sqlite';
 import { createHash, createHmac, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -59,6 +63,12 @@ function actionValue(value: unknown): WorkAction {
   }
 }
 
+/**
+ * 작업·세션·감독관 QR/당일 코드의 SQLite 저장소. API와 관리자 CLI가 같은 규칙/DB를 사용한다.
+ * 세션 토큰에서 주체를 복원하고 작업자 소유권·감독관 유효/취소 상태를 명령마다 재검사한다.
+ * 업무 상태 전이는 workflow/work.ts에 위임하고 트랜잭션/revision으로 동시 변경을 제어한다.
+ * now 주입은 만료/날짜 경계 시험용이며 실제 코드는 서버에서만 계산한다. 반환 store는 서버 종료 시 close한다.
+ */
 export function createWorkStore(filename = defaultDatabasePath, now = () => Date.now()) {
   if (filename !== ':memory:') mkdirSync(dirname(filename), { recursive: true });
   let dailyKey: Buffer;

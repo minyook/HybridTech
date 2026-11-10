@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-09",
+  "scope": "Android model selection, per-model downloads and identical-prompt native-generation comparison UI",
+  "models": [
+    {
+      "legacyInstallationPreserved": true,
+      "id": "gemma4-e2b",
+      "file": "gemma-4-e2b-it.litertlm"
+    },
+    {
+      "id": "gemma3-270m",
+      "requiresGatedAccess": true,
+      "expectedBytes": 304005120,
+      "file": "gemma3-270m-it-q8.litertlm",
+      "revision": "9d2093270fb5aa49a986b49b5779d763dde7b630"
+    },
+    {
+      "id": "gemma3-1b",
+      "requiresGatedAccess": true,
+      "expectedBytes": 584417280,
+      "file": "gemma3-1b-it-int4.litertlm",
+      "revision": "aa49427ccd3bcacb1820d2bc3bb969eaffe632bf"
+    }
+  ],
+  "unitTests": {
+    "tests": 178.0,
+    "passed": 168.0,
+    "errors": 0.0,
+    "skipped": 10.0,
+    "failures": 0.0
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 112
+  },
+  "apk": {
+    "sha256": "211E80814F893F03CF13354B3A9067DBFCE0DCB5EE6061E550DA85E51D5EDC9A",
+    "path": "C:\\Users\\limmi\\AndroidStudioProjects\\Sllm2\\tmp\\multi-model-20261109\\fieldguard-multi-model-debug.apk",
+    "bytes": 324987056
+  },
+  "instrumentationApkBuilt": true,
+  "deviceTestsExecuted": false,
+  "additionalModelsDownloaded": false,
+  "measuredNativeBenchmarks": [],
+  "comparisonConditions": {
+    "contextTokens": 4096,
+    "quality": "human-reviewed against common reference passages",
+    "questions": 5,
+    "retrievalTimingIncluded": false,
+    "actualBackendRecorded": true,
+    "maxOutputTokens": 256
+  },
+  "limitations": [
+    "New model weights and actual CPU/GPU execution require device verification after authorized gated download.",
+    "APK and automated source checks are not measurements of model accuracy or generation speed.",
+    "The fixed five-question set and output limit are initial comparison conditions."
+  ]
+}

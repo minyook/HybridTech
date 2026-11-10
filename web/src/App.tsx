@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 라우트·대화·문서·설정·점검 화면을 조합한다. 저장소/검색/AI 모듈과 화면 이벤트를 연결하는 보존 웹 셸이다.
+ * 연결 모듈: ./features/VoicePanel, ./types, ./ai/runtime, ./ai/useAIStatus, ./chat/useChatScroll 등.
+ */
 import VoicePanel from './features/VoicePanel';
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Chat, Checklist, Chunk, Source } from './types';

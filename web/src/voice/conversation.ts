@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 음성 듣기·질문·읽기·재시도 흐름을 조정한다. 질문 처리는 호출자 콜백으로 기존 채팅/RAG에 연결한다.
+ * 연결 모듈: ./segmenter.
+ */
 import {SpeechSegmenter,resample16k} from './segmenter';
 export type VoicePhase='off'|'preparing'|'listening'|'hearing'|'transcribing'|'answering'|'reading'|'error';
 export interface VoiceState {phase:VoicePhase;message:string;heard?:string}

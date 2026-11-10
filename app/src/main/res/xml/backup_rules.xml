@@ -1,4 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 소스 안내
+앱 백업에 포함/제외할 파일 경계. 모델·인증 자료의 복원을 데이터 수명과 함께 확인한다.
+-->
+<!--
    Sample backup rules file; uncomment and customize as necessary.
    See https://developer.android.com/guide/topics/data/autobackup
    for details.
@@ -6,6 +10,7 @@
    See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
+    <exclude domain="sharedpref" path="model_download_access.xml"/>
     <!--
    <include domain="sharedpref" path="."/>
    <exclude domain="sharedpref" path="device.xml"/>

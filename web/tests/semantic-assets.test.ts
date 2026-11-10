@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: installs only after the entire streamed body has passed its hash and size checks / does not mark corrupt bytes as ready and deletes the partial cache entry. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: installs only after the entire streamed body has passed its hash and size checks, does not mark corrupt bytes as ready and deletes the partial cache entry, checks actual cached files instead of trusting only an installed marker
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import {afterEach,beforeEach,expect,it,vi} from 'vitest';
 vi.mock('../../tools/semantic-model-files.json',()=>({default:{'config.json':{size:3,sha256:'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad'}}}));
 import {prepareSemantic,semanticInstalled,semanticKey} from '../src/rag/semantic-assets';

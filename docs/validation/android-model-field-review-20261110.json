@@ -1,0 +1,547 @@
+{
+  "date": "2026-11-10",
+  "suiteId": "field-detailed-v2",
+  "reviewer": "Codex manual inspection; not blinded or independently adjudicated",
+  "rubric": "android-model-field-rubric-20261110.json",
+  "interpretation": "Coverage points are question-set-specific human assessments, not a model accuracy percentage or field safety certification. usable means a coherent substantively relevant answer without an observed material contradiction, not a certified safe instruction.",
+  "models": {
+    "gemma3-270m": {
+      "backend": "GPU",
+      "rows": [
+        {
+          "caseId": "entry-check",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "빈 출력. 네이티브 invalid decode/sample 경고. 모델 독해력 점수와 실행 호환 문제를 분리해야 함."
+          ]
+        },
+        {
+          "caseId": "sampling",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "빈 출력. 네이티브 invalid decode/sample 경고. 모델 독해력 점수와 실행 호환 문제를 분리해야 함."
+          ]
+        },
+        {
+          "caseId": "ventilation-restart",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "빈 출력. 네이티브 invalid decode/sample 경고. 모델 독해력 점수와 실행 호환 문제를 분리해야 함."
+          ]
+        },
+        {
+          "caseId": "respirators",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "빈 출력. 네이티브 invalid decode/sample 경고. 모델 독해력 점수와 실행 호환 문제를 분리해야 함."
+          ]
+        },
+        {
+          "caseId": "rescue-equipment",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "빈 출력. 네이티브 invalid decode/sample 경고. 모델 독해력 점수와 실행 호환 문제를 분리해야 함."
+          ]
+        },
+        {
+          "caseId": "hot-work",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "빈 출력. 네이티브 invalid decode/sample 경고. 모델 독해력 점수와 실행 호환 문제를 분리해야 함."
+          ]
+        },
+        {
+          "caseId": "inert-gas",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "빈 출력. 네이티브 invalid decode/sample 경고. 모델 독해력 점수와 실행 호환 문제를 분리해야 함."
+          ]
+        },
+        {
+          "caseId": "co-conflict",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "빈 출력. 네이티브 invalid decode/sample 경고. 모델 독해력 점수와 실행 호환 문제를 분리해야 함."
+          ]
+        },
+        {
+          "caseId": "rescue",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "빈 출력. 네이티브 invalid decode/sample 경고. 모델 독해력 점수와 실행 호환 문제를 분리해야 함."
+          ]
+        },
+        {
+          "caseId": "cpr-branches",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "빈 출력. 네이티브 invalid decode/sample 경고. 모델 독해력 점수와 실행 호환 문제를 분리해야 함."
+          ]
+        },
+        {
+          "caseId": "permit-handover",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "빈 출력. 네이티브 invalid decode/sample 경고. 모델 독해력 점수와 실행 호환 문제를 분리해야 함."
+          ]
+        },
+        {
+          "caseId": "uncertain-readings",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "빈 출력. 네이티브 invalid decode/sample 경고. 모델 독해력 점수와 실행 호환 문제를 분리해야 함."
+          ]
+        }
+      ],
+      "summary": {
+        "reviewedCases": 12,
+        "coveragePoints": 0,
+        "maxCoveragePoints": 36,
+        "usableWithCaveats": 0,
+        "casesWithMaterialIssues": 12
+      }
+    },
+    "gemma3-1b": {
+      "backend": "GPU",
+      "rows": [
+        {
+          "caseId": "entry-check",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "빈 출력"
+          ]
+        },
+        {
+          "caseId": "sampling",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "밀폐공간과라는 미완성 단편만 반환"
+          ]
+        },
+        {
+          "caseId": "ventilation-restart",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "빈 출력"
+          ]
+        },
+        {
+          "caseId": "respirators",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "별표와 숫자 반복으로 붕괴"
+          ]
+        },
+        {
+          "caseId": "rescue-equipment",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "빈 출력"
+          ]
+        },
+        {
+          "caseId": "hot-work",
+          "coverage": [
+            0.5,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "일부 목적 문장 뒤에 산 반복; 환기와 측정 확인을 선택으로 표기"
+          ]
+        },
+        {
+          "caseId": "inert-gas",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "과·와 음절 반복으로 붕괴"
+          ]
+        },
+        {
+          "caseId": "co-conflict",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "산소 기준을 80ppm/0ppm으로 생성하고 CO 위험과 혼동"
+          ]
+        },
+        {
+          "caseId": "rescue",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "밀폐공간장장과라는 단편만 반환"
+          ]
+        },
+        {
+          "caseId": "cpr-branches",
+          "coverage": [
+            0.5,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "반응 확인 일부 뒤 동시 압박·인공호흡 오류와 별표 반복"
+          ]
+        },
+        {
+          "caseId": "permit-handover",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "질문 재진술 뒤 과제·별표·숫자 반복"
+          ]
+        },
+        {
+          "caseId": "uncertain-readings",
+          "coverage": [
+            0,
+            0,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "빈 출력"
+          ]
+        }
+      ],
+      "summary": {
+        "reviewedCases": 12,
+        "coveragePoints": 1.0,
+        "maxCoveragePoints": 36,
+        "usableWithCaveats": 0,
+        "casesWithMaterialIssues": 12
+      }
+    },
+    "gemma4-e2b": {
+      "backend": "GPU",
+      "rows": [
+        {
+          "caseId": "entry-check",
+          "coverage": [
+            0,
+            1,
+            0.5
+          ],
+          "usable": false,
+          "materialIssues": [
+            "원문 23.5%를 235%로 잘못 생성",
+            "1.4<1.5, 29<30, 9<10 비교를 초과/미충족으로 뒤집음",
+            "1119 오타, 깨진 출처와 표 셀 구조"
+          ]
+        },
+        {
+          "caseId": "sampling",
+          "coverage": [
+            1,
+            0.5,
+            1
+          ],
+          "usable": true,
+          "materialIssues": [],
+          "formatIssues": [
+            "반복되는 표 행과 깨진 출처 번호",
+            "내부 측정 시 호흡보호구 조건이 일부 표에서 일반화됨",
+            "도식 기호를 설명 없이 복사"
+          ],
+          "note": "측정 지점·채기관·방폭 전등·재측정의 주요 내용은 확인 가능하나 정리와 조건 표현 보완 필요"
+        },
+        {
+          "caseId": "ventilation-restart",
+          "coverage": [
+            1,
+            0.5,
+            0.5
+          ],
+          "usable": false,
+          "materialIssues": [
+            "119를 1119로 잘못 생성",
+            "이전 측정값을 환기 전원단절·점심시간 경과 후 측정값으로 잘못 재정의"
+          ],
+          "formatIssues": [
+            "마지막 표가 미완성",
+            "출처 번호 손상"
+          ],
+          "visiblyIncomplete": true
+        },
+        {
+          "caseId": "respirators",
+          "coverage": [
+            0,
+            0.5,
+            0.5
+          ],
+          "usable": false,
+          "materialIssues": [
+            "송기마스크의 주요 역할을 유해가스 농도 측정으로 잘못 설명",
+            "특정 방독 정화통 조건 없이 CO 등 유해가스 보호를 일괄 서술"
+          ],
+          "formatIssues": [
+            "마지막 비교표가 머리글에서 끝남",
+            "표 열 수와 출처 번호 손상"
+          ],
+          "visiblyIncomplete": true
+        },
+        {
+          "caseId": "rescue-equipment",
+          "coverage": [
+            0.5,
+            1,
+            0.5
+          ],
+          "usable": false,
+          "materialIssues": [
+            "근거에 없는 안전관리자 승인 의무를 마지막에 확정적으로 추가"
+          ],
+          "formatIssues": [
+            "인양 장치를 양치 등으로 잘못 생성",
+            "첫 장에서 준비 의무가 확인되지 않는다고 묶어 말한 뒤 준비 의무를 다시 설명",
+            "불필요한 반복과 표 셀 수 불일치"
+          ],
+          "note": "고정 수량을 지어내지 않고 출입구별 계획 필요는 설명"
+        },
+        {
+          "caseId": "hot-work",
+          "coverage": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "usable": false,
+          "materialIssues": [
+            "비상 신고 번호를 1199로 잘못 생성"
+          ],
+          "formatIssues": [
+            "과도한 표·깨진 출처 번호·용접수/용접압력 같은 불명확한 표현"
+          ],
+          "evidenceLimitations": [
+            "이번 공통 근거에는 용접 시 계속 환기하는 환기 시기 절이 선택되지 않음; 입력 패킷 누락과 생성 오류를 구분해야 함"
+          ]
+        },
+        {
+          "caseId": "inert-gas",
+          "coverage": [
+            1,
+            0.5,
+            0.5
+          ],
+          "usable": false,
+          "materialIssues": [
+            "원문 12%를 120%로 변경",
+            "비상 신고 번호를 1119로 생성",
+            "휘발유증기에 CH4를 붙이는 등 가스 명칭/화학식 혼합"
+          ],
+          "formatIssues": [
+            "출처 번호와 표가 끝부분에서 끊김",
+            "범위 밖 유해가스 목록과 도식 노이즈 반복"
+          ],
+          "visiblyIncomplete": true
+        },
+        {
+          "caseId": "co-conflict",
+          "coverage": [
+            0.5,
+            0,
+            1
+          ],
+          "usable": false,
+          "materialIssues": [
+            "CO 표에서 200ppm을 20ppm, 600ppm을 60ppm, 30분을 300분 등으로 변경",
+            "뒤쪽 표에서 산소 23.5%를 235%, CO 기준을 이산화탄소 기준으로 변경"
+          ],
+          "formatIssues": [
+            "앞뒤 표의 수치가 서로 다름",
+            "체크리스트가 마지막에서 끊김"
+          ],
+          "visiblyIncomplete": true,
+          "evidenceLimitations": [
+            "이번 공통 근거에는 CO의 헤모글로빈 결합 기전 문단이 선택되지 않음; 해당 설명을 제공 문서에서 확인 못했다고 한 부분은 입력 패킷 누락과 구별해야 함"
+          ]
+        },
+        {
+          "caseId": "rescue",
+          "coverage": [
+            0,
+            0.5,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "원문 30회 압박을 300회로 바꾸고 같은 답변 뒤에서는 30회로 다시 기술",
+            "1119 오타",
+            "공기 미확인·무보호 상황에서 반응/호흡 확인을 먼저 나열하여 외부 대기·구조 후 처치의 순서를 혼합"
+          ],
+          "formatIssues": [
+            "마지막 체크리스트가 끊김",
+            "깨진 근거 번호와 반복"
+          ],
+          "visiblyIncomplete": true
+        },
+        {
+          "caseId": "cpr-branches",
+          "coverage": [
+            0.5,
+            0,
+            0.5
+          ],
+          "usable": false,
+          "materialIssues": [
+            "원문 압박 속도 100~120회를 10~120회, 1000~120회, 100~20회 등으로 서로 다르게 생성",
+            "119를 여러 곳에서 1119로 변경"
+          ],
+          "formatIssues": [
+            "반복되는 표·체크리스트와 인공기 등 오타",
+            "마지막 체크리스트 끝이 미완성"
+          ],
+          "visiblyIncomplete": true
+        },
+        {
+          "caseId": "permit-handover",
+          "coverage": [
+            1,
+            0.5,
+            0.5
+          ],
+          "usable": true,
+          "materialIssues": [],
+          "formatIssues": [
+            "마지막 인수인계 표가 중간에서 끝남",
+            "반복과 깨진 출처 번호"
+          ],
+          "visiblyIncomplete": true,
+          "note": "현재 공기 상태와 교대 후 재점검은 설명하지만 연락·구조 계획과 승인 분리 설명은 불완전"
+        },
+        {
+          "caseId": "uncertain-readings",
+          "coverage": [
+            0,
+            0.5,
+            0
+          ],
+          "usable": false,
+          "materialIssues": [
+            "CO 30ppm 미만을 30000ppm 미만으로 변경",
+            "산소 23.5%를 235%로 변경",
+            "119를 1119로 변경",
+            "원문에 있는 교정·표준가스 확인 내용을 명시되지 않았다고 설명"
+          ],
+          "formatIssues": [
+            "핵심 질문인 서로 다른 표시 단위 비교에 직접 답하지 않고 측정 절차를 반복"
+          ]
+        }
+      ],
+      "summary": {
+        "reviewedCases": 12,
+        "coveragePoints": 18.0,
+        "maxCoveragePoints": 36,
+        "usableWithCaveats": 2,
+        "casesWithMaterialIssues": 10
+      }
+    }
+  },
+  "reviewComplete": true
+}

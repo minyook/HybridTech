@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 검색 결과의 본문·필수 근거·보충 프롬프트/검증을 공유하는 답변 계획. 원문 본문을 보충 생성으로 교체하지 않는다.
+ * 연결 모듈: ../types, ./evidence, ./text.
+ */
 import type { Source } from '../types';
 import { selectedEvidence, formatEvidenceUnits, type EvidenceUnit } from './evidence';
 import { compactText } from './text';

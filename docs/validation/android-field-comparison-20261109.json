@@ -1,0 +1,82 @@
+{
+  "date": "2026-11-09",
+  "scope": "Android field-scenario long-answer model comparison implementation and APK/code validation; no device or native generation execution",
+  "suiteId": "field-detailed-v2",
+  "questionCountPerModel": 12,
+  "questionCountWithThreeModels": 36,
+  "comparisonSettings": {
+    "contextTokens": 4096,
+    "maxOutputTokens": 2048,
+    "automaticAnswerLength": false,
+    "previousMaxOutputTokens": 256,
+    "samePromptAndEvidencePerModel": true,
+    "forcesNativeGeneration": true,
+    "followUpGenerationToFillOutputLimit": false,
+    "normalChatSettingsOverwritten": false,
+    "npuLongAnswerExecution": false,
+    "npuFallbackReason": "The current application NPU context limit is 1280, below the requested 2048 output budget; portable GPU/CPU fallback is recorded."
+  },
+  "features": [
+    "Complex fictional field scenarios covering gas readings, sampling, ventilation, respiratory protection, rescue equipment, hot work, inert gases, CO, rescue, CPR, handover and measurement reliability",
+    "Three evidence subqueries per case, preserving different selected conditions from the same source page",
+    "Detailed Korean Markdown instructions with procedures, comparison tables and checklists",
+    "Completed-prefix live answer preview and partial text capture on recoverable exceptions",
+    "First completed-text latency, total generation time, engine preparation, actual backend and output character count",
+    "Human review checklist and incomplete evidence subquery reporting",
+    "Nullable native token statistics and output-limit status when unsupported by the SDK",
+    "Large JSON file sharing through a restricted cache FileProvider",
+    "Legacy quick-v1 reports retain their original five-question, 256-token conditions"
+  ],
+  "build": {
+    "command": ".\\gradlew.bat --offline :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug",
+    "success": true,
+    "log": "tmp/field-comparison-20261109/build.log"
+  },
+  "unitTests": {
+    "tests": 186,
+    "passed": 176,
+    "skipped": 10,
+    "failures": 0,
+    "errors": 0,
+    "newRegressionTests": [
+      "Detailed scenarios retain manual 2048-token output instead of automatic brief output",
+      "Different selected conditions from the same source page survive subquery merge",
+      "Legacy reports preserve original settings and identity",
+      "Long raw and formatted text, review metadata and unknown termination survive JSON round-trip"
+    ]
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 112
+  },
+  "apk": {
+    "path": "C:\\Users\\limmi\\AndroidStudioProjects\\Sllm2\\tmp\\field-comparison-20261109\\fieldguard-field-comparison-debug.apk",
+    "bytes": 318900352,
+    "sha256": "1CDFC91466C6ACC2C924D3A39DC1B8C92DCCFBBCFEFC14911BB2EDB5C15AE914",
+    "signatureVerified": true,
+    "signingCertificateSha256": "1f0702b54e9ede30e833c2732a20590c55b5664b7955a8b644c295035a2152b9"
+  },
+  "instrumentationApk": {
+    "path": "C:\\Users\\limmi\\AndroidStudioProjects\\Sllm2\\tmp\\field-comparison-20261109\\fieldguard-field-comparison-androidTest.apk",
+    "bytes": 1316021,
+    "sha256": "86F3CBE38A0A5648CC1D088056DF5CDFF4E8F2B5913B6BC799963BBBAF6EF229",
+    "built": true,
+    "executed": false
+  },
+  "packagedFileProviderVerified": {
+    "authority": "com.minyook.sllm2.comparison-files",
+    "exported": false,
+    "grantUriPermissions": true,
+    "allowedCachePath": "model-comparisons/"
+  },
+  "connectedDevices": [],
+  "deviceTestsExecuted": false,
+  "nativeModelGenerationExecuted": false,
+  "measuredPerformance": [],
+  "limitations": [
+    "Output length and completion depend on each model and the available context; an output cap is not a guaranteed answer length.",
+    "Actual common-evidence retrieval, long generation, screen rendering, export interaction, memory use and thermal behavior require device validation.",
+    "Automated regressions do not establish field-answer correctness, native model compatibility or speed.",
+    "A forced process exit may lose the in-progress answer; only previously saved completed rows are restored."
+  ]
+}

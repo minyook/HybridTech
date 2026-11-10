@@ -1,3 +1,6 @@
+/* 소스 안내
+ * Android 질문 평가 결과를 집계해 사람이 읽을 요약 자료로 만든다. 기록된 실행 조건을 새 측정으로 바꾸지 않는다.
+ */
 import {readFile,writeFile,copyFile,mkdir} from 'node:fs/promises';
 import {resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';

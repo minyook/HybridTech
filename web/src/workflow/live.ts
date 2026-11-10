@@ -1,9 +1,16 @@
+/* 소스 안내
+ * 권한별 SSE 변경 신호·재조회·연결 실패 폴백·만료 콜백을 관리한다. 화면 해제 시 구독/타이머를 정리한다.
+ * 연결 모듈: ./work.
+ */
 import type { Role } from './work';
 
 export type WorkConnection = 'connecting' | 'live' | 'reconnecting';
 
-// Commands use the authenticated POST API; this stream tells the other device to
-// read its own authorized snapshot. No work contents travel in public broadcasts.
+/**
+ * 작업 화면의 상대 기기 변경 구독. 명령은 인증된 POST이고 SSE는 목록 재조회 신호만 전달한다.
+ * 연결 실패에는 5초 폴백, 포커스/온라인 복귀에는 재조회를 사용한다. 화면 해제 시 반환한 정리 함수를 호출한다.
+ * 감독관 만료 이벤트는 expired 콜백으로 인증 화면에 전달하며 클라이언트 캐시를 권한 근거로 삼지 않는다.
+ */
 export function watchWorkOrders(view: Role, refresh: () => void, connection: (value: WorkConnection) => void, expired: () => void) {
   let source: EventSource | undefined;
   let live = false;

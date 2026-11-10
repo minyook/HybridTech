@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 부분 템플릿과 빈 thinking 표시를 숨기고 Markdown 답변을 보존한다 / thinking이 생성돼도 본문만 노출한다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 부분 템플릿과 빈 thinking 표시를 숨기고 Markdown 답변을 보존한다, thinking이 생성돼도 본문만 노출한다, 같은 첫 단계로 다시 시작하는 반복 목록과 남은 제목을 표시하지 않는다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { expect, it } from 'vitest';
 import { cleanLightSummary, visibleLightAnswer } from '../src/ai/light-output';
 it('부분 템플릿과 빈 thinking 표시를 숨기고 Markdown 답변을 보존한다',()=>{

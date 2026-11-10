@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 공통 아이콘·안내·제목·Markdown 표시와 이동/포맷 유틸리티. 기능 처리는 전달받은 데이터/콜백으로 연결한다.
+ * 연결 모듈: ./workflow/native.
+ */
 import type { ReactNode } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';

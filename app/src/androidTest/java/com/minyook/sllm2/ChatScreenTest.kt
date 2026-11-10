@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 실제 Compose 목록·표시 프레임·키보드 크기 변화·복사/출처을 검증하는 Android 계측 검사다.
+ * 검사 예: aLongAnswerStartsAtItsEndAndComposesOnlyAViewport, readingOlderTextPausesFollowingWithoutMovingComposerAndCanResume, returningToTheBottomResumesFollowingAndChatSwitchResetsPosition
+ * 실행: 연결된 Android 기기/에뮬레이터의 AndroidJUnitRunner. opt-in 인자는 본문 assume/arguments 조건을 확인한다.
+ */
 package com.minyook.sllm2
 
 import androidx.compose.foundation.layout.Box
@@ -5,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -76,6 +82,16 @@ class ChatScreenTest {
         compose.onNodeWithTag("scrollLatest").assertDoesNotExist()
         compose.runOnIdle { ui.value=ui.value.copy(activeChatId="other",messages=listOf(answer.copy(id="other-answer",text="다른 대화의 끝",pending=false))) }
         compose.onNodeWithText("다른 대화의 끝").assertIsDisplayed()
+    }
+
+    @Test fun streamingTextKeepsFollowingWhenTheLastRowWrapsWithoutAddingRows() {
+        show()
+        val longer = answer.text + " 사용 조건을 단계별로 확인합니다.".repeat(12)
+        compose.runOnIdle {
+            ui.value = ui.value.copy(messages = listOf(ui.value.messages.first(), answer.copy(text = longer)))
+        }
+        assertAtBottom()
+        compose.onNodeWithTag("scrollLatest").assertDoesNotExist()
     }
 
     @Test fun imeSendUsesTheSameValidationAndHidesIdleVoicePanel() {
@@ -156,13 +172,36 @@ class ChatScreenTest {
         compose.onNodeWithText("일반 지식 답변").assertIsDisplayed()
         compose.onNodeWithText("참조한 문서").assertDoesNotExist()
     }
-    @Test fun clarificationOptionsAreVisibleEvenWhileTheAnswerIsBeingCommitted() {
+    @Test fun legacyTopicSuggestionsNeverRenderSelectionControls() {
         val options = listOf(com.minyook.sllm2.data.SearchSuggestion("측정 위치", "산소 측정 위치"), com.minyook.sllm2.data.SearchSuggestion("측정 시기", "산소 측정 시기"))
-        ui.value = FieldGuardUiState(activeChatId = "options", messages = listOf(answer.copy(text = "확인할 항목을 선택해 주세요.\n\n1. 측정 위치\n\n2. 측정 시기", suggestions = options, pending = true)), isAnswering = true)
+        ui.value = FieldGuardUiState(activeChatId = "options", messages = listOf(answer.copy(text = "이미 저장된 답변입니다.", suggestions = options, pending = true)), isAnswering = true)
         show()
-        compose.onNodeWithTag("answerChoices:answer").performScrollTo().assertIsDisplayed()
-        compose.onNode(hasText("측정 위치") and hasAnyAncestor(hasTestTag("answerChoices:answer"))).assertIsNotEnabled()
+        compose.onNodeWithTag("answerChoices:answer").assertDoesNotExist()
+        compose.onNodeWithText("측정 위치").assertDoesNotExist()
         compose.runOnIdle { ui.value = ui.value.copy(messages = ui.value.messages.map { it.copy(pending = false) }, isAnswering = false) }
-        compose.onNode(hasText("측정 위치") and hasAnyAncestor(hasTestTag("answerChoices:answer"))).assertIsEnabled()
+        compose.onNodeWithTag("answerChoices:answer").assertDoesNotExist()
+        compose.onNodeWithText("측정 시기").assertDoesNotExist()
+    }
+
+    @Test fun generatedTextRevealsAcrossFramesInsteadOfJumpingBySentence() {
+        val message=mutableStateOf(ChatMessageUi(id="smooth",text="",fromWorker=false,pending=true,animateAnswer=true))
+        compose.mainClock.autoAdvance=false
+        try {
+            compose.setContent { androidx.compose.material3.Text(rememberRevealedMessage(message.value).text,Modifier.testTag("smoothText")) }
+            compose.mainClock.advanceTimeByFrame()
+            val text="장비 배치와 연결 조건을 함께 확인하세요. ".repeat(6)
+            compose.runOnUiThread { message.value=message.value.copy(text=text) }
+            val lengths=mutableSetOf<Int>()
+            repeat(8) {
+                compose.mainClock.advanceTimeBy(32)
+                val shown=compose.onNodeWithTag("smoothText").fetchSemanticsNode().config[SemanticsProperties.Text].joinToString(""){it.text}
+                assertTrue(text.startsWith(shown));assertTrue(shown.length<text.length)
+                lengths+=shown.length
+            }
+            assertTrue("Several display updates per accepted chunk",lengths.size>=4)
+            compose.runOnUiThread { message.value=message.value.copy(pending=false) }
+            compose.mainClock.advanceTimeBy(240)
+            compose.onNodeWithTag("smoothText").assertTextEquals(text)
+        } finally {compose.mainClock.autoAdvance=true}
     }
 }

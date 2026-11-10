@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 인식 Worker의 오디오 입력을 로컬 STT 모델로 처리해 결과를 돌려준다. Android OS 인식기 구현과 별개다.
+ * 연결 모듈: ./catalog.
+ */
 import {env,pipeline,type AutomaticSpeechRecognitionPipeline} from '@huggingface/transformers';
 import {VOICE_CACHE,VOICE_MODEL,voiceKey} from './catalog';
 let recognizer:AutomaticSpeechRecognitionPipeline|undefined;

@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 원문을 의미 검색용 항목/절로 구성한다. PC 인덱스 생성과 검색 결과의 원문 연결을 일치시키는 경계다.
+ * 연결 모듈: ../types, ./evidence.
+ */
 import type {Chunk} from '../types';
 import {evidenceUnits} from './evidence';
 export interface SemanticPassage {id:string;documentId:string;page:number;chunkIndex:number;section:string;text:string;orders:number[];units:ReturnType<typeof evidenceUnits>;searchText:string;sourceBody:string;vector:number[]}

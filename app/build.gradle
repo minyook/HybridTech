@@ -1,3 +1,6 @@
+/* 소스 안내
+ * Android SDK·의존성·build type·JNI 패키징과 검색 자산 무결성 preBuild 검사를 정의한다.
+ */
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -31,6 +34,13 @@ android {
         buildConfig true
         resValues true
         compose true
+    }
+
+    packaging {
+        jniLibs {
+            // Qualcomm opens the HTP stubs and DSP skeletons by filesystem path.
+            useLegacyPackaging = true
+        }
     }
 
     buildTypes {
@@ -72,6 +82,7 @@ dependencies {
     implementation libs.androidx.compose.ui.tooling.preview
     implementation libs.androidx.compose.material3
     implementation libs.litertlm.android
+    implementation 'com.qualcomm.qti:qnn-runtime:2.44.0'
     implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.22.0'
     testImplementation libs.junit
     testImplementation 'org.json:json:20250517'

@@ -1,3 +1,7 @@
+/* 소스 안내
+ * Worker의 모델/SDK 자원 정리 상태를 관리한다. 중복 정리·실패 후 자원 수명은 생성 루프와 분리한다.
+ * 연결 모듈: ./diagnostics.
+ */
 import type { AIDiagnostic } from './diagnostics';
 interface Device {
   destroy():void;lost:Promise<{reason:string}>;

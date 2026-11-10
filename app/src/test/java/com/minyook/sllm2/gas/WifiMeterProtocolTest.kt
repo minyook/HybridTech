@@ -1,3 +1,8 @@
+/* 소스 안내
+ * LF 프레임·인증·필드/값·순번·신선도을 검증하는 JVM 회귀 검사다.
+ * 검사 예: hello, reading, rejected
+ * 실행: :app:testDebugUnitTest. 외부 자산/평가/스트레스의 선택 조건은 본문의 환경 변수/Assume을 확인한다.
+ */
 package com.minyook.sllm2.gas
 
 import org.json.JSONObject

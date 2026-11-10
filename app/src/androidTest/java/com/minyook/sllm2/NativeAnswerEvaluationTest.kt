@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 단말의 실제 문서 검색/답변 기준을 검증하는 Android 계측 검사다.
+ * 검사 예: evaluateUnchanged150AndFocused33WithoutModelOrHistoryWrites, strings, norm
+ * 실행: 연결된 Android 기기/에뮬레이터의 AndroidJUnitRunner. opt-in 인자는 본문 assume/arguments 조건을 확인한다.
+ */
 package com.minyook.sllm2
 
 import androidx.test.platform.app.InstrumentationRegistry

@@ -1,3 +1,7 @@
+/* 소스 안내
+ * Markdown을 블록/목록/인라인 표시 모델로 파싱하는 순수 함수. ChatTimeline과 MarkdownText가 사용한다.
+ * 연결 모듈: com.minyook.sllm2.data.AnswerMarkdown.
+ */
 package com.minyook.sllm2.ui
 
 import com.minyook.sllm2.data.AnswerMarkdown
@@ -9,6 +13,14 @@ internal sealed interface MarkdownBlock {
     data object Divider : MarkdownBlock
 }
 
+private val divider = Regex("(?:(?:-\\s*){3,}|(?:\\*\\s*){3,}|(?:_\\s*){3,})")
+private val tableSeparator = Regex(":?-{3,}:?")
+
+/**
+ * Markdown 원문을 화면용 블록 모델로 파싱하는 순수 함수. 네트워크/모델/저장소에 접근하지 않는다.
+ * ChatTimelineBuilder가 메시지별로 캐시하며 MarkdownBlockText가 결과를 렌더링한다.
+ * 표의 모든 셀과 코드 내용을 보존하고 답변의 사실·문장 길이는 여기서 요약하지 않는다.
+ */
 internal fun markdownBlocks(markdown: String): List<MarkdownBlock> {
     val lines = markdown.replace("\r\n", "\n").replace('\r', '\n').lines()
     val result = mutableListOf<MarkdownBlock>()
@@ -26,12 +38,12 @@ internal fun markdownBlocks(markdown: String): List<MarkdownBlock> {
             if (index < lines.size) index++
             result += MarkdownBlock.Code(body.joinToString("\n")); continue
         }
-        if (line.trim().matches(Regex("(?:(?:-\\s*){3,}|(?:\\*\\s*){3,}|(?:_\\s*){3,})"))) {
+        if (line.trim().matches(divider)) {
             result += MarkdownBlock.Divider; index++; continue
         }
         if (index + 1 < lines.size && line.contains('|')) {
             val header = markdownCells(line); val separator = markdownCells(lines[index + 1])
-            if (header.size > 1 && separator.size == header.size && separator.all { it.matches(Regex(":?-{3,}:?")) }) {
+            if (header.size > 1 && separator.size == header.size && separator.all { it.matches(tableSeparator) }) {
                 val rows = mutableListOf(header); index += 2
                 while (index < lines.size && lines[index].contains('|') && lines[index].isNotBlank()) rows += markdownCells(lines[index++])
                 // A malformed/generated row may contain extra cells: never silently discard their text.

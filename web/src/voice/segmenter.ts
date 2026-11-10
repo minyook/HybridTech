@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 입력 오디오의 발화 구간과 16 kHz 리샘플링을 처리한다. 인식기에 넘길 샘플 경계를 만든다.
+ */
 /** Bounded, adaptive energy detector. Noise is not treated as semantic speech. */
 export class SpeechSegmenter {
   private floor=0.004;private calibration=0;private voiced=0;private silence=0;private speaking=false;private frames:Float32Array[]=[];private before:Float32Array[]=[];

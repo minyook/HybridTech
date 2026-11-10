@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 경량 모델은 공식 고정 리비전의 13개 파일과 해시를 포함한다 / 스트리밍 검증 완료 후에만 설치로 인식하고 완료 파일은 재다운로드하지 않는다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 경량 모델은 공식 고정 리비전의 13개 파일과 해시를 포함한다, 스트리밍 검증 완료 후에만 설치로 인식하고 완료 파일은 재다운로드하지 않는다, 해시가 틀린 파일과 잘린 응답은 설치로 남기지 않는다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { expect, it, vi } from 'vitest';
 import { sha256 } from '@noble/hashes/sha2.js';
 import { artifactScope, downloadLightModel, LIGHT_MODEL, lightModelInstalled, type LightArtifact } from '../src/ai/light-model';

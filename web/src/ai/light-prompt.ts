@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 실제 tokenizer로 입력 예산을 계산하고 근거·출력 여유를 보존한 경량 프롬프트를 구성한다.
+ * 연결 모듈: ../types, ../rag/evidence.
+ */
 import type { Source } from '../types';
 import { evidenceQueue, evidenceUnits, type EvidenceUnit } from '../rag/evidence';
 

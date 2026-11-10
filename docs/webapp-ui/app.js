@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 보존된 정적 디자인 시안의 화면 전환/예시 상호작용. 실제 측정기/감독관 서버의 동작 코드와 구분한다.
+ */
 const $ = (selector) => document.querySelector(selector);
 const icon = (name, extra = '') => `<svg ${extra} aria-hidden="true"><use href="#i-${name}"/></svg>`;
 const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));

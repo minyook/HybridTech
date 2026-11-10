@@ -1,7 +1,12 @@
+/* 소스 안내
+ * 구어체를 검색용 질의로 정규화한다. 사용자의 화면/기록 원문과 검색 표현을 분리한다.
+ */
 package com.minyook.sllm2.data
 
-/** Conservative domain language normalization, not a question-to-page/answer table.
- * Preserve the user's question in UI/history and use this only for retrieval. */
+/**
+ * Coordinator가 검색 질의에만 적용하는 도메인 표현 정규화. 구어체/동의 표현을 검색 용어로 맞춘다.
+ * 사용자가 입력한 UI/기록 원문은 보존하고, 질문 문장을 특정 정답이나 페이지 번호에 직접 연결하지 않는다.
+ */
 internal object QuestionUnderstanding {
     fun normalize(question:String):String {
         var q=question

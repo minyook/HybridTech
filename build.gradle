@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 루트 Gradle 플러그인 선언. 실제 Android 모듈 설정은 app/build.gradle로 이어진다.
+ */
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
     alias(libs.plugins.android.application) apply false

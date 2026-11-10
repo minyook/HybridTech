@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 감독관 QR 발급·교환·취소와 초기 코드 인증 화면. 최종 권한은 workflow/access → 서버가 확인한다.
+ * 연결 모듈: ../workflow/access, ../workflow/invitation, ../ui, ./QrScanner.
+ */
 import {useEffect,useState} from 'react';
 import QRCode from 'qrcode';
 import {issueSupervisorInvitation,lockSupervisor,refreshWorkSession,registerSupervisor,redeemSupervisorInvitation,revokeSupervisorInvitation,listSupervisorInvitations,useWorkSession,type SupervisorInvitation,type SupervisorInvitationRecord} from '../workflow/access';

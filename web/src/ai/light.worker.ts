@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 경량 웹 생성 Worker 진입점. UI의 요청을 LightWorkerEngine에 전달하고 응답을 메인 런타임으로 보낸다.
+ * 연결 모듈: ./light-model, ./light-engine, ./protocol.
+ */
 import { MLCEngine } from '@mlc-ai/web-llm';
 import { LIGHT_MODEL } from './light-model';
 import { LightWorkerEngine } from './light-engine';

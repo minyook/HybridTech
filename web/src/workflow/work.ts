@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 점검 항목·업무 상태·역할별 전이·승인 조건의 공통 도메인 규칙. UI의 안내와 서버 store의 최종 검사가 함께 사용한다.
+ */
 export type Role = 'worker' | 'supervisor';
 export interface Actor { id: string; role: Role; name: string }
 export type InspectionKey = 'air' | 'ppe' | 'communication' | 'ventilation' | 'worker';

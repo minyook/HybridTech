@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 기존 설치는 한 번 전체 검사하고 새 조회에서도 결과를 복원해 전체 파일 읽기를 생략한다 / 같은 크기의 수정 파일은 수정시각이 바뀌면 전체 검사하고 손상을 거부한다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 기존 설치는 한 번 전체 검사하고 새 조회에서도 결과를 복원해 전체 파일 읽기를 생략한다, 같은 크기의 수정 파일은 수정시각이 바뀌면 전체 검사하고 손상을 거부한다, 크기·수정시각이 같아도 표본 구간이 다르면 전체 검사한다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { digestBlob, installModel, MODEL_RECHECK_INTERVAL_MS, verifyStoredModel } from '../src/ai/model';

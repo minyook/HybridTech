@@ -1,4 +1,8 @@
-// Pinned Apache-2.0 assets; all question inference is local.
+/* 소스 안내
+ * 고정 검색 모델을 크기/SHA-256 검증 후 자산으로 복사한다. --android-only로 Android만 준비하며 문서 인덱스를 다시 만들지 않는다.
+ */
+// 빌드 전 검색 모델 준비: 고정 revision·크기·SHA-256을 확인한 파일만 Android/웹 자산으로 복사한다.
+// --android-only는 Android 대상만 준비한다. 문서 벡터 인덱스를 재생성하거나 런타임 질문을 서버로 보내지 않는다.
 import {mkdir,readFile,writeFile,copyFile,unlink} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import path from 'node:path';

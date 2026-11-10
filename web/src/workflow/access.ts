@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 세션/감독관 인증 상태와 CSRF를 사용하는 업무 API 클라이언트. React 구독과 서버 명령/응답을 연결한다.
+ * 연결 모듈: ./work.
+ */
 import { useEffect, useSyncExternalStore } from 'react';
 import type { WorkAction, WorkOrder } from './work';
 

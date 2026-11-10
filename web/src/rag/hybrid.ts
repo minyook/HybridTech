@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 문단 후보의 어휘/의미 순위를 결합하고 직접 근거·모호성·출처 범위를 결정한다.
+ * 연결 모듈: ../types, ./search, ./text, ./evidence, ./semantic-passages.
+ */
 import type {Chunk,Source} from '../types';
 import {retrieve,terms,aspects} from './search';
 import {aliases,compactText,genericTerms} from './text';

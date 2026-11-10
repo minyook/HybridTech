@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 웹 오프라인 정적 자산 캐시의 Service Worker 템플릿. API/인증 요청과 자산 캐시의 경계를 유지한다.
+ */
 /* Generated only for production builds; an incomplete update never replaces a working shell. */
 const VERSION = __VERSION__;
 const SHELL = `fieldguard-shell-${VERSION}`;

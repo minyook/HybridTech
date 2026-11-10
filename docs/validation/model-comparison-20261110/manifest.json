@@ -1,0 +1,93 @@
+{
+  "date": "2026-11-10",
+  "device": "Samsung SM-S928N / SM8650 / Android 16",
+  "sdk": "LiteRT-LM 0.17.1",
+  "mainAttempts": 36,
+  "additionalDiagnosticAttempts": 13,
+  "mainReportsComplete": true,
+  "settingsUnchanged": true,
+  "installedModelFiles": [
+    {
+      "modelId": "gemma3-270m",
+      "fileName": "gemma3-270m-it-q8.litertlm",
+      "bytes": 304005120,
+      "deviceSha256": "757e9119fa5bd667a2774fb470ac4afcd3190a21c677f8e69a5d6bc908abdd63"
+    },
+    {
+      "modelId": "gemma3-1b",
+      "fileName": "gemma3-1b-it-int4.litertlm",
+      "bytes": 584417280,
+      "deviceSha256": "1325ae366d31950f137c9c357b9fa89448b176d76998180c08ceaca78bba98be"
+    },
+    {
+      "modelId": "gemma4-e2b",
+      "fileName": "gemma-4-e2b-it.litertlm",
+      "bytes": 2588147712,
+      "deviceSha256": "181938105e0eefd105961417e8da75903eacda102c4fce9ce90f50b97139a63c"
+    }
+  ],
+  "modelChecksumScope": "Device fingerprints recorded for reproducibility; official gated repository checksum was not available without authentication. Do not interpret these as a remote checksum verification.",
+  "npuOutcome": "Unsupported dispatch runtime version; initialization failed and the observed responses ran on GPU, not NPU.",
+  "files": {
+    "270m-gpu-native-warning.txt": {
+      "bytes": 555,
+      "sha256": "6a9b8ec58c238bd5dd575e65f048b6afa0d11c7d4e7432abcdf8d55169289ea3"
+    },
+    "answers.md": {
+      "bytes": 144822,
+      "sha256": "f79ec454d5136d3909280f652db9d93c9e148f9139a9eae63b4a7171f7a4bd74"
+    },
+    "combined-report.json": {
+      "bytes": 374610,
+      "sha256": "e76604ab60e832eaa40adcdd26e08e2f160ae7cfb6493577dd2cc6374a5bf019"
+    },
+    "field-gpu-gemma3-1b-20261110.json": {
+      "bytes": 118944,
+      "sha256": "40413fb877ca6cd15b4c6186b867cbb49afb14ca444b79def69d773f4589dc6e"
+    },
+    "field-gpu-gemma3-270m-20261110.json": {
+      "bytes": 70268,
+      "sha256": "83b1ca3067b1f32603c468803021dd81c1d5a00bee9116c61b5805aab87118dd"
+    },
+    "field-gpu-gemma4-e2b-20261110.json": {
+      "bytes": 209163,
+      "sha256": "96dbc71b1b6dc68577e8252b5a8dd6e9e8a17ff842cfcaed916c95188d1b9f8e"
+    },
+    "measurements.csv": {
+      "bytes": 4805,
+      "sha256": "341f720851a30d6a607e89eb6286961c7c257f914d620f8dce02858791b47c1f"
+    },
+    "npu-native-diagnostic.txt": {
+      "bytes": 1561,
+      "sha256": "4b4fedb1712e7146e117add2c02168d7df73316a7464db933798faec3b47e6db"
+    },
+    "probe-gemma3-1b-cpu-4096.json": {
+      "bytes": 10349,
+      "sha256": "87f31a001aa6efbff6865441ead2dbbf3734f121860159d221820e040823cf3e"
+    },
+    "probe-gemma3-1b-gpu-4096.json": {
+      "bytes": 1962,
+      "sha256": "26c0ad97278add29b5637aebe290287745ab125f5c2f37e9ff22a926bda5a1ae"
+    },
+    "probe-gemma3-1b-npu-4096.json": {
+      "bytes": 2099,
+      "sha256": "ed149aa7ebe2d4abb3ecb09f8c6b47092bb007341bde78f78ecd4c89ba4b8daa"
+    },
+    "probe-gemma3-270m-cpu-4096.json": {
+      "bytes": 3519,
+      "sha256": "9b9601aba71577742a7753642dc74073b64775d6faa10647458311bc3f61fe66"
+    },
+    "probe-gemma3-270m-gpu-4096.json": {
+      "bytes": 1176,
+      "sha256": "a61ef94575345e2d9ca15144695b769f9b2feff5b95e2fa111e9b70a07b84e8e"
+    },
+    "probe-gemma4-e2b-cpu-4096.json": {
+      "bytes": 8986,
+      "sha256": "c2016e16510a5b3c4685e9af8e0c15af78458c4b126369617c391eb5ea2e84e0"
+    },
+    "summary.json": {
+      "bytes": 8130,
+      "sha256": "afb4a62b56af1439ffafd787c907fc4a3ee745e91f3bf58248fd46e930240e59"
+    }
+  }
+}

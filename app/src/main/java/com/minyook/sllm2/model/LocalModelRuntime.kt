@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 질문 생성의 직렬화·프롬프트·예산·엔진 재사용·NPU/GPU/CPU 선택과 지표 전달을 담당한다.
+ * 연결 모듈: com.minyook.sllm2.data.ConversationContext, com.minyook.sllm2.data.ConversationTurn, com.minyook.sllm2.data.GeneralKnowledgeAnswer.
+ */
 package com.minyook.sllm2.model
 
 import android.content.Context
@@ -16,16 +20,56 @@ import com.google.ai.edge.litertlm.ThinkingConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.TimeoutCancellationException
 import java.io.File
 
-/** Owns one native engine for the visible process; the downloaded model itself stays persistent on disk. */
+/**
+ * ViewModel과 모델 비교기가 사용하는 로컬 텍스트 생성 실행기. 다운로드한 파일은 ModelFiles가 관리한다.
+ *
+ * generate는 Mutex로 직렬화하고, 사용자 설정·질문 종류로 프롬프트와 출력 예산을 만든다.
+ * AUTO/NPU는 칩셋별 추가 파일과 라이브러리를 확인해 NpuInferenceClient의 별도 프로세스를 먼저 시도한다.
+ * 휴대폰 범용 파일은 LiteRT-LM GPU/CPU 경로로 실행하며 모델·backend·문맥이 같으면 엔진을 재사용한다.
+ * 원시 중간 본문은 onPartialAnswer로 반환한다. 화면에 공개할지 결정하는 검사는 호출자에게 있고,
+ * 최종 문자열·한도 도달·실행 방식/시간은 각각 반환값과 콜백으로 전달한다.
+ */
 class LocalModelRuntime(
     private val context: Context,
     private val loadSettings: () -> InferenceSettings = { InferenceSettingsPreferences(context).load() },
 ) {
     private val lock = Any()
+    private val generationMutex = Mutex()
     @Volatile private var engine: Engine? = null
     @Volatile private var activeBackendName = "unknown"
+    private var engineKey: EngineKey? = null
+    private val npuClient = NpuInferenceClient(context)
+    private val failedNpuArtifacts = mutableSetOf<String>()
+
+    private data class EngineKey(val model: LocalModel, val backend: InferenceBackend, val contextTokens: Int)
+
+    /**
+     * 전경의 유휴 채팅에서 E2B 엔진만 준비한다. 가짜 질문/답변이나 추가 토큰 생성은 하지 않는다.
+     * ViewModel은 질문 검색 전에 이 작업의 종료를 기다려 ONNX 적재와 겹치지 않게 한다.
+     * 실제 요청과 같은 설정/엔진 키를 쓰며 CPU/NPU 요청은 미리 다른 backend로 바꾸지 않는다.
+     */
+    suspend fun prepareForQuestion(): Boolean = withContext(Dispatchers.Default) {
+        generationMutex.withLock {
+            val requested = loadSettings()
+            val settings = requested.copy(contextTokens = requested.contextTokens.coerceAtMost(requested.model.contextLimit))
+            val profile = DeviceProfile.read(context)
+            val info = ActivityManager.MemoryInfo().also {
+                (context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).getMemoryInfo(it)
+            }
+            if (!EngineReusePolicy.prepareWhileIdle(settings, profile.totalRamGb, info.availMem,
+                    info.lowMemory || profile.lowRamDevice, profile.arm64)) return@withLock false
+            val started = SystemClock.elapsedRealtime()
+            val (_, reused) = initializeIfNeeded(settings)
+            Log.i(TAG, "idlePrepareMs=${SystemClock.elapsedRealtime()-started} backend=$activeBackendName reused=$reused")
+            true
+        }
+    }
 
     @OptIn(com.google.ai.edge.litertlm.ExperimentalApi::class)
     suspend fun generate(
@@ -33,87 +77,154 @@ class LocalModelRuntime(
         evidence: String,
         compactVoiceAnswer: Boolean = false,
         supplementOnly: Boolean = false,
-        onPartialAnswer: (String) -> Unit = {},
+        onPartialAnswer: ((String) -> Unit)? = null,
         generalKnowledge: Boolean = false,
         onOutputLimit: (Boolean) -> Unit = {},
         recentConversation: List<ConversationTurn> = emptyList(),
         latestUserQuestion: String? = null,
         onMetrics: (GenerationMetrics) -> Unit = {},
     ): String = withContext(Dispatchers.Default) {
-        val startedAt = SystemClock.elapsedRealtime()
-        val settings = loadSettings()
-        val outputLimit = AnswerOutputPolicy.limit(settings, supplementOnly, generalKnowledge)
-        val basePrompt = if(generalKnowledge)GeneralKnowledgeAnswer.prompt(question,evidence) + "\n출력 예산은 최대 ${outputLimit ?: settings.contextTokens} 토큰입니다. 예산 안에서 문장과 목록을 완결하고, 불필요하게 항목을 늘리지 마세요." else buildPrompt(
-            question = question,
-            context = evidence,
-            compactVoiceAnswer = compactVoiceAnswer,
-            supplementOnly = supplementOnly,
-        )
-        val prompt = ConversationContext.generationPrompt(basePrompt, recentConversation, latestUserQuestion ?: question, settings.contextTokens, outputLimit ?: ContextTokenPolicy.responseLimit(settings.contextTokens))
-        // Conservative byte-token upper bound: skip optional generation instead
-        // of cutting a condition/exception from the source plan.
-        if (supplementOnly && prompt.toByteArray(Charsets.UTF_8).size + (outputLimit ?: 192) + 64 > settings.contextTokens) return@withContext ""
-        val activeEngine = initializeIfNeeded()
-        val engineReadyAt = SystemClock.elapsedRealtime()
-        val response = StringBuilder()
-        var firstChunkAt = 0L
-        var lastChunkAt = 0L
-        var chunks = 0
-        var lastPartialUpdateAt = 0L
-        var prefillTokens: Int? = null
-        var decodeTokens: Int? = null
-        var decodeTokensPerSecond: Double? = null
-        // LiteRT-LM 0.17.1 supports this explicitly. Do not generate hidden
-        // reasoning tokens before the first visible answer; retain output settings.
-        activeEngine.createConversation(ConversationConfig(
-            thinkingConfig = ThinkingConfig(enableThinking = false, thinkingTokenBudget = 0),
-            extraContext = mapOf("enable_thinking" to false),
-        )).use { conversation ->
-            conversation.sendMessageAsync(prompt, maxOutputToken = outputLimit).collect { partial ->
-                val before = response.length
-                partial.contents.contents
-                    .filterIsInstance<Content.Text>()
-                    .forEach { text -> response.append(text.text) }
-                val now = SystemClock.elapsedRealtime()
-                if (response.length == before) return@collect
-                if (firstChunkAt == 0L) firstChunkAt = now
-                lastChunkAt = now
-                chunks++
-                if (response.isNotEmpty() && now - lastPartialUpdateAt >= PARTIAL_UPDATE_INTERVAL_MS) {
-                    onPartialAnswer(response.toString())
-                    lastPartialUpdateAt = now
+            generationMutex.withLock {
+            val startedAt = SystemClock.elapsedRealtime()
+            val requested = loadSettings()
+            val settings = requested.copy(contextTokens = requested.contextTokens.coerceAtMost(requested.model.contextLimit))
+            val latestQuestion = latestUserQuestion ?: question
+            val briefGeneral = generalKnowledge && GeneralKnowledgeAnswer.prefersBrief(question, settings.automaticAnswerLength, latestQuestion)
+            val outputLimit = AnswerOutputPolicy.limit(settings, supplementOnly, generalKnowledge, briefGeneral)
+            val basePrompt = if(generalKnowledge)GeneralKnowledgeAnswer.prompt(question, evidence, briefGeneral) + "\n최대 ${outputLimit ?: settings.contextTokens} 토큰 안에서 답변을 완결하세요." else buildPrompt(
+                question = question,
+                context = evidence,
+                compactVoiceAnswer = compactVoiceAnswer,
+                supplementOnly = supplementOnly,
+            )
+            val prompt = ConversationContext.generationPrompt(
+                basePrompt, recentConversation, latestQuestion, settings.contextTokens,
+                outputLimit ?: ContextTokenPolicy.responseLimit(settings.contextTokens),
+                maxHistoryBytes = if (briefGeneral && settings.automaticAnswerLength) 768 else 4096,
+            )
+            // Conservative byte-token upper bound: skip optional generation instead
+            // of cutting a condition/exception from the source plan.
+            if (supplementOnly && prompt.toByteArray(Charsets.UTF_8).size + (outputLimit ?: 192) + 64 > settings.contextTokens) return@withContext ""
+            // NPU는 backend 이름만 바꿔 실행하지 않는다. 칩셋 전용 파일·런타임·요청 문맥이 모두 맞아야 한다.
+            val profile = DeviceProfile.read(context)
+            val npu = NpuModel.forDevice(settings.model, profile.socModel)
+            val npuOutput = outputLimit ?: ContextTokenPolicy.responseLimit(settings.contextTokens)
+            var fallbackReason = ""
+            if (settings.backend == InferenceBackend.AUTO || settings.backend == InferenceBackend.NPU) {
+                fallbackReason = when {
+                    npu == null -> "이 칩셋과 모델 조합의 NPU 배포 파일이 없어요."
+                    npu.id in failedNpuArtifacts -> "이번 실행에서 실패한 NPU 대신 범용 모델을 사용해요."
+                    ModelFiles.finalFile(context, settings.model, npu).length() != npu.bytes -> "NPU 추가 파일을 다운로드하면 우선 사용할 수 있어요."
+                    npuOutput >= npu.contextLimit -> "요청한 답변 한도가 NPU 파일의 문맥보다 커서 범용 모델을 사용해요."
+                    npu.requiredLibraries.any { !File(context.applicationInfo.nativeLibraryDir, it).isFile } -> "NPU 연결 라이브러리를 확인하지 못했어요."
+                    else -> ""
+                }
+                if (fallbackReason.isBlank() && npu != null) {
+                    releasePortable()
+                    try {
+                        val result = npuClient.generate(settings.model, prompt, minOf(settings.contextTokens, npu.contextLimit), npuOutput, onPartialAnswer)
+                        check(result.text.isNotBlank()) { "NPU가 완료된 답변을 반환하지 않았어요." }
+                        activeBackendName = "NPU"
+                        onOutputLimit(result.outputTokens != null && result.outputTokens >= npuOutput)
+                        onMetrics(GenerationMetrics("NPU", result.bindingMs + result.initializationMs,
+                            result.firstChunkMs?.plus(result.bindingMs), SystemClock.elapsedRealtime() - startedAt,
+                            prompt.toByteArray(Charsets.UTF_8).size, null, result.outputTokens, result.tokensPerSecond,
+                            settings.model.id, result.reusedEngine, npu.fileName, result.contextTokens))
+                        return@withContext result.text.trim()
+                    } catch (_: TimeoutCancellationException) {
+                        failedNpuArtifacts += npu.id
+                        npuClient.abortAndRelease()
+                        fallbackReason = "NPU 실행 대기 시간이 초과돼 범용 모델로 전환했어요."
+                    } catch (cancelled: CancellationException) {
+                        npuClient.release(abort = true)
+                        throw cancelled
+                    } catch (error: Exception) {
+                        if (!NpuModel.isContextLimitError(error.message)) failedNpuArtifacts += npu.id
+                        npuClient.abortAndRelease()
+                        fallbackReason = if (NpuModel.isContextLimitError(error.message)) "질문이 NPU 문맥 한도를 넘어 범용 모델로 전환했어요."
+                            else "NPU 실행을 완료하지 못해 범용 모델로 전환했어요."
+                        Log.w(TAG, "NPU fallback for ${npu.id}: ${error.javaClass.simpleName}")
+                    }
                 }
             }
-            runCatching { conversation.getBenchmarkInfo() }.onFailure { Log.w(TAG,"Native benchmark unavailable: ${it.javaClass.simpleName}: ${it.message}") }.getOrNull()?.let { benchmark ->
-                prefillTokens = benchmark.lastPrefillTokenCount
-                decodeTokens = benchmark.lastDecodeTokenCount
-                decodeTokensPerSecond = benchmark.lastDecodeTokensPerSecond
+            // NPU 종료를 확인한 뒤 범용 엔진을 적재해 두 경로의 모델 메모리가 겹치는 일을 줄인다.
+            npuClient.abortAndRelease()
+            val (activeEngine, reusedEngine) = initializeIfNeeded(settings)
+            val engineReadyAt = SystemClock.elapsedRealtime()
+            val response = StringBuilder()
+            var firstChunkAt = 0L
+            var lastChunkAt = 0L
+            var chunks = 0
+            var lastPartialUpdateAt = 0L
+            var prefillTokens: Int? = null
+            var decodeTokens: Int? = null
+            var decodeTokensPerSecond: Double? = null
+            // LiteRT-LM 0.17.1 supports this explicitly. Do not generate hidden
+            // reasoning tokens before the first visible answer; retain output settings.
+            val conversationConfig = if (settings.model == LocalModel.GEMMA4_E2B) ConversationConfig(
+                thinkingConfig = ThinkingConfig(enableThinking = false, thinkingTokenBudget = 0),
+                extraContext = mapOf("enable_thinking" to false),
+            ) else ConversationConfig()
+            activeEngine.createConversation(conversationConfig).use { conversation ->
+                // SDK 부분 응답을 누적 접두부로 바꿔 전달한다. 화면용 문장 검사/애니메이션은 여기서 하지 않는다.
+                conversation.sendMessageAsync(prompt, maxOutputToken = outputLimit).collect { partial ->
+                    val before = response.length
+                    for (content in partial.contents.contents) {
+                        if (content is Content.Text) response.append(content.text)
+                    }
+                    if (response.length == before) return@collect
+                    val now = SystemClock.elapsedRealtime()
+                    if (firstChunkAt == 0L) firstChunkAt = now
+                    lastChunkAt = now
+                    chunks++
+                    if (onPartialAnswer != null && (chunks == 1 || now - lastPartialUpdateAt >= PARTIAL_UPDATE_INTERVAL_MS)) {
+                        onPartialAnswer(response.toString())
+                        lastPartialUpdateAt = now
+                    }
+                }
+                runCatching { conversation.getBenchmarkInfo() }.onFailure { Log.w(TAG,"Native benchmark unavailable: ${it.javaClass.simpleName}: ${it.message}") }.getOrNull()?.let { benchmark ->
+                    prefillTokens = benchmark.lastPrefillTokenCount
+                    decodeTokens = benchmark.lastDecodeTokenCount
+                    decodeTokensPerSecond = benchmark.lastDecodeTokensPerSecond
+                }
+                onOutputLimit(outputLimit != null && decodeTokens != null && decodeTokens >= outputLimit)
             }
-            onOutputLimit(outputLimit != null && decodeTokens != null && decodeTokens >= outputLimit)
+            val finishedAt = SystemClock.elapsedRealtime()
+            onMetrics(GenerationMetrics(activeBackendName, engineReadyAt - startedAt,
+                firstChunkAt.takeIf { it > 0 }?.minus(startedAt), finishedAt - startedAt,
+                prompt.toByteArray(Charsets.UTF_8).size, prefillTokens, decodeTokens, decodeTokensPerSecond,
+                settings.model.id, reusedEngine, settings.model.fileName, settings.contextTokens, fallbackReason))
+            Log.i(
+                TAG,
+                "model=${settings.model.id} backend=$activeBackendName initMs=${engineReadyAt - startedAt} firstChunkMs=${if (firstChunkAt == 0L) -1 else firstChunkAt - engineReadyAt} " +
+                    "streamMs=${if (firstChunkAt == 0L) -1 else lastChunkAt - firstChunkAt} " +
+                    "tailMs=${if (lastChunkAt == 0L) -1 else finishedAt - lastChunkAt} " +
+                    "chunks=$chunks outputChars=${response.length} outputLimit=${outputLimit ?: "model-default"} promptChars=${prompt.length}",
+            )
+            response.toString().trim()
         }
-        val finishedAt = SystemClock.elapsedRealtime()
-        onMetrics(GenerationMetrics(activeBackendName, engineReadyAt - startedAt,
-            firstChunkAt.takeIf { it > 0 }?.minus(startedAt), finishedAt - startedAt,
-            prompt.toByteArray(Charsets.UTF_8).size, prefillTokens, decodeTokens, decodeTokensPerSecond))
-        Log.i(
-            TAG,
-            "backend=$activeBackendName initMs=${engineReadyAt - startedAt} firstChunkMs=${if (firstChunkAt == 0L) -1 else firstChunkAt - engineReadyAt} " +
-                "streamMs=${if (firstChunkAt == 0L) -1 else lastChunkAt - firstChunkAt} " +
-                "tailMs=${if (lastChunkAt == 0L) -1 else finishedAt - lastChunkAt} " +
-                "chunks=$chunks outputChars=${response.length} outputLimit=${outputLimit ?: "model-default"} promptChars=${prompt.length}",
-        )
-        response.toString().trim()
     }
 
-    fun release() = synchronized(lock) {
+    fun release() {
+        npuClient.release()
+        releasePortable()
+    }
+
+    suspend fun releaseAndWait() {
+        npuClient.abortAndRelease()
+        releasePortable()
+    }
+
+    private fun releasePortable() = synchronized(lock) {
         engine?.close()
         engine = null
         activeBackendName = "unknown"
+        engineKey = null
     }
 
     /** Search and generation remain sequential; this avoids unloading a healthy GPU model. */
     fun prepareForSemanticSearch():Boolean {
-        if(engine==null)return false
+        if(engine==null && activeBackendName != "NPU")return false
         val info=ActivityManager.MemoryInfo().also { (context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).getMemoryInfo(it) }
         val keep=EngineReusePolicy.retainForSearch(activeBackendName,DeviceProfile.read(context).totalRamGb,info.availMem,info.lowMemory)
         Log.i(TAG,"retainForSearch=$keep backend=$activeBackendName availableRamMb=${info.availMem/1024/1024}")
@@ -121,17 +232,19 @@ class LocalModelRuntime(
         return keep
     }
 
-    private fun initializeIfNeeded(): Engine = synchronized(lock) {
-        engine?.let { return@synchronized it }
-        val modelPath = ModelFiles.finalFile(context).takeIf { it.exists() }
-            ?: throw IllegalStateException("다운로드된 Gemma 4 E2B 모델이 없습니다.")
-        val cacheDirectory = File(context.noBackupFilesDir, "litert-cache").apply { mkdirs() }
+    private fun initializeIfNeeded(settings: InferenceSettings): Pair<Engine, Boolean> = synchronized(lock) {
+        val key = EngineKey(settings.model, settings.backend, settings.contextTokens)
+        engine?.takeIf { engineKey == key }?.let { return@synchronized it to true }
+        releasePortable()
+        val modelPath = ModelFiles.finalFile(context, settings.model).takeIf { settings.model.acceptsBytes(it.length()) }
+            ?: throw IllegalStateException("다운로드된 ${settings.model.title} 모델이 없습니다.")
+        val cacheDirectory = File(context.noBackupFilesDir, "litert-cache/${settings.model.id}").apply { mkdirs() }
         val profile = DeviceProfile.read(context)
-        val settings = loadSettings()
         val candidates = when (settings.backend) {
             InferenceBackend.CPU -> listOf(Backend.CPU())
             InferenceBackend.GPU -> listOf(Backend.GPU(), Backend.CPU())
-            InferenceBackend.AUTO -> if (profile.recommendedForGemma4E2b) {
+            InferenceBackend.NPU -> if (profile.arm64 && !profile.lowRamDevice) listOf(Backend.GPU(), Backend.CPU()) else listOf(Backend.CPU())
+            InferenceBackend.AUTO -> if (profile.arm64 && profile.totalRamGb >= settings.model.recommendedRamGb && !profile.lowRamDevice) {
                 listOf(Backend.GPU(), Backend.CPU())
             } else {
                 listOf(Backend.CPU())
@@ -152,8 +265,9 @@ class LocalModelRuntime(
                 candidate = initializedEngine
                 initializedEngine.initialize()
                 engine = initializedEngine
+                engineKey = key
                 activeBackendName = backend.javaClass.simpleName
-                return@synchronized initializedEngine
+                return@synchronized initializedEngine to false
             } catch (error: Exception) {
                 candidate?.let { runCatching { it.close() } }
                 lastError = error
@@ -215,4 +329,9 @@ class LocalModelRuntime(
 data class GenerationMetrics(
     val backend: String, val initializationMs: Long, val firstChunkMs: Long?, val totalMs: Long,
     val promptBytes: Int, val prefillTokens: Int?, val decodeTokens: Int?, val decodeTokensPerSecond: Double?,
+    val modelId: String = LocalModel.GEMMA4_E2B.id,
+    val reusedEngine: Boolean = false,
+    val modelFileName: String = "",
+    val effectiveContextTokens: Int = 0,
+    val fallbackReason: String = "",
 )

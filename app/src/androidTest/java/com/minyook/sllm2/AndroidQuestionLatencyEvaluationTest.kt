@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 단말 검색/답변의 문항별 처리 지연을 검증하는 Android 계측 검사다.
+ * 검사 예: restoreBackendFromArgument, measureCurrentProductionQuestionPath, publish
+ * 실행: 연결된 Android 기기/에뮬레이터의 AndroidJUnitRunner. opt-in 인자는 본문 assume/arguments 조건을 확인한다.
+ */
 package com.minyook.sllm2
 
 import android.os.SystemClock

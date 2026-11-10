@@ -1,15 +1,23 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 소스 안내
+Android 데이터 추출/전송의 백업 제외 계약. Manifest의 참조와 함께 유지한다.
+-->
+<!--
    Sample data extraction rules file; uncomment and customize as necessary.
    See https://developer.android.com/about/versions/12/backup-restore#xml-changes
    for details.
 -->
 <data-extraction-rules>
     <cloud-backup>
+        <exclude domain="sharedpref" path="model_download_access.xml"/>
         <!-- TODO: Use <include> and <exclude> to control what is backed up.
         <include .../>
         <exclude .../>
         -->
     </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="model_download_access.xml"/>
+    </device-transfer>
     <!--
     <device-transfer>
         <include .../>

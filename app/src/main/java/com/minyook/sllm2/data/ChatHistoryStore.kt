@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 최종 대화·출처·주제·선택지를 로컬 JSON으로 저장/복원한다. ViewModel의 기록 목록과 다음 질문 문맥에 연결된다.
+ */
 package com.minyook.sllm2.data
 
 import android.content.Context
@@ -6,9 +9,10 @@ import org.json.JSONObject
 import java.util.UUID
 
 /**
- * A small, local-only transcript store for the navigation drawer. It deliberately
- * stays separate from the knowledge base: saved chats never alter RAG documents
- * or embeddings.
+ * ViewModel의 최종 대화와 문맥 메타데이터를 SharedPreferences JSON으로 저장한다.
+ * create/append 후 목록을 갱신하고 loadChat에서 턴을 복원해 ConversationContext에 다시 전달한다.
+ * 대화 수/턴 수를 제한하며 문서 DB·임베딩·모델 가중치는 수정하지 않는다.
+ * 화면 애니메이션의 부분 본문 대신 최종 Markdown·실제 출처·선택지를 저장한다.
  */
 class ChatHistoryStore(context: Context) {
     private val preferences = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)

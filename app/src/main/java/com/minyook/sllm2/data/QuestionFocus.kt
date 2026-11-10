@@ -1,6 +1,13 @@
+/* 소스 안내
+ * 장비 대상과 수량·용도·차이 등 요청 속성을 분리한다. 후속 질문 복원·장비 검색·일반 생성이 공유한다.
+ */
 package com.minyook.sllm2.data
 
-/** Domain entities and requested attributes, never a question-to-answer/page table. */
+/**
+ * 장비 대상과 요청 속성(수량·용도·차이 등)을 구분하는 공통 규칙.
+ * ConversationContext는 후속 질문의 초점을 복원하고 장비 검색/생성 정책은 같은 대상 규칙을 사용한다.
+ * 어떤 장비를 묻는지 정할 뿐 준비 대수·사양·정답 페이지를 하드코딩하는 데이터가 아니다.
+ */
 internal object QuestionFocus {
     data class Entity(val name: String, val forms: Regex) {
         fun matches(text: String) = forms.containsMatchIn(text)

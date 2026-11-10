@@ -1,0 +1,318 @@
+{
+  "scope": "Measured physical Android native generation. Common precomputed retrieval is excluded. FirstSentenceMs means first displayable completed prefix and may be a heading. One run per question; not a repeated statistical benchmark or automatic correctness grade.",
+  "suiteId": "field-detailed-v2",
+  "contextTokens": 4096,
+  "maxOutputTokens": 2048,
+  "requestedBackend": "GPU",
+  "device": "samsung SM-S928N / Android 16",
+  "reports": [
+    {
+      "path": "tmp\\model-benchmark-20261110\\field-gpu-gemma3-270m-20261110.json",
+      "sha256": "83b1ca3067b1f32603c468803021dd81c1d5a00bee9116c61b5805aab87118dd",
+      "phase": "complete",
+      "settingsUnchanged": true
+    },
+    {
+      "path": "tmp\\model-benchmark-20261110\\field-gpu-gemma3-1b-20261110.json",
+      "sha256": "40413fb877ca6cd15b4c6186b867cbb49afb14ca444b79def69d773f4589dc6e",
+      "phase": "complete",
+      "settingsUnchanged": true
+    },
+    {
+      "path": "tmp\\model-benchmark-20261110\\field-gpu-gemma4-e2b-20261110.json",
+      "sha256": "96dbc71b1b6dc68577e8252b5a8dd6e9e8a17ff842cfcaed916c95188d1b9f8e",
+      "phase": "complete",
+      "settingsUnchanged": true
+    }
+  ],
+  "commonQuestionAndReferenceVerified": true,
+  "models": {
+    "gemma3-270m": {
+      "attempted": 12,
+      "nonEmptyTextResponses": 0,
+      "runtimeErrorsOrEmptyOutputs": 12,
+      "actualBackends": [
+        "GPU"
+      ],
+      "allAttemptSeconds": {
+        "n": 12,
+        "mean": 36.643,
+        "median": 38.031,
+        "p95": 42.0057,
+        "min": 22.179,
+        "max": 42.339
+      },
+      "failedAttemptSeconds": {
+        "n": 12,
+        "mean": 36.643,
+        "median": 38.031,
+        "p95": 42.0057,
+        "min": 22.179,
+        "max": 42.339
+      },
+      "totalSeconds": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "warmTotalSeconds": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "firstDisplayableSeconds": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "initializationSeconds": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "outputCharacters": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "sdkOutputTokens": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "sdkTokensPerSecond": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "availableSystemRamMbBefore": {
+        "n": 12,
+        "mean": 2833,
+        "median": 2897.5,
+        "p95": 2953.4,
+        "min": 2132,
+        "max": 2971
+      },
+      "thermalStatusBefore": [
+        0
+      ],
+      "casesWithIncompleteEvidence": [],
+      "knownOutputLimitHits": 0,
+      "unknownOutputLimitStatus": 0,
+      "qualityGrade": "See separate human review; successful generation is not factual correctness."
+    },
+    "gemma3-1b": {
+      "attempted": 12,
+      "nonEmptyTextResponses": 8,
+      "runtimeErrorsOrEmptyOutputs": 4,
+      "actualBackends": [
+        "GPU"
+      ],
+      "allAttemptSeconds": {
+        "n": 12,
+        "mean": 28.96516666666667,
+        "median": 15.7075,
+        "p95": 70.75994999999999,
+        "min": 1.648,
+        "max": 85.528
+      },
+      "failedAttemptSeconds": {
+        "n": 4,
+        "mean": 3.60975,
+        "median": 2.4475,
+        "p95": 6.584699999999998,
+        "min": 2.23,
+        "max": 7.314
+      },
+      "totalSeconds": {
+        "n": 8,
+        "mean": 41.642875000000004,
+        "median": 48.9675,
+        "p95": 76.13014999999999,
+        "min": 1.648,
+        "max": 85.528
+      },
+      "warmTotalSeconds": {
+        "n": 5,
+        "mean": 38.1256,
+        "median": 48.174,
+        "p95": 58.5472,
+        "min": 1.648,
+        "max": 58.677
+      },
+      "firstDisplayableSeconds": {
+        "n": 5,
+        "mean": 4.751,
+        "median": 3.113,
+        "p95": 8.9054,
+        "min": 1.639,
+        "max": 9.228
+      },
+      "initializationSeconds": {
+        "n": 8,
+        "mean": 1.96825,
+        "median": 0.002,
+        "p95": 5.3129,
+        "min": 0.0,
+        "max": 5.378
+      },
+      "outputCharacters": {
+        "n": 8,
+        "mean": 1843.625,
+        "median": 1937.5,
+        "p95": 3398.1499999999996,
+        "min": 5,
+        "max": 3563
+      },
+      "sdkOutputTokens": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "sdkTokensPerSecond": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "availableSystemRamMbBefore": {
+        "n": 12,
+        "mean": 2390.9166666666665,
+        "median": 1971.5,
+        "p95": 3584.2999999999997,
+        "min": 1895,
+        "max": 3647
+      },
+      "thermalStatusBefore": [
+        0,
+        1
+      ],
+      "casesWithIncompleteEvidence": [],
+      "knownOutputLimitHits": 0,
+      "unknownOutputLimitStatus": 8,
+      "qualityGrade": "See separate human review; successful generation is not factual correctness."
+    },
+    "gemma4-e2b": {
+      "attempted": 12,
+      "nonEmptyTextResponses": 12,
+      "runtimeErrorsOrEmptyOutputs": 0,
+      "actualBackends": [
+        "GPU"
+      ],
+      "allAttemptSeconds": {
+        "n": 12,
+        "mean": 73.2765,
+        "median": 73.908,
+        "p95": 106.90090000000001,
+        "min": 37.877,
+        "max": 107.98
+      },
+      "failedAttemptSeconds": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "totalSeconds": {
+        "n": 12,
+        "mean": 73.2765,
+        "median": 73.908,
+        "p95": 106.90090000000001,
+        "min": 37.877,
+        "max": 107.98
+      },
+      "warmTotalSeconds": {
+        "n": 11,
+        "mean": 73.96136363636364,
+        "median": 80.506,
+        "p95": 106.999,
+        "min": 37.877,
+        "max": 107.98
+      },
+      "firstDisplayableSeconds": {
+        "n": 12,
+        "mean": 5.1585,
+        "median": 4.892,
+        "p95": 8.592049999999999,
+        "min": 2.689,
+        "max": 9.774
+      },
+      "initializationSeconds": {
+        "n": 12,
+        "mean": 0.3788333333333333,
+        "median": 0.0025,
+        "p95": 2.0360999999999967,
+        "min": 0.001,
+        "max": 4.521
+      },
+      "outputCharacters": {
+        "n": 12,
+        "mean": 2972.5,
+        "median": 3165.5,
+        "p95": 3543.7,
+        "min": 1731,
+        "max": 3701
+      },
+      "sdkOutputTokens": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "sdkTokensPerSecond": {
+        "n": 0,
+        "mean": null,
+        "median": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "availableSystemRamMbBefore": {
+        "n": 12,
+        "mean": 2248.0833333333335,
+        "median": 2194.0,
+        "p95": 2820.6999999999994,
+        "min": 1937,
+        "max": 3275
+      },
+      "thermalStatusBefore": [
+        1,
+        2
+      ],
+      "casesWithIncompleteEvidence": [],
+      "knownOutputLimitHits": 0,
+      "unknownOutputLimitStatus": 12,
+      "qualityGrade": "See separate human review; successful generation is not factual correctness."
+    }
+  }
+}

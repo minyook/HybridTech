@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 검증한 번들 PDF의 요청 쪽만 IO 스레드에서 렌더링한다. 결과 Bitmap은 SourcePdfPage에 전달한다.
+ */
 package com.minyook.sllm2.data
 
 import android.content.Context
@@ -12,7 +15,12 @@ import java.io.IOException
 import java.security.MessageDigest
 import kotlin.math.roundToInt
 
-/** Copies the bundled official PDF on first use and renders only the cited page. */
+/**
+ * SourcePdfPage가 요청한 원본 PDF 한 쪽을 IO 스레드에서 Bitmap으로 렌더링한다.
+ * SourcePdfCatalog로 문서/쪽을 확인하고 번들 사본의 해시·전체 쪽수를 검증한 뒤 PdfRenderer를 연다.
+ * descriptor/renderer/page는 요청마다 닫고 렌더 폭을 제한한다. 반환 Bitmap의 화면 수명은 SourcePdfPage가 관리한다.
+ * 온라인 PDF를 매번 다운로드하거나 추출한 텍스트를 원본 이미지처럼 표시하지 않는다.
+ */
 class SourcePdfRepository(private val context: Context) {
     suspend fun renderPage(documentId: String, pageNumber: Int, widthPx: Int): Bitmap = withContext(Dispatchers.IO) {
         val source = SourcePdfCatalog.find(documentId) ?: throw IOException("연결된 PDF 원본이 없습니다.")

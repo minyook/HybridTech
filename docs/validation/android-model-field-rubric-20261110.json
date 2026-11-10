@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-10",
+  "suiteId": "field-detailed-v2",
+  "scope": "Human review of this fictional field-question set against the common supplied source packet; not an independent clinical/legal validation or a universal accuracy score.",
+  "frozenBeforeCurrentAnswersReviewed": true,
+  "scoring": {
+    "perCriterion": "1 = substantively addressed with source conditions preserved, 0.5 = incomplete or partly unclear, 0 = missing/contradictory/unusable",
+    "criteriaPerCase": 3,
+    "maxCoveragePointsPerModel": 36,
+    "grounding": "Separately record material contradictions or unsupported numerical/specification/authorization claims. A coverage score is not a safety pass.",
+    "formatAndCoherence": "Separately assess Korean readability, Markdown structure, repetition and whether the final answer is visibly incomplete.",
+    "missingEvidence": "If required source material is absent, explicitly acknowledging uncertainty is preferable to inventing it. Attribute source-packet omissions separately."
+  },
+  "cases": [
+    {"id":"entry-check","criteria":["각 측정값과 기준의 단위·이상/미만 경계를 구분한다.","측정값만으로 투입을 승인하지 않고 추가 확인할 환기·장비·감시 조건을 설명한다.","환기·재측정·감독/감시 확인을 단계로 연결하고 미확인 조건을 표시한다."]},
+    {"id":"sampling","criteria":["입구 한 점만으로 대표하지 못함과 여러 위치·높이 측정을 설명한다.","외부 채취와 채기관 사용의 관련 조건을 설명하고 제조사 확인 사항을 구분한다.","전등 조건과 재측정을 포함하면서 문서에 없는 사양을 확정하지 않는다."]},
+    {"id":"ventilation-restart","criteria":["환기 중단 직후 작업 중지·퇴피 등 대응과 인원 확인을 설명한다.","환기 복구와 재측정 이전의 예전 수치를 현재 안전 근거로 사용하지 않는다.","재개 전 감시인·감독자의 확인 사항과 순서를 설명한다."]},
+    {"id":"respirators","criteria":["방독마스크와 송기마스크·공기호흡기의 산소공급/보호 한계를 구분한다.","가스 종류·농도 미확인 상태에서 적합성을 추측하지 않고 확인 절차를 설명한다.","외부 감시·연락·구조 준비를 보호구 선택과 함께 설명한다."]},
+    {"id":"rescue-equipment","criteria":["문서의 준비 의무와 확인되지 않은 고정 수량을 구분한다.","분리된 출입구·동시 작업·구조 경로에 맞춘 배치 확인 사항을 설명한다.","안전대·구명줄·인양 장치와 호환성·제조사 정보·구조 인원 확인을 설명한다."]},
+    {"id":"hot-work","criteria":["산소·유해가스와 가연성 위험을 함께 점검하고 문서 수치의 조건을 보존한다.","환기와 작업 중 재측정을 작업 전/작업 중 절차에 연결한다.","점화원·외부 감시·중지 조건과 문서 밖 허가 절차의 미확인 상태를 구분한다."]},
+    {"id":"inert-gas","criteria":["무색·무취가 안전을 뜻하지 않으며 산소 치환 위험을 설명한다.","가스별 위치·분포 차이를 무리하게 일반화하지 않고 측정·환기와 연결한다.","보호구·감시 준비와 설비/제조사 자료 확인 사항을 구분한다."]},
+    {"id":"co-conflict","criteria":["산소 농도가 정상이어도 CO 중독을 배제하지 못하는 이유를 설명한다.","CO 농도·노출시간 자료를 정확히 구분하고 임의 안전 체류시간을 제시하지 않는다.","경고 후 작업자 보호·현장 대응과 추가 측정/확인 순서를 설명한다."]},
+    {"id":"rescue","criteria":["공기 미확인 상태에서 보호구 없는 임의 진입을 금지해 2차 사고를 막는다.","신고·외부 구조 준비·장비/인원 확인과 전문 구조팀에 전달할 정보를 구분한다.","안전한 장소에서 응급처치를 진행하는 순서와 담당 역할을 설명한다."]},
+    {"id":"cpr-branches","criteria":["반응/정상 호흡 확인과 도움 요청 이후 행동을 조건에 따라 분기한다.","압박·인공호흡과 인공호흡이 어려운 경우를 원문 조건에 맞춰 설명한다.","AED·반복/중단·회복자세를 구분하고 미확인 내용을 표시한다."]},
+    {"id":"permit-handover","criteria":["교대·작업 변경 후 현재 공기 상태와 재측정 필요를 확인한다.","환기·보호구·감시·연락·구조 준비의 인수인계 항목을 설명한다.","이전 기록/허가와 현재 승인 상태를 구분하고 자동 승인을 가정하지 않는다."]},
+    {"id":"uncertain-readings","criteria":["가스 종류와 표시 단위를 맞춰 숫자만으로 상태를 비교하지 않는다.","채취 조건·위치·시기·기기 점검의 확인 순서를 설명한다.","센서 오차·교정 주기·정확한 대기시간을 추측하지 않고 제조사 확인 사항으로 표시한다."]}
+  ]
+}

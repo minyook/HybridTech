@@ -1,3 +1,7 @@
+/* 소스 안내
+ * IndexedDB의 대화·설정·로컬 점검·모델 메타데이터/Blob 저장 계약. 서버 승인 DB와 별도 저장소다.
+ * 연결 모듈: ../types, ../workflow/work.
+ */
 import { openDB, type IDBPDatabase } from 'idb';
 import type { Chat, Checklist, ModelRecord, ModelVerification } from '../types';
 import type { WorkOrder } from '../workflow/work';

@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 사설 IPv4만 허용하며 공개 IP·호스트·변형 문자열은 거부한다 / 실제 TLS 인증서가 PC IP·localhost와 일치하고 다른 IP는 인증하지 않는다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 사설 IPv4만 허용하며 공개 IP·호스트·변형 문자열은 거부한다, 실제 TLS 인증서가 PC IP·localhost와 일치하고 다른 IP는 인증하지 않는다, 재실행과 PC IP 변경에도 아이폰에서 신뢰한 CA를 임의로 바꾸지 않는다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { createServer as httpServer } from 'node:http';
 import { createServer as httpsServer, request } from 'node:https';
 import type { AddressInfo } from 'node:net';

@@ -1,3 +1,5 @@
+# 소스 안내
+# PDF 원본의 표/도식 셀을 대조해 구조 자료와 검증 근거를 만드는 PC 도구. 실행 모델의 답변을 학습/생성하지 않는다.
 """Extract source-linked table cells on the PC; Android never parses PDFs for answers.
 
 Run with the bundled Python (pdfplumber). Cells come from PDF coordinates, not an

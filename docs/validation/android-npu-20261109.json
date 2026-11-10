@@ -1,0 +1,95 @@
+{
+  "date": "2026-11-09",
+  "scope": "Android Qualcomm NPU priority with chipset-specific packages, private inference process, and portable GPU/CPU fallback",
+  "sdk": "LiteRT-LM 0.17.1",
+  "qnnRuntime": "2.44.0",
+  "dispatch": {
+    "sha256": "9c039e24d7b80c5a213455cb29f9c2766125dca5f135fa9111c3ef224792e95f",
+    "sourceCommit": "32a331c33a7115a3b86ef554fb58a9c11d03b123"
+  },
+  "supportedModels": [
+    "gemma3-270m",
+    "gemma3-1b"
+  ],
+  "supportedSocs": [
+    "SM8550",
+    "SM8650",
+    "SM8750",
+    "SM8850"
+  ],
+  "npuApplicationContextLimit": 1280,
+  "gemma4NpuPackageConnected": false,
+  "privateServiceProcess": ":npu",
+  "packagedLibraries": [
+    {
+      "bytes": 478912,
+      "name": "libLiteRtDispatch_Qualcomm.so"
+    },
+    {
+      "bytes": 2778448,
+      "name": "libQnnHtp.so"
+    },
+    {
+      "bytes": 2983832,
+      "name": "libQnnSystem.so"
+    },
+    {
+      "bytes": 679440,
+      "name": "libQnnHtpV73Stub.so"
+    },
+    {
+      "bytes": 17233280,
+      "name": "libQnnHtpV73Skel.so"
+    },
+    {
+      "bytes": 679440,
+      "name": "libQnnHtpV75Stub.so"
+    },
+    {
+      "bytes": 17237336,
+      "name": "libQnnHtpV75Skel.so"
+    },
+    {
+      "bytes": 679440,
+      "name": "libQnnHtpV79Stub.so"
+    },
+    {
+      "bytes": 16929336,
+      "name": "libQnnHtpV79Skel.so"
+    },
+    {
+      "bytes": 755736,
+      "name": "libQnnHtpV81Stub.so"
+    },
+    {
+      "bytes": 18041644,
+      "name": "libQnnHtpV81Skel.so"
+    }
+  ],
+  "licenseIncluded": true,
+  "unitTests": {
+    "tests": 182.0,
+    "skipped": 10.0,
+    "errors": 0.0,
+    "passed": 172.0,
+    "failures": 0.0
+  },
+  "lint": {
+    "warnings": 112,
+    "errors": 0
+  },
+  "apk": {
+    "path": "C:\\Users\\limmi\\AndroidStudioProjects\\Sllm2\\tmp\\npu-20261109\\fieldguard-npu-priority-debug.apk",
+    "sha256": "35B44FD225018CC4ACBC521D59BCDDD4E53BC2E0931F9DCDD437E9FBDC39E33F",
+    "bytes": 318963262
+  },
+  "deviceExecutionVerified": false,
+  "npuWeightsDownloaded": false,
+  "nativeFaultRecoveryVerifiedOnDevice": false,
+  "measuredPerformance": [],
+  "limitations": [
+    "Native SDK/dispatch/QNN/firmware interoperability remains unverified on physical hardware.",
+    "Static tests and APK contents do not establish NPU execution success, recovery success, or speed.",
+    "Only catalogued Qualcomm chip/model artifacts are attempted; other devices use portable backends."
+  ]
+}

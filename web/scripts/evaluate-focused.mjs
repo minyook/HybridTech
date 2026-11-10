@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 세부 주제 질문의 선택 문단/조건/출처를 평가한다. 전체 모델 일반 지식의 사실 정확도 측정과 구분한다.
+ */
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';

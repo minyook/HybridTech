@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 경량 Worker가 사용할 SDK/토크나이저 브리지 코드를 구성한다. 입력 SDK와 생성 결과 계약을 시험에서 확인한다.
+ */
 // Deliberately scoped to the bundled light worker, never node_modules. Review
 // against the pinned SDK on upgrades; missing/duplicate markers fail the build.
 export function bridgeLightSDK(source){

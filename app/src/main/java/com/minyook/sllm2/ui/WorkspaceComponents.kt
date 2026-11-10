@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 화면 폭 규칙·버튼·필드·카드·아이콘의 공통 Compose 구성요소. 도메인 처리는 호출자가 전달한 콜백으로 연결한다.
+ */
 package com.minyook.sllm2.ui
 
 import androidx.compose.foundation.BorderStroke

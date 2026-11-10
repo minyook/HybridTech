@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: Safari visual viewport shrink puts the composer above the keyboard, then restores even with focus retained / Chrome layout resize and browsers without VisualViewport use the remembered unobstructed height. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: Safari visual viewport shrink puts the composer above the keyboard, then restores even with focus retained, Chrome layout resize and browsers without VisualViewport use the remembered unobstructed height, browser toolbar changes, hardware keyboard focus and unfocused window resizing do not hide navigation
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { expect, it } from 'vitest';
 import { createChatViewport, type ChatViewportSample } from '../src/chat/viewport';
 

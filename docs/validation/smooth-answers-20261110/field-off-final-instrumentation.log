@@ -1,0 +1,31 @@
+INSTRUMENTATION_STATUS: class=com.minyook.sllm2.ReferenceAnswerStreamingTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+com.minyook.sllm2.ReferenceAnswerStreamingTest:
+INSTRUMENTATION_STATUS: test=renderReferenceSizedNativeAnswers
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: referenceProgress=READY
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: referenceProgress=밀폐공간 작업을 중단했다가 다시 시작할 때 감독관이 확인할 사항을 핵심 5개로 정리해줘. 각 항목은 한 문장으로 설명해줘.
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: referenceProgress=밀폐공간 인명구조용 삼각대 준비 수량을 정할 때 확인할 조건을 핵심 4개로 설명해줘. 임의의 대수는 정하지 말고, 각 항목은 한 문장으로 정리해줘.
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: referenceProgress=FINISHED
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.minyook.sllm2.ReferenceAnswerStreamingTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=renderReferenceSizedNativeAnswers
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 50.277
+
+OK (1 test)
+
+
+INSTRUMENTATION_CODE: -1

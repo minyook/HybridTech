@@ -1,0 +1,37 @@
+﻿modelId,caseId,caseTitle,backend,firstDisplayableSeconds,totalSeconds,initializationSeconds,outputCharacters,outputTokens,tokensPerSecond,reusedEngine,availableRamMb,thermalStatus,error
+gemma3-270m,entry-check,여러 가스 측정값과 작업 투입 전 점검,GPU,,38.263,3.348,0,,,False,2132,0,모델이 답변을 반환하지 않았어요.
+gemma3-270m,sampling,깊고 어두운 공간의 측정 계획,GPU,,40.671,2.714,0,,,False,2866,0,모델이 답변을 반환하지 않았어요.
+gemma3-270m,ventilation-restart,환기 중단과 작업 재개,GPU,,22.179,2.587,0,,,False,2893,0,모델이 답변을 반환하지 않았어요.
+gemma3-270m,respirators,산소 부족과 보호구 선택,GPU,,26.654,2.469,0,,,False,2838,0,모델이 답변을 반환하지 않았어요.
+gemma3-270m,rescue-equipment,여러 출입구의 구조 장비 배치,GPU,,37.799,3.507,0,,,False,2854,0,모델이 답변을 반환하지 않았어요.
+gemma3-270m,hot-work,밀폐공간의 용접과 가연성 가스,GPU,,40.007,3.774,0,,,False,2830,0,모델이 답변을 반환하지 않았어요.
+gemma3-270m,inert-gas,냄새 없는 가스와 산소 치환,GPU,,36.267,3.326,0,,,False,2939,0,모델이 답변을 반환하지 않았어요.
+gemma3-270m,co-conflict,산소 정상과 일산화탄소 위험의 구분,GPU,,40.447,3.017,0,,,False,2925,0,모델이 답변을 반환하지 않았어요.
+gemma3-270m,rescue,내부 작업자 쓰러짐과 2차 사고 예방,GPU,,37.119,3.462,0,,,False,2971,0,모델이 답변을 반환하지 않았어요.
+gemma3-270m,cpr-branches,구조 후 호흡 확인과 응급처치 분기,GPU,,41.733,2.719,0,,,False,2912,0,모델이 답변을 반환하지 않았어요.
+gemma3-270m,permit-handover,교대 작업과 작업허가·감시 인수인계,GPU,,42.339,3.468,0,,,False,2902,0,모델이 답변을 반환하지 않았어요.
+gemma3-270m,uncertain-readings,단위가 다른 측정값과 측정 신뢰성,GPU,,36.238,3.688,0,,,False,2934,0,모델이 답변을 반환하지 않았어요.
+gemma3-1b,entry-check,여러 가스 측정값과 작업 투입 전 점검,GPU,,7.314,4.992,0,,,False,2519,0,모델이 답변을 반환하지 않았어요.
+gemma3-1b,sampling,깊고 어두운 공간의 측정 계획,GPU,,7.226,5.192,5,,,False,3471,0,
+gemma3-1b,ventilation-restart,환기 중단과 작업 재개,GPU,,2.443,0.004,0,,,True,1917,0,모델이 답변을 반환하지 않았어요.
+gemma3-1b,respirators,산소 부족과 보호구 선택,GPU,7.615,49.761,5.17,2022,,,False,3533,0,
+gemma3-1b,rescue-equipment,여러 출입구의 구조 장비 배치,GPU,,2.452,0.002,0,,,True,2023,0,모델이 답변을 반환하지 않았어요.
+gemma3-1b,hot-work,밀폐공간의 용접과 가연성 가스,GPU,9.228,85.528,5.378,3092,,,False,3647,0,
+gemma3-1b,inert-gas,냄새 없는 가스와 산소 치환,GPU,,48.174,0.002,1853,,,True,1966,0,
+gemma3-1b,co-conflict,산소 정상과 일산화탄소 위험의 구분,GPU,1.639,24.101,0.002,1595,,,True,1927,0,
+gemma3-1b,rescue,내부 작업자 쓰러짐과 2차 사고 예방,GPU,,1.648,0.001,7,,,True,1918,0,
+gemma3-1b,cpr-branches,구조 후 호흡 확인과 응급처치 분기,GPU,2.16,58.677,0.001,2612,,,True,1898,1,
+gemma3-1b,permit-handover,교대 작업과 작업허가·감시 인수인계,GPU,3.113,58.028,0.0,3563,,,True,1895,1,
+gemma3-1b,uncertain-readings,단위가 다른 측정값과 측정 신뢰성,GPU,,2.23,0.001,0,,,True,1977,1,모델이 답변을 반환하지 않았어요.
+gemma4-e2b,entry-check,여러 가스 측정값과 작업 투입 전 점검,GPU,9.774,65.743,4.521,3245,,,False,3275,1,
+gemma4-e2b,sampling,깊고 어두운 공간의 측정 계획,GPU,5.063,61.503,0.003,3039,,,True,2449,1,
+gemma4-e2b,ventilation-restart,환기 중단과 작업 재개,GPU,4.828,37.877,0.003,1731,,,True,2445,1,
+gemma4-e2b,respirators,산소 부족과 보호구 선택,GPU,4.96,49.809,0.002,2511,,,True,2176,1,
+gemma4-e2b,rescue-equipment,여러 출입구의 구조 장비 배치,GPU,2.743,49.251,0.003,2540,,,True,2212,1,
+gemma4-e2b,hot-work,밀폐공간의 용접과 가연성 가스,GPU,4.956,67.31,0.003,3328,,,True,2239,1,
+gemma4-e2b,inert-gas,냄새 없는 가스와 산소 치환,GPU,2.826,83.076,0.003,3086,,,True,2224,2,
+gemma4-e2b,co-conflict,산소 정상과 일산화탄소 위험의 구분,GPU,2.689,80.828,0.002,3386,,,True,2121,2,
+gemma4-e2b,rescue,내부 작업자 쓰러짐과 2차 사고 예방,GPU,7.625,89.417,0.002,3249,,,True,1950,2,
+gemma4-e2b,cpr-branches,구조 후 호흡 확인과 응급처치 분기,GPU,4.554,106.018,0.001,3415,,,True,1937,2,
+gemma4-e2b,permit-handover,교대 작업과 작업허가·감시 인수인계,GPU,7.258,107.98,0.001,3701,,,True,1956,2,
+gemma4-e2b,uncertain-readings,단위가 다른 측정값과 측정 신뢰성,GPU,4.626,80.506,0.002,2439,,,True,1993,2,

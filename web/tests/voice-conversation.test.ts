@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 짧은 충격음·침묵은 질문으로 보내지 않고 말이 끝나면 자동으로 세그먼트를 반환한다 / 긴 발화는 중간을 잘라 자동 전송하지 않는다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 짧은 충격음·침묵은 질문으로 보내지 않고 말이 끝나면 자동으로 세그먼트를 반환한다, 긴 발화는 중간을 잘라 자동 전송하지 않는다, 한 번 켠 뒤 발화→자동 전송→읽기→다시 듣기를 수행하고 읽는 소리를 재입력하지 않는다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import {expect,it,vi} from 'vitest';
 import {VoiceConversation,type ConversationPorts,type VoiceState} from '../src/voice/conversation';
 import {SpeechSegmenter,resample16k} from '../src/voice/segmenter';

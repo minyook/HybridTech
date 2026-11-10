@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 생성 SDK/Worker를 배포 자산으로 번들링한다. runtime이 참조할 실행 파일 준비 단계다.
+ * 연결 모듈: ./light-worker-bridge.mjs.
+ */
 import { build } from 'vite';
 import { fileURLToPath } from 'node:url';
 import { readFile } from 'node:fs/promises';

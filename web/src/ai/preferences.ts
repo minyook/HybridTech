@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 AI 문맥/출력/복구 프로필과 로컬 설정 저장·정규화를 관리한다. Android InferenceSettings와 저장소가 다르다.
+ * 연결 모듈: ../storage/db, ./capabilities.
+ */
 import { getSetting, setSetting } from '../storage/db';
 import { browserAIFeatures } from './capabilities';
 

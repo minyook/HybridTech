@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 실제 의미 인코더를 사용하는 검색 회귀을 검증하는 JVM 회귀 검사다.
+ * 검사 예: recordReviewedFrozenVectorsAndPreparedIndexLatency, median
+ * 실행: :app:testDebugUnitTest. 외부 자산/평가/스트레스의 선택 조건은 본문의 환경 변수/Assume을 확인한다.
+ */
 package com.minyook.sllm2.data
 
 import org.json.JSONArray

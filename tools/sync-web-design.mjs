@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 스타일/아이콘 기준을 Android 디자인 토큰/리소스로 동기화하는 개발 도구. 생성 대상 변경은 실제 앱 화면과 함께 확인한다.
+ * 연결 모듈: com.minyook.sllm2.R.
+ */
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';

@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 브라우저 viewport 제어기를 React 상태/수명에 연결한다. 키보드·화면 변화가 채팅 배치에 반영되게 한다.
+ * 연결 모듈: ./viewport.
+ */
 import { useLayoutEffect, useState } from 'react';
 import { createChatViewport, type ChatViewport, type ChatViewportSample } from './viewport';
 

@@ -1,3 +1,6 @@
+/* 소스 안내
+ * React 렌더 오류를 복구 화면으로 격리한다. 모델 native 프로세스 종료를 직접 처리하는 런타임 가드는 아니다.
+ */
 import { Component, type ReactNode } from 'react';
 
 export class ErrorBoundary extends Component<{children:ReactNode},{failed:boolean}> {

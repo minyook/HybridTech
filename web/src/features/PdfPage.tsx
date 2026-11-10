@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 문서 ID와 쪽을 PDF.js 렌더로 연결하는 웹 원문 화면. Android PdfRenderer 화면과 별도 구현이다.
+ * 연결 모듈: ../types, ../offline/assets, ../ui.
+ */
 import { useEffect, useRef, useState } from 'react';
 import { getDocument, GlobalWorkerOptions, type PDFDocumentProxy } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import workerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';

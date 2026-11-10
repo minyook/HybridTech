@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 로컬 음성 준비·진행·시작/중단 UI. 실제 오디오/인식 수명은 voice 계층에 위임한다.
+ * 연결 모듈: ../voice/assets, ../voice/catalog, ../voice/conversation, ../voice/recognizer, ../voice/browser-audio.
+ */
 import {useEffect,useRef,useState} from 'react';
 import {downloadVoice,voiceInstalled} from '../voice/assets';
 import {VOICE_MODEL_BYTES} from '../voice/catalog';

@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 보존된 iPhone 로컬 HTTPS 시험의 주소·인증서·설치 안내 서버 도우미. 운영 인증서 발급/배포와 구분한다.
+ */
 import { createPrivateKey, randomBytes, randomUUID, X509Certificate } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';

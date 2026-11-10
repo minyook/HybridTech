@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 불완전한 다운로드는 오프라인 준비 완료로 표시하지 않는다 / 완료된 파일은 다음 준비에서 다시 검증하고 다운로드를 재사용한다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 불완전한 다운로드는 오프라인 준비 완료로 표시하지 않는다, 완료된 파일은 다음 준비에서 다시 검증하고 다운로드를 재사용한다, 캐시의 손상된 파일은 재다운로드해 복구한다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { createHash } from 'node:crypto';
 import { afterEach, expect, it, vi } from 'vitest';
 import type { Asset } from '../src/types';

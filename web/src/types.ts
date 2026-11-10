@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 웹 문서·출처·대화 등 모듈 사이의 데이터 계약. 저장소·검색·화면이 같은 타입을 사용한다.
+ */
 export interface Chunk {
   id: string;
   documentId: string;

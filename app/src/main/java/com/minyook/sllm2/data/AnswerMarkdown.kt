@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 모델/문서 Markdown의 표시 정리와 완결 경계를 관리한다. ViewModel의 부분 공개와 UI 표시가 사용하며 원문 수치나 조건을 요약하지 않는다.
+ */
 package com.minyook.sllm2.data
 
 /** Display-only cleanup. Does not shorten evidence, remove conditions, or rewrite measurements. */
@@ -6,6 +9,8 @@ object AnswerMarkdown {
     private val bullet = Regex("^(\\s*)[*+]\\s+")
     private val ordered = Regex("^(\\s*)(\\d+)[)]\\s+")
     private val sentenceEnd = Regex("(?<!\\d)[.!?。！？](?:[’”\\\"')\\]]|\\*\\*|`)*(?=\\s|$)")
+    private val listLine = Regex("(?:[-*+] |\\d+[.)] ).+")
+    private val dividerLine = Regex("[-*_ ]+")
     private val numbered = Regex("(?<![~～①-⑳])([①-⑳])\\s+(?=[가-힣A-Za-z])")
     private val checklistHeader = Regex("^밀폐공간\\s*작업\\s*시\\s*준수사항\\s*\\(산업안전보건기준에\\s*관한\\s*규칙\\)\\s*항\\s*목\\s*[○×]*\\s*위\\s*반\\s*사\\s*항\\s*및\\s*조\\s*치\\s*")
     private val brokenEnding = Regex("(하십시|하십|있습|없습|습니|합니|됩니)\\s+(오|시오|니다|다)(?=[.?!,\\s]|$)")
@@ -39,7 +44,9 @@ object AnswerMarkdown {
     }
 
     /** Only completed blocks/sentences are published while generation is still in progress. */
-    fun preview(raw: String): String? {
+    fun preview(raw: String): String? = previewPrefix(raw)?.let(::formatPreview)
+
+    internal fun previewPrefix(raw: String): String? {
         var text = raw.replace("\r\n", "\n").replace('\r', '\n')
         if (wrapper.containsMatchIn(text)) text = text.replaceFirst(wrapper, "").removeSuffix("```")
         var fence: String? = null; var offset = 0; var boundary = 0
@@ -51,17 +58,19 @@ object AnswerMarkdown {
                 if (line.isBlank()) boundary = offset
                 else if (!line.trimStart().startsWith('#') && !line.contains('|')) {
                     sentenceEnd.findAll(line).lastOrNull()?.let { boundary = offset + it.range.last + 1 }
-                    if (offset + line.length < text.length && line.trimStart().matches(Regex("(?:[-*+] |\\d+[.)] ).+"))) boundary = offset + line.length
+                    if (offset + line.length < text.length && line.trimStart().matches(listLine)) boundary = offset + line.length
                 }
             }
             offset += line.length + 1
         }
-        if (boundary == 0) return null
-        val prefix = text.take(boundary).trim()
+        return if (boundary == 0) null else text.take(boundary).trim()
+    }
+
+    internal fun formatPreview(prefix: String): String? {
         // Do not show a half-open bold/code span or an isolated title as the first answer.
         if (closingInlineMarkers(prefix).isNotEmpty()) return null
         val body = normalize(prefix)
-        if (body.lines().none { it.isNotBlank() && !it.trimStart().startsWith('#') && !it.matches(Regex("[-*_ ]+")) }) return null
+        if (body.lineSequence().none { it.isNotBlank() && !it.trimStart().startsWith('#') && !it.matches(dividerLine) }) return null
         return body
     }
 

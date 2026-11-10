@@ -1,0 +1,13 @@
+Qualcomm NPU runtime integration
+
+QNN Runtime 2.44.0
+Maven coordinates com.qualcomm.qti:qnn-runtime:2.44.0
+https://repo.maven.apache.org/maven2/com/qualcomm/qti/qnn-runtime/2.44.0/
+The vendor license and notices are included in this directory.
+
+LiteRT Qualcomm dispatch library
+Google AI Edge official sample, commit 32a331c33a7115a3b86ef554fb58a9c11d03b123
+https://github.com/google-ai-edge/litert-samples/tree/32a331c33a7115a3b86ef554fb58a9c11d03b123/samples/litert/qualcomm/llm_chatbot_npu
+libLiteRtDispatch_Qualcomm.so SHA-256
+9c039e24d7b80c5a213455cb29f9c2766125dca5f135fa9111c3ef224792e95f
+Apache License 2.0 is included in Google-Apache-2.0.txt.

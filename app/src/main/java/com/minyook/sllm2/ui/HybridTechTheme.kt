@@ -1,3 +1,6 @@
+/* 소스 안내
+ * Compose 테마/색상 정의. 이 파일을 쓰는 화면과 실제 TossFieldGuardApp의 별도 테마 적용을 구분한다.
+ */
 package com.minyook.sllm2.ui
 
 import androidx.compose.material3.MaterialTheme

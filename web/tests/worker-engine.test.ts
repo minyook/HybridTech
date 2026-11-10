@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 무결성 검증 후 저장된 문맥 한도로 실제 SDK 엔진을 만든다 / OPFS 모델은 워커에서 열고 실제 파일 크기를 확인한 뒤 스트리밍 적재한다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 무결성 검증 후 저장된 문맥 한도로 실제 SDK 엔진을 만든다, OPFS 모델은 워커에서 열고 실제 파일 크기를 확인한 뒤 스트리밍 적재한다, iPhone 실행은 입력 배치 1과 작은 ringbuffer를 사용하고 데스크톱의 기본 설정은 유지한다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 const sdk=vi.hoisted(()=>({create:vi.fn(),load:vi.fn(),verify:vi.fn(),setup:vi.fn(),global:vi.fn()}));
 vi.mock('@litert-lm/core',()=>({Engine:{create:sdk.create},loadLiteRtLm:sdk.load,SamplerType:{TOP_K:1},setupDefaultWebGpuDevice:sdk.setup,getGlobalLiteRtLm:sdk.global}));

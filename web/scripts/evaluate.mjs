@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 웹 검색 평가의 결과를 집계/출력하는 개발 스크립트. 평가 데이터와 실행한 검색 코드의 조합이 기준이다.
+ */
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { createServer } from 'vite';
 const server=await createServer({server:{middlewareMode:true},appType:'custom'});

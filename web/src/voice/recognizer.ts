@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 로컬 인식 Worker 요청·자산 준비·복구·정리를 메인 화면에서 조정한다.
+ * 연결 모듈: ../ai/runtime, ../ai/engine-lease, ./assets.
+ */
 import {holdAIForAudio} from '../ai/runtime';
 import {acquireEngineLease} from '../ai/engine-lease';
 import {voiceInstalled} from './assets';

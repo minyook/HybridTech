@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 보존된 iPhone HTTPS 시험 서버/자산 준비를 실행하고 종료를 정리하는 개발 진입점이다.
+ * 연결 모듈: ../server/iphone-https.ts.
+ */
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { preview } from 'vite';

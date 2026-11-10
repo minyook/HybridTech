@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 음성 인식이 메모리를 사용할 때 답변 모델을 정리하고 자동 적재를 막는다 / 답변 모델 준비 중 음성 인식을 시작하면 늦은 적재가 겹치지 않는다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 음성 인식이 메모리를 사용할 때 답변 모델을 정리하고 자동 적재를 막는다, 답변 모델 준비 중 음성 인식을 시작하면 늦은 적재가 겹치지 않는다, Gemma도 선택한 문단만 프롬프트에 넣고 전체 원문을 다시 섞지 않는다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 const fixture=vi.hoisted(()=>({settings:{contextTokens:8192,maxOutputTokens:512},installed:true,lightInstalled:true,runtime:true,backend:'idb',forceSupplement:true}));
 vi.mock('../src/rag/answer-plan',async importOriginal=>{const actual=await importOriginal<typeof import('../src/rag/answer-plan')>();return {...actual,createAnswerPlan:(question:string,sources:Parameters<typeof actual.createAnswerPlan>[1])=>({...actual.createAnswerPlan(question,sources),supplementRequested:fixture.forceSupplement})};});

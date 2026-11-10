@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 산소 후속 질문의 원문/표/관련 없는 내용 배제을 검증하는 JVM 회귀 검사다.
+ * 검사 예: explicitSubjectDescriptionsHaveCorrectScopeWithoutLoadingTheEncoder, strings, norm
+ * 실행: :app:testDebugUnitTest. 외부 자산/평가/스트레스의 선택 조건은 본문의 환경 변수/Assume을 확인한다.
+ */
 package com.minyook.sllm2.data
 
 import org.json.JSONArray
@@ -33,7 +38,7 @@ class GasScopeEvaluationTest {
             rows.put(JSONObject().put("asked",asked).put("prior",prior).put("query",request.query).put("kind",request.kind.name).put("status",result.status).put("method",result.method).put("pages",JSONArray(result.sources.map{it.chunk.pageNumber}.distinct())).put("millis",(System.nanoTime()-started)/1e6).put("pass",issues.isEmpty()).put("failures",JSONArray(issues)).put("answerMarkdown",plan.body))
         }
         val report=JSONObject().put("platform","PC JVM").put("scope","Actual Android coordinator/conversation resolver/answer plan with real assets; no Android execution, UI frame, STT/TTS or Gemma inference; explicit description path needs no query encoding").put("datasetScope",dataset.getString("scope")).put("total",cases.length()).put("passed",cases.length()-failed).put("encoderCalls",encoderCalls).put("indexPrepareMs",prepareMs).put("results",rows)
-        val out=File(app.parentFile,"tmp/gas-scope-20261105").apply{mkdirs()}
+        val out=File(app,"build/reports/fieldguard/gas-scope").apply{mkdirs()}
         File(out,"after-pc.json").writeText(report.toString(2))
         File(out,"after-answers.md").writeText("# 대상별 문서 답변 · PC 제품 코드 검사\n\n실기기/Gemma/UI 프레임 검사가 아닙니다.\n\n"+(0 until rows.length()).joinToString("\n\n---\n\n"){i->val row=rows.getJSONObject(i);"## ${row.getString("asked")}\n\n이전 주제: ${row.getString("prior").ifBlank{"없음"}}\n\n${row.getString("answerMarkdown")}"})
         assertEquals(report.toString(2),0,failed);assertEquals(0,encoderCalls)

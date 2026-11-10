@@ -1,0 +1,12 @@
+E/litert  ( 3100): [dispatch_delegate.cc:131] Failed to initialize Dispatch API: ERROR: [third_party/odml/litert/litert/runtime/dispatch/dispatch_delegate.cc:201]
+E/litert  ( 3100): [dispatch_delegate.cc:146] Failed to create a dispatch delegate kernel: No usable Dispatch runtime found
+E/litert  ( 3100): [litert_dispatch.cc:187] Unsupported dispatch runtime version
+E/litert  ( 3100): [dispatch_delegate.cc:131] Failed to initialize Dispatch API: ERROR: [third_party/odml/litert/litert/runtime/dispatch/dispatch_delegate.cc:201]
+E/litert  ( 3100): [litert_dispatch.cc:187] Unsupported dispatch runtime version
+E/litert  ( 3100): [litert_dispatch.cc:187] Unsupported dispatch runtime version
+E/litert  ( 3100): [dispatch_delegate.cc:131] Failed to initialize Dispatch API: ERROR: [third_party/odml/litert/litert/runtime/dispatch/dispatch_delegate.cc:201]
+E/litert  ( 3100): [litert_dispatch.cc:187] Unsupported dispatch runtime version
+E/litert  ( 3100): [dispatch_delegate.cc:131] Failed to initialize Dispatch API: ERROR: [third_party/odml/litert/litert/runtime/dispatch/dispatch_delegate.cc:201]
+E/litert  ( 3100): [litert_compiled_model.cc:164] Failed to allocate tensors
+E/native  ( 3100): E0000 00:00:1794276093.057878    3123 llm_litert_npu_compiled_model_executor.cc:457] INTERNAL: RET_CHECK failure (third_party/odml/litert_lm/runtime/executor/llm_litert_npu_compiled_model_executor.cc:457) result Inference warmup run for Text Decoder (prefill) failed.Failed to invoke the compiled model
+E/native  ( 3100): └ Failed to allocate tensors

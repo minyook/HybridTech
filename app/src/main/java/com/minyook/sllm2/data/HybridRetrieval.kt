@@ -1,12 +1,24 @@
+/* 소스 안내
+ * 직접 응답 선택기와 어휘/768차원 의미 순위를 결합한다. 주제 선택 메뉴 없이 출처·검색 상태·일반 설명 주제를 반환한다.
+ */
 package com.minyook.sllm2.data
 
 import org.json.JSONObject
 import kotlin.math.ln
 import kotlin.math.sqrt
 
+/** 이전 대화 기록의 선택 메타데이터 읽기 호환용. 새 답변에는 주제 선택지를 생성하지 않는다. */
 data class SearchSuggestion(val label: String, val question: String)
 data class SearchResolution(val question: String, val sources: List<RetrievedChunk> = emptyList(), val status: String = "unconfirmed", val message: String = "질문에 직접 답할 근거를 아직 확인하지 못했어요. 궁금한 대상과 알고 싶은 내용을 함께 알려 주세요.", val suggestions: List<SearchSuggestion> = emptyList(), val semantic: Boolean = false, val method: String = "", val searchComplete: Boolean = false, val generalQuestion: String? = null, val answerBody: String? = null)
 internal data class SemanticPassage(val id:String,val documentId:String,val page:Int,val chunkIndex:Int,val section:String,val text:String,val orders:List<Int>,val units:List<EvidencePassage>,val searchText:String,val sourceBody:String,val vector:FloatArray)
+/**
+ * 원문 문단의 어휘 점수와 사전 계산된 768차원 의미 벡터의 순위를 결합하는 검색 엔진.
+ * Coordinator가 질문 벡터를 공급하며 이 클래스는 모델을 직접 실행하지 않는다.
+ * 명시한 단일 가스·장비·정확한 절 제목은 전용 선택기로 처리하고, 일반 후보는 dense/sparse 순위를
+ * 결합해 재검토한다. 인덱스의 문서 본문이 현재 ObjectBox 원문과 일치하는 항목만 출처로 허용한다.
+ * 선택한 문단과 결과 상태를 SearchResolution으로 반환한다. 후보가 비슷해도 주제 선택 메뉴를 만들지 않으며
+ * 직접 근거를 확정하지 못한 구체적인 질문은 일반 설명 경로에 원문 그대로 전달한다.
+ */
 internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:String) {
     private val root = JSONObject(json)
     init { require(root.getInt("dimensions")==768 && root.getString("modelRevision")=="5090578d9565bb06545b4552f76e6bc2c93e4a66") }
@@ -41,7 +53,7 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
         val sharedGas=parts.size>1&&parts.dropLast(1).all{Regex("^(산소|유해가스|일산화탄소|이산화탄소|황화수소)$").matches(EvidenceLanguage.compact(it))}&&EvidenceLanguage.terms(parts.last()).any{it in setOf("측정","농도","기준")}
         if(!review&&!fastOnly&&parts.size>1&&!sharedGas){
             val each=parts.map{resolve(it,null)};val found=each.filter{it.status=="answered"};val missing=each.filter{it.status!="answered"}
-            if(found.isNotEmpty()&&missing.isNotEmpty())return result.copy(status="partial",sources=found.flatMap{it.sources}.groupBy{it.chunk.id}.values.map{group->group.first().copy(evidence=group.flatMap{FocusedEvidence.selected(it)}.distinctBy{it.text})},message="질문 중 ‘${missing.joinToString(" / "){it.question}}’ 부분은 아직 직접 근거를 확인하지 못했어요. 이 부분에서 궁금한 대상이나 조건을 더 알려 주세요.",suggestions=missing.take(3).map{SearchSuggestion(it.question,it.question)})
+            if(found.isNotEmpty()&&missing.isNotEmpty())return result.copy(status="partial",sources=found.flatMap{it.sources}.groupBy{it.chunk.id}.values.map{group->group.first().copy(evidence=group.flatMap{FocusedEvidence.selected(it)}.distinctBy{it.text})},message="질문 중 ‘${missing.joinToString(" / "){it.question}}’ 부분은 아직 직접 근거를 확인하지 못했어요. 이 부분에서 궁금한 대상이나 조건을 더 알려 주세요.")
         }
         val tokenQuestion=if(review)question.replace(Regex("(?<=[가-힣])(?:과|와)\\s+")," ") else question
         val tokens=EvidenceLanguage.terms(tokenQuestion).filterNot{Regex("^(그거|그건|그것|그러면|그럼|후속|질문)").containsMatchIn(it)}
@@ -59,8 +71,7 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
         }
         if(vector==null||vector.size!=768||vector.any{!it.isFinite()}){
             if(sources.isNotEmpty()&&unknown.isEmpty()&&!vague)return result.copy(sources=sources,status="answered",message="",semantic=false,method="lexical")
-            val suggestions=if(vague&&tokens.isNotEmpty())passages.filter{it.section.length<50&&tokens.any{t->t in EvidenceLanguage.compact(it.section)}}.map{it.section}.distinctBy{EvidenceLanguage.compact(it)}.take(3).map{val label=it.replace(Regex("^\\((.*)\\)$"),"$1");SearchSuggestion(label,"${label}에 대해 알려줘")} else emptyList()
-            return result.copy(status=if(vague)"clarify" else "unconfirmed",message=if(vague)"어떤 대상의 방법이나 조건이 궁금한가요? 대상과 궁금한 점을 함께 알려 주세요." else result.message,suggestions=suggestions,semantic=false)
+            return result.copy(status=if(vague)"clarify" else "unconfirmed",message=if(vague)"어떤 대상의 방법이나 조건이 궁금한가요? 대상과 궁금한 점을 함께 알려 주세요." else result.message,semantic=false)
         }
         val texts=passageTexts
         val frequencies=tokens.associateWith{t->tokenFrequency.computeIfAbsent(t){texts.count{t in it}}}
@@ -84,12 +95,11 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
         val fused=candidates.filter{it.dense>=(dense.firstOrNull()?.dense?:0.0)-.075}.sortedByDescending{it.fused}
         val lead=dense.firstOrNull();val gap=if(lead!=null)lead.dense-(dense.firstOrNull{it.p.page!=lead.p.page||it.p.documentId!=lead.p.documentId}?.dense?:lead.dense) else 0.0
         val top=if(lead!=null&&lead.dense>=.40&&gap>=(if(lead.dense>=.5).04 else .06))lead else fused.firstOrNull()
-        if((dense.firstOrNull()?.dense?:0.0)>=.4)result=result.copy(suggestions=fused.map{it.p.section}.filter{it.isNotBlank()&&it.length<=50}.distinctBy{EvidenceLanguage.compact(it)}.take(3).map{SearchSuggestion(it,"${it}에 대해 알려줘")})
         val semanticClear=top!=null&&top.dense>=.40&&dense.indexOf(top)<5&&top.dense-(dense.firstOrNull{it.p.page!=top.p.page||it.p.documentId!=top.p.documentId}?.dense?:top.dense)>=(if(top.dense>=.5).04 else .06)
         if(review){
             result=result.copy(searchComplete=true,method="reviewed-semantic")
             if(passages.isEmpty()||passages.size!=root.getJSONArray("passages").length())return result.copy(status="search-error",searchComplete=false,message="현재 문서와 검색 인덱스를 함께 확인하지 못했어요. 문서를 준비한 뒤 다시 질문해 주세요.",suggestions=emptyList())
-            if(vague)return result.copy(status="clarify",message="어떤 대상의 내용을 확인할까요? 관련 항목을 선택하거나 질문의 대상을 알려 주세요.")
+            if(vague)return result.copy(status="clarify",message="궁금한 대상과 내용을 알려 주세요.")
             if(unknown.isNotEmpty() || (sources.isEmpty()&&(lead?.dense?:0.0)<.40))return result.copy(status="no-evidence",message="제공 문서 전체 검색에서 질문에 직접 답할 근거를 확인하지 못했어요.",suggestions=emptyList(),generalQuestion=question)
             val attributes=tokens.filter{it in setOf("방법","시기","자격","직무","절차")}
             val titled=if(attributes.isEmpty()||tokens.count{it !in EvidenceLanguage.generic}<1)emptyList() else chunks.filter{c->
@@ -117,13 +127,15 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
                 if(anchorCandidates.size==1)return result.copy(status="answered",sources=completeSafety(anchorCandidates.map{RetrievedChunk(it,1.0,pageUnits.getValue(it.id))},question),message="",suggestions=emptyList(),method="unique-source-anchor-semantic")
                 val agreement=sources.isNotEmpty()&&dense.take(5).any{c->c.dense>=.40&&sources.any{it.chunk.documentId==c.p.documentId&&it.chunk.pageNumber==c.p.page}}
                 if((agreement||anchored)&&!vague)return result.copy(status="answered",sources=completeSafety(sources,question),message="",suggestions=emptyList(),method=if(anchored)"source-anchor-semantic" else "lexical-semantic-agreement")
-                return result.copy(status="clarify",message="관련 근거가 여러 항목으로 나뉘어 있어요. 아래 항목 중 궁금한 범위를 선택해 주세요.")
+                // 후보가 비슷하다는 이유로 주제 선택을 요구하지 않는다. 근거 선택 기준은 유지하고,
+                // 문서로 확정하지 못한 원래 질문을 일반 설명 경로에 그대로 전달한다.
+                return result.copy(status="no-evidence",message="질문에 직접 답할 문서 근거를 확정하지 못했어요.",generalQuestion=question)
             }
         }else{
-            if(vague)return result.copy(status="clarify",message="어떤 내용을 확인하려는 건가요? 관련 문서에서 찾은 항목 중 선택하거나 궁금한 대상을 알려 주세요.")
-            if(unknown.isNotEmpty())return result.copy(message="관련 주제는 찾았지만 요청한 ‘${unknown.joinToString("·")}’ 정보는 현재 문서 근거로 확인하지 못했어요. 아래 항목은 다른 관련 내용이에요.")
+            if(vague)return result.copy(status="clarify",message="궁금한 대상과 내용을 알려 주세요.")
+            if(unknown.isNotEmpty())return result.copy(message="관련 주제는 찾았지만 요청한 ‘${unknown.joinToString("·")}’ 정보는 현재 문서 근거로 확인하지 못했어요.")
         }
-        if(sources.isEmpty()&&!semanticClear)return result.copy(status="clarify",message="질문의 뜻을 한 가지로 좁히지 못했어요. 아래 관련 항목 중 어떤 내용인지 알려 주세요. 다른 뜻이라면 대상이나 상황을 조금 더 설명해 주세요.")
+        if(sources.isEmpty()&&!semanticClear)return result.copy(status="clarify",message="궁금한 대상과 내용을 알려 주세요.")
         if(sources.isNotEmpty()&&!review)return result.copy(sources=sources,status="answered",message="",suggestions=emptyList())
         if(top==null)return result
         val p=top.p;val chunk=chunks.first{it.documentId==p.documentId&&it.pageNumber==p.page&&it.chunkIndex==p.chunkIndex}
@@ -133,13 +145,6 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
         val evidence=listOf(RetrievedChunk(chunk,top.fused,selected+context))
         return result.copy(sources=if(review)completeSafety(evidence,question) else evidence,status="answered",message="",suggestions=emptyList())
     }
-    fun relatedChoices(question: String, sources: List<RetrievedChunk>): List<SearchSuggestion> {
-        val selected = sources.flatMap { FocusedEvidence.selected(it) }.map { it.section }.filter { it.isNotBlank() && it.length <= 70 }.distinct()
-        val terms = EvidenceLanguage.terms(question)
-        val other = passages.filter { passage -> terms.any { it in EvidenceLanguage.aliases(passage.section) } }.map { it.section }.filter(String::isNotBlank)
-        return (selected + other).distinctBy { EvidenceLanguage.compact(it) }.take(3).map { SearchSuggestion(it, "$question $it 에 대해 알려줘") }
-    }
-
     /** Additional evidence is searched in the same topic and kept with its complete safety scope. */
     fun additional(question: String, vector: FloatArray, seenAnswers: List<String>): List<RetrievedChunk> {
         val seen = seenAnswers.joinToString(" ") { EvidenceLanguage.compact(it) }

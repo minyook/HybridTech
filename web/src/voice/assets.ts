@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 로컬 음성 모델 manifest·설치 확인·다운로드를 관리한다. 인식 Worker가 준비된 자산을 사용한다.
+ * 연결 모듈: ./catalog.
+ */
 import {sha256} from '@noble/hashes/sha2.js';
 import {bytesToHex} from '@noble/hashes/utils.js';
 import {VOICE_CACHE,VOICE_FILES,VOICE_REVISION,VOICE_MODEL_BYTES,voiceKey} from './catalog';

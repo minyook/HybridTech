@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 시험 TCP v1의 LF 프레임·hello/reading 파싱과 장비별 registry를 정의한다. 순번·신선도·소유자·RTT를 관리한다.
+ */
 package com.minyook.sllm2.gas
 
 import org.json.JSONObject
@@ -11,7 +14,12 @@ data class MeterHello(val deviceId:String,val name:String,val test:Boolean,val i
 data class MeterSample(val sequence:Long,val ageMs:Long,val oxygen:Double?,val h2s:Double?,val co:Double?,val lel:Double?,val healthy:Boolean,val alarm:String)
 class MeterProtocolException(message:String):Exception(message)
 
-/** Field Guard experimental protocol v1. UTF-8 JSON, one bounded frame per LF. */
+/**
+ * 제조사 협의 전 시험용 센서 통신 v1의 프레임·필드 계약. WifiMeterServer가 파서로 사용한다.
+ * UTF-8 JSON 한 개당 LF 하나이며 최대 길이·알 수 없는 필드·값/단위·세션 연결 코드를 검사한다.
+ * 유효한 hello/reading만 타입으로 반환하고 실패는 MeterProtocolException으로 해당 연결에 전달한다.
+ * AP 공유 코드 확인은 개별 장비 신원 증명이나 애플리케이션 데이터 암호화를 제공하지 않는다.
+ */
 object WifiMeterProtocol {
     const val MAX_FRAME_BYTES=8192
     const val DEFAULT_PORT=8765
@@ -76,6 +84,11 @@ data class WifiMeterView(val deviceId:String,val name:String,val test:Boolean,va
 }
 
 /** Per-connection ownership prevents one socket from overwriting another meter. */
+/**
+ * 연결 소유자와 장비 ID별 최신 샘플을 관리하는 동기화 저장소.
+ * 중복/역순 수신은 신선도를 갱신하지 않고, 단조 시계로 샘플 경과·연결 지연을 계산한다.
+ * snapshot 결과는 서비스/UI의 상태 표시용이며 MAX_RECEIVERS는 실제 AP 무선 대수 보장이 아니다.
+ */
 class WifiMeterRegistry {
     private data class Entry(val owner:String,var view:WifiMeterView,var receivedNanos:Long=0)
     private val entries=linkedMapOf<String,Entry>()

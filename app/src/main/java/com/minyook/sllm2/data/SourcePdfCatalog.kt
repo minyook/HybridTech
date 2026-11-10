@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 문서 ID를 번들 PDF 파일·쪽수·판본 해시에 연결한다. PDF 렌더와 표 복원에서 같은 판본을 확인한다.
+ */
 package com.minyook.sllm2.data
 
 /** Official attachments corresponding to the bundled page-by-page search text. */
@@ -11,6 +14,7 @@ internal data class SourcePdf(
     fun pageIndex(pageNumber: Int): Int? = pageNumber.takeIf { it in 1..pageCount }?.minus(1)
 }
 
+/** 검색의 documentId를 번들 PDF·쪽수·판본 해시에 연결한다. Repository와 표 복원기가 같은 판본을 확인한다. */
 internal object SourcePdfCatalog {
     private val documents = listOf(
         SourcePdf(

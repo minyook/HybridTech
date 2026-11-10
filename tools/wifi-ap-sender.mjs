@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+/* 소스 안내
+ * 명시적인 테스트 장비 ID와 값을 TCP v1으로 전송하는 PC 송신기. 실제 센서값이나 현장 검증 결과가 아니다.
+ */
 // Explicitly simulated TCP detectors for Field Guard experimental protocol v1.
 import net from 'node:net';
 import { parseArgs } from 'node:util';

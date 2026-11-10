@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: Android 검색 이식 / 같은 Java UTF-16 해시와 384차원 정규화 벡터를 사용한다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: Android 검색 이식, 같은 Java UTF-16 해시와 384차원 정규화 벡터를 사용한다, Android와 같은 복합 질문과 결과 단어를 구분한다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { aspects, contradictsSources, embed, javaHash, rank, retrieve } from '../src/rag/search';

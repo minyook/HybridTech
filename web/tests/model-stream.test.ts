@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 큰 Blob의 기본 stream을 쓰지 않고 1MiB 이하 입력으로 같은 바이트를 읽는다 / SDK가 큰 BYOB 버퍼를 요청해도 한 번에 읽는 파일 범위를 제한한다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 큰 Blob의 기본 stream을 쓰지 않고 1MiB 이하 입력으로 같은 바이트를 읽는다, SDK가 큰 BYOB 버퍼를 요청해도 한 번에 읽는 파일 범위를 제한한다, 무결성 검사도 1MiB씩 읽으며 중단 요청 후 파일을 읽지 않는다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { createHash } from 'node:crypto';
 import { expect, it, vi } from 'vitest';
 import { boundedModelStream, MODEL_READ_CHUNK_BYTES as CHUNK } from '../src/ai/model-stream';

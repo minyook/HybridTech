@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 작은 모델용 근거 묶음·설명 정렬·빠진 수치/조건·중복을 관리한다. 최종 답변은 문서 근거를 보존한 순서로 합친다.
+ * 연결 모듈: ../types, ../rag/evidence, ../rag/text.
+ */
 import type { Source } from '../types';
 import { evidenceUnits, formatEvidenceUnits, type EvidenceUnit } from '../rag/evidence';
 import { compactText } from '../rag/text';

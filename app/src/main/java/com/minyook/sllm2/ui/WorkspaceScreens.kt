@@ -1,9 +1,12 @@
+/* 소스 안내
+ * 채팅·음성 대화 목록과 문서/기록 화면을 구성한다. 입력/출처 이벤트는 actions로 넘기고 목록 따라가기는 표시 상태로 관리한다.
+ * 연결 모듈: com.minyook.sllm2.data.ChatHistoryStore, com.minyook.sllm2.data.GeneralKnowledgeAnswer, com.minyook.sllm2.model.ModelPhase.
+ */
 package com.minyook.sllm2.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,6 +29,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
@@ -45,23 +49,38 @@ import com.minyook.sllm2.data.ChatHistoryStore
 import com.minyook.sllm2.data.GeneralKnowledgeAnswer
 import com.minyook.sllm2.model.ModelPhase
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * 텍스트/음성 대화가 공유하는 대화 목록과 입력창. ViewModel 메시지를 표시 전용 버퍼에 통과시킨 뒤
+ * ChatTimelineBuilder로 Markdown 블록별 lazy 항목을 만든다. 원문·기록 저장과 모델 생성은 수행하지 않는다.
+ * 사용자 위쪽 탐색은 자동 따라가기를 멈추고 끝 복귀/최근 답변 버튼은 끝 앵커 추적을 다시 시작한다.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable internal fun WorkspaceChat(state:FieldGuardUiState,voice:VoiceUiState,actions:FieldGuardActions,imeVisible:Boolean,voiceMode:Boolean=false){
     val list=key(state.activeChatId){rememberLazyListState()}
     var follow by rememberSaveable(state.activeChatId){mutableStateOf(true)}
     var jumpRequest by remember(state.activeChatId){mutableIntStateOf(0)}
     var viewportHeight by remember(list){mutableIntStateOf(0)}
+    var autoScrolling by remember(list) { mutableStateOf(false) }
+    val scrollScope=rememberCoroutineScope()
+    var scrollJob by remember(list) { mutableStateOf<Job?>(null) }
+    DisposableEffect(list){onDispose{scrollJob?.cancel()}}
     var voiceSettings by remember{mutableStateOf(false)}
-    val messages=if(state.activeChatId!=null||state.messages.size>1)state.messages else emptyList()
+    val incoming=if(state.activeChatId!=null||state.messages.size>1)state.messages else emptyList()
+    val messages=key(state.activeChatId) { incoming.map { message -> key(message.id) { rememberRevealedMessage(message) } } }
     val timelineBuilder=remember{ChatTimelineBuilder()}
     val rows=remember(messages){timelineBuilder.build(messages)}
+    val latestEndIndex by rememberUpdatedState(rows.size+1)
+    val following by rememberUpdatedState(follow)
+    val endAnchorHeight = with(LocalDensity.current) { 1.dp.roundToPx() }
     val keyboard=LocalSoftwareKeyboardController.current
     val focus=LocalFocusManager.current
-    val canSend=!voice.conversationEnabled&&!state.isAnswering&&state.input.isNotBlank()
+    val canSend=!voice.conversationEnabled&&!state.isAnswering&&!state.isComparing&&state.input.isNotBlank()
     val submit:()->Unit={if(canSend){follow=true;keyboard?.hide();focus.clearFocus();actions.onSubmit()}}
     val openVoice:()->Unit={keyboard?.hide();focus.clearFocus();actions.onNavigate(AppDestination.VOICE);if(!voice.conversationEnabled)actions.onVoiceClick()}
     val toggleVoice:()->Unit={if(voice.conversationEnabled)actions.onStopVoice() else actions.onVoiceClick()}
@@ -69,24 +88,50 @@ import java.util.Locale
     // changing answer height must not be mistaken for the reader scrolling up.
     val scrollConnection=remember(list){object:NestedScrollConnection{
         override fun onPreScroll(available:Offset,source:NestedScrollSource):Offset{
-            if(source==NestedScrollSource.UserInput&&available.y>0f&&list.canScrollBackward)follow=false
+            if(source==NestedScrollSource.UserInput&&available.y>0f&&list.canScrollBackward){follow=false;scrollJob?.cancel();autoScrolling=false}
             return Offset.Zero
         }
     }}
     LaunchedEffect(list){snapshotFlow{Triple(list.layoutInfo.totalItemsCount,list.isScrollInProgress,list.canScrollForward)}.collectLatest{(count,moving,forward)->if(count>0&&!moving&&!forward)follow=true}}
     LaunchedEffect(imeVisible){if(imeVisible){follow=true;jumpRequest++}}
-    // IME animation changes the actual viewport after visibility first flips.
-    // Each explicit jump runs even if following was already enabled. Wait for
-    // layout, target the end, then consume any remaining bottom padding.
-    LaunchedEffect(list,rows,viewportHeight,follow,jumpRequest){
-        if(follow&&rows.isNotEmpty()&&viewportHeight>0){
-            withFrameNanos{}
-            list.scrollToItem(rows.size+1)
-            withFrameNanos{}
-            if(list.canScrollForward)list.scrollBy(viewportHeight.toFloat())
+    // Nearby streamed text should move by its added height. Long jumps and
+    // viewport changes can still anchor directly to the end.
+    LaunchedEffect(list, rows, viewportHeight, follow, jumpRequest, endAnchorHeight) {
+        if(!follow){scrollJob?.cancel();autoScrolling=false;return@LaunchedEffect}
+        if (follow && rows.isNotEmpty() && viewportHeight > 0) {
+            val endIndex = rows.size + 1
+            withFrameNanos { }
+            if(scrollJob?.isActive==true)return@LaunchedEffect
+            autoScrolling = true
+            try {
+                val layout = list.layoutInfo
+                val lastVisible = layout.visibleItemsInfo.lastOrNull()?.index ?: 0
+                if (state.isAnswering && list.canScrollForward && layout.totalItemsCount == endIndex + 1 &&
+                    layout.viewportSize.height == viewportHeight && endIndex - lastVisible in 0..4
+                ) {
+                    // Keep the scroll alive across character updates; restarting a spring on
+                    // every frame leaves the viewport permanently chasing the growing text.
+                    scrollJob=scrollScope.launch {
+                        try {
+                            do {
+                                val current=list.layoutInfo
+                                val endOffset=current.viewportEndOffset-current.afterContentPadding-endAnchorHeight
+                                list.animateScrollToItem(latestEndIndex, scrollOffset = -endOffset.coerceAtLeast(0))
+                                withFrameNanos { }
+                            } while(following && list.canScrollForward)
+                        } finally {autoScrolling=false}
+                    }
+                } else {
+                    list.scrollToItem(endIndex)
+                }
+            } finally {
+                if(scrollJob?.isActive!=true)autoScrolling = false
+            }
         }
     }
-    val awayFromEnd by remember(list){derivedStateOf{list.canScrollForward}}
+    val showScrollLatest by remember(list) {
+        derivedStateOf { list.canScrollForward && (!follow || !autoScrolling) }
+    }
     Box(Modifier.fillMaxSize(),contentAlignment=Alignment.TopCenter){
         Column(Modifier.widthIn(max=1260.dp).fillMaxSize().padding(horizontal=workspacePadding()).padding(bottom=if(imeVisible)8.dp else 0.dp)){
             Box(Modifier.weight(1f)){
@@ -122,13 +167,13 @@ import java.util.Locale
                             is ChatTimelineRow.Question->WorkspaceQuestion(row.message)
                             is ChatTimelineRow.Header->WorkspaceAnswerHeader(row.message)
                             is ChatTimelineRow.Body->MarkdownBlockText(row.block)
-                            is ChatTimelineRow.Footer->WorkspaceAnswerFooter(row.message,actions,!state.isAnswering&&!voice.conversationEnabled)
+                            is ChatTimelineRow.Footer->WorkspaceAnswerFooter(row.message,actions)
                         }
                     }}
                 }
                 if(rows.isNotEmpty())item(key="conversationEnd",contentType="end"){Spacer(Modifier.fillMaxWidth().height(1.dp).testTag("conversationEnd"))}
             }
-            if(awayFromEnd&&messages.isNotEmpty())FilledTonalButton(onClick={follow=true;jumpRequest++},modifier=Modifier.align(Alignment.BottomCenter).padding(bottom=8.dp).testTag("scrollLatest")){Text("최근 답변으로 이동 ↓",fontSize=12.sp)}
+            if(showScrollLatest&&messages.isNotEmpty())FilledTonalButton(onClick={follow=true;jumpRequest++},modifier=Modifier.align(Alignment.BottomCenter).padding(bottom=8.dp).testTag("scrollLatest")){Text("최근 답변으로 이동 ↓",fontSize=12.sp)}
             }
             if(state.inputError!=null&&(!voiceMode||state.inputError!=voice.error))WorkspaceNotice(state.inputError,true)
             if(voiceMode){
@@ -172,11 +217,8 @@ import java.util.Locale
         }
 }
 @OptIn(ExperimentalLayoutApi::class)
-@Composable private fun WorkspaceAnswerFooter(message:ChatMessageUi,actions:FieldGuardActions,choicesEnabled:Boolean){
+@Composable private fun WorkspaceAnswerFooter(message:ChatMessageUi,actions:FieldGuardActions){
     Column(Modifier.fillMaxWidth().padding(top=12.dp,bottom=12.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){
-        if(message.suggestions.isNotEmpty())FlowRow(modifier=Modifier.testTag("answerChoices:${message.id}"),horizontalArrangement=Arrangement.spacedBy(8.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){
-            message.suggestions.forEach{suggestion->OutlinedButton(enabled=choicesEnabled&&!message.pending,onClick={actions.onPreset(suggestion.question)}){Text(suggestion.label,fontSize=12.sp)}}
-        }
         if(message.sourceIds.isNotEmpty()){
             HorizontalDivider(color=WorkspaceDesign.Border)
             Text("참조한 문서",fontSize=11.sp,color=WorkspaceDesign.Muted)

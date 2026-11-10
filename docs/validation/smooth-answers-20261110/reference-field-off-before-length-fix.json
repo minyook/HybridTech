@@ -1,0 +1,69 @@
+{
+  "scope": "Real S24 E2B GPU generation with optional production WorkspaceChat presentation in a temporary fixture. No RAG, user chat writes or saved-setting changes. Questions explicitly request a small field checklist; this is not a long-answer or factual-accuracy certification. Screen recording may add overhead. UI frame timestamps are not separately benchmarked.",
+  "presentation": "off",
+  "maxOutputTokens": 1024,
+  "contextTokens": 4096,
+  "phase": "complete",
+  "rows": [
+    {
+      "question": "밀폐공간 작업을 중단했다가 다시 시작할 때 감독관이 확인할 사항을 핵심 5개로 정리해줘. 각 항목은 한 문장으로 설명해줘.",
+      "totalMs": 4251,
+      "firstAcceptedBodyMs": 1417,
+      "firstNativeTextMs": 585,
+      "initializationMs": 5,
+      "decodeTokens": 114,
+      "tokensPerSecond": 30.593758356582782,
+      "outputChars": 234,
+      "rawAnswer": "작업 재개 전, 작업 구역의 안전성 및 환경이 완전히 복구되었는지 확인해야 합니다. 작업 절차서 및 안전 계획이 최신 상태로 유지되고 있는지 검토해야 합니다. 작업팀 구성원 모두가 재교육을 받았고, 필요한 모든 개인 보호 장비를 갖추었는지 확인해야 합니다. 작업 구역의 환기 및 비상 연락 체계가 정상적으로 작동하는지 점검해야 합니다. 작업 시작 전에 모든 관련 허가 및 안전 점검이 완료되었는지 최종 확인해야 합니다.",
+      "displayAnswer": "> **일반 지식 안내**: 제공 문서로 확인한 사실과 구분되는 AI의 일반 설명입니다.\n\n작업 재개 전, 작업 구역의 안전성 및 환경이 완전히 복구되었는지 확인해야 합니다. 작업 절차서 및 안전 계획이 최신 상태로 유지되고 있는지 검토해야 합니다. 작업팀 구성원 모두가 재교육을 받았고, 필요한 모든 개인 보호 장비를 갖추었는지 확인해야 합니다. 작업 구역의 환기 및 비상 연락 체계가 정상적으로 작동하는지 점검해야 합니다. 작업 시작 전에 모든 관련 허가 및 안전 점검이 완료되었는지 최종 확인해야 합니다.",
+      "outputLimitReached": false,
+      "validatedChunkArrivals": [
+        {
+          "ms": 1417,
+          "validatedCharacters": 97
+        },
+        {
+          "ms": 2065,
+          "validatedCharacters": 139
+        },
+        {
+          "ms": 3028,
+          "validatedCharacters": 194
+        },
+        {
+          "ms": 3663,
+          "validatedCharacters": 238
+        }
+      ]
+    },
+    {
+      "question": "밀폐공간 인명구조용 삼각대 준비 수량을 정할 때 확인할 조건을 핵심 4개로 설명해줘. 임의의 대수는 정하지 말고, 각 항목은 한 문장으로 정리해줘.",
+      "totalMs": 5811,
+      "firstAcceptedBodyMs": 2016,
+      "firstNativeTextMs": 433,
+      "initializationMs": 5,
+      "decodeTokens": 133,
+      "tokensPerSecond": 24.342514980220365,
+      "outputChars": 258,
+      "rawAnswer": "밀폐공간 인명구조용 삼각대 준비 수량을 결정할 때 확인해야 할 핵심 조건은 작업 구역의 크기와 구조, 작업의 복잡성, 그리고 예상되는 비상 상황의 심각도입니다. 작업 구역의 면적과 접근성을 고려하여 필요한 삼각대의 종류와 개수를 산정해야 합니다. 작업의 종류와 예상되는 인원수를 파악하여 최소한의 안전 확보가 가능한 수량을 결정해야 합니다. 또한, 현장의 특수한 환경이나 장비 배치 조건이 삼각대 사용에 미치는 영향을 검토하여 최종 준비 수량을 확정해야 합니다.",
+      "displayAnswer": "> **일반 지식 안내**: 제공 문서로 확인한 사실과 구분되는 AI의 일반 설명입니다.\n\n밀폐공간 인명구조용 삼각대 준비 수량을 결정할 때 확인해야 할 핵심 조건은 작업 구역의 크기와 구조, 작업의 복잡성, 그리고 예상되는 비상 상황의 심각도입니다. 작업 구역의 면적과 접근성을 고려하여 필요한 삼각대의 종류와 개수를 산정해야 합니다. 작업의 종류와 예상되는 인원수를 파악하여 최소한의 안전 확보가 가능한 수량을 결정해야 합니다. 또한, 현장의 특수한 환경이나 장비 배치 조건이 삼각대 사용에 미치는 영향을 검토하여 최종 준비 수량을 확정해야 합니다.",
+      "outputLimitReached": false,
+      "validatedChunkArrivals": [
+        {
+          "ms": 2016,
+          "validatedCharacters": 140
+        },
+        {
+          "ms": 2805,
+          "validatedCharacters": 188
+        },
+        {
+          "ms": 3864,
+          "validatedCharacters": 241
+        }
+      ]
+    }
+  ],
+  "warmupMs": 10139,
+  "settingsUnchanged": true
+}

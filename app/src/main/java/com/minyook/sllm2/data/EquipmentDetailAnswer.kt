@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 명시한 장비와 수량/설명 속성에 맞는 원문 절을 선택한다. HybridRetrieval이 호출하며 미확인 수량을 모델 추측으로 채우지 않는다.
+ */
 package com.minyook.sllm2.data
 
 /** Complete, source-backed answers for named equipment and count questions.

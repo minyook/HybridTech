@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 고정 150문항을 현재 검색/답변 경로로 평가하고 문항별 결과를 기록하는 PC 진입 스크립트다.
+ */
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { createServer } from 'vite';

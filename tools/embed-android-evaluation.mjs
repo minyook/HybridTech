@@ -1,3 +1,6 @@
+/* 소스 안내
+ * Android 평가 결과를 평가 페이지가 읽는 데이터로 준비하는 개발 도구. 제품 질문/학습 데이터와 구분한다.
+ */
 // PC-only evaluation helper. Android's own SemanticTokenizer exports the exact input IDs.
 // Reuses an installed ONNX Node runtime; never downloads models or modifies web/.
 import {readFile, writeFile, rename} from 'node:fs/promises';

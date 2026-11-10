@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 AI 상태·Worker 요청·준비·생성·중단·복구를 조정한다. 화면 훅은 이 모듈 상태를 구독한다.
+ * 연결 모듈: ../types, ../offline/assets, ./model, ./preferences, ./output-quality 등.
+ */
 import type { Source } from '../types';
 import { assetUrl, preparedGroups } from '../offline/assets';
 import { installedModel } from './model';

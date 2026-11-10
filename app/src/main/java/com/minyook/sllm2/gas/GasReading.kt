@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 선택 장비의 채널 값과 신선도·세션 상태를 표현/저장한다. 앱·서비스 알림·위젯 사이의 스냅샷 경계다.
+ */
 package com.minyook.sllm2.gas
 
 import android.content.Context
@@ -24,7 +27,11 @@ data class GasReading(
         source != GasReadingSource.NONE && sessionActive && hasValues && receivedAtMillis > 0L && nowMillis >= receivedAtMillis && nowMillis - receivedAtMillis < freshnessMs
 }
 
-/** Selected AP meter snapshot for the app, notification and widget. */
+/**
+ * 선택된 AP 장비의 최근 스냅샷 저장소. 서비스가 갱신하면 앱 내부 변경 알림과 위젯 갱신으로 이어진다.
+ * 저장값이 있어도 AP 세션·수신 시각·신선도가 유효해야 현재 값으로 사용한다. 미수신 채널은 null로 유지한다.
+ * 모델 추론·작업 승인 데이터와 별개이며 이 값만으로 작업 가능 여부를 판정하지 않는다.
+ */
 object GasReadingStore {
     const val ACTION_READING_CHANGED = "com.minyook.sllm2.gas.READING_CHANGED"
     private const val PREFERENCES = "gas_reading"

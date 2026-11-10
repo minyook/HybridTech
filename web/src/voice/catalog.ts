@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 웹 음성 모델의 고정 revision·파일·캐시 키/크기 카탈로그. assets와 recognizer가 공유한다.
+ */
 // Immutable multilingual Whisper tiny q8 (not the English-only .en model).
 export const VOICE_REVISION='5332fcc35e32a33b86612b9a57a89be7906102b1';
 export const VOICE_CACHE='fieldguard-voice-tiny-v1';

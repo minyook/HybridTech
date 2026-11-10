@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 보존된 웹 AI 복구 안내 HTML을 생성한다. API가 nonce 정책과 함께 제공하며 서버 추론을 수행하는 페이지는 아니다.
+ * 연결 모듈: ../src/ai/recovery.ts.
+ */
 import { AI_OPERATION_KEY, AI_STAGES } from '../src/ai/recovery.ts';
 
 // Served below /api/ so already installed service workers also fetch it directly.

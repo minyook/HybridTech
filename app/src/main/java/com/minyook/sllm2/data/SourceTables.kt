@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 판본/청크 해시가 맞는 검수 표를 선택 문단에 복원한다. 표시 본문과 모델 문맥이 같은 구조를 사용한다.
+ */
 package com.minyook.sllm2.data
 
 import java.security.MessageDigest
@@ -28,6 +31,11 @@ private data class TableText(val value:String,val positions:List<Int>) {
     }
 }
 
+/**
+ * 선택 문단과 PC 검수 표 데이터를 연결하는 복원기. FocusedEvidence.selected에서 호출된다.
+ * 문서 ID·쪽·원문 본문 해시·PDF 판본 해시가 일치한 자료에만 적용해 다른 판본의 셀이 섞이지 않게 한다.
+ * 결과는 Markdown 표/선택 행으로 표시와 모델 문맥에 함께 사용한다. 임의 PDF 표 추출 엔진은 아니다.
+ */
 internal object SourceTables {
     private val tables by lazy { SourceTableData.tables.withIndex().groupBy { Triple(it.value.documentId,it.value.page,it.value.chunkIndex) } }
     private fun matching(chunk:KnowledgeChunk):List<IndexedValue<SourceTable>> {

@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 카메라 또는 이미지의 QR 내용을 디코딩해 인증 화면 콜백으로 전달한다. QR 해독 자체가 감독관 권한을 부여하지 않는다.
+ */
 import {useEffect,useRef,useState} from 'react';
 import jsQR from 'jsqr';
 /** QR camera frames and photos never leave this device. */

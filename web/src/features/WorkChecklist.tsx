@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 작업자 요청과 감독관 점검/승인 화면. 인증된 명령·SSE 갱신·업무 상태 모델을 조합한다.
+ * 연결 모듈: ../types, ../storage/db, ../ai/runtime, ../workflow/work, ../workflow/access 등.
+ */
 import { useEffect, useRef, useState } from 'react';
 import type { Checklist } from '../types';
 import { allWorkOrders, getSetting, setSetting } from '../storage/db';

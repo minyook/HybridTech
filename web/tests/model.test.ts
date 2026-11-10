@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 검증을 통과한 파일만 설치하고 새로운 조회에서 복원한다 / 해시 불일치로 실패한 파일은 기존 모델을 덮어쓰지 않는다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 검증을 통과한 파일만 설치하고 새로운 조회에서 복원한다, 해시 불일치로 실패한 파일은 기존 모델을 덮어쓰지 않는다, 크기가 다른 부분 파일과 취소된 파일을 설치 완료로 표시하지 않는다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import 'fake-indexeddb/auto';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { digestBlob, installedModel, installModel, removeModel } from '../src/ai/model';

@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 채팅 스크롤 제어기를 React ref/effect와 연결한다. 목록 변경/사용자 이동을 전달하고 이벤트를 정리한다.
+ * 연결 모듈: ./scroll.
+ */
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createChatScroll, responseEndIsVisible } from './scroll';
 

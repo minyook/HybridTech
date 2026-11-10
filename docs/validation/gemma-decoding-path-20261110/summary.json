@@ -1,0 +1,43 @@
+{
+  "date": "2026-11-10",
+  "device": "S24 Ultra / SM-S928N / SM8650 / Android 16",
+  "sdk": "LiteRT-LM 0.17.1",
+  "scope": "Two same-prompt, same-output-budget device comparisons. Both trials enable the native benchmark flag. Not a repeated throughput certification or product quality pass.",
+  "requestedContextTokens": 4096,
+  "requestedMaxOutputTokens": 2048,
+  "nativeTrials": 4,
+  "settingsUnchanged": true,
+  "rows": [
+    {
+      "caseId": "entry-check",
+      "samePromptAndEvidence": true,
+      "sameOutput": true,
+      "prefillTokens": 2070,
+      "decodeTokensBefore": 1823,
+      "decodeTokensAfter": 1823,
+      "secondsBefore": 58.358,
+      "secondsAfter": 58.874,
+      "tokensPerSecondBefore": 35.70626788736094,
+      "tokensPerSecondAfter": 35.16276729152358,
+      "initializationBeforeMs": 4730,
+      "initializationAfterMs": 5602
+    },
+    {
+      "caseId": "rescue-equipment",
+      "samePromptAndEvidence": true,
+      "sameOutput": true,
+      "prefillTokens": 2334,
+      "decodeTokensBefore": 1397,
+      "decodeTokensAfter": 1397,
+      "secondsBefore": 42.956,
+      "secondsAfter": 49.226,
+      "tokensPerSecondBefore": 34.054808921122174,
+      "tokensPerSecondAfter": 29.16640651063695,
+      "initializationBeforeMs": 14,
+      "initializationAfterMs": 5
+    }
+  ],
+  "conclusion": "Disabling speculative decoding did not accelerate these cases; candidate not applied to production. Full answers are byte-identical.",
+  "productionChangesApplied": false,
+  "source": "https://github.com/google-ai-edge/LiteRT-LM/blob/v0.17.1/kotlin/java/com/google/ai/edge/litertlm/ExperimentalFlags.kt"
+}

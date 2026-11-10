@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 세션 쿠키·origin/CSRF·JSON 검증 후 store 명령으로 연결하는 HTTP/SSE 경계. 실제 업무 권한은 저장소/도메인에서 재검사한다.
+ * 연결 모듈: ./store.ts, ./ai-recovery-page.ts.
+ */
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { ApiError, type WorkStore } from './store.ts';
 import { randomBytes } from 'node:crypto';
@@ -17,6 +21,12 @@ async function body(request: IncomingMessage) {
   for await (const chunk of request) { input += chunk; if (Buffer.byteLength(input) > 32_768) throw new ApiError(413, '입력 내용이 너무 길어요.'); }
   try { return JSON.parse(input); } catch { throw new ApiError(400, '요청 내용을 확인해 주세요.'); }
 }
+/**
+ * Vite dev/preview에 등록되는 작업 API 경계. plugin.ts가 수명 동안 유지할 WorkStore를 주입한다.
+ * 쿠키·origin·CSRF·JSON 요청을 확인한 뒤 인증/업무 명령을 store로 넘기고 HTTP 오류로 변환한다.
+ * SSE는 권한별 변경 신호만 보내며 클라이언트 live.ts가 자기 권한의 목록을 다시 읽는다.
+ * 역할/소유권과 상태 전이의 최종 검사는 저장소/도메인 계층에서도 수행한다.
+ */
 export function createWorkMiddleware(store: WorkStore) {
   return async (request: IncomingMessage, response: ServerResponse, next: () => void) => {
     let url: URL;

@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 소스 안내
+Android 그림/런처 리소스 workspace_icon_search. 참조하는 화면/테마가 표시하며 자체 기능 처리나 네트워크 동작은 없다.
+-->
 <!-- Generated from web/src/ui.tsx. Run node tools/sync-web-design.mjs. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="22dp" android:height="22dp" android:viewportWidth="24" android:viewportHeight="24">
     <path android:pathData="M3,10a7,7 0,1 0,14,0a7,7 0,1 0,-14,0" android:fillColor="@android:color/transparent" android:strokeColor="#FF6B7684" android:strokeWidth="1.7" android:strokeLineCap="round" android:strokeLineJoin="round" />

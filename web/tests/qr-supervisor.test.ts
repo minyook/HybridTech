@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 작업자는 QR을 발급할 수 없으며 형식이 맞는 임의 토큰으로 권한을 얻을 수 없다 / 발급·스캔 1회 교환·세션 회전·작업자 소유권 보존·이중 사용 방지를 처리한다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 작업자는 QR을 발급할 수 없으며 형식이 맞는 임의 토큰으로 권한을 얻을 수 없다, 발급·스캔 1회 교환·세션 회전·작업자 소유권 보존·이중 사용 방지를 처리한다, QR 발급자의 취소가 이미 부여한 QR 권한에도 즉시 적용된다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import {afterEach,beforeEach,expect,it} from 'vitest';
 import QRCode from 'qrcode';import jsQR from 'jsqr';
 import {createWorkStore,type WorkStore} from '../server/store';

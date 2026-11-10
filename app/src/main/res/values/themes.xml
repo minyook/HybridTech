@@ -1,3 +1,6 @@
+<!-- 소스 안내
+Activity의 기본 Android 테마. Compose 내부 테마 정의와 적용 위치를 구분한다.
+-->
 <resources>
     <!-- Framework window theme; the visible app theme is supplied by Compose. -->
     <style name="Base.Theme.Sllm2" parent="android:style/Theme.Material.Light.NoActionBar">

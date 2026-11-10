@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 실제 앱 화면 셸. 목적지·뒤로 가기·반응형 메뉴·키보드/시스템 여백을 조정해 기능 화면으로 연결한다.
+ * 연결 모듈: com.minyook.sllm2.gas.GasReading, com.minyook.sllm2.gas., com.minyook.sllm2.gas.GasReadingSource, com.minyook.sllm2.model.ContextTokenPolicy, com.minyook.sllm2.model.InferenceBackend 등.
+ */
 package com.minyook.sllm2.ui
 
 import androidx.activity.compose.BackHandler
@@ -135,6 +139,11 @@ private fun FieldGuardTossTheme(content: @Composable () -> Unit) {
     )
 }
 
+/**
+ * MainActivity가 사용하는 실제 화면 셸. destination에 따라 기능 화면을 선택하고 공통 테마·뒤로 가기·
+ * 휴대폰 하단 메뉴/넓은 화면 사이드바·시스템/키보드 여백을 관리한다.
+ * 화면의 입력은 actions로 돌려보내며, 채팅은 WorkspaceChat, 작업 점검/인증은 NativeWorkPage로 이어진다.
+ */
 @Composable
 fun TossFieldGuardApp(state: FieldGuardUiState, voice: VoiceUiState, actions: FieldGuardActions) {
     FieldGuardTossTheme {

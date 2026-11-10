@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 브라우저 마이크 캡처와 로컬 한국어 읽기를 감싼 장치 어댑터. 오디오/읽기 종료와 텍스트 분할을 관리한다.
+ * 연결 모듈: ./conversation.
+ */
 import type {Capture} from './conversation';
 export async function openMicrophone(frames:(audio:Float32Array,rate:number)=>void,ended:()=>void,signal:AbortSignal):Promise<Capture>{
   if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia)throw Error('마이크에는 HTTPS와 지원 브라우저가 필요해요.');

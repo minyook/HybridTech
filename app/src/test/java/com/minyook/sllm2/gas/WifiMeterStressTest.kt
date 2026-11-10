@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 동시 송신·재접속·장기 프레임 스트레스을 검증하는 JVM 회귀 검사다.
+ * 검사 예: optIn, record, awaitCondition
+ * 실행: :app:testDebugUnitTest. 외부 자산/평가/스트레스의 선택 조건은 본문의 환경 변수/Assume을 확인한다.
+ */
 package com.minyook.sllm2.gas
 
 import org.json.JSONObject
@@ -18,7 +23,7 @@ class WifiMeterStressTest {
         generateSequence(File(System.getProperty("user.dir"))) { it.parentFile }
             .first { File(it, "tools/wifi-ap-sender.mjs").isFile }
     }
-    private val results by lazy { File(root, "tmp/wifi-ap-stress-20261104").apply { mkdirs() } }
+    private val results by lazy { File(root, "app/build/reports/fieldguard/wifi-ap-stress").apply { mkdirs() } }
 
     @Before fun optIn() {
         assumeTrue("Run with FIELDGUARD_WIFI_AP_STRESS=1; requires Node.js", System.getenv("FIELDGUARD_WIFI_AP_STRESS") == "1")

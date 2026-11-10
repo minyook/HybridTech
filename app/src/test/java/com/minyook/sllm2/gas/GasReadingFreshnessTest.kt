@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 세션·시간·누락 채널에 따른 최신 측정 표시을 검증하는 JVM 회귀 검사다.
+ * 검사 예: onlyRecentMeasurementsAreCurrent
+ * 실행: :app:testDebugUnitTest. 외부 자산/평가/스트레스의 선택 조건은 본문의 환경 변수/Assume을 확인한다.
+ */
 package com.minyook.sllm2.gas
 
 import org.junit.Assert.assertFalse

@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 웹 생성 출력의 반복/깨진 패턴을 제한된 규칙으로 탐지한다. 문서 사실 검증 전체를 대신하지 않는다.
+ */
 const letters = (text:string) => text.match(/\p{L}/gu) ?? [];
 const korean = /\p{Script=Hangul}/u;
 const usualScripts = /[\p{Script=Hangul}\p{Script=Latin}\p{Script=Han}]/u;

@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 검토용 150문항 평가 자료를 구성하는 개발 도구. 회귀 집합 변경은 성능 측정과 별도 변경으로 취급한다.
+ */
 // Authored from the supplied 2022 guide, not from retrieval output. This is a
 // versioned engineering rubric; domain-owner approval is a separate release gate.
 import { writeFile } from 'node:fs/promises';

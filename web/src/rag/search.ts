@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹의 원문 문단 어휘 점수·질문 범위·근거 선택·기존 답변 검증을 제공한다. 신경망 질의 인코딩은 semantic 계층에 있다.
+ * 연결 모듈: ../types, ./text, ./evidence.
+ */
 import type { Chunk, Source } from '../types';
 import { aliases, compactText, domainTerms, genericTerms, pageBody, queryTerms } from './text';
 import { evidenceUnits, selectedEvidence, type EvidenceUnit } from './evidence';

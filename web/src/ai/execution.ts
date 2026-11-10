@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 일반/Apple 모바일 실행 프로필을 SDK executor 설정으로 바꾼다. 적용 대상은 웹 LiteRT 경로이며 Android 설정과 별개다.
+ */
 import type { GpuArtisanConfig, LlmExecutorSettings } from '@litert-lm/core';
 
 export type AIExecutionProfile='standard'|'apple-mobile';

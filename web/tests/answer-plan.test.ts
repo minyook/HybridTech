@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 실제 가스 측정 본문은 한 번에 표시되고 모델 입력과 동일한 조건·출처를 보존한다 / 실제 CPR의 조건·행동·반복 종료 시점과 회복자세를 한 답변에 유지한다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 실제 가스 측정 본문은 한 번에 표시되고 모델 입력과 동일한 조건·출처를 보존한다, 실제 CPR의 조건·행동·반복 종료 시점과 회복자세를 한 답변에 유지한다, 일반 문서 질문에 현장 작업 판정을 만들지 않고 실시간 승인 질문은 문서에서 답하지 않는다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { readFileSync } from 'node:fs';
 import { expect, it } from 'vitest';
 import { acceptedSupplement, composeAnswer, createAnswerPlan, supplementPrompt } from '../src/rag/answer-plan';

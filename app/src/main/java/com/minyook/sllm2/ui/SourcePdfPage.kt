@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 선택한 문서/쪽의 PDF 렌더 상태를 화면에 반영한다. 원본 Bitmap은 SourcePdfRepository에서 요청한다.
+ * 연결 모듈: com.minyook.sllm2.data.SourcePdfCatalog, com.minyook.sllm2.data.SourcePdfRepository.
+ */
 package com.minyook.sllm2.ui
 
 import android.graphics.Bitmap
@@ -43,6 +47,7 @@ private sealed interface PdfViewState {
 
 @Composable
 internal fun SourcePdfPage(source: SourceUi) {
+    // ViewModel이 고른 문서/쪽을 SourcePdfRepository에 요청한다. 렌더 상태만 소유하고 검색 결과를 재작성하지 않는다.
     val specification = SourcePdfCatalog.find(source.documentId)
     if (specification == null) {
         Text("이 문서에 연결된 PDF 원본이 없습니다. 추출 텍스트 보기를 이용해 주세요.")

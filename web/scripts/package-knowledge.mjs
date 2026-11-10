@@ -1,3 +1,6 @@
+/* 소스 안내
+ * PC의 문서/검색 자료를 배포용 패키지로 정리한다. 원문 판본·메타데이터·검증 자료의 대응을 유지한다.
+ */
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {createServer} from 'vite';

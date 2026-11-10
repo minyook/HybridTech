@@ -1,3 +1,6 @@
+<!-- 소스 안내
+앱 이름·화면/위젯 등이 참조하는 문자열 리소스.
+-->
 <resources>
     <string name="app_name">O₂ Field Guard</string>
 </resources>

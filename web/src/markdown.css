@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 답변의 제목·표·목록·코드 표시의 스타일 정의. 해당 React 화면과 클래스 이름을 함께 변경해야 한다.
+ */
 .markdown{line-height:1.85;overflow-wrap:anywhere}
 .markdown>:first-child{margin-top:0}.markdown>:last-child{margin-bottom:0}
 .markdown h1,.markdown h2,.markdown h3,.markdown h4,.markdown h5,.markdown h6{color:#24344b;line-height:1.55;letter-spacing:-.025em;margin:1.65em 0 .75em;font-weight:750}

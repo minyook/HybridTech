@@ -1,3 +1,6 @@
+/* 소스 안내
+ * ObjectBox에 저장하는 페이지 단위 원문 엔티티. 문서 ID/쪽/본문과 기존 해시 임베딩 필드를 보유한다.
+ */
 package com.minyook.sllm2.data
 
 import io.objectbox.annotation.Entity

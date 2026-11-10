@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 경량 모델의 생각 템플릿과 반복된 절차 출력을 표시용으로 정리한다. 생성된 사실 자체의 정확성을 보장하지 않는다.
+ */
 /** Qwen's non-thinking template can echo an empty <think> wrapper. Keep any
  * template/thinking prelude out of visible Markdown, including partial chunks. */
 export function visibleLightAnswer(raw:string){

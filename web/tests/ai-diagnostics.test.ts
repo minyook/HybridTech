@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 중단 표시와 실제 힙 크기를 보존하고 질문·답변·원시 오류를 보고서에서 제외한다 / 최근 48개만 남기고 변조된 저장 내용과 잘못된 메모리 수치를 제외한다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 중단 표시와 실제 힙 크기를 보존하고 질문·답변·원시 오류를 보고서에서 제외한다, 최근 48개만 남기고 변조된 저장 내용과 잘못된 메모리 수치를 제외한다, 저장소가 없거나 손상돼도 진단 때문에 AI 실행을 중단하지 않는다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import {afterEach,beforeEach,expect,it,vi} from 'vitest';
 import {aiDiagnosticReport,AI_DIAGNOSTIC_KEY,recordAIDiagnostic} from '../src/ai/diagnostics';
 import {AI_OPERATION_KEY} from '../src/ai/recovery';

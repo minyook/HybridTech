@@ -1,14 +1,26 @@
+/* 소스 안내
+ * 검색 결과를 본문·근거 ID·출처로 묶는다. 화면에 먼저 표시한 뒤 선택적 보충을 근거 계약으로 검사한다.
+ */
 package com.minyook.sllm2.data
 
 import org.json.JSONObject
 
+/** 화면 본문과 선택적 AI 보충이 공유하는 근거 단위. id는 보충 검증에, sourceId는 실제 PDF 출처 연결에 사용한다. */
 data class PlannedPassage(val id: String, val sourceId: Long, val text: String, val section: String)
+
+/**
+ * 검색 결과에서 만들어 화면·음성·선택적 모델 보충이 공유하는 답변 계획.
+ * create는 선택한 원문의 표시 본문과 근거 ID/출처를 함께 구성하고 context는 같은 근거를 모델용으로 직렬화한다.
+ * ViewModel이 본문을 먼저 표시한 뒤 supplementRequested인 경우에만 보충 실행으로 넘어간다.
+ * 근거 선택과 일반 생성 허용은 앞단 SearchResolution의 책임이며 이 계획 자체가 현장 승인 판단은 아니다.
+ */
 data class DocumentAnswerPlan(val question: String, val body: String, val evidence: List<PlannedPassage>, val sources: List<RetrievedChunk>, val directAnswer: Boolean = false) {
     // Source answers finish immediately. A reason/comparison question already
     // answered by the document must not spend seconds regenerating the same text.
     val supplementRequested = !directAnswer && evidence.isNotEmpty() && Regex("쉽게|풀어|AI\\s*(?:로|가)\\s*(?:설명|보충)",RegexOption.IGNORE_CASE).containsMatchIn(question) && !Regex("승인|작업\\s*가능|들어가도|출입해도").containsMatchIn(question)
     val sourceLabels = sources.associate { it.chunk.id to "${it.chunk.sourceKind} · ${it.chunk.pageNumber}쪽" }
     val sourceIds = sources.map { it.chunk.id }.distinct()
+    /** 선택한 근거만 ID와 함께 모델에 보낸다. 페이지 전체나 다른 절의 내용은 새로 붙이지 않는다. */
     fun context(): String = evidence.joinToString("\n\n") { passage ->
         val title=sources.firstOrNull { it.chunk.id==passage.sourceId }?.chunk?.documentTitle.orEmpty()
         "[${passage.id}] $title · ${passage.section}\n${passage.text}"
@@ -27,7 +39,11 @@ data class DocumentAnswerPlan(val question: String, val body: String, val eviden
     }
 }
 
-/** Optional additions never replace, rewrite or stream over the selected source answer. */
+/**
+ * LocalModelRuntime의 선택적 문서 보충 JSON을 검사하는 경계.
+ * 모델이 반환한 evidenceIds가 현재 계획에 존재하는지, 숫자·조건·중복/작업 허용 단정이 없는지 확인한다.
+ * 통과하면 짧은 보충 문자열, 실패하면 빈 문자열을 반환한다. ViewModel은 원문 본문을 유지한 채 뒤에만 추가한다.
+ */
 object AnswerSupplementVerifier {
     fun fromJson(raw: String, plan: DocumentAnswerPlan): String = try {
         val json = JSONObject(raw.trim().removePrefix("```json").removePrefix("```").removeSuffix("```").trim())

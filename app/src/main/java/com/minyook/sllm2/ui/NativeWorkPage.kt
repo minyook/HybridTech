@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 작업 점검/감독관 인증만 같은 origin의 WebView로 연결한다. 업무 권한과 승인은 서버가 검증한다.
+ * 연결 모듈: com.minyook.sllm2.BuildConfig, com.minyook.sllm2.model.ModelPhase.
+ */
 package com.minyook.sllm2.ui
 
 import android.annotation.SuppressLint
@@ -52,6 +56,13 @@ internal fun WorkServerSettings(state: FieldGuardUiState, actions: FieldGuardAct
     }
 }
 
+/**
+ * 작업 전 점검/감독관 인증만 기존 서버 화면으로 연결하는 WebView 경계.
+ * TossFieldGuardApp의 CHECKLIST/SUPERVISOR 목적지에서 호출하며 주소가 없으면 서버 설정을 표시한다.
+ * 저장한 origin의 탐색만 허용하고 fieldguard://ask/settings 명령은 네이티브 화면 이동으로 바꾼다.
+ * 세션·QR 교환·권한/승인 검사는 서버 API의 책임이다. WebView 메뉴 노출이 권한 근거가 아니다.
+ * AndroidView 해제 시 로딩을 멈추고 WebView를 파괴한다. 앱의 문서/모델을 웹 AI로 다시 실행하지 않는다.
+ */
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 internal fun NativeWorkPage(state: FieldGuardUiState, actions: FieldGuardActions) {

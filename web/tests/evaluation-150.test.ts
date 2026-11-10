@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 동결한 150문항은 문서 출처·필수 구절·금지 표현을 갖는다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 동결한 150문항은 문서 출처·필수 구절·금지 표현을 갖는다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import {readFileSync} from 'node:fs';
 import {expect,it} from 'vitest';
 import dataset from './evaluation-150.json';

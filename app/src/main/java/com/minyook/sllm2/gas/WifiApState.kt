@@ -1,3 +1,6 @@
+/* 소스 안내
+ * AP 세션과 장비 목록을 서비스에서 ViewModel로 전달하는 StateFlow. 연결 비밀은 현재 세션 메모리에만 둔다.
+ */
 package com.minyook.sllm2.gas
 
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +24,11 @@ data class WifiApUiState(
     val selected get() = meters.firstOrNull { it.deviceId == selectedDeviceId }
 }
 
-/** Credentials live only for the current AP session, never in preferences or logs. */
+/**
+ * 서비스 → ViewModel 사이의 AP 세션 상태 통로. 서비스만 연결/측정 상태를 갱신하고 UI는 StateFlow를 읽는다.
+ * SSID·암호·연결 코드는 메모리의 현재 세션에만 존재하며 preferences나 로그에 저장하지 않는다.
+ * select는 표시할 장비만 바꾸고 감지기 연결이나 실제 측정값을 만들지 않는다.
+ */
 object WifiApHub {
     private val mutable = MutableStateFlow(WifiApUiState())
     val state = mutable.asStateFlow()

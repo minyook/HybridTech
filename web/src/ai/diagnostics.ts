@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 허용한 실행 단계/지표만 로컬 진단으로 기록·내보낸다. 프롬프트·답변·원시 오류 같은 사용자 내용을 저장하지 않는 경계다.
+ * 연결 모듈: ./recovery.
+ */
 import { AI_OPERATION_KEY } from './recovery';
 export const AI_DIAGNOSTIC_KEY='fieldguard-ai-diagnostics';
 export const AI_RUNTIME_REVISION='apple-grounded-answer-20261021.3';

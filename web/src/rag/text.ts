@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 검색의 별칭·어휘·원문/질문 정규화 유틸리티. 질문별 정답 페이지를 저장하는 매핑은 아니다.
+ * 연결 모듈: ../types.
+ */
 import type { Chunk } from '../types';
 
 // Normalize spelling/spacing for matching, without changing the stored PDF text.

@@ -1,0 +1,39 @@
+{
+  "modelId": "gemma3-270m",
+  "requestedBackend": "GPU",
+  "scope": "Diagnostic short prompts, separate from the 12-case detailed comparison; do not pool timings.",
+  "shortPromptOutputTokens": 256,
+  "contextTokens": 4096,
+  "rows": [
+    {
+      "question": "Explain why oxygen is important for breathing in three sentences.",
+      "rawAnswer": "",
+      "error": "",
+      "maxOutputTokens": 256,
+      "generalKnowledge": true,
+      "totalMs": 15456,
+      "actualBackend": "GPU",
+      "initializationMs": 5824,
+      "promptBytes": 1132,
+      "modelFileName": "gemma3-270m-it-q8.litertlm",
+      "effectiveContextTokens": 4096,
+      "fallbackReason": ""
+    },
+    {
+      "question": "산소가 호흡에 필요한 이유를 한국어 세 문장으로 설명해줘.",
+      "rawAnswer": "",
+      "error": "",
+      "maxOutputTokens": 256,
+      "generalKnowledge": true,
+      "totalMs": 9142,
+      "actualBackend": "GPU",
+      "initializationMs": 15,
+      "promptBytes": 1152,
+      "modelFileName": "gemma3-270m-it-q8.litertlm",
+      "effectiveContextTokens": 4096,
+      "fallbackReason": ""
+    }
+  ],
+  "phase": "complete",
+  "settingsUnchanged": true
+}

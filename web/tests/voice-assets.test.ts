@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 손상되거나 잘못된 모델 파일을 설치 완료로 표시하지 않는다 / 설치 완료 표식만 있고 필수 파일이 없으면 미준비로 판단한다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 손상되거나 잘못된 모델 파일을 설치 완료로 표시하지 않는다, 설치 완료 표식만 있고 필수 파일이 없으면 미준비로 판단한다, 모델이 있어도 실행 파일이 누락되면 미준비로 판단한다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import {afterEach,beforeEach,expect,it,vi} from 'vitest';
 import {downloadVoice,voiceInstalled} from '../src/voice/assets';
 import {VOICE_FILES,voiceKey} from '../src/voice/catalog';

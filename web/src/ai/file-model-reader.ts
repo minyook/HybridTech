@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 로컬 Blob의 필요한 범위만 읽어 SDK의 파일 읽기 계약을 구현한다. 모델 크기 전체의 JS 복사 버퍼를 만들지 않는다.
+ * 연결 모듈: ./model-stream.
+ */
 import { MODEL_READ_CHUNK_BYTES,type ModelReaderStats } from './model-stream';
 
 interface ReadResult {error?:Error}

@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 의미 검색 질의/후보 결과를 고정 평가 사례와 비교한다. 입력 자산과 실제 모델 인코딩 조건을 보존해 해석한다.
+ */
 // Actual pinned CPU inference, production retrieval code, original source corpus.
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';

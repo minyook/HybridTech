@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 사용자가 시작하는 Local-only AP foreground service. AP/TCP 수명·주기적 상태 전달·장비 경보 알림·정리를 소유한다.
+ * 연결 모듈: com.minyook.sllm2.MainActivity, com.minyook.sllm2.R.
+ */
 package com.minyook.sllm2.gas
 
 import android.app.*
@@ -17,7 +21,14 @@ import java.net.NetworkInterface
 import java.security.SecureRandom
 import java.util.concurrent.Executors
 
-/** User-started, offline AP receiver. Transport does not depend on the AI runtime. */
+/**
+ * 사용자가 명시적으로 시작/정지하는 Local-only AP 수신 foreground service.
+ * MainActivity 권한 확인 → ViewModel.startAp → 이 서비스 → AP 주소 확인 → WifiMeterServer 생성으로 이어진다.
+ * 서버 registry를 주기적으로 읽어 WifiApHub(StateFlow), 선택 장비 저장소, 알림/위젯에 전달한다.
+ * 장비가 보낸 warning/danger의 상태 변화를 알리며 LLM 생성이나 클라우드 AI에 통신 처리를 맡기지 않는다.
+ * 종료 시 소켓·AP reservation·현재 측정 상태를 함께 정리하고 재시작에는 새 세션 연결 정보를 발급한다.
+ * 기본 앱과 같은 프로세스의 서비스이며 별도 프로세스 장애 격리를 제공하는 구조는 아니다.
+ */
 class GasMonitoringService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private val io = Executors.newSingleThreadExecutor()
@@ -118,6 +129,7 @@ class GasMonitoringService : Service() {
         return START_NOT_STICKY
     }
 
+    /** 새 AP 인터페이스를 한 개로 특정한 뒤 그 주소에만 TCP를 연다. 늦은 콜백은 generation으로 배제한다. */
     private fun findAddress(attempt: Int, ssid: String, password: String, token: String, deadline: Long) {
         if (!active || generation != attempt) return
         val candidates = addresses().filter { (name, address) ->
@@ -155,6 +167,7 @@ class GasMonitoringService : Service() {
         stopSelf()
     }
 
+    /** AP와 TCP의 소유 자원을 함께 해제하고 오래된 값을 현재 측정값으로 남기지 않는다. */
     private fun shutdown() {
         active = false; generation++
         // Keep late hotspot callbacks: onStarted must close a reservation after cancellation.

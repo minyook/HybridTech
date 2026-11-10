@@ -1,3 +1,8 @@
+/* 소스 안내
+ * 웹 회귀 검사: 모델 누락·문맥 초과 시 엔진을 만들지 않는다 / 일반 절차 질문은 본문을 먼저 표시하고 생성 없이 정확한 0 토큰을 반환한다. 픽스처와 테스트 이름이 다루는 조건을 기준으로 해석한다.
+ * 검사 예: 모델 누락·문맥 초과 시 엔진을 만들지 않는다, 일반 절차 질문은 본문을 먼저 표시하고 생성 없이 정확한 0 토큰을 반환한다, 추가 설명은 단 한 번 생성하고 실제 SDK 사용량을 보존한다
+ * 실행: web/에서 npm test. 실제 네트워크/모델 검증과 mock·순수 검사의 범위는 각 fixture를 확인한다.
+ */
 import { expect, it, vi } from 'vitest';
 import type { MLCEngine } from '@mlc-ai/web-llm';
 import { LightWorkerEngine } from '../src/ai/light-engine';

@@ -1,3 +1,6 @@
+/* 소스 안내
+ * 보안 컨텍스트·브라우저 저장/GPU 등 기능을 조회해 사용 가능 설명을 만든다. 기기 내 메모리 한도를 해제하는 기능은 아니다.
+ */
 export interface AIFeatures {
   secure: boolean;
   webgpu: boolean;

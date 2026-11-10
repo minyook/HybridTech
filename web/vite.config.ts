@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 기존 웹 dev/preview의 포트·보안 헤더·작업 API 플러그인·Vitest 대상을 정의한다.
+ * 연결 모듈: ./server/plugin.ts.
+ */
 import { defineConfig } from 'vitest/config';
 import { workApi } from './server/plugin.ts';
 

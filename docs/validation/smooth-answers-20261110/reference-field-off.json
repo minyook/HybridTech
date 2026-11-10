@@ -1,0 +1,81 @@
+{
+  "scope": "Real S24 E2B GPU generation with optional production WorkspaceChat presentation in a temporary fixture. No RAG, user chat writes or saved-setting changes. Questions explicitly request a small field checklist; this is not a long-answer or factual-accuracy certification. Screen recording may add overhead. UI frame timestamps are not separately benchmarked.",
+  "presentation": "off",
+  "maxOutputTokens": 1024,
+  "contextTokens": 4096,
+  "phase": "complete",
+  "rows": [
+    {
+      "question": "밀폐공간 작업을 중단했다가 다시 시작할 때 감독관이 확인할 사항을 핵심 5개로 정리해줘. 각 항목은 한 문장으로 설명해줘.",
+      "totalMs": 13768,
+      "firstAcceptedBodyMs": 1349,
+      "firstNativeTextMs": 811,
+      "initializationMs": 7,
+      "decodeTokens": 277,
+      "tokensPerSecond": 21.250920600812762,
+      "outputChars": 532,
+      "rawAnswer": "감독관이 확인해야 할 핵심 사항은 다음과 같습니다.\n\n1.  **작업 구역 및 환경 재확인:** 작업 구역의 현재 상태, 주변 위험 요소, 그리고 작업 환경(환기 상태 등)이 이전과 동일하거나 개선되었는지 확인해야 합니다.\n2.  **안전 절차 및 허가 재검토:** 작업 시작 전, 모든 안전 절차(LOTO 포함)가 준수되었는지, 그리고 필요한 모든 작업 허가서가 유효한지 재확인해야 합니다.\n3.  **장비 및 설비 점검:** 사용될 장비와 설비가 정상 작동 상태이며, 이전 작업으로 인해 발생했을 수 있는 잠재적 결함이나 손상이 없는지 육안 및 기능적으로 점검해야 합니다.\n4.  **작업 인력 및 교육 상태 확인:** 작업 인력의 안전 교육 이수 여부, 개인 보호구(PPE) 착용 상태, 그리고 작업팀 간의 역할 분담이 명확한지 확인해야 합니다.\n5.  **비상 대응 계획 점검:** 작업 중 발생 가능한 비상 상황(화재, 질식, 부상 등)에 대한 비상 연락망, 대피 경로, 그리고 비상 대응 절차가 최신 상태로 준비되어 있는지 확인해야 합니다.",
+      "displayAnswer": "> **일반 지식 안내**: 제공 문서로 확인한 사실과 구분되는 AI의 일반 설명입니다.\n\n감독관이 확인해야 할 핵심 사항은 다음과 같습니다.\n\n1.  **작업 구역 및 환경 재확인:** 작업 구역의 현재 상태, 주변 위험 요소, 그리고 작업 환경(환기 상태 등)이 이전과 동일하거나 개선되었는지 확인해야 합니다.\n2.  **안전 절차 및 허가 재검토:** 작업 시작 전, 모든 안전 절차(LOTO 포함)가 준수되었는지, 그리고 필요한 모든 작업 허가서가 유효한지 재확인해야 합니다.\n3.  **장비 및 설비 점검:** 사용될 장비와 설비가 정상 작동 상태이며, 이전 작업으로 인해 발생했을 수 있는 잠재적 결함이나 손상이 없는지 육안 및 기능적으로 점검해야 합니다.\n4.  **작업 인력 및 교육 상태 확인:** 작업 인력의 안전 교육 이수 여부, 개인 보호구(PPE) 착용 상태, 그리고 작업팀 간의 역할 분담이 명확한지 확인해야 합니다.\n5.  **비상 대응 계획 점검:** 작업 중 발생 가능한 비상 상황(화재, 질식, 부상 등)에 대한 비상 연락망, 대피 경로, 그리고 비상 대응 절차가 최신 상태로 준비되어 있는지 확인해야 합니다.",
+      "outputLimitReached": false,
+      "validatedChunkArrivals": [
+        {
+          "ms": 1349,
+          "validatedCharacters": 79
+        },
+        {
+          "ms": 2948,
+          "validatedCharacters": 175
+        },
+        {
+          "ms": 4542,
+          "validatedCharacters": 270
+        },
+        {
+          "ms": 7146,
+          "validatedCharacters": 373
+        },
+        {
+          "ms": 10230,
+          "validatedCharacters": 471
+        },
+        {
+          "ms": 13766,
+          "validatedCharacters": 583
+        }
+      ]
+    },
+    {
+      "question": "밀폐공간 인명구조용 삼각대 준비 수량을 정할 때 확인할 조건을 핵심 4개로 설명해줘. 임의의 대수는 정하지 말고, 각 항목은 한 문장으로 정리해줘.",
+      "totalMs": 14074,
+      "firstAcceptedBodyMs": 2287,
+      "firstNativeTextMs": 759,
+      "initializationMs": 5,
+      "decodeTokens": 220,
+      "tokensPerSecond": 16.358911298013897,
+      "outputChars": 421,
+      "rawAnswer": "밀폐공간 인명구조용 삼각대 준비 수량을 정할 때 확인해야 할 핵심 조건은 다음과 같습니다.\n\n1. **구조 및 작업 환경:** 해당 밀폐공간의 크기, 형태, 그리고 작업 구역의 복잡성을 고려하여 필요한 삼각대의 종류와 개수를 결정해야 합니다.\n2. **구조물 및 장비 배치:** 현장의 출입구, 작업 구역의 배치, 그리고 사용될 장비의 조합을 확인하여 삼각대가 물리적으로 접근 가능하고 안정적으로 설치될 수 있는지 검토해야 합니다.\n3. **안전 및 규정 준수:** 관련 안전 규정이나 작업 허가서에 명시된 최소한의 장비 배치 기준과 인명구조 계획에 필요한 최소한의 장비 수량을 확인해야 합니다.\n4. **비상 상황 대비:** 예상치 못한 상황이나 추가적인 인원 발생 시에도 즉각적인 구조 활동이 가능하도록 충분한 여유분(예비 수량)을 확보해야 합니다.",
+      "displayAnswer": "> **일반 지식 안내**: 제공 문서로 확인한 사실과 구분되는 AI의 일반 설명입니다.\n\n밀폐공간 인명구조용 삼각대 준비 수량을 정할 때 확인해야 할 핵심 조건은 다음과 같습니다.\n\n1. **구조 및 작업 환경:** 해당 밀폐공간의 크기, 형태, 그리고 작업 구역의 복잡성을 고려하여 필요한 삼각대의 종류와 개수를 결정해야 합니다.\n2. **구조물 및 장비 배치:** 현장의 출입구, 작업 구역의 배치, 그리고 사용될 장비의 조합을 확인하여 삼각대가 물리적으로 접근 가능하고 안정적으로 설치될 수 있는지 검토해야 합니다.\n3. **안전 및 규정 준수:** 관련 안전 규정이나 작업 허가서에 명시된 최소한의 장비 배치 기준과 인명구조 계획에 필요한 최소한의 장비 수량을 확인해야 합니다.\n4. **비상 상황 대비:** 예상치 못한 상황이나 추가적인 인원 발생 시에도 즉각적인 구조 활동이 가능하도록 충분한 여유분(예비 수량)을 확보해야 합니다.",
+      "outputLimitReached": false,
+      "validatedChunkArrivals": [
+        {
+          "ms": 2287,
+          "validatedCharacters": 101
+        },
+        {
+          "ms": 4949,
+          "validatedCharacters": 186
+        },
+        {
+          "ms": 8216,
+          "validatedCharacters": 292
+        },
+        {
+          "ms": 11237,
+          "validatedCharacters": 384
+        }
+      ]
+    }
+  ],
+  "warmupMs": 11762,
+  "settingsUnchanged": true
+}

@@ -1,3 +1,7 @@
+/* 소스 안내
+ * 웹 모델 설치·OPFS/저장소 상태·검증 영수증·삭제를 관리한다. catalog와 runtime이 같은 설치 결과를 사용한다.
+ * 연결 모듈: ../storage/db, ../types, ./model-stream.
+ */
 import { sha256 } from '@noble/hashes/sha2.js';
 import { commitModel, getModelBlob, modelMetadata, rememberModelVerification, removeModelData } from '../storage/db';
 import type { ModelRecord, ModelVerification } from '../types';

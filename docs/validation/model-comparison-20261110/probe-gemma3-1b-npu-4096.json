@@ -1,0 +1,41 @@
+{
+  "modelId": "gemma3-1b",
+  "requestedBackend": "NPU",
+  "scope": "Diagnostic short prompts, separate from the 12-case detailed comparison; do not pool timings.",
+  "shortPromptOutputTokens": 256,
+  "contextTokens": 4096,
+  "rows": [
+    {
+      "question": "Explain why oxygen is important for breathing in three sentences.",
+      "rawAnswer": "과산화수소는 생명 유지에 필수적인 물질이며, 호흡을 통해 산소를 공급하여 생명과 건강을 유지할 수 있도록 합니다. 또한, 산소는 세포의 에너지 생산과 신체 기능 유지에 중요한 역할을 하므로 생명과 건강에 필수적입니다.",
+      "error": "",
+      "maxOutputTokens": 256,
+      "generalKnowledge": true,
+      "totalMs": 9666,
+      "actualBackend": "GPU",
+      "initializationMs": 6646,
+      "promptBytes": 1132,
+      "firstNativeTextMs": 7806,
+      "modelFileName": "gemma3-1b-it-int4.litertlm",
+      "effectiveContextTokens": 4096,
+      "fallbackReason": "NPU 실행을 완료하지 못해 범용 모델로 전환했어요."
+    },
+    {
+      "question": "산소가 호흡에 필요한 이유를 한국어 세 문장으로 설명해줘.",
+      "rawAnswer": "산소가 호흡에 필요한 이유는 우리 몸이 적절한 산소 농도를 유지하기 위해서입니다. 산소는 세포 내에서 에너지 생산과 생명 유지에 필수적이며, 산소 농도가 낮아지면 세포 기능과 생명에 부정적인 영향을 미칩니다. 또한 산소는 호흡과 관련하여 중요한 역할을 하므로 호흡을 통해 산소를 공급받는 것이 필수적입니다.",
+      "error": "",
+      "maxOutputTokens": 256,
+      "generalKnowledge": true,
+      "totalMs": 3133,
+      "actualBackend": "GPU",
+      "initializationMs": 4,
+      "promptBytes": 1152,
+      "firstNativeTextMs": 507,
+      "modelFileName": "gemma3-1b-it-int4.litertlm",
+      "effectiveContextTokens": 4096,
+      "fallbackReason": "이번 실행에서 실패한 NPU 대신 범용 모델을 사용해요."
+    }
+  ],
+  "phase": "complete",
+  "settingsUnchanged": true
+}
