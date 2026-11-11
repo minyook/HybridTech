@@ -32,7 +32,7 @@ class ChatScreenTest {
     private val ime = mutableStateOf(false)
     private val viewport = mutableStateOf(720)
 
-    private fun actions(submit: () -> Unit = {}, openSource: (Long) -> Unit = {}) = FieldGuardActions(onNavigate={},onNewChat={},onLoadChat={},onInputChange={value->ui.value=ui.value.copy(input=value)},onSubmit=submit,onPreset={},onDownloadModel={},onBackend={},onContextTokens={},onResponseTokens={},onSaveSettings={},onStartAp={},onSelectMeter={},onStopAp={},onVoiceClick={},onVoiceLongClick={},onOpenSource=openSource)
+    private fun actions(submit: () -> Unit = {}, openSource: (Long) -> Unit = {}) = FieldGuardActions(onNavigate={},onNewChat={},onLoadChat={},onInputChange={value->ui.value=ui.value.copy(input=value)},onSubmit=submit,onPreset={},onDownloadModel={},onContextTokens={},onResponseTokens={},onSaveSettings={},onStartAp={},onSelectMeter={},onStopAp={},onVoiceClick={},onVoiceLongClick={},onOpenSource=openSource)
 
     private fun show(actions: FieldGuardActions = actions(), voice: VoiceUiState = VoiceUiState(available=false)) {
         compose.setContent {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 소스 안내
-앱 권한·Application/Activity·서비스·:npu 프로세스·FileProvider·위젯의 Android 등록 계약이다.
+앱 권한·Application/Activity·서비스·FileProvider·위젯의 Android 등록 계약이다.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
@@ -39,22 +39,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Sllm2">
-        <uses-native-library android:name="libvndksupport.so" android:required="false" />
-        <uses-native-library android:name="libOpenCL.so" android:required="false" />
         <uses-native-library android:name="libcdsprpc.so" android:required="false" />
-        <service
-            android:name=".model.NpuInferenceService"
-            android:exported="false"
-            android:process=":npu" />
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.comparison-files"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/model_comparison_paths" />
-        </provider>
+        <uses-native-library android:name="libOpenCL.so" android:required="false" />
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="dataSync"

@@ -19,3 +19,9 @@
 *.apk
 app/src/main/assets/semantic-model/
 local.properties
+
+/tmp/
+/app/.cxx/
+
+/node_modules/
+/web/

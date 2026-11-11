@@ -145,6 +145,7 @@ internal class HybridRetrieval(private val chunks:List<KnowledgeChunk>, json:Str
         val evidence=listOf(RetrievedChunk(chunk,top.fused,selected+context))
         return result.copy(sources=if(review)completeSafety(evidence,question) else evidence,status="answered",message="",suggestions=emptyList())
     }
+
     /** Additional evidence is searched in the same topic and kept with its complete safety scope. */
     fun additional(question: String, vector: FloatArray, seenAnswers: List<String>): List<RetrievedChunk> {
         val seen = seenAnswers.joinToString(" ") { EvidenceLanguage.compact(it) }

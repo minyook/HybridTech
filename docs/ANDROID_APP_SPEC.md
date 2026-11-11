@@ -184,7 +184,7 @@ Android 12 이상의 기기 내 인식기만 사용합니다. 한 번 시작하�
 
 `FieldWorkspaceUi.kt`는 홈·사이드바·문서 카드·설정 화면의 웹 디자인을 Compose로 구현한다. `NativeWorkPage.kt`는 설정한 작업 서버의 포함 모드 웹 화면을 열고 웹 내비게이션·중복 AI 준비를 숨긴다. 질문/모델 준비 링크는 앱의 해당 화면으로 이동한다. 설치된 네이티브 모델과 실제 엔진 실행 중 상태는 구분한다. 같은 서버 origin만 허용하며 임의 JavaScript 브리지는 없다. `WorkServerAddress.kt`가 주소를 검증하고 `work_network_security.xml`이 localhost 외 평문 연결을 차단한다.
 
-감독관은 점검/설정에서 오늘의 숫자 6자리를 입력한다. 서버 CLI `today / rotate / revoke`로 관리하고 여러 감독관이 같은 코드를 사용한다. 한국 시간 자정에 코드와 권한이 만료된다. 공유 코드의 기기 인증이므로 개인 신원 확인은 아니다. 외부 브라우저와 WebView의 쿠키는 별개다. 인증과 새 작업은 서버 연결이 필요하다. 전체 상태·권한 규칙은 [작업 흐름](../web/docs/workflow.md)을 따른다.
+감독관은 점검/설정에서 오늘의 숫자 6자리를 입력한다. 서버 CLI `today / rotate / revoke`로 관리하고 여러 감독관이 같은 코드를 사용한다. 한국 시간 자정에 코드와 권한이 만료된다. 공유 코드의 기기 인증이므로 개인 신원 확인은 아니다. 외부 브라우저와 WebView의 쿠키는 별개다. 인증과 새 작업은 서버 연결이 필요하다. 전체 상태·권한 규칙은 [작업 흐름](WORKFLOW.md)을 따른다.
 
 일반 디버그 앱 ID는 `com.minyook.sllm2`다. 기존 설치본과 서명이 다르면 삭제하지 않고 `-PdesignPreview=true`로 `com.minyook.sllm2.designpreview`를 빌드해 따로 설치한다. 앱 이름은 `Field Guard 디자인`이며 저장소도 분리되어 기존 모델·대화에 영향을 주지 않는다. 갤럭시 탭 화면은 [홈](screenshots/android-workspace-home.png)·[설정](screenshots/android-workspace-settings.png)·[문서](screenshots/android-workspace-library.png)·[감독관 인증](screenshots/android-workspace-supervisor.png)을 참조한다.
 
@@ -201,4 +201,4 @@ Android 12 이상의 기기 내 인식기만 사용합니다. 한 번 시작하�
 
 주요 구현 진입점은 [app/build.gradle](../app/build.gradle), [MainActivity](../app/src/main/java/com/minyook/sllm2/MainActivity.kt), [FieldGuardViewModel](../app/src/main/java/com/minyook/sllm2/ui/FieldGuardViewModel.kt), [TossFieldGuardApp](../app/src/main/java/com/minyook/sllm2/ui/TossFieldGuardApp.kt)다. 검색/근거, 가스 패킷·신선도, PDF, 음성 포맷터의 JVM·Android 테스트가 저장소에 있다. 문서 작성 자체로 빌드나 실기기 테스트를 통과했다는 뜻은 아니다.
 
-웹 공통 화면·API 구조는 [웹 현행 설계서](webapp/TARGET_ARCHITECTURE.md), 유지할 동작은 [유지보수 기준](webapp/BUILD_PROMPT.md), 실제 실행 결과는 [검증 기록](../web/docs/validation.md)을 참조한다.
+현재 Android 앱과 독립 작업 API의 파일 구조는 [README](../README.md)와 [코드 지도](CODE_MAP.md)를 참고한다.

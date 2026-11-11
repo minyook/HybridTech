@@ -23,11 +23,7 @@ data class DeviceProfile(
     val availableStorageGb: Int,
     val lowRamDevice: Boolean,
     val arm64: Boolean,
-    val socModel: String = "",
 ) {
-    val recommendedForGemma4E2b: Boolean
-        get() = arm64 && totalRamGb >= 8 && !lowRamDevice
-
     companion object {
         fun read(context: Context): DeviceProfile {
             val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
@@ -38,56 +34,49 @@ data class DeviceProfile(
                 availableStorageGb = (storage.availableBytes / (1024L * 1024L * 1024L)).toInt(),
                 lowRamDevice = manager.isLowRamDevice,
                 arm64 = Build.SUPPORTED_ABIS.any { it == "arm64-v8a" },
-                socModel = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) Build.SOC_MODEL else "",
             )
         }
     }
 }
 
-/** Worker와 추론 실행기가 공유하는 파일 위치. 모델별 범용/NPU 파일과 미완성 .part 파일을 구분한다. */
+/** Worker와 추론 실행기가 공유하는 파일 위치. 모델별 GGUF 파일과 미완성 .part 파일을 구분한다. */
 object ModelFiles {
-    const val MODEL_FILE_NAME = "gemma-4-e2b-it.litertlm"
-
     fun modelDirectory(context: Context): File = File(context.noBackupFilesDir, "models").apply { mkdirs() }
-    fun finalFile(context: Context, model: LocalModel = InferenceSettingsPreferences(context).load().model, npu: NpuModel? = null): File =
-        File(modelDirectory(context), npu?.fileName ?: model.fileName)
-    fun partialFile(context: Context, model: LocalModel = InferenceSettingsPreferences(context).load().model, npu: NpuModel? = null): File =
-        File(modelDirectory(context), "${npu?.fileName ?: model.fileName}.part")
+    fun finalFile(context: Context): File =
+        File(modelDirectory(context), LocalModel.fileName)
+    fun partialFile(context: Context): File =
+        File(modelDirectory(context), "${LocalModel.fileName}.part")
 }
 
 /** 파일 존재/크기와 저장된 진행 상태를 합쳐 설정 화면의 모델별 설치 상태를 반환한다. */
 class ModelPreferences(private val context: Context) {
     private val preferences = context.getSharedPreferences("local_model", Context.MODE_PRIVATE)
 
-    fun status(model: LocalModel = InferenceSettingsPreferences(context).load().model, npu: NpuModel? = null): ModelStatus {
-        val finalFile = ModelFiles.finalFile(context, model, npu)
+    fun status(): ModelStatus {
+        val finalFile = ModelFiles.finalFile(context)
         val bytes = finalFile.takeIf { it.exists() }?.length() ?: 0L
-        if (if (npu != null) bytes == npu.bytes else model.acceptsBytes(bytes)) return ModelStatus(ModelPhase.READY, bytes)
+        if (LocalModel.isInstalled(finalFile)) return ModelStatus(ModelPhase.READY, bytes)
         val savedPhase = runCatching {
-            ModelPhase.valueOf(preferences.getString(key(model, "phase", npu), ModelPhase.NOT_INSTALLED.name).orEmpty())
+            ModelPhase.valueOf(preferences.getString(key("phase"), ModelPhase.NOT_INSTALLED.name).orEmpty())
         }.getOrDefault(ModelPhase.NOT_INSTALLED)
         return ModelStatus(
             // A stale preference must never make a removed or corrupt model look runnable.
             phase = if (savedPhase == ModelPhase.READY) ModelPhase.NOT_INSTALLED else savedPhase,
-            installedBytes = ModelFiles.partialFile(context, model, npu).takeIf { it.exists() }?.length() ?: bytes,
-            failureMessage = preferences.getString(key(model, "failure", npu), null),
+            installedBytes = ModelFiles.partialFile(context).takeIf { it.exists() }?.length() ?: bytes,
+            failureMessage = preferences.getString(key("failure"), null),
         )
     }
 
-    fun markDownloading(model: LocalModel = InferenceSettingsPreferences(context).load().model, npu: NpuModel? = null) = update(model, ModelPhase.DOWNLOADING, null, npu)
-    fun markReady(model: LocalModel = InferenceSettingsPreferences(context).load().model, npu: NpuModel? = null) = update(model, ModelPhase.READY, null, npu)
-    fun markFailed(message: String?, model: LocalModel = InferenceSettingsPreferences(context).load().model, npu: NpuModel? = null) = update(model, ModelPhase.FAILED, message?.take(180), npu)
+    fun markDownloading() = update(ModelPhase.DOWNLOADING, null)
+    fun markReady() = update(ModelPhase.READY, null)
+    fun markFailed(message: String?) = update(ModelPhase.FAILED, message?.take(180))
 
-    private fun key(model: LocalModel, field: String, npu: NpuModel?) = when {
-        npu != null -> "${npu.id}_$field"
-        model == LocalModel.GEMMA4_E2B -> field
-        else -> "${model.id}_$field"
-    }
+    private fun key(field: String) = "${LocalModel.id}_$field"
 
-    private fun update(model: LocalModel, phase: ModelPhase, failure: String?, npu: NpuModel?) {
+    private fun update(phase: ModelPhase, failure: String?) {
         preferences.edit()
-            .putString(key(model, "phase", npu), phase.name)
-            .putString(key(model, "failure", npu), failure)
+            .putString(key("phase"), phase.name)
+            .putString(key("failure"), failure)
             .commit()
     }
 }

@@ -25,6 +25,7 @@ class LiveQuestionEvaluationTest {
         val out = File(root, "app/build/reports/fieldguard/direct-answers").apply { mkdirs() }
         val questions = listOf(
             "밀폐공간 작업을 중단했다가 다시 시작할 때 감독관이 확인할 사항을 핵심 5개로 정리해줘. 각 항목은 한 문장으로 설명해줘.",
+            "밀폐공간 작업을 일시 중단했다가 다시 시작하기 전에 산소와 유해가스 농도를 측정해야 하나요?",
             "산소 및 유해가스 측정방법 알려줘",
         )
         val tokenizer = SemanticTokenizer(File(app,"src/main/assets/semantic-model/tokenizer.json").readText())
@@ -58,7 +59,8 @@ class LiveQuestionEvaluationTest {
             val plan=DocumentAnswerPlan.create(q,result)
             results.put(JSONObject().put("question",q).put("status",result.status).put("method",result.method)
                 .put("suggestions",result.suggestions.size).put("generalQuestion",result.generalQuestion?:JSONObject.NULL)
-                .put("pages",JSONArray(result.sources.map{it.chunk.pageNumber})).put("documentBody",plan.body))
+                .put("pages",JSONArray(result.sources.map{it.chunk.pageNumber})).put("documentBody",plan.body)
+                .put("modelContext", plan.generationContext()))
         }
         File(out,"results.json").writeText(JSONObject().put("scope","PC production Kotlin routing with actual pinned ONNX query embeddings; no device UI or Gemma generation").put("results",results).toString(2))
     }

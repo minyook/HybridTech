@@ -1,0 +1,12 @@
+{
+  "name": "field-guard-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "work:server": "node server/index.ts",
+    "supervisor": "node server/manage.ts"
+  },
+  "devDependencies": {
+    "onnxruntime-node": "1.21.0"
+  }
+}

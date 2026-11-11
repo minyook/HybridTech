@@ -571,7 +571,7 @@ private fun TossSettings(state: FieldGuardUiState, actions: FieldGuardActions) {
 
 @Composable
 private fun TossModel(state:FieldGuardUiState,actions:FieldGuardActions){
-    WorkspacePage{WorkspaceHeading("ON-DEVICE AI","기기 내 Gemma","문서와 AI를 이 기기에 저장해요.");WorkspaceModelPanel(state,actions);WorkspaceButton("AI 토큰 설정",{actions.onNavigate(AppDestination.INFERENCE)},primary=false)}
+    WorkspacePage{WorkspaceHeading("ON-DEVICE AI","기기 내 EXAONE","문서와 AI를 이 기기에 저장해요.");WorkspaceModelPanel(state,actions);WorkspaceButton("AI 토큰 설정",{actions.onNavigate(AppDestination.INFERENCE)},primary=false)}
 }
 
 @Composable

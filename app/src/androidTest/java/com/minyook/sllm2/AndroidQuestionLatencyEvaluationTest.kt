@@ -25,7 +25,7 @@ class AndroidQuestionLatencyEvaluationTest {
         org.junit.Assume.assumeTrue(args.containsKey("restoreBackend"))
         val context=InstrumentationRegistry.getInstrumentation().targetContext
         val backend=InferenceBackend.valueOf(args.getString("restoreBackend")!!)
-        check(context.getSharedPreferences("inference_settings",android.content.Context.MODE_PRIVATE).edit().putString("backend",backend.name).commit())
+        check(context.getSharedPreferences("inference_settings",android.content.Context.MODE_PRIVATE).edit().putString("execution_order",backend.name).commit())
         assertEquals(backend,InferenceSettingsPreferences(context).load().backend)
     }
     @Test fun measureCurrentProductionQuestionPath() = runBlocking {
@@ -108,7 +108,7 @@ class AndroidQuestionLatencyEvaluationTest {
             if(override!=null){
                 preferences.save(original)
                 // Instrumentation can end its process before apply() reaches disk.
-                check(context.getSharedPreferences("inference_settings",android.content.Context.MODE_PRIVATE).edit().putString("backend",original.backend.name).commit())
+                check(context.getSharedPreferences("inference_settings",android.content.Context.MODE_PRIVATE).edit().putString("execution_order",original.backend.name).commit())
             }
         }
         report.put("phase","complete");publish()

@@ -26,7 +26,6 @@ class NativeAnswerCorpusTest {
         val results = JSONArray(); val groups = JSONObject(); val hashes = JSONObject().put("corpus", sha(rawCorpus))
         for (name in listOf("evaluation-150.json", "focused-retrieval.json")) {
             val bytes = File(root, "src/androidTest/assets/rag-evaluation/$name").readBytes(); hashes.put(name, sha(bytes))
-            assertEquals("Android/Web rubric must stay identical", sha(File(root, "../web/tests/$name").readBytes()), sha(bytes))
             val dataset = JSONObject(String(bytes)); val cases = dataset.getJSONArray("cases")
             var pagePasses = 0; var bodyPasses = 0; var passes = 0
             for (index in 0 until cases.length()) {

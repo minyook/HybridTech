@@ -1,14 +1,14 @@
 /* 소스 안내
- * 고정 검색 모델을 크기/SHA-256 검증 후 자산으로 복사한다. --android-only로 Android만 준비하며 문서 인덱스를 다시 만들지 않는다.
+ * 고정 검색 모델을 크기/SHA-256 검증 후 자산으로 복사한다. Android 자산을 준비하며 문서 인덱스를 다시 만들지 않는다.
  */
-// 빌드 전 검색 모델 준비: 고정 revision·크기·SHA-256을 확인한 파일만 Android/웹 자산으로 복사한다.
-// --android-only는 Android 대상만 준비한다. 문서 벡터 인덱스를 재생성하거나 런타임 질문을 서버로 보내지 않는다.
+// 빌드 전 검색 모델 준비: 고정 revision·크기·SHA-256을 확인한 파일만 Android 자산으로 복사한다.
+// 문서 벡터 인덱스를 재생성하거나 런타임 질문을 서버로 보내지 않는다.
 import {mkdir,readFile,writeFile,copyFile,unlink} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url));
-const destinations=process.argv.includes('--android-only')?['app/src/main/assets/semantic-model']:['app/src/main/assets/semantic-model','web/public/semantic-model'];
+const destinations=['app/src/main/assets/semantic-model'];
 const revision='5090578d9565bb06545b4552f76e6bc2c93e4a66';
 const source='onnx-community/embeddinggemma-300m-ONNX';
 const expected=JSON.parse(await readFile(new URL('./semantic-model-files.json',import.meta.url),'utf8'));

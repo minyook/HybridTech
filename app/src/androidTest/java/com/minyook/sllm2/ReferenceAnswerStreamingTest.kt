@@ -1,5 +1,5 @@
 /* 소스 안내
- * 실제 E2B 직접 생성의 첫 공개 본문·완료 지표와 임시 채팅 표시을 검증하는 Android 계측 검사다.
+ * 실제 EXAONE 직접 생성의 첫 공개 본문·완료 지표와 임시 채팅 표시을 검증하는 Android 계측 검사다.
  * 검사 예: renderReferenceSizedNativeAnswers, publish
  * 실행: 연결된 Android 기기/에뮬레이터의 AndroidJUnitRunner. opt-in 인자는 본문 assume/arguments 조건을 확인한다.
  */
@@ -14,8 +14,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.mutableStateOf
 import androidx.test.core.app.ActivityScenario
 import androidx.test.platform.app.InstrumentationRegistry
-import com.google.ai.edge.litertlm.ExperimentalApi
-import com.google.ai.edge.litertlm.ExperimentalFlags
 import com.minyook.sllm2.data.GeneralKnowledgeAnswer
 import com.minyook.sllm2.model.*
 import com.minyook.sllm2.ui.*
@@ -29,7 +27,6 @@ import java.io.File
 
 /** Real native generation in the production chat UI, with a temporary history-free fixture. */
 class ReferenceAnswerStreamingTest {
-    @OptIn(ExperimentalApi::class)
     @Test fun renderReferenceSizedNativeAnswers() = runBlocking {
         val instrumentation=InstrumentationRegistry.getInstrumentation()
         val args=InstrumentationRegistry.getArguments()
@@ -39,12 +36,10 @@ class ReferenceAnswerStreamingTest {
         val showUi=presentation=="smooth"
         val context=instrumentation.targetContext
         val original=InferenceSettingsPreferences(context).load()
-        val benchmark=ExperimentalFlags.enableBenchmark
-        ExperimentalFlags.enableBenchmark=true
-        val settings=InferenceSettings(InferenceBackend.GPU,4096,1024,automaticAnswerLength=false,model=LocalModel.GEMMA4_E2B)
+        val settings=InferenceSettings(InferenceBackend.CPU,4096,1024,automaticAnswerLength=false)
         val runtime=LocalModelRuntime(context){settings}
         val rows=JSONArray()
-        val report=JSONObject().put("scope","Real S24 E2B GPU generation with optional production WorkspaceChat presentation in a temporary fixture. No RAG, user chat writes or saved-setting changes. Questions explicitly request a small field checklist; this is not a long-answer or factual-accuracy certification. Screen recording may add overhead. UI frame timestamps are not separately benchmarked.")
+        val report=JSONObject().put("scope","Real EXAONE 4.0 1.2B CPU generation with optional production WorkspaceChat presentation in a temporary fixture. No RAG, user chat writes or saved-setting changes. Questions explicitly request a small field checklist; this is not a long-answer or factual-accuracy certification. Screen recording may add overhead. UI frame timestamps are not separately benchmarked.")
             .put("presentation",presentation).put("maxOutputTokens",1024).put("contextTokens",4096).put("phase","warming").put("rows",rows)
         val output=File(context.getExternalFilesDir(null),"generation-checks/reference-field-$presentation.json")
         val main=Handler(Looper.getMainLooper())
@@ -55,8 +50,8 @@ class ReferenceAnswerStreamingTest {
             val warmStarted=SystemClock.elapsedRealtime()
             runtime.generate("산소가 호흡에 필요한 이유를 세 문장으로 설명해줘.","",generalKnowledge=true)
             report.put("warmupMs",SystemClock.elapsedRealtime()-warmStarted);publish()
-            val ui=mutableStateOf(FieldGuardUiState(activeChatId="reference-demo",messages=emptyList(),settings=settings,modelStatus=ModelStatus(ModelPhase.READY,2588147712)))
-            val actions=FieldGuardActions(onNavigate={},onNewChat={},onLoadChat={},onInputChange={},onSubmit={},onPreset={},onDownloadModel={},onBackend={},onContextTokens={},onResponseTokens={},onSaveSettings={},onStartAp={},onSelectMeter={},onStopAp={},onVoiceClick={},onVoiceLongClick={},onOpenSource={})
+            val ui=mutableStateOf(FieldGuardUiState(activeChatId="reference-demo",messages=emptyList(),settings=settings,modelStatus=ModelStatus(ModelPhase.READY,LocalModel.downloadBytes)))
+            val actions=FieldGuardActions(onNavigate={},onNewChat={},onLoadChat={},onInputChange={},onSubmit={},onPreset={},onDownloadModel={},onContextTokens={},onResponseTokens={},onSaveSettings={},onStartAp={},onSelectMeter={},onStopAp={},onVoiceClick={},onVoiceLongClick={},onOpenSource={})
             if(showUi) {
                 scenario=ActivityScenario.launch(WorkspacePreviewActivity::class.java)
                 scenario.onActivity { activity -> activity.setContent { MaterialTheme { WorkspaceChat(ui.value,VoiceUiState(available=false),actions,false) } } }
@@ -104,7 +99,6 @@ class ReferenceAnswerStreamingTest {
             instrumentation.sendStatus(1,Bundle().apply{putString("referenceProgress","FINISHED")})
             Thread.sleep(3500)
         } finally {
-            runtime.releaseAndWait();scenario?.close();ExperimentalFlags.enableBenchmark=benchmark
             report.put("settingsUnchanged",original==InferenceSettingsPreferences(context).load());publish()
         }
     }

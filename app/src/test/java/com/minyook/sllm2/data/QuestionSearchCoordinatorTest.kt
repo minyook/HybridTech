@@ -108,6 +108,7 @@ class QuestionSearchCoordinatorTest {
         assertTrue(result.suggestions.isEmpty())
         assertFalse(result.message.contains("선택"))
     }
+
     @Test fun moreWithoutNewSupportedEvidenceDoesNotClaimTheOriginalTopicIsAbsent() {
         val history = listOf(ConversationTurn(true, "대상설비"), ConversationTurn(false, chunks[0].body, topicQuestion = "대상설비"))
         val result = QuestionSearchCoordinator(index()) { vector(0) }.search(ConversationContext.resolve("또 다른 건 없어?", history))

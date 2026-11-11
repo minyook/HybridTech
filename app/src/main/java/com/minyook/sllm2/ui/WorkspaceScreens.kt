@@ -80,7 +80,7 @@ import java.util.Locale
     val endAnchorHeight = with(LocalDensity.current) { 1.dp.roundToPx() }
     val keyboard=LocalSoftwareKeyboardController.current
     val focus=LocalFocusManager.current
-    val canSend=!voice.conversationEnabled&&!state.isAnswering&&!state.isComparing&&state.input.isNotBlank()
+    val canSend=!voice.conversationEnabled&&!state.isAnswering&&state.input.isNotBlank()
     val submit:()->Unit={if(canSend){follow=true;keyboard?.hide();focus.clearFocus();actions.onSubmit()}}
     val openVoice:()->Unit={keyboard?.hide();focus.clearFocus();actions.onNavigate(AppDestination.VOICE);if(!voice.conversationEnabled)actions.onVoiceClick()}
     val toggleVoice:()->Unit={if(voice.conversationEnabled)actions.onStopVoice() else actions.onVoiceClick()}
@@ -141,7 +141,7 @@ import java.util.Locale
                         if(!imeVisible)WorkspaceHeading(if(voiceMode)"LOCAL VOICE CONVERSATION" else "LOCAL DOCUMENT ASSISTANT",if(voiceMode)"말로 질문하고, 근거를 확인해요" else "현장에서 궁금한 점을 물어보세요",if(voiceMode)"질문과 답변을 이 화면에서 이어 볼 수 있어요." else "문서에서 근거를 찾고, 같은 쪽의 원문까지 연결해요.",action={WorkspaceButton("새 대화",actions.onNewChat,primary=false,icon=WorkspaceSymbol.PLUS,enabled=!state.isAnswering&&!voice.conversationEnabled)})
                         FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalArrangement=Arrangement.spacedBy(6.dp)){
                             WorkspaceBadge("● 문서 ${state.documents.sumOf{it.chunkCount}}개 쪽",green=true)
-                            WorkspaceBadge(if(state.modelStatus.phase==ModelPhase.READY)"Gemma 모델 저장됨" else "문서 원문 검색 모드")
+                            WorkspaceBadge(if(state.modelStatus.phase==ModelPhase.READY)"EXAONE 모델 저장됨" else "문서 원문 검색 모드")
                             TextButton(onClick={actions.onNavigate(AppDestination.SETTINGS)}){Text("AI 설정 →",fontSize=11.sp,color=WorkspaceDesign.Blue)}
                         }
                     }

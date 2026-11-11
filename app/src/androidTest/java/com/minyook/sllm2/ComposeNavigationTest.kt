@@ -150,7 +150,6 @@ class ComposeNavigationTest {
         onSubmit = onSubmit,
         onPreset = {},
         onDownloadModel = {},
-        onBackend = {},
         onContextTokens = {},
         onResponseTokens = {},
         onSaveSettings = {},

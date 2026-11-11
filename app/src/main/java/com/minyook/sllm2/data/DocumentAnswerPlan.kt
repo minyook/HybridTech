@@ -1,5 +1,5 @@
 /* 소스 안내
- * 검색 결과를 본문·근거 ID·출처로 묶는다. 화면에 먼저 표시한 뒤 선택적 보충을 근거 계약으로 검사한다.
+ * 검색 결과를 모델 입력 근거, 대체 답변 본문, PDF 출처로 묶는다.
  */
 package com.minyook.sllm2.data
 
@@ -9,9 +9,9 @@ import org.json.JSONObject
 data class PlannedPassage(val id: String, val sourceId: Long, val text: String, val section: String)
 
 /**
- * 검색 결과에서 만들어 화면·음성·선택적 모델 보충이 공유하는 답변 계획.
- * create는 선택한 원문의 표시 본문과 근거 ID/출처를 함께 구성하고 context는 같은 근거를 모델용으로 직렬화한다.
- * ViewModel이 본문을 먼저 표시한 뒤 supplementRequested인 경우에만 보충 실행으로 넘어간다.
+ * 검색 결과에서 만들어 화면·음성·모델이 공유하는 답변 계획.
+ * create는 선택한 원문의 대체 답변 본문과 근거 ID/출처를 함께 구성한다.
+ * generationContext는 선택된 근거를 답변 생성용 입력으로 제공한다.
  * 근거 선택과 일반 생성 허용은 앞단 SearchResolution의 책임이며 이 계획 자체가 현장 승인 판단은 아니다.
  */
 data class DocumentAnswerPlan(val question: String, val body: String, val evidence: List<PlannedPassage>, val sources: List<RetrievedChunk>, val directAnswer: Boolean = false) {
@@ -24,6 +24,10 @@ data class DocumentAnswerPlan(val question: String, val body: String, val eviden
     fun context(): String = evidence.joinToString("\n\n") { passage ->
         val title=sources.firstOrNull { it.chunk.id==passage.sourceId }?.chunk?.documentTitle.orEmpty()
         "[${passage.id}] $title · ${passage.section}\n${passage.text}"
+    }
+    fun generationContext(): String = evidence.groupBy { it.sourceId to it.section }.values.joinToString("\n\n") { passages ->
+        val section = passages.first().section
+        passages.joinToString("\n", prefix = if (section.isBlank()) "" else "$section\n") { it.text }
     }
     companion object {
         fun create(question: String, resolution: SearchResolution, knowledgeReady: Boolean = true): DocumentAnswerPlan {

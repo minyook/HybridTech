@@ -17,6 +17,7 @@ object GeneralKnowledgeAnswer {
     private val detailedRequest = Regex("자세|상세|차근|길게|단계별|순서대로|표로|체크리스트|전부|모두|각각|비교|(?:네|다섯|여섯|일곱|여덟|아홉|열|[4-9]|\\d{2,})\\s*문장")
     private val briefRequest = Regex("(?:한|두|세|(?<!\\d)[123])\\s*문장|짧게|간단히|간략|요점만|핵심만|짧은\\s*답변")
     private val perItemLength = Regex("각\\s*(?:항목|단계|조건|사항|요점|문항)|(?:항목|단계|조건)(?:별|마다)")
+    private val completeNumberedLine = Regex("^(\\d+)\\.\\s+(\\S.*[.!?。！？])$")
     private val multipleTopics = Regex("그리고|또한|더불어|함께|동시에|[,，;；\\n]|절차|사용법|방법|예시|주의사항|구성|장단점|이유")
     private val definition = Regex("(?:뜻|의미|정의)(?:이|가|는|를)?\\s*(?:뭐야|뭔가요|무엇(?:이야|인가요)?|알려\\s*줘|설명해\\s*줘)?[?.!？\\s]*$")
 
@@ -31,7 +32,7 @@ object GeneralKnowledgeAnswer {
     private fun formatInstruction(question: String, brief: Boolean): String {
         val items = numberedItemCount(question)
         return when {
-            items != null -> "한국어 Markdown 답변 본문만 작성하세요. 1번부터 ${items}번까지 정확히 ${items}개 번호 항목으로 바로 시작하고 각 항목은 한 문장으로 쓰세요. 항목마다 다른 확인 대상과 확인 행동을 직접 설명하고 필요한 조건·예외를 문장에 포함하세요. 도입문·별도 결론·같은 내용 반복은 생략하고 마지막 항목에서 종료하세요."
+            items != null -> "한국어 Markdown 답변 본문에 1번부터 ${items}번까지 정확히 ${items}개 번호 항목을 쓰세요. 각 항목은 필요한 조건·예외를 담은 짧고 완결된 한 문장으로 설명하세요."
             brief -> "한국어로 질문에 직접 답하는 1~3개의 완결 문장만 쓰고 종료하세요. 필요한 조건과 예외를 포함하고 제목·목록·요약은 생략하세요."
             else -> "한국어 Markdown 답변 본문만 작성하세요. 첫 문장은 짧은 직답, 이어서 필요한 설명·조건·예외를 완결된 문장과 목록으로 쓰세요."
         }
@@ -85,8 +86,20 @@ object GeneralKnowledgeAnswer {
         }
         return chosen.joinToString("\n\n").trim()
     }
+    private fun supportedNumberedItems(value: String, question: String, count: Int): List<String> =
+        value.lineSequence().mapNotNull { line ->
+            val match = completeNumberedLine.matchEntire(line.trim()) ?: return@mapNotNull null
+            val number = match.groupValues[1].toIntOrNull() ?: return@mapNotNull null
+            val text = match.groupValues[2]
+            (number to text).takeIf { number in 1..count && acceptable(text, question) }
+        }.distinctBy { it.first }.distinctBy { it.second }.map { (number, text) -> "$number. $text" }.toList()
+
     private fun labelledPreview(body: String?, question: String): String? = body
-        ?.let { supportedGeneralText(it, question) }
+        ?.let { text ->
+            val count = numberedItemCount(question)
+            if (count == null) supportedGeneralText(text, question)
+            else supportedNumberedItems(text, question, count).joinToString("\n")
+        }
         ?.takeIf(String::isNotBlank)
         ?.let { "$NOTICE\n\n$it" }
 
@@ -110,6 +123,16 @@ object GeneralKnowledgeAnswer {
 
     fun finish(raw:String,question:String,outputLimitReached:Boolean=false):String {
         val value=AnswerMarkdown.normalize(raw)
+        val count = numberedItemCount(question)
+        if (count != null) {
+            val items = supportedNumberedItems(value, question, count)
+            val body = items.joinToString("\n")
+            val incomplete = if (items.size < count) {
+                "> 요청하신 ${count}개 항목 중 ${items.size}개를 완성했어요."
+            } else ""
+            val limit = LIMIT_NOTICE.takeIf { outputLimitReached && items.size < count }.orEmpty()
+            return listOf(NOTICE, body, incomplete, limit).filter(String::isNotBlank).joinToString("\n\n")
+        }
         val safe = if(acceptable(value,question))value else supportedGeneralText(value,question)
         val body=if(safe.isNotBlank())safe else "일반 설명을 완성하지 못했어요. 질문을 다시 보내 주세요."
         return "$NOTICE\n\n$body" + if(outputLimitReached && safe.isNotBlank()) "\n\n$LIMIT_NOTICE" else ""

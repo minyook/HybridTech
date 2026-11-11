@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- 소스 안내
-비교 보고서 공유 FileProvider가 노출할 파일 경로의 최소 범위.
--->
-<paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <cache-path name="model-comparisons" path="model-comparisons/" />
-</paths>

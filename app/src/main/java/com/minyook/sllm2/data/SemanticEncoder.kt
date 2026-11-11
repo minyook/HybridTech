@@ -13,7 +13,7 @@ import kotlin.math.sqrt
 /**
  * 검색용 질문을 EmbeddingGemma ONNX CPU 세션으로 인코딩해 정규화된 768차원 벡터를 반환한다.
  * 문서 벡터는 번들 인덱스에 있으므로 휴대폰에서 다시 만들지 않는다. 질문별 임시 tensor/result는 use로 닫는다.
- * 최근 16개 질문 벡터와 세션을 재사용하며, ViewModel이 Gemma 생성 전 또는 화면 이탈 시 release를 호출한다.
+ * 최근 16개 질문 벡터와 세션을 재사용하며, ViewModel이 EXAONE 생성 전 또는 화면 이탈 시 release를 호출한다.
  * 생성 모델(LocalModelRuntime)과 독립적인 자원이며 인코딩 실패는 Coordinator가 검색 오류로 처리한다.
  */
 class SemanticEncoder(private val context: Context) {

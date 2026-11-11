@@ -83,6 +83,7 @@ import androidx.compose.ui.unit.sp
 import com.minyook.sllm2.data.ChatHistoryStore
 import com.minyook.sllm2.gas.GasReading
 import com.minyook.sllm2.model.ContextTokenPolicy
+import com.minyook.sllm2.model.LocalModel
 import com.minyook.sllm2.model.InferenceBackend
 import com.minyook.sllm2.model.ModelPhase
 import kotlinx.coroutines.launch
@@ -101,8 +102,8 @@ data class FieldGuardActions(
     val onSubmit: () -> Unit,
     val onPreset: (String) -> Unit,
     val onDownloadModel: () -> Unit,
-    val onBackend: (InferenceBackend) -> Unit,
     val onContextTokens: (Int) -> Unit,
+    val onBackend: (InferenceBackend) -> Unit = {},
     val onResponseTokens: (Int) -> Unit,
     val onSaveSettings: () -> Unit,
     val onStartAp: () -> Unit,
@@ -123,12 +124,7 @@ data class FieldGuardActions(
     val onSaveChecklist: () -> Unit = {},
     val onClearChatHistory: () -> Unit = {},
     val onSaveWorkServer: (String) -> Unit = {},
-    val onSelectModel: (com.minyook.sllm2.model.LocalModel) -> Unit = {},
     val onDownloadWithToken: (String) -> Unit = {},
-    val onDownloadNpu: (String) -> Unit = {},
-    val onStartModelComparison: () -> Unit = {},
-    val onStopModelComparison: () -> Unit = {},
-    val onReviewModelComparison: (Int, Boolean) -> Unit = { _, _ -> },
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -475,7 +471,7 @@ private fun RuntimeStatusCard(state: FieldGuardUiState, safeLimit: Int) {
             val phase = state.modelStatus.phase
             Text(
                 when (phase) {
-                    ModelPhase.READY -> "준비됨 · Gemma 4 E2B / ${state.settings.backend.label}"
+                    ModelPhase.READY -> "준비됨 · ${LocalModel.title} / ${state.settings.backend.label}"
                     ModelPhase.DOWNLOADING -> "다운로드 중 · ${state.modelProgress?.let { "$it%" } ?: "진행률 확인 중"}"
                     ModelPhase.FAILED -> "모델 준비 실패 · 다시 시도 필요"
                     ModelPhase.NOT_INSTALLED -> "문서 검색 모드 · 모델 준비 필요"
@@ -484,7 +480,7 @@ private fun RuntimeStatusCard(state: FieldGuardUiState, safeLimit: Int) {
                 style = MaterialTheme.typography.titleMedium,
             )
             if (phase == ModelPhase.DOWNLOADING) LinearProgressIndicator(progress = { (state.modelProgress ?: 0) / 100f }, modifier = Modifier.fillMaxWidth().padding(top = 12.dp))
-            Text("RAM ${state.deviceProfile?.totalRamGb ?: "—"}GB · 저장 공간 ${state.deviceProfile?.availableStorageGb ?: "—"}GB\n문서 문맥 ${state.settings.contextTokens.tokenText()} / 이 기기 안전 한도 ${safeLimit.tokenText()} · 답변 ${if (state.settings.automaticAnswerLength) "자동" else state.settings.responseTokens.tokenText()}", color = Color(0xFFB8C7C5), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 10.dp))
+            Text("RAM ${state.deviceProfile?.totalRamGb ?: "—"}GB · 저장 공간 ${state.deviceProfile?.availableStorageGb ?: "—"}GB\n문서 문맥 ${state.settings.contextTokens.tokenText()} / 이 기기 안전 한도 ${safeLimit.tokenText()} · 답변은 남은 문맥 전체 사용", color = Color(0xFFB8C7C5), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 10.dp))
         }
     }
 }
@@ -493,10 +489,10 @@ private fun RuntimeStatusCard(state: FieldGuardUiState, safeLimit: Int) {
 private fun ModelManagementCard(state: FieldGuardUiState, actions: FieldGuardActions) {
     DarkCard {
         Text("온디바이스 모델 카탈로그", color = Color.White, style = MaterialTheme.typography.titleLarge)
-        Text("Gemma 4 E2B Instruct · 약 2.41 GB", color = Color.White, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 12.dp))
+        Text("${LocalModel.title} · ${LocalModel.sizeLabel}", color = Color.White, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 12.dp))
         Text("현장 대화와 안전 안내 기본 권장 모델 · 다운로드가 끝나면 추론은 오프라인으로 실행됩니다.", color = Color(0xFFB8C7C5), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 6.dp))
         when (state.modelStatus.phase) {
-            ModelPhase.READY -> Text("로컬 Gemma 준비됨 · ${state.settings.backend.label}", color = Color(0xFF69D99A), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 14.dp))
+            ModelPhase.READY -> Text("로컬 EXAONE 준비됨 · ${state.settings.backend.label}", color = Color(0xFF69D99A), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 14.dp))
             ModelPhase.DOWNLOADING -> Text("앱을 닫아도 다운로드를 이어갑니다.", color = Color(0xFFB8C7C5), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 14.dp))
             else -> Button(onClick = actions.onDownloadModel, modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) { Text(if (state.modelStatus.phase == ModelPhase.FAILED) "다시 다운로드" else "앱에서 다운로드") }
         }
@@ -506,38 +502,20 @@ private fun ModelManagementCard(state: FieldGuardUiState, actions: FieldGuardAct
 @Composable
 private fun InferenceSettingsCard(state: FieldGuardUiState, contextLimit: Int, actions: FieldGuardActions) {
     DarkCard {
-        Text("실행 백엔드", color = Color.White, style = MaterialTheme.typography.titleMedium)
-        InferenceBackend.entries.forEach { backend ->
-            FilterChip(
-                selected = state.settings.backend == backend,
-                onClick = { actions.onBackend(backend) },
-                label = { Text(backend.label) },
-                modifier = Modifier.padding(end = 6.dp, top = 8.dp),
-            )
+        WorkspaceSelect("실행 방식", state.settings.backend.label, InferenceBackend.entries.map { it.label },
+            enabled = !state.isAnswering) { label ->
+            actions.onBackend(InferenceBackend.entries.first { it.label == label })
         }
         SliderSetting(
             label = "총 컨텍스트 한도",
-            description = "Gemma 원본 128,000 토큰 · 이 기기 안전 한도 안에서 선택",
+            description = "EXAONE 원본 65,536 토큰 · 이 기기 안전 한도 안에서 선택",
             value = state.settings.contextTokens,
             min = ContextTokenPolicy.MIN_CONTEXT_TOKENS,
             max = contextLimit,
             step = 1_024,
             onChange = actions.onContextTokens,
         )
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text("답변 길이 자동", color = Color.White, style = MaterialTheme.typography.titleMedium)
-            androidx.compose.material3.Switch(checked = state.settings.automaticAnswerLength, onCheckedChange = actions.onAutomaticAnswerLength)
-        }
-        Text("모델이 답을 마칠 때까지 생성합니다.", color = Color(0xFFB8C7C5), style = MaterialTheme.typography.bodyMedium)
-        if (!state.settings.automaticAnswerLength) SliderSetting(
-            label = "수동 최대 출력 길이",
-            description = "상한에 도달하면 답변이 중간에 멈출 수 있습니다.",
-            value = state.settings.responseTokens,
-            min = ContextTokenPolicy.MIN_RESPONSE_TOKENS,
-            max = ContextTokenPolicy.responseLimit(state.settings.contextTokens),
-            step = 128,
-            onChange = actions.onResponseTokens,
-        )
+        Text("최대 답변 토큰 · 문맥의 남은 토큰 전체 사용", color = Color(0xFFB8C7C5), style = MaterialTheme.typography.bodyMedium)
         if (state.settingsSaved) Text("저장됨 · 다음 질문부터 적용됩니다.", color = Color(0xFF69D99A), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
         Button(onClick = actions.onSaveSettings, modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) { Text("설정 저장") }
     }

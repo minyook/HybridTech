@@ -8,6 +8,10 @@ package com.minyook.sllm2.data
  * 사용자가 입력한 UI/기록 원문은 보존하고, 질문 문장을 특정 정답이나 페이지 번호에 직접 연결하지 않는다.
  */
 internal object QuestionUnderstanding {
+    private val numberedPresentation = Regex(
+        """\s*(?:핵심\s*)?\d+\s*(?:개|가지|항목)(?:로|를)?\s*(?:정리|설명|알려)(?:해\s*)?(?:줘|주세요|해요)?[.!?]?\s*각\s*(?:항목|단계|조건|사항)[^.?!]*[.?!]?$""",
+    )
+
     fun normalize(question:String):String {
         var q=question
             .let(QuestionFocus::requestText)
@@ -20,6 +24,8 @@ internal object QuestionUnderstanding {
             .replace(Regex("더러워진|더러운"),"오염된")
             .replace(Regex("뜯어|뜯는"),"분해")
             .replace(Regex("멈추면|멈췄|멈춘|멈추는"),"중단")
+            .replace(Regex("(?:일시\\s*)?중단(?:했다가|한\\s*뒤|\\s*후)\\s*(?:작업을\\s*)?다시\\s*시작"), "일시 중단하였다가 다시 시작")
+        if (GeneralKnowledgeAnswer.numberedItemCount(question) != null) q = q.replace(numberedPresentation, "")
         if("측정" in q&&"산소" in q)q=q.replace(Regex("(?<!유해)가스"),"유해가스")
         if("송기마스크" in q)q=q.replace("호스","송기라인")
         if(Regex("질소|아르곤|불활성").containsMatchIn(q))q=q.replace(Regex("실수로\\s*열지\\s*않도록"),"잘못된 조작 방지")

@@ -1,12 +1,10 @@
 /* 소스 안내
- * 기존 답변 경로의 제한된 모순 검사와 회귀 대상. 현재 ViewModel의 일반/보충 검증기는 다른 객체이므로 호출 범위를 구분한다.
+ * 문서 기반 생성에서 일부 출처 모순을 감지한다.
  */
 package com.minyook.sllm2.data
 
 /**
- * 기존 답변 경로의 제한된 모순 검사 유틸리티. 선택한 CPR 근거 누락/문서 부재 단정 등을 검사한다.
- * 현재 ViewModel의 선택적 문서 보충은 DocumentAnswerPlan의 AnswerSupplementVerifier,
- * 일반 생성은 GeneralKnowledgeAnswer를 사용한다. 이 객체가 모든 앱 답변을 검증하는 것은 아니다.
+ * DocumentGeneration이 사용하는 모순 검사. 선택한 CPR 근거의 누락과 복합 질문에서의 문서 부재 단정을 검사한다.
  */
 internal object QuestionAnswerVerifier {
     private val missingDocumentClaim = Regex(

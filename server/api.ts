@@ -1,0 +1,101 @@
+/* 소스 안내
+ * 세션 쿠키·origin/CSRF·JSON 검증 후 store 명령으로 연결하는 HTTP/SSE 경계. 실제 업무 권한은 저장소/도메인에서 재검사한다.
+ * 연결 모듈: ./store.ts.
+ */
+import type { IncomingMessage, ServerResponse } from 'node:http';
+import { ApiError, type WorkStore } from './store.ts';
+import { randomBytes } from 'node:crypto';
+
+const COOKIE = 'fieldguard_session';
+function cookieToken(request: IncomingMessage) {
+  return request.headers.cookie?.split(';').map(value => value.trim()).find(value => value.startsWith(`${COOKIE}=`))?.slice(COOKIE.length + 1);
+}
+function setCookie(request: IncomingMessage, response: ServerResponse, token: string) {
+  const secure = Boolean((request.socket as { encrypted?: boolean }).encrypted);
+  response.setHeader('Set-Cookie', `${COOKIE}=${token}; Path=/api; HttpOnly; SameSite=Strict; Max-Age=2592000${secure ? '; Secure' : ''}`);
+}
+async function body(request: IncomingMessage) {
+  if (!request.headers['content-type']?.startsWith('application/json')) throw new ApiError(415, 'JSON 형식으로 요청해 주세요.');
+  let input = '';
+  for await (const chunk of request) { input += chunk; if (Buffer.byteLength(input) > 32_768) throw new ApiError(413, '입력 내용이 너무 길어요.'); }
+  try { return JSON.parse(input); } catch { throw new ApiError(400, '요청 내용을 확인해 주세요.'); }
+}
+/**
+ * 작업 API 경계. index.ts가 수명 동안 유지할 WorkStore를 주입한다.
+ * 쿠키·origin·CSRF·JSON 요청을 확인한 뒤 인증/업무 명령을 store로 넘기고 HTTP 오류로 변환한다.
+ * SSE는 권한별 변경 신호만 보내며 Android 클라이언트가 자기 권한의 목록을 다시 읽는다.
+ * 역할/소유권과 상태 전이의 최종 검사는 저장소/도메인 계층에서도 수행한다.
+ */
+export function createWorkMiddleware(store: WorkStore) {
+  return async (request: IncomingMessage, response: ServerResponse, next: () => void) => {
+    let url: URL;
+    try { url = new URL(request.url ?? '/', 'http://localhost'); }
+    catch { response.statusCode = 400; response.end(); return; }
+    if (!url.pathname.startsWith('/api/')) return next();
+    response.setHeader('Content-Type', 'application/json; charset=utf-8');
+    response.setHeader('Cache-Control', 'no-store');
+    response.setHeader('X-Content-Type-Options', 'nosniff');
+    const send = (status: number, value: unknown) => { response.statusCode = status; response.end(JSON.stringify(value)); };
+    try {
+      const origin = request.headers.origin;
+      if (origin && new URL(origin).host !== request.headers.host) throw new ApiError(403, '같은 사이트에서 요청해 주세요.');
+      if (request.headers['sec-fetch-site'] === 'cross-site') throw new ApiError(403, '같은 사이트에서 요청해 주세요.');
+      const token = cookieToken(request);
+      if (request.method === 'GET' && url.pathname === '/api/session') {
+        const result = store.connect(token); if (result.token) setCookie(request, response, result.token);
+        return send(200, result.session);
+      }
+      if (request.method === 'GET' && url.pathname === '/api/work-events') {
+        const view = url.searchParams.get('view') ?? 'worker';
+        let version = store.changeVersion(token, view);
+        response.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+        response.setHeader('X-Accel-Buffering', 'no');
+        response.flushHeaders();
+        const event = (name: string, value: unknown) => response.write(`event: ${name}\ndata: ${JSON.stringify(value)}\n\n`);
+        // Always refresh on (re)connect: changes may have happened while disconnected.
+        event('changed', { version });
+        let ticks = 0;
+        const timer = setInterval(() => {
+          if (response.destroyed || response.writableEnded) { clearInterval(timer); return; }
+          try {
+            // SQLite also sees writes from another server process.
+            const current = store.changeVersion(token, view);
+            if (version !== current) { version = current; event('changed', { version }); }
+            else if (++ticks % 15 === 0) response.write(': heartbeat\n\n');
+          } catch (error) {
+            event('access-expired', { error: error instanceof ApiError ? error.message : '연결을 다시 확인해 주세요.' });
+            clearInterval(timer); response.end();
+          }
+        }, 1000);
+        response.once('close', () => clearInterval(timer));
+        return;
+      }
+      if (request.method === 'GET' && url.pathname === '/api/work-orders') return send(200, store.listOrders(token, url.searchParams.get('view') ?? 'worker'));
+      if(request.method==='GET'&&url.pathname==='/api/supervisor/invitations')return send(200,store.listInvites(token));
+      if (request.method !== 'POST') throw new ApiError(404, '요청 경로를 찾지 못했어요.');
+      store.verifyCsrf(token, request.headers['x-fieldguard-csrf'] as string | undefined);
+      const payload = await body(request);
+      if(url.pathname==='/api/supervisor/invitations')return send(201,store.issueInvite(token,payload?.name));
+      if(url.pathname==='/api/supervisor/redeem'){
+        const result=store.redeemInvite(token,payload?.token,request.socket.remoteAddress??'unknown');
+        setCookie(request,response,result.token);return send(200,result.session);
+      }
+      if(url.pathname==='/api/supervisor/revoke-invitation'){
+        store.revokeInvite(token,payload?.id);return send(200,{revoked:true});
+      }
+      if (url.pathname === '/api/supervisor/register') {
+        const result = store.unlock(token, payload?.code, request.socket.remoteAddress ?? 'unknown');
+        setCookie(request, response, result.token); return send(200, result.session);
+      }
+      if (url.pathname === '/api/supervisor/lock') {
+        const result = store.lock(token); setCookie(request, response, result.token); return send(200, result.session);
+      }
+      if (url.pathname === '/api/work-orders') return send(201, store.createOrder(token, payload));
+      const match = url.pathname.match(/^\/api\/work-orders\/([a-zA-Z0-9-]+)\/actions$/);
+      if (match) return send(200, store.applyAction(token, match[1], payload));
+      throw new ApiError(404, '요청 경로를 찾지 못했어요.');
+    } catch (error) {
+      send(error instanceof ApiError ? error.status : 500, { error: error instanceof ApiError ? error.message : '서버에서 처리하지 못했어요. 잠시 후 다시 시도해 주세요.' });
+    }
+  };
+}

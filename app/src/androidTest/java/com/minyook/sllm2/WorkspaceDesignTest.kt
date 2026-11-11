@@ -74,7 +74,7 @@ class WorkspaceDesignTest {
     }
     @Test fun settingsExposeDailySupervisorAccessAndNativeFunctions() {
         show(AppDestination.SETTINGS)
-        compose.onNodeWithText("기기 내 Gemma").assertIsDisplayed()
+        compose.onNodeWithText("기기 내 EXAONE").assertIsDisplayed()
         capture("android-workspace-settings.png")
         compose.onNodeWithText("감독관 화면으로 전환").performScrollTo().assertIsDisplayed()
     }
@@ -146,5 +146,5 @@ class WorkspaceDesignTest {
         val directory=File(InstrumentationRegistry.getInstrumentation().targetContext.getExternalFilesDir(null),"design-previews").apply{mkdirs()}
         File(directory,name).outputStream().use{bitmap.compress(Bitmap.CompressFormat.PNG,100,it)}
     }
-    private fun inertActions()=FieldGuardActions(onNavigate={},onNewChat={},onLoadChat={},onInputChange={},onSubmit={},onPreset={},onDownloadModel={},onBackend={},onContextTokens={},onResponseTokens={},onSaveSettings={},onStartAp={},onSelectMeter={},onStopAp={},onVoiceClick={},onVoiceLongClick={})
+    private fun inertActions()=FieldGuardActions(onNavigate={},onNewChat={},onLoadChat={},onInputChange={},onSubmit={},onPreset={},onDownloadModel={},onContextTokens={},onResponseTokens={},onSaveSettings={},onStartAp={},onSelectMeter={},onStopAp={},onVoiceClick={},onVoiceLongClick={})
 }

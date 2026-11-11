@@ -74,7 +74,7 @@ class TossNavigationTest {
         navigateWorkspace(AppDestination.SENSOR)
         compose.onNodeWithTag("startWifiAp").assertIsDisplayed()
         navigateWorkspace(AppDestination.SETTINGS)
-        compose.onNodeWithText("기기 내 Gemma").assertIsDisplayed()
+        compose.onNodeWithText("기기 내 EXAONE").assertIsDisplayed()
     }
 
     @Test
@@ -120,7 +120,7 @@ class TossNavigationTest {
             )))
         }
         compose.onNodeWithText("산소 농도").assertIsDisplayed()
-        compose.onNodeWithText("Gemma가 답변을 작성하고 있어요").assertIsDisplayed()
+        compose.onNodeWithText("문서 검색 안내 · 작성 중").assertIsDisplayed()
 
         compose.runOnIdle {
             state = state.copy(
@@ -219,22 +219,21 @@ class TossNavigationTest {
     }
 
     @Test
-    fun tokenDropdownUsesExistingNativeSettingsAndSaveAction() {
+    fun tokenSettingsShowMaximumOutputAndSaveContext() {
         var state by mutableStateOf(FieldGuardUiState(destination=AppDestination.INFERENCE))
         var saved=false
         compose.setContent {
             TossFieldGuardApp(state,VoiceUiState(available=false),actions().copy(
-                onAutomaticAnswerLength={state=state.copy(settings=state.settings.copy(automaticAnswerLength=it))},
-                onResponseTokens={state=state.copy(settings=state.settings.copy(responseTokens=it))},
+                onContextTokens={state=state.copy(settings=state.settings.copy(contextTokens=it))},
                 onSaveSettings={saved=true},
             ))
         }
-        compose.onNodeWithTag("select-최대 답변 토큰").performClick()
-        compose.onNodeWithText("512 토큰").performClick()
+        compose.onNodeWithText("문맥의 남은 토큰 전체 사용").assertIsDisplayed()
+        compose.onNodeWithTag("select-문맥 토큰 한도").performClick()
+        compose.onNodeWithText("2048 토큰").performClick()
         compose.onNodeWithText("토큰 설정 저장").performClick()
         compose.runOnIdle {
-            assertEquals(512,state.settings.responseTokens)
-            org.junit.Assert.assertFalse(state.settings.automaticAnswerLength)
+            assertEquals(2048,state.settings.contextTokens)
             org.junit.Assert.assertTrue(saved)
         }
     }
@@ -250,7 +249,7 @@ class TossNavigationTest {
         onNavigate = onNavigate,
         onNewChat = {}, onLoadChat = {}, onInputChange = onInputChange,
         onSubmit = onSubmit, onPreset = {}, onDownloadModel = {},
-        onBackend = {}, onContextTokens = {}, onResponseTokens = {}, onSaveSettings = {},
+        onContextTokens = {}, onResponseTokens = {}, onSaveSettings = {},
         onStartAp = {}, onSelectMeter = {}, onStopAp = {},
         onVoiceClick = {}, onVoiceLongClick = {},
         onCompleteOnboarding = onCompleteOnboarding,

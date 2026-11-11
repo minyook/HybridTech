@@ -17,7 +17,7 @@ import com.minyook.sllm2.data.KnowledgeRepository
 import com.minyook.sllm2.data.KnowledgeSeeder
 import com.minyook.sllm2.data.KnowledgeChunk
 import com.minyook.sllm2.data.DocumentAnswerPlan
-import com.minyook.sllm2.data.AnswerSupplementVerifier
+import com.minyook.sllm2.data.DocumentGeneration
 import com.minyook.sllm2.data.HybridRetrieval
 import com.minyook.sllm2.data.SemanticEncoder
 import com.minyook.sllm2.data.SearchSuggestion
@@ -33,22 +33,17 @@ import com.minyook.sllm2.gas.GasReadingSource
 import com.minyook.sllm2.gas.GasReadingStore
 import com.minyook.sllm2.model.ContextTokenPolicy
 import com.minyook.sllm2.model.DeviceProfile
-import com.minyook.sllm2.model.InferenceBackend
 import com.minyook.sllm2.model.InferenceSettings
+import com.minyook.sllm2.model.InferenceBackend
 import com.minyook.sllm2.model.InferenceSettingsPreferences
 import com.minyook.sllm2.model.LocalModelRuntime
 import com.minyook.sllm2.model.ModelDownloadScheduler
 import com.minyook.sllm2.model.ModelPhase
 import com.minyook.sllm2.model.ModelPreferences
 import com.minyook.sllm2.model.ModelStatus
-import com.minyook.sllm2.model.LocalModel
-import com.minyook.sllm2.model.NpuModel
 import com.minyook.sllm2.model.GenerationMetrics
 import com.minyook.sllm2.model.EngineReusePolicy
 import com.minyook.sllm2.model.ModelDownloadAccess
-import com.minyook.sllm2.model.ModelComparisonReport
-import com.minyook.sllm2.model.ModelComparisonRunner
-import com.minyook.sllm2.model.ModelComparisonStore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -113,16 +108,7 @@ data class FieldGuardUiState(
     val knowledgeStatus: String = "제공 문서를 준비하는 중입니다…",
     val modelStatus: ModelStatus = ModelStatus(ModelPhase.NOT_INSTALLED, 0),
     val modelProgress: Int? = null,
-    val modelStatuses: Map<LocalModel, ModelStatus> = emptyMap(),
-    val npuModel: NpuModel? = null,
-    val npuStatus: ModelStatus = ModelStatus(ModelPhase.NOT_INSTALLED, 0),
-    val npuProgress: Int? = null,
     val lastInference: GenerationMetrics? = null,
-    val comparison: ModelComparisonReport? = null,
-    val isComparing: Boolean = false,
-    val comparisonProgress: String = "",
-    val comparisonPreview: String = "",
-    val comparisonStopRequested: Boolean = false,
     val deviceProfile: DeviceProfile? = null,
     val settings: InferenceSettings = InferenceSettings(),
     val settingsSaved: Boolean = false,
@@ -155,12 +141,10 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     private val appContext = application.applicationContext
     private val modelPreferences = ModelPreferences(appContext)
     private val inferencePreferences = InferenceSettingsPreferences(appContext)
-    private val comparisonStore = ModelComparisonStore(appContext)
-    @Volatile private var stopComparison = false
     private val repository = KnowledgeRepository()
-    private val runtime = LocalModelRuntime(appContext)
+    private val runtime = LocalModelRuntime(appContext, maximizeOutput = true)
     private var idlePreparation: Job? = null
-    private var attemptedPreparation: Triple<LocalModel, InferenceBackend, Int>? = null
+    private var attemptedPreparation: Pair<InferenceBackend, Int>? = null
     @Volatile private var appForeground = true
     private val semanticEncoder = SemanticEncoder(appContext)
     private val questionSearchIndex by lazy { appContext.assets.open("knowledge/semantic-index-v1.json").bufferedReader().use { it.readText() } }
@@ -175,8 +159,6 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
             checklistSaved = uiPreferences.getBoolean("checklist_saved", false),
             workServerUrl = uiPreferences.getString("work_server_url", "") ?: "",
             modelStatus = modelPreferences.status(),
-            modelStatuses = LocalModel.entries.associateWith { modelPreferences.status(it) },
-            comparison = comparisonStore.load(),
             deviceProfile = DeviceProfile.read(appContext),
             settings = inferencePreferences.load(),
             histories = history.list(),
@@ -197,41 +179,20 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
 
     /** WorkManager 진행률과 디스크의 모델 상태를 합친다. READY는 파일 저장 상태이며 엔진 적재 완료가 아니다. */
     private fun refreshModelStatus() {
-        val model = _uiState.value.settings.model
-        fun workFor(selected: LocalModel, npu: NpuModel? = null) = modelWorkInfos.filter { info ->
-            val matchingModel = ModelDownloadScheduler.modelTag(selected) in info.tags ||
-                (selected == LocalModel.GEMMA4_E2B && info.tags.none { it.startsWith("model:") })
-            matchingModel && (ModelDownloadScheduler.artifactTag(npu) in info.tags ||
-                (npu == null && info.tags.none { it.startsWith("artifact:") }))
-        }
-        val selectedWork = workFor(model)
+        val selectedWork = modelWorkInfos
         val running = selectedWork.firstOrNull { it.state == WorkInfo.State.RUNNING }
         val pending = selectedWork.any { it.state == WorkInfo.State.ENQUEUED || it.state == WorkInfo.State.BLOCKED }
         val downloaded = running?.progress?.getLong("downloadedBytes", 0L) ?: 0L
         val total = running?.progress?.getLong("totalBytes", -1L) ?: -1L
-        val statuses = LocalModel.entries.associateWith { selected ->
-            val saved = modelPreferences.status(selected)
-            if (saved.phase == ModelPhase.DOWNLOADING && workFor(selected).none { !it.state.isFinished })
+        val saved = modelPreferences.status()
+        val status = when {
+            running != null || pending -> ModelStatus(ModelPhase.DOWNLOADING, downloaded)
+            saved.phase == ModelPhase.DOWNLOADING ->
                 saved.copy(phase = ModelPhase.FAILED, failureMessage = "이전 다운로드가 중단됐어요. 다시 다운로드해 주세요.")
-            else saved
+            else -> saved
         }
-        val status = if (running != null || pending) ModelStatus(ModelPhase.DOWNLOADING, downloaded) else statuses.getValue(model)
-        val npu = NpuModel.forDevice(model, _uiState.value.deviceProfile?.socModel.orEmpty())
-        val npuWork = workFor(model, npu).takeIf { npu != null }.orEmpty()
-        val npuRunning = npuWork.firstOrNull { it.state == WorkInfo.State.RUNNING }
-        val npuActive = npuWork.any { !it.state.isFinished }
-        val npuTotal = npuRunning?.progress?.getLong("totalBytes", -1) ?: -1
-        val npuDownloaded = npuRunning?.progress?.getLong("downloadedBytes", 0) ?: 0
-        val npuSaved = npu?.let { modelPreferences.status(model, it) } ?: ModelStatus(ModelPhase.NOT_INSTALLED, 0)
-        val npuStatus = when {
-            npuActive -> ModelStatus(ModelPhase.DOWNLOADING, npuDownloaded)
-            npuSaved.phase == ModelPhase.DOWNLOADING -> npuSaved.copy(phase = ModelPhase.FAILED, failureMessage = "이전 NPU 다운로드가 중단됐어요. 다시 시도해 주세요.")
-            else -> npuSaved
-        }
-        updateState { it.copy(modelStatus = status, modelStatuses = statuses + (model to status),
-            modelProgress = if (total > 0) ((downloaded * 100) / total).toInt().coerceIn(0, 100) else null,
-            npuModel = npu, npuStatus = npuStatus,
-            npuProgress = if (npuTotal > 0) ((npuDownloaded * 100) / npuTotal).toInt().coerceIn(0, 100) else null) }
+        updateState { it.copy(modelStatus = status,
+            modelProgress = if (total > 0) ((downloaded * 100) / total).toInt().coerceIn(0, 100) else null) }
         prepareIdleModel()
     }
 
@@ -239,14 +200,13 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     private fun prepareIdleModel() {
         val state = _uiState.value
         if (!appForeground || state.destination !in setOf(AppDestination.CHAT, AppDestination.VOICE) ||
-            state.isAnswering || state.isComparing || state.modelStatus.phase != ModelPhase.READY || idlePreparation?.isActive == true) return
+            state.isAnswering || state.modelStatus.phase != ModelPhase.READY || idlePreparation?.isActive == true) return
         val settings = inferencePreferences.load()
-        if (settings.model != LocalModel.GEMMA4_E2B || settings.backend !in setOf(InferenceBackend.AUTO, InferenceBackend.GPU)) return
-        val key = Triple(settings.model, settings.backend, settings.contextTokens)
+        val key = settings.backend to settings.contextTokens
         if (attemptedPreparation == key) return
         idlePreparation = viewModelScope.launch {
             delay(250) // 예시 질문을 바로 보냈다면 준비 작업보다 실제 검색을 먼저 처리한다.
-            if (!appForeground || _uiState.value.isAnswering || _uiState.value.isComparing) return@launch
+            if (!appForeground || _uiState.value.isAnswering) return@launch
             attemptedPreparation = key
             try {
                 withContext(Dispatchers.Default) {
@@ -331,7 +291,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
 
     /** 인식된 발화를 공통 질문 경로로 보낸다. 완료 콜백은 음성 상태 머신의 TTS/다음 듣기로 이어진다. */
     fun submitVoiceQuestion(question: String, onAnswer: ((String) -> Unit)? = null, onFailure: ((String) -> Unit)? = null) {
-        if (_uiState.value.isAnswering || _uiState.value.isComparing) { onFailure?.invoke("진행 중인 답변이나 모델 비교가 끝난 뒤 다시 시작해 주세요."); return }
+        if (_uiState.value.isAnswering) { onFailure?.invoke("진행 중인 답변이 끝난 뒤 다시 시작해 주세요."); return }
         if (_uiState.value.destination != AppDestination.VOICE) navigate(AppDestination.CHAT)
         changeInput(normalizeVoiceQuestion(question))
         submitQuestion(compactVoiceAnswer = true, speakAnswer = true, onAnswer = onAnswer, onFailure = onFailure)
@@ -391,7 +351,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun clearChatHistory() {
-        if (_uiState.value.isAnswering || _uiState.value.isComparing) return
+        if (_uiState.value.isAnswering) return
         history.clear()
         updateState { it.copy(histories = emptyList(), activeChatId = null, messages = listOf(ChatMessageUi(text = WELCOME, fromWorker = false))) }
     }
@@ -408,7 +368,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
      * UI의 글자 표시 버퍼는 별도 StreamingTextReveal이 담당한다. 이 함수는 최종 답변을 자르지 않는다.
      */
     fun submitQuestion(compactVoiceAnswer: Boolean = false, speakAnswer: Boolean = false, onAnswer: ((String) -> Unit)? = null, onFailure: ((String) -> Unit)? = null) {
-        if (_uiState.value.isAnswering || _uiState.value.isComparing) return
+        if (_uiState.value.isAnswering) return
         val asked = _uiState.value.input.trim()
         if (asked.isBlank()) {
             updateState { it.copy(inputError = "확인할 내용을 입력해 주세요") }
@@ -457,9 +417,35 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
             val basePlan = DocumentAnswerPlan.create(request.answerQuestion, resolution, repository.documentCount() > 0)
             val plan = if(sources.isEmpty()) basePlan.copy(body=resolution.message) else if(resolution.message.isNotBlank())basePlan.copy(body=basePlan.body+"\n\n"+resolution.message) else basePlan
             val sourceIds = plan.sourceIds
+            var documentLimitReached = false
+            val generatedDocument = if (resolution.status == "answered" && plan.evidence.isNotEmpty() &&
+                modelPreferences.status().phase == ModelPhase.READY
+            ) {
+                try {
+                    semanticEncoder.release()
+                    val raw = runtime.generate(
+                        request.answerQuestion, basePlan.generationContext(), compactVoiceAnswer,
+                        recentConversation = request.turns, latestUserQuestion = request.asked,
+                        onMetrics = ::recordInferenceMetrics,
+                        onOutputLimit = { documentLimitReached = it },
+                    )
+                    DocumentGeneration.accept(raw, basePlan, documentLimitReached)
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: Exception) {
+                    android.util.Log.w("FieldGuardAnswerLatency", "Document generation failed", error)
+                    null
+                }
+            } else null
+            val documentBody = generatedDocument?.let { body ->
+                listOf(body, resolution.message).filter(String::isNotBlank).joinToString("\n\n")
+            } ?: if (documentLimitReached) {
+                plan.body + "\n\n> 생성이 문맥 토큰 한도에 도달해 문서 근거를 표시했어요."
+            } else plan.body
+            val documentOrigin = if (generatedDocument == null) "document-fallback" else "document-generated"
             withContext(Dispatchers.Main) {
-                updateState { state -> state.copy(messages = state.messages.map { message -> if (message.id == pending.id) message.copy(text = plan.body, sourceIds = sourceIds, sourceLabels = plan.sourceLabels, suggestions = resolution.suggestions, topicQuestion = request.topic, answerStatus = resolution.status) else message }) }
-                if(sources.isNotEmpty())recordFirstBody("document")
+                updateState { state -> state.copy(messages = state.messages.map { message -> if (message.id == pending.id) message.copy(text = documentBody, sourceIds = sourceIds, sourceLabels = plan.sourceLabels, suggestions = resolution.suggestions, topicQuestion = request.topic, answerStatus = resolution.status) else message }) }
+                if (sources.isNotEmpty()) recordFirstBody(documentOrigin)
             }
             // generalQuestion은 검색 조정기가 허용한 주제다. 단순히 sources가 비었다는 이유로 생성하지 않는다.
             val generalQuestion=resolution.generalQuestion.takeIf{resolution.searchComplete}?.let { if(sources.isEmpty() && request.answerQuestion != request.query) request.answerQuestion else it }
@@ -479,7 +465,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
                             for (partial in previews) {
                                 val body = preview.next(partial) ?: continue
                                 lastGeneralBody = body
-                                val combined = if (sources.isEmpty()) body else plan.body + "\n\n" + body
+                                val combined = if (sources.isEmpty()) body else documentBody + "\n\n" + body
                                 updateState { state ->
                                     state.copy(messages = state.messages.map {
                                         if (it.id == pending.id) it.copy(text = combined, animateAnswer = true) else it
@@ -506,17 +492,8 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
                 }catch(cancelled:CancellationException){throw cancelled}catch(_:Exception){(lastGeneralBody ?: GeneralKnowledgeAnswer.NOTICE)+"\n\n> 답변 생성이 중단됐어요. 위 내용은 완료된 답변의 일부예요. 모델 상태를 확인한 뒤 다시 질문해 주세요."}
                 }
             }else ""
-            // 문서 보충은 일반 지식과 별도 계약이다. 근거 ID/수치/조건을 검사한 짧은 설명만 본문 뒤에 붙인다.
-            val supplement = if (generalQuestion==null && resolution.status=="answered" && plan.supplementRequested && modelPreferences.status().phase == ModelPhase.READY) {
-                try {
-                    semanticEncoder.release()
-                    val raw = runtime.generate(request.answerQuestion, plan.context(), compactVoiceAnswer, supplementOnly = true, recentConversation = request.turns, latestUserQuestion = request.asked)
-                    AnswerSupplementVerifier.fromJson(raw, plan)
-                } catch (cancelled: CancellationException) { throw cancelled }
-                catch (_: Exception) { "" }
-            } else ""
-            val response = if(general.isNotBlank()){if(sources.isEmpty())general else plan.body+"\n\n"+general} else AnswerSupplementVerifier.compose(plan, supplement)
-            android.util.Log.i("FieldGuardAnswerLatency","answerMs=${SystemClock.elapsedRealtime()-searchStarted} origin=${if(general.isNotBlank())"general-or-mixed" else "document"}")
+            val response = if(general.isNotBlank()){if(sources.isEmpty())general else documentBody+"\n\n"+general} else documentBody
+            android.util.Log.i("FieldGuardAnswerLatency","answerMs=${SystemClock.elapsedRealtime()-searchStarted} origin=${if(general.isNotBlank())"general-or-mixed" else documentOrigin}")
             // 저장·복사·TTS가 같은 최종 본문을 쓰도록 애니메이션용 일부 텍스트 대신 완성된 response를 저장한다.
             history.append(chatId, ChatHistoryStore.Role.ASSISTANT, response, sourceIds, suggestions=resolution.suggestions, topicQuestion=request.topic, answerStatus=resolution.status)
             val savedHistories = history.list()
@@ -543,7 +520,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     fun updateBackend(backend: InferenceBackend) = updateSettings { it.copy(backend = backend) }
 
     fun updateContextTokens(tokens: Int) = updateSettings { current ->
-        val limit = ContextTokenPolicy.deviceLimit(appContext, current.model)
+        val limit = ContextTokenPolicy.deviceLimit(appContext)
         val context = tokens.coerceIn(ContextTokenPolicy.MIN_CONTEXT_TOKENS, limit)
         current.copy(
             contextTokens = context,
@@ -558,24 +535,14 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     fun updateAutomaticAnswerLength(enabled: Boolean) = updateSettings { it.copy(automaticAnswerLength = enabled) }
 
     fun saveSettings() {
-        if (_uiState.value.isAnswering || _uiState.value.isComparing) return
+        if (_uiState.value.isAnswering) return
         val settings = _uiState.value.settings
         val previous = inferencePreferences.load()
         inferencePreferences.save(settings)
         if (EngineReusePolicy.requiresReload(previous, settings) && idlePreparation?.isActive != true) runtime.release()
-        updateState { it.copy(settingsSaved = true) }
-    }
-
-    fun selectModel(model: LocalModel) {
-        if (_uiState.value.isAnswering || _uiState.value.isComparing) return
-        val current = _uiState.value.settings
-        val context = current.contextTokens.coerceAtMost(ContextTokenPolicy.deviceLimit(appContext, model))
-        val selected = current.copy(model = model, contextTokens = context,
-            responseTokens = current.responseTokens.coerceAtMost(ContextTokenPolicy.responseLimit(context)))
-        inferencePreferences.save(selected)
-        runtime.release()
-        updateState { it.copy(settings = selected, settingsSaved = true, lastInference = null) }
-        refreshModelStatus()
+        updateState {
+            it.copy(settingsSaved = true, lastInference = it.lastInference.takeIf { previous.backend == settings.backend })
+        }
     }
 
     private fun recordInferenceMetrics(metrics: GenerationMetrics) {
@@ -583,17 +550,8 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
         updateState { it.copy(lastInference = metrics) }
     }
 
-    /** 저장 공간/접근 토큰을 확인하고 모델별 고유 WorkManager 작업을 예약한다. HTTP 전송은 Worker가 맡는다. */
-    fun downloadModel(token: String = "", useNpu: Boolean = false) {
-        val model = _uiState.value.settings.model
-        val npu = if (useNpu) _uiState.value.npuModel ?: return else null
-        val profile = DeviceProfile.read(appContext)
-        val requiredGb = if (model == LocalModel.GEMMA4_E2B) 4 else 1
-        if (profile.availableStorageGb < requiredGb) {
-            val message = "## 저장 공간이 부족합니다\n\n${model.title} 설치에는 **${requiredGb}GB** 이상의 여유 공간이 필요합니다."
-            updateState { it.copy(destination = AppDestination.CHAT, messages = it.messages + ChatMessageUi(text = message, fromWorker = false)) }
-            return
-        }
+    /** 접근 토큰을 저장하고 모델별 고유 WorkManager 작업을 예약한다. HTTP 전송은 Worker가 맡는다. */
+    fun downloadModel(token: String = "") {
         if (token.isNotBlank()) {
             val saved = runCatching { ModelDownloadAccess(appContext).save(token) }
             if (saved.isFailure) {
@@ -601,59 +559,8 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
                 return
             }
         }
-        ModelDownloadScheduler.enqueue(appContext, model, npu)
-        updateState { if (useNpu) it.copy(npuStatus = ModelStatus(ModelPhase.DOWNLOADING, 0), npuProgress = null)
-            else it.copy(modelStatus = ModelStatus(ModelPhase.DOWNLOADING, 0), modelProgress = null) }
-    }
-
-    /** 채팅/음성과 겹치지 않게 비교를 시작한다. 문항별 실제 생성과 보고서 저장은 ModelComparisonRunner가 맡는다. */
-    fun startModelComparison() {
-        if (_uiState.value.isAnswering || _uiState.value.isComparing) return
-        val models = LocalModel.entries.filter { modelPreferences.status(it).phase == ModelPhase.READY }
-        if (models.size < 2) {
-            updateState { it.copy(comparisonProgress = "모델을 두 개 이상 다운로드한 뒤 비교해 주세요.") }
-            return
-        }
-        val backend = _uiState.value.settings.backend
-        stopComparison = false
-        updateState { it.copy(isComparing = true, comparisonStopRequested = false, comparisonPreview = "", comparisonProgress = "현장 상세 비교를 준비하고 있어요.") }
-        viewModelScope.launch(Dispatchers.Default) {
-            try {
-                idlePreparation?.cancelAndJoin()
-                runtime.release()
-                semanticEncoder.release()
-                val report = ModelComparisonRunner(appContext).run(models, backend, { stopComparison },
-                    onPartial = { preview -> updateState { it.copy(comparisonPreview = preview) } }) { report, progress ->
-                    comparisonStore.save(report)
-                    updateState { it.copy(comparison = report, comparisonProgress = progress) }
-                }
-                comparisonStore.save(report)
-                updateState { it.copy(comparison = report, comparisonProgress = if (report.phase == "complete") "모델 비교를 완료했어요." else "모델 비교를 중지했어요.") }
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (_: Exception) {
-                val report = _uiState.value.comparison?.copy(phase = if (stopComparison) "stopped" else "interrupted")
-                report?.let { runCatching { comparisonStore.save(it) } }
-                updateState { it.copy(comparison = report, comparisonProgress = if (stopComparison) "모델 비교를 중지했어요." else "모델 비교가 중단됐어요. 완료된 결과를 확인하고 다시 실행해 주세요.") }
-            } finally {
-                updateState { it.copy(isComparing = false, comparisonPreview = "") }
-            }
-        }
-    }
-
-    fun stopModelComparison() {
-        stopComparison = true
-        updateState { it.copy(comparisonStopRequested = true, comparisonProgress = "현재 답변이 끝나면 중지해요.") }
-    }
-
-    fun reviewModelComparison(index: Int, correct: Boolean) {
-        if (_uiState.value.isComparing) return
-        val current = _uiState.value.comparison ?: return
-        if (index !in current.rows.indices) return
-        val report = current.copy(rows = current.rows.mapIndexed { i, row -> if (i == index) row.copy(correct = correct) else row })
-        val saved = runCatching { comparisonStore.save(report) }.isSuccess
-        updateState { it.copy(comparison = report,
-            comparisonProgress = if (saved) it.comparisonProgress else "평가를 기기에 저장하지 못했어요. JSON 복사로 보관해 주세요.") }
+        ModelDownloadScheduler.enqueue(appContext)
+        updateState { it.copy(modelStatus = ModelStatus(ModelPhase.DOWNLOADING, 0), modelProgress = null) }
     }
 
     fun startAp() {
@@ -709,7 +616,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     private fun updateSettings(transform: (InferenceSettings) -> InferenceSettings) = updateState {
-        if (it.isAnswering || it.isComparing) it else it.copy(settings = transform(it.settings), settingsSaved = false)
+        if (it.isAnswering) it else it.copy(settings = transform(it.settings), settingsSaved = false)
     }
 
     private fun updateState(transform: (FieldGuardUiState) -> FieldGuardUiState) {
@@ -717,7 +624,6 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     override fun onCleared() {
-        stopComparison = true
         persistSettings()
         modelWork.removeObserver(workObserver)
         semanticEncoder.release()

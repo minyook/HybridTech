@@ -115,4 +115,16 @@ class GeneralKnowledgeAnswerTest {
         assertFalse(GeneralKnowledgeAnswer.prefersBrief("확인 조건을 항목별 한 문장으로 설명해줘", automaticLength = false))
         assertTrue(GeneralKnowledgeAnswer.prompt("확인 사항 5개를 각 항목 한 문장으로 정리해줘").contains("한국어 Markdown 답변"))
     }
+
+    @Test fun numberedAnswersKeepCompleteValidRowsAndIdentifyMissingItems() {
+        val question = "밀폐공간 확인 사항 5개를 각 항목 한 문장으로 알려줘"
+        val raw = "1. 산소를 측정합니다.\n2. 산소는 16%면 됩니다.\n3. 연락 수단을 확인합니다.\n4. 보호구를"
+        val final = GeneralKnowledgeAnswer.finish(raw, question, outputLimitReached = true)
+        assertTrue(final.contains("1. 산소를 측정합니다.\n3. 연락 수단을 확인합니다."))
+        assertFalse(final.contains("16%"))
+        assertFalse(final.contains("4. 보호구를"))
+        assertTrue(final.contains("5개 항목 중 2개"))
+        assertTrue(final.contains(GeneralKnowledgeAnswer.LIMIT_NOTICE))
+        assertTrue(GeneralKnowledgeAnswer.partial(raw, question).orEmpty().contains("3. 연락 수단을 확인합니다."))
+    }
 }

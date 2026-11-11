@@ -2,7 +2,7 @@
  * Android 평가 결과를 평가 페이지가 읽는 데이터로 준비하는 개발 도구. 제품 질문/학습 데이터와 구분한다.
  */
 // PC-only evaluation helper. Android's own SemanticTokenizer exports the exact input IDs.
-// Reuses an installed ONNX Node runtime; never downloads models or modifies web/.
+// Reuses an installed ONNX Node runtime; never downloads models.
 import {readFile, writeFile, rename} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
@@ -11,7 +11,7 @@ import {fileURLToPath} from 'node:url';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const output=resolve(process.argv[2]);
 const require=createRequire(import.meta.url);
-const ort=require(require.resolve('onnxruntime-node',{paths:[root,resolve(root,'web')]}));
+const ort=require('onnxruntime-node');
 const assets=resolve(root,'app/src/main/assets/semantic-model');
 const manifest=JSON.parse(await readFile(resolve(assets,'manifest.json'),'utf8'));
 for(const entry of manifest.files.filter(f=>f.name.startsWith('onnx/')||f.name==='tokenizer.json')) {
