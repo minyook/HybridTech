@@ -7,6 +7,7 @@ package com.minyook.sllm2.ui
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -69,6 +70,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -77,6 +79,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
@@ -115,7 +118,7 @@ private val TossRed = Color(0xFFF04452)
 private val TossRedWeak = Color(0xFFFFEFF0)
 
 @Composable
-private fun FieldGuardTossTheme(content: @Composable () -> Unit) {
+internal fun FieldGuardTossTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = lightColorScheme(
             primary = TossBlue, onPrimary = Color.White,
@@ -151,20 +154,40 @@ fun TossFieldGuardApp(state: FieldGuardUiState, voice: VoiceUiState, actions: Fi
             TossOnboarding(actions.onCompleteOnboarding)
             return@FieldGuardTossTheme
         }
-        val destination = state.destination
+        val destination = if (state.destination == AppDestination.SUPERVISOR) {
+            AppDestination.CHECKLIST
+        } else state.destination
         val keyboard = LocalSoftwareKeyboardController.current
         LaunchedEffect(destination) { if (destination != AppDestination.CHAT) keyboard?.hide() }
         val wide = workspaceWide()
         val drawer = rememberDrawerState(DrawerValue.Closed)
         val workspaceScope = rememberCoroutineScope()
+        val context = LocalContext.current.applicationContext
+        val work = remember(context) {
+            WorkScenarioState(LocalWorkScenario(context), WorkView.WORKER, workspaceScope)
+        }
+        RefreshWorkOnResume(work)
+        var workStep by rememberSaveable { mutableStateOf<ScenarioStep?>(null) }
+        val openWorkStep: (ScenarioStep?) -> Unit = { step ->
+            val accessible = step?.takeUnless { it.destination == AppDestination.SUPERVISOR }
+            workStep = accessible
+            work.clearError()
+            if (accessible != ScenarioStep.REQUEST) work.requestOpen = false
+            actions.onNavigate(accessible?.destination ?: AppDestination.CHECKLIST)
+        }
+        LaunchedEffect(destination) {
+            if (destination != AppDestination.VOICE) work.voiceFromWork = false
+        }
         val parent = when (destination) {
             AppDestination.HOME -> null
             AppDestination.CHAT, AppDestination.SENSOR, AppDestination.SETTINGS -> AppDestination.HOME
-            AppDestination.HISTORY, AppDestination.VOICE -> AppDestination.CHAT
+            AppDestination.HISTORY -> AppDestination.CHAT
+            AppDestination.VOICE -> if (work.voiceFromWork) AppDestination.CHECKLIST else AppDestination.CHAT
             AppDestination.SOURCE -> state.sourceReturnDestination
             AppDestination.SENSOR_DISCONNECTED -> AppDestination.SENSOR
             AppDestination.CHECKLIST, AppDestination.LIBRARY -> AppDestination.HOME
-            AppDestination.LOCAL_CHECKLIST, AppDestination.WORK_SERVER, AppDestination.SUPERVISOR -> AppDestination.CHECKLIST
+            AppDestination.SUPERVISOR -> if (workStep != null) AppDestination.HOME else AppDestination.CHECKLIST
+            AppDestination.LOCAL_CHECKLIST -> AppDestination.SETTINGS
             AppDestination.MODEL, AppDestination.INFERENCE, AppDestination.DATA, AppDestination.SYSTEM -> AppDestination.SETTINGS
         }
         BackHandler(enabled = parent != null || drawer.isOpen) {
@@ -173,8 +196,11 @@ fun TossFieldGuardApp(state: FieldGuardUiState, voice: VoiceUiState, actions: Fi
             parent?.let(actions.onNavigate)
         }
         val imeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+        val hasTextEntry = destination in setOf(AppDestination.CHAT, AppDestination.CHECKLIST, AppDestination.SUPERVISOR)
         val navigateFromTab: (AppDestination) -> Unit = { target ->
             if (destination == AppDestination.VOICE && target != AppDestination.VOICE) actions.onStopVoice()
+            workStep = null
+            work.requestOpen = false
             actions.onNavigate(target)
         }
         val navigateFromMenu: (AppDestination) -> Unit = { target -> workspaceScope.launch { drawer.close() }; navigateFromTab(target) }
@@ -184,35 +210,48 @@ fun TossFieldGuardApp(state: FieldGuardUiState, voice: VoiceUiState, actions: Fi
         Row(Modifier.fillMaxSize().background(WorkspaceDesign.Canvas)) {
         if (wide) FieldWorkspaceSidebar(destination, navigateFromMenu)
         Scaffold(
-            modifier = Modifier.weight(1f).then(if(destination == AppDestination.CHAT) Modifier.imePadding() else Modifier),
+            modifier = Modifier.weight(1f).then(if (hasTextEntry) Modifier.imePadding() else Modifier),
             containerColor = WorkspaceDesign.Canvas,
             topBar = {
-                TossTopBar(destination, parent, state, onBack = {
+                TossTopBar(destination, parent, onBack = {
                     if (destination == AppDestination.VOICE) actions.onStopVoice()
                     parent?.let(actions.onNavigate)
-                }, onHistory = { actions.onNavigate(AppDestination.HISTORY) }, onSettings = { actions.onNavigate(AppDestination.SETTINGS) }, onMenu = if (wide) null else ({ workspaceScope.launch { drawer.open() } }))
+                }, onMenu = if (wide) null else ({ workspaceScope.launch { drawer.open() } }))
             },
             bottomBar = {
-                if ((!imeVisible || destination != AppDestination.CHAT) && !wide) TossBottomNavigation(destination, state.sourceReturnDestination, navigateFromTab)
+                if (destination != AppDestination.VOICE && (!imeVisible || !hasTextEntry) && !wide) {
+                    TossBottomNavigation(destination, state.sourceReturnDestination, navigateFromTab)
+                }
             },
         ) { padding ->
             Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
                 when (destination) {
-                    AppDestination.HOME -> FieldWorkspaceHome(state, actions)
+                    AppDestination.HOME -> FieldWorkspaceHome(state, actions, work, openWorkStep)
                     AppDestination.CHAT -> TossChat(state, voice, actions, imeVisible)
                     AppDestination.HISTORY -> TossHistory(state, actions)
-                    AppDestination.SOURCE -> TossSource(state, actions)
+                    AppDestination.LIBRARY, AppDestination.SOURCE -> {
+                        val showSource = destination == AppDestination.SOURCE
+                        if (LocalConfiguration.current.screenWidthDp >= 1100 &&
+                            (!showSource || state.sourceReturnDestination == AppDestination.LIBRARY)
+                        ) WorkspaceLibraryAndSource(state, actions, showSource)
+                        else if (showSource) TossSource(state, actions)
+                        else TossLibrary(state, actions)
+                    }
                     AppDestination.VOICE -> WorkspaceChat(state, voice, actions, imeVisible=false, voiceMode=true)
-                    AppDestination.SENSOR -> TossSensor(state, actions)
-                    AppDestination.SENSOR_DISCONNECTED -> TossSensorDisconnected(state, actions)
-                    AppDestination.CHECKLIST, AppDestination.SUPERVISOR -> key(destination) { NativeWorkPage(state, actions) }
+                    AppDestination.SENSOR, AppDestination.SENSOR_DISCONNECTED -> {
+                        val active = work.currentOrder?.takeIf { it.fieldActive || it.status == WorkStatus.ALARM }
+                        WifiApSensorScreen(state, actions, active) {
+                            openWorkStep(if (active?.status == WorkStatus.ALARM) ScenarioStep.EVACUATION else ScenarioStep.ALARM)
+                        }
+                    }
+                    AppDestination.CHECKLIST, AppDestination.SUPERVISOR -> key(destination, workStep) {
+                        NativeWorkPage(state, actions, work, workStep, openWorkStep)
+                    }
                     AppDestination.LOCAL_CHECKLIST -> TossChecklist(state, actions)
-                    AppDestination.WORK_SERVER -> WorkServerSettings(state, actions)
-                    AppDestination.LIBRARY -> TossLibrary(state, actions)
                     AppDestination.MODEL -> TossModel(state, actions)
                     AppDestination.INFERENCE -> TossInference(state, actions)
                     AppDestination.DATA -> TossData(state, actions)
-                    AppDestination.SETTINGS -> TossSettings(state, actions)
+                    AppDestination.SETTINGS -> FieldWorkspaceSettings(state, actions)
                     AppDestination.SYSTEM -> TossSystem(state)
                 }
             }
@@ -223,12 +262,12 @@ fun TossFieldGuardApp(state: FieldGuardUiState, voice: VoiceUiState, actions: Fi
 }
 
 @Composable
-private fun TossTopBar(destination:AppDestination,parent:AppDestination?,state:FieldGuardUiState,onBack:()->Unit,onHistory:()->Unit,onSettings:()->Unit,onMenu:(()->Unit)?) {
+private fun TossTopBar(destination: AppDestination, parent: AppDestination?, onBack: () -> Unit, onMenu: (() -> Unit)?) {
     val title=when(destination){
         AppDestination.HOME->"홈";AppDestination.CHAT->"문서 질문";AppDestination.LIBRARY->"문서 보관함";AppDestination.HISTORY->"대화 기록"
         AppDestination.CHECKLIST->"작업 전 점검";AppDestination.SUPERVISOR->"감독관 인증";AppDestination.SOURCE->"근거 문서"
         AppDestination.VOICE->"음성 대화";AppDestination.SENSOR,AppDestination.SENSOR_DISCONNECTED->"가스 측정"
-        AppDestination.LOCAL_CHECKLIST->"이전 기기 점검";AppDestination.WORK_SERVER->"작업 서버"
+        AppDestination.LOCAL_CHECKLIST->"이전 기기 점검"
         else->"설정"
     }
     Column(Modifier.background(Color.White)){
@@ -236,11 +275,8 @@ private fun TossTopBar(destination:AppDestination,parent:AppDestination?,state:F
             if(parent!=null&&destination !in setOf(AppDestination.CHAT,AppDestination.SETTINGS,AppDestination.LIBRARY,AppDestination.HISTORY,AppDestination.CHECKLIST)){
                 IconButton(onClick=onBack,modifier=Modifier.size(36.dp).semantics{contentDescription="뒤로 가기"}){Text("←",fontSize=20.sp,color=TossMuted)}
             }else if(onMenu!=null)IconButton(onClick=onMenu,modifier=Modifier.size(36.dp).testTag("workspaceMenu").semantics{contentDescription="전체 메뉴 열기"}){Text("☰",fontSize=20.sp,color=TossMuted)}
-            if(!workspaceMobile()){Text("워크스페이스",fontSize=12.sp,color=Color(0xFF8B95A1));Text("/",fontSize=12.sp,color=Color(0xFF8B95A1))}
             Text(title,fontSize=12.sp,fontWeight=FontWeight.SemiBold,color=TossSecondary,modifier=Modifier.weight(1f))
-            Text("● 기기 내",fontSize=11.sp,color=TossGreen)
-            IconButton(onClick=onSettings,modifier=Modifier.size(36.dp).semantics{contentDescription="오프라인 준비 설정"}){WorkspaceIcon(WorkspaceSymbol.DOWNLOAD,Modifier.size(18.dp))}
-            if(workspaceWide())Surface(color=Color(0xFFEDF1F7),shape=RoundedCornerShape(11.dp)){Text("HT",fontSize=10.sp,fontWeight=FontWeight.ExtraBold,color=Color(0xFF657289),modifier=Modifier.padding(9.dp))}
+            InternetStatusIndicator()
         }
         HorizontalDivider(color=TossBorder)
     }
@@ -262,9 +298,10 @@ private fun TossBackIcon() {
 private fun TossBottomNavigation(destination: AppDestination, sourceReturnDestination: AppDestination, onNavigate: (AppDestination) -> Unit) {
     val selected = when (destination) {
         AppDestination.HISTORY, AppDestination.VOICE -> AppDestination.CHAT
-        AppDestination.SOURCE -> if (sourceReturnDestination == AppDestination.LIBRARY) AppDestination.LIBRARY else AppDestination.CHAT
+        AppDestination.LIBRARY -> AppDestination.HOME
+        AppDestination.SOURCE -> if (sourceReturnDestination == AppDestination.LIBRARY) AppDestination.HOME else AppDestination.CHAT
         AppDestination.SENSOR_DISCONNECTED -> AppDestination.SENSOR
-        AppDestination.CHECKLIST, AppDestination.LOCAL_CHECKLIST, AppDestination.WORK_SERVER, AppDestination.SUPERVISOR -> AppDestination.CHECKLIST
+        AppDestination.CHECKLIST, AppDestination.LOCAL_CHECKLIST, AppDestination.SUPERVISOR -> AppDestination.CHECKLIST
         AppDestination.MODEL, AppDestination.INFERENCE, AppDestination.DATA, AppDestination.SYSTEM -> AppDestination.SETTINGS
         else -> destination
     }
@@ -274,15 +311,23 @@ private fun TossBottomNavigation(destination: AppDestination, sourceReturnDestin
             listOf(
                 AppDestination.HOME to "홈",
                 AppDestination.CHAT to "질문",
-                AppDestination.LIBRARY to "문서",
+                AppDestination.SENSOR to "가스 측정",
                 AppDestination.SETTINGS to "설정",
             ).forEach { (page, label) ->
                 Column(
-                    Modifier.weight(1f).fillMaxSize().clickable { onNavigate(page) },
+                    Modifier.weight(1f).fillMaxSize().testTag("bottom-${page.name}")
+                        .selectable(selected == page, role = androidx.compose.ui.semantics.Role.Tab) { onNavigate(page) },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    TossNavigationIcon(page, if (selected == page) TossBlue else TossMuted)
+                    Surface(
+                        color = if (selected == page) WorkspaceDesign.BlueWeak else Color.Transparent,
+                        shape = RoundedCornerShape(18.dp),
+                    ) {
+                        Box(Modifier.size(48.dp, 30.dp), contentAlignment = Alignment.Center) {
+                            TossNavigationIcon(page, if (selected == page) TossBlue else TossMuted)
+                        }
+                    }
                     Spacer(Modifier.height(3.dp))
                     Text(label, color = if (selected == page) TossBlue else TossMuted, fontWeight = if (selected == page) FontWeight.Bold else FontWeight.Medium, fontSize = 11.sp)
                 }
@@ -295,7 +340,8 @@ private fun TossBottomNavigation(destination: AppDestination, sourceReturnDestin
 internal fun TossNavigationIcon(page:AppDestination,color:Color) {
     WorkspaceIcon(when(page){
         AppDestination.HOME->WorkspaceSymbol.HOME
-        AppDestination.CHAT,AppDestination.VOICE->WorkspaceSymbol.CHAT
+        AppDestination.CHAT->WorkspaceSymbol.CHAT
+        AppDestination.VOICE->WorkspaceSymbol.MIC
         AppDestination.LIBRARY,AppDestination.SOURCE->WorkspaceSymbol.BOOK
         AppDestination.CHECKLIST,AppDestination.LOCAL_CHECKLIST,AppDestination.SUPERVISOR->WorkspaceSymbol.CHECK
         AppDestination.HISTORY->WorkspaceSymbol.HISTORY
@@ -309,7 +355,7 @@ internal fun TossNavigationIcon(page:AppDestination,color:Color) {
 internal fun TossScrollPage(content: @Composable ColumnScope.() -> Unit) { WorkspacePage(content) }
 
 @Composable
-internal fun TossPageTitle(title: String, description: String? = null) { WorkspaceHeading("FIELD WORKSPACE",title.replace("\n"," "),description) }
+internal fun TossPageTitle(title: String, description: String? = null) { WorkspaceHeading(title.replace("\n"," "),description) }
 
 @Composable
 internal fun TossPanel(modifier: Modifier = Modifier, color: Color = Color.White, content: @Composable ColumnScope.() -> Unit) { WorkspaceCard(modifier,color,content) }
@@ -338,10 +384,10 @@ private fun TossOnboarding(onStart: () -> Unit) {
     Column(Modifier.fillMaxSize().background(Color.White).statusBarsPadding().padding(24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Spacer(Modifier.height(18.dp))
         Text("O₂ Field Guard", color = TossBlue, fontWeight = FontWeight.Bold, fontSize = 17.sp)
-        TossPageTitle("현장에서 필요한 답,\n휴대전화 안에 있어요", "처음 모델을 받을 때만 인터넷이 필요해요. 이후 질문과 기록은 기기에 남아요.")
+        TossPageTitle("앱 사용 안내")
         TossPanel {
             Text("안전 문서 2개", style = MaterialTheme.typography.titleMedium)
-            Text("87개 근거 조각이 기기에 저장돼요.", style = MaterialTheme.typography.bodySmall)
+            Text("안전작업 가이드와 자율점검표를 열 수 있습니다.", style = MaterialTheme.typography.bodySmall)
             HorizontalDivider(color = TossBorder)
             Text("로컬 AI 모델", style = MaterialTheme.typography.titleMedium)
             Text("설치 후 인터넷 없이 문서 근거로 답해요.", style = MaterialTheme.typography.bodySmall)
@@ -462,7 +508,7 @@ private fun Double.gasNumber(): String = if (this % 1.0 == 0.0) toInt().toString
 private fun Long.localTime(): String = if (this <= 0L) "—" else DateFormat.getTimeInstance(DateFormat.SHORT, Locale.KOREA).format(Date(this))
 
 @Composable
-private fun currentTimeTick(): Long {
+internal fun currentTimeTick(): Long {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -503,9 +549,6 @@ internal fun WorkspaceVoiceSettings(voice: VoiceUiState, actions: FieldGuardActi
 }
 
 @Composable
-private fun TossSensor(state: FieldGuardUiState, actions: FieldGuardActions) = WifiApSensorScreen(state, actions)
-
-@Composable
 private fun TossGasMetrics(reading: GasReading) {
     Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
@@ -531,9 +574,6 @@ private fun TossGasMetric(label: String, value: Double?, unit: String, modifier:
         }
     }
 }
-
-@Composable
-private fun TossSensorDisconnected(state: FieldGuardUiState, actions: FieldGuardActions) = WifiApSensorScreen(state, actions)
 
 private val checklistTitles = listOf("작업 위치와 출입 경로", "공기 측정 기록", "환기 상태", "감시인과 연락 방법", "구조 장비와 절차")
 private val checklistDescriptions = listOf("현장 계획과 비교", "검교정된 기기 사용 여부", "작업 중 유지 계획", "현장 담당자 확인", "원문 근거 확인")
@@ -565,18 +605,13 @@ private fun TossChecklist(state: FieldGuardUiState, actions: FieldGuardActions) 
 private fun TossLibrary(state:FieldGuardUiState,actions:FieldGuardActions){WorkspaceLibrary(state,actions)}
 
 @Composable
-private fun TossSettings(state: FieldGuardUiState, actions: FieldGuardActions) {
-    FieldWorkspaceSettings(state, actions)
-}
-
-@Composable
 private fun TossModel(state:FieldGuardUiState,actions:FieldGuardActions){
-    WorkspacePage{WorkspaceHeading("ON-DEVICE AI","기기 내 EXAONE","문서와 AI를 이 기기에 저장해요.");WorkspaceModelPanel(state,actions);WorkspaceButton("AI 토큰 설정",{actions.onNavigate(AppDestination.INFERENCE)},primary=false)}
+    WorkspacePage { WorkspaceModelPanel(state, actions) }
 }
 
 @Composable
 private fun TossInference(state:FieldGuardUiState,actions:FieldGuardActions){
-    WorkspacePage{WorkspaceHeading("YOUR WORKSPACE","AI 토큰 설정","답변 길이와 AI가 사용할 문맥 크기를 조절해요.");WorkspaceTokenSettings(state,actions)}
+    WorkspacePage{WorkspaceTokenSettings(state,actions)}
 }
 
 @Composable
@@ -592,7 +627,7 @@ private fun TossData(state: FieldGuardUiState, actions: FieldGuardActions) {
         )
     }
     TossScrollPage {
-        TossPageTitle("내 기록은\n이 기기에 있어요", "대화 기록과 마지막 수신 가스값은 앱 전용 저장소에 보관돼요.")
+        TossPageTitle("저장 데이터", "대화 기록과 마지막 수신 가스값은 앱 전용 저장소에 보관돼요.")
         TossPanel(color = TossGreenWeak) {
             Text("계정 없이 사용해요", style = MaterialTheme.typography.titleMedium, color = TossGreen)
             Text("현재 앱에는 질문·답변 전송 서버가 없어요.", style = MaterialTheme.typography.bodyMedium)
@@ -615,7 +650,7 @@ private fun TossData(state: FieldGuardUiState, actions: FieldGuardActions) {
 private fun TossSystem(state: FieldGuardUiState) {
     val now = currentTimeTick()
     TossScrollPage {
-        TossPageTitle("앱 밖에서도\n측정 상태를 봐요")
+        TossPageTitle("위젯과 알림")
         TossPanel(color = TossBlueWeak) {
             Text("홈 화면 위젯", style = MaterialTheme.typography.titleMedium)
             Text("마지막 수신 상태와 출처를 보여줘요.", style = MaterialTheme.typography.bodyMedium)
@@ -631,11 +666,25 @@ private fun TossSystem(state: FieldGuardUiState) {
 }
 
 @Composable
-internal fun WifiApSensorScreen(state: FieldGuardUiState, actions: FieldGuardActions) {
+internal fun WifiApSensorScreen(
+    state: FieldGuardUiState,
+    actions: FieldGuardActions,
+    activeWork: ScenarioOrder? = null,
+    onOpenActiveWork: () -> Unit = {},
+) {
     val ap = state.wifiAp
     val now = currentTimeTick()
     TossScrollPage {
-        TossPageTitle("감지기를\nWi-Fi로 연결해요", ap.status)
+        WorkspaceStatusHeading("측정기 연결", ap.status)
+        if (activeWork != null) WorkspaceListGroup("진행 중인 작업") {
+            val evacuating = activeWork.status == WorkStatus.ALARM
+            WorkspaceActionRow(
+                WorkspaceSymbol.SHIELD,
+                if (evacuating) "탈출 확인 기록" else "위험 신고",
+                "${activeWork.site} · ${activeWork.location}",
+                onClick = onOpenActiveWork,
+            )
+        }
         TossPanel {
             TossStatusPill(when(ap.phase) { ApPhase.OFF -> "AP 꺼짐"; ApPhase.STARTING -> "준비 중"; ApPhase.RUNNING -> "AP 켜짐 · 인터넷 불필요"; ApPhase.ERROR -> "시작 확인 필요" }, TossBlueWeak, TossBlue)
             if(ap.phase == ApPhase.RUNNING || ap.phase == ApPhase.STARTING) {

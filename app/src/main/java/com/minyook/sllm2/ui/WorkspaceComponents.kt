@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -37,15 +38,62 @@ internal val workspaceQuestions = listOf("산소 및 유해가스 측정방법 �
         Column(Modifier.widthIn(max = 1260.dp).fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = workspacePadding(), vertical = if (workspaceMobile()) 26.dp else 38.dp), verticalArrangement = Arrangement.spacedBy(20.dp), content = content)
     }
 }
-@Composable internal fun WorkspaceHeading(eyebrow: String, title: String, description: String? = null, action: (@Composable () -> Unit)? = null) {
+@Composable internal fun WorkspaceHeading(title: String, description: String? = null, action: (@Composable () -> Unit)? = null) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
-        Text(eyebrow, color = WorkspaceDesign.Blue, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = .88.sp)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.Bottom) {
             Text(title, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
             action?.invoke()
         }
         if (description != null) Text(description, color = WorkspaceDesign.Muted, fontSize = 14.sp, lineHeight = 23.sp)
     }
+}
+
+@Composable internal fun WorkspaceStatusHeading(title: String, status: String? = null) {
+    Column(
+        Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(7.dp),
+    ) {
+        Text(title, style = MaterialTheme.typography.headlineMedium)
+        if (!status.isNullOrBlank()) Text(status, color = WorkspaceDesign.Muted, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
+    }
+}
+
+@Composable internal fun WorkspaceListGroup(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(title, style = MaterialTheme.typography.titleSmall, color = WorkspaceDesign.Muted)
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = Color.White,
+            shape = RoundedCornerShape(18.dp),
+            border = BorderStroke(1.dp, WorkspaceDesign.Border),
+        ) { Column(content = content) }
+    }
+}
+
+@Composable internal fun WorkspaceActionRow(
+    symbol: WorkspaceSymbol,
+    title: String,
+    detail: String? = null,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier.fillMaxWidth().heightIn(min = 52.dp).clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(13.dp),
+    ) {
+        WorkspaceIcon(symbol, color = WorkspaceDesign.Blue)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            if (!detail.isNullOrBlank()) Text(detail, style = MaterialTheme.typography.bodySmall, color = WorkspaceDesign.Muted)
+        }
+        WorkspaceIcon(WorkspaceSymbol.CHEVRON, Modifier.size(18.dp))
+    }
+}
+
+@Composable internal fun WorkspaceRowDivider() {
+    HorizontalDivider(Modifier.padding(start = 51.dp), color = WorkspaceDesign.Border)
 }
 @Composable internal fun WorkspaceCard(modifier: Modifier = Modifier, color: Color = Color.White, content: @Composable ColumnScope.() -> Unit) {
     Surface(modifier.fillMaxWidth(), color = color, shape = RoundedCornerShape(WorkspaceDesign.CardRadius.dp), border = BorderStroke(1.dp, WorkspaceDesign.Border)) {

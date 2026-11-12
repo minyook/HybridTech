@@ -1,6 +1,6 @@
 /* 소스 안내
  * 제품 공통 화면의 배치/반응형·콜백을 검증하는 Android 계측 검사다.
- * 검사 예: keepPreviewVisible, homeUsesTheSameHeroAndWorkspaceAsWeb, settingsExposeDailySupervisorAccessAndNativeFunctions
+ * 검사 예: keepPreviewVisible, homeShowsSafetyTools, settingsExposeDailySupervisorAccessAndNativeFunctions
  * 실행: 연결된 Android 기기/에뮬레이터의 AndroidJUnitRunner. opt-in 인자는 본문 assume/arguments 조건을 확인한다.
  */
 package com.minyook.sllm2
@@ -19,22 +19,27 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.minyook.sllm2.ui.ChatMessageUi
 import com.minyook.sllm2.data.ChatHistoryStore
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.minyook.sllm2.ui.AppDestination
 import com.minyook.sllm2.ui.DocumentUi
 import com.minyook.sllm2.ui.FieldGuardActions
 import com.minyook.sllm2.ui.FieldGuardUiState
+import com.minyook.sllm2.ui.SourceUi
 import com.minyook.sllm2.ui.TossFieldGuardApp
 import com.minyook.sllm2.ui.VoiceUiState
+import com.minyook.sllm2.ui.WorkspaceDesign
 import org.junit.Rule
 import org.junit.Before
 import org.junit.Test
@@ -56,36 +61,74 @@ class WorkspaceDesignTest {
         }
     }
     private val documents = listOf(DocumentUi("confined_space_safety_guide_2022", "밀폐공간 안전작업 가이드",84),DocumentUi("confined_space_checklist_2026","밀폐공간 자율점검표",3))
-    private fun show(destination: AppDestination, server: String = "", phone: Boolean = false, state: FieldGuardUiState = FieldGuardUiState(destination=destination,documents=documents,workServerUrl=server)) {
+    private fun show(destination: AppDestination, phone: Boolean = false, state: FieldGuardUiState = FieldGuardUiState(destination=destination,documents=documents), actions: FieldGuardActions = inertActions()) {
         compose.setContent {
             if(phone) {
                 val configuration=Configuration(LocalConfiguration.current).apply{screenWidthDp=390;screenHeightDp=844}
                 CompositionLocalProvider(LocalConfiguration provides configuration) {
-                    Box(Modifier.width(390.dp).height(844.dp).testTag("phonePreview")) { TossFieldGuardApp(state,VoiceUiState(available=false),inertActions()) }
+                    Box(Modifier.width(390.dp).height(844.dp).testTag("phonePreview")) { TossFieldGuardApp(state,VoiceUiState(available=false),actions) }
                 }
-            } else TossFieldGuardApp(state,VoiceUiState(available=false),inertActions())
+            } else TossFieldGuardApp(state,VoiceUiState(available=false),actions)
         }
         compose.waitForIdle()
     }
-    @Test fun homeUsesTheSameHeroAndWorkspaceAsWeb() {
+    @Test fun homeShowsSafetyTools() {
         show(AppDestination.HOME)
-        compose.onNodeWithText("안전한 작업의 시작,\n근거부터 확인하세요.").assertIsDisplayed()
+        compose.onNodeWithText("밀폐공간 안전").assertIsDisplayed()
+        compose.onNodeWithTag("homeVoiceWorkRequest").assertIsDisplayed()
         capture("android-workspace-home.png")
+        val visibleSteps = listOf(1, 4, 5, 6, 7, 8)
+        visibleSteps.forEach { step -> compose.onNodeWithTag("workScenarioStep$step").performScrollTo().assertIsDisplayed() }
+        capture("android-workspace-home-steps.png")
     }
-    @Test fun settingsExposeDailySupervisorAccessAndNativeFunctions() {
-        show(AppDestination.SETTINGS)
+    @Test fun settingsExposeModelAndDeviceFunctionsWithoutServerSetup() {
+        var downloads = 0
+        var destination: AppDestination? = null
+        show(AppDestination.SETTINGS, actions = inertActions(
+            navigate = { destination = it },
+            downloadModel = { downloads++ },
+        ))
         compose.onNodeWithText("기기 내 EXAONE").assertIsDisplayed()
+        compose.onNodeWithTag("internetStatus").assertIsDisplayed()
         capture("android-workspace-settings.png")
-        compose.onNodeWithText("감독관 화면으로 전환").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("downloadExaone").assertIsDisplayed().performClick()
+        compose.onNodeWithTag("modelInferenceSettings").assertIsDisplayed().performClick()
+        compose.runOnIdle {
+            org.junit.Assert.assertEquals(1, downloads)
+            org.junit.Assert.assertEquals(AppDestination.INFERENCE, destination)
+        }
+        if (compose.activity.resources.configuration.screenWidthDp < WorkspaceDesign.SidebarBreakpoint) {
+            compose.onNodeWithText("문서 보관함").assertIsNotDisplayed()
+        }
+        compose.onNodeWithText("가스 측정기").assertDoesNotExist()
+        compose.onNodeWithText("한국어 음성").assertDoesNotExist()
+        compose.onNodeWithText("작업 서버").assertDoesNotExist()
+        compose.onNodeWithText("이전 기기 점검 기록").performScrollTo().assertIsDisplayed()
     }
     @Test fun libraryKeepsTheOriginalDocuments() {
         show(AppDestination.LIBRARY)
         compose.onNodeWithText("밀폐공간 안전작업 가이드").assertIsDisplayed()
         capture("android-workspace-library.png")
     }
-    @Test fun chatUsesWebEmptyStateAndComposer() {
+    @Test fun wideDocumentViewKeepsLibraryNextToSource() {
+        org.junit.Assume.assumeTrue(compose.activity.resources.configuration.screenWidthDp >= 1100)
+        val guide = documents.first()
+        show(AppDestination.SOURCE, state = FieldGuardUiState(
+            destination = AppDestination.SOURCE,
+            documents = documents,
+            sourceReturnDestination = AppDestination.LIBRARY,
+            selectedSource = SourceUi(1, guide.id, guide.title, 24, "산소·유해가스 농도 측정", ""),
+        ))
+        compose.onNodeWithText("전체 문서").assertIsDisplayed()
+        compose.onNodeWithText("24쪽 · 산소·유해가스 농도 측정").assertIsDisplayed()
+        compose.waitUntil(15_000) {
+            compose.onAllNodesWithContentDescription("${guide.title} 24쪽 PDF 원본").fetchSemanticsNodes().isNotEmpty()
+        }
+        capture("android-workspace-source.png")
+    }
+    @Test fun chatShowsExampleQuestionsAndComposer() {
         show(AppDestination.CHAT)
-        compose.onNodeWithText("질문은 편하게,\n근거는 정확하게.").assertIsDisplayed()
+        compose.onNodeWithText("질문 예시").assertIsDisplayed()
         compose.onNodeWithTag("chatInput").assertIsDisplayed()
         capture("android-workspace-chat.png")
     }
@@ -94,21 +137,24 @@ class WorkspaceDesignTest {
         compose.onNodeWithText("작업 전 확인").assertIsDisplayed()
         capture("android-workspace-answer.png")
     }
-    @Test fun historyUsesWebSavedRows() {
+    @Test fun historyShowsSavedConversations() {
         show(AppDestination.HISTORY,state=FieldGuardUiState(destination=AppDestination.HISTORY,documents=documents,histories=listOf(ChatHistoryStore.Session("design","산소 및 유해가스 측정방법 알려줘",System.currentTimeMillis(),emptyList()))))
-        compose.onNodeWithText("이전에 확인한 내용을 다시 봐요").assertIsDisplayed()
+        compose.onNodeWithText("저장된 대화").assertIsDisplayed()
         capture("android-workspace-history.png")
     }
-    @Test fun tokenSettingsUseTheSameFieldsAsWeb() {
+    @Test fun tokenSettingsShowOutputAndContext() {
         show(AppDestination.INFERENCE)
         compose.onNodeWithText("최대 답변 토큰").assertIsDisplayed()
         compose.onNodeWithText("문맥 토큰 한도").assertIsDisplayed()
         capture("android-workspace-tokens.png")
     }
-    @Test fun phoneHomeKeepsIllustrationAndBottomNavigationInsideViewport() {
+    @Test fun phoneHomeKeepsTitleAndBottomNavigationInsideViewport() {
         show(AppDestination.HOME,phone=true)
-        compose.onNodeWithText("안전한 작업의 시작,\n근거부터 확인하세요.").assertIsDisplayed()
+        compose.onNodeWithText("밀폐공간 안전").assertIsDisplayed()
+        compose.onNodeWithTag("bottom-SENSOR").assertIsDisplayed()
+        compose.onNodeWithTag("bottom-LIBRARY").assertDoesNotExist()
         capturePhone("android-workspace-phone-home.png")
+        compose.onNodeWithTag("homeLibrary").performScrollTo().assertIsDisplayed()
     }
     @Test fun phoneChatKeepsComposerAndMenuInsideViewport() {
         show(AppDestination.CHAT,phone=true)
@@ -119,23 +165,17 @@ class WorkspaceDesignTest {
         val bitmap=compose.onNodeWithTag("phonePreview").captureToImage().asAndroidBitmap()
         save(bitmap,name)
     }
-    @Test fun supervisorPageUsesTheSameSixDigitWebScreen() {
-        show(AppDestination.SUPERVISOR,"http://localhost:4173")
-        val rendered=java.util.concurrent.atomic.AtomicReference("")
-        compose.waitUntil(30_000) {
-            InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                findWebView(compose.activity.window.decorView)?.evaluateJavascript("document.body ? document.body.innerText : ''") { rendered.set(it) }
-            }
-            rendered.get().contains("오늘의 암호코드")
-        }
-        capture("android-workspace-supervisor.png")
-    }
-    private fun findWebView(view:android.view.View):android.webkit.WebView? {
-        if(view is android.webkit.WebView)return view
-        if(view is android.view.ViewGroup)for(index in 0 until view.childCount) {
-            findWebView(view.getChildAt(index))?.let{return it}
-        }
-        return null
+    @Test fun workerBuildBlocksSupervisorScreensAndActions() {
+        org.junit.Assume.assumeFalse(BuildConfig.SUPERVISOR_APP)
+        val state = androidx.compose.runtime.mutableStateOf(FieldGuardUiState(destination = AppDestination.HOME))
+        compose.setContent { TossFieldGuardApp(state.value, VoiceUiState(available = false), inertActions()) }
+        compose.onNodeWithTag("homeSupervisorRole").assertDoesNotExist()
+        compose.onNodeWithTag("workScenarioStep2").assertDoesNotExist()
+        compose.onNodeWithTag("workScenarioStep3").assertDoesNotExist()
+        compose.runOnIdle { state.value = state.value.copy(destination = AppDestination.SUPERVISOR) }
+        compose.onNodeWithText("작업 진행").assertIsDisplayed()
+        compose.onNodeWithTag("workRoleSupervisor").assertDoesNotExist()
+        compose.onNodeWithTag("workApprove").assertDoesNotExist()
     }
     private fun capture(name:String) {
         val bitmap=compose.onRoot().captureToImage().asAndroidBitmap()
@@ -146,5 +186,6 @@ class WorkspaceDesignTest {
         val directory=File(InstrumentationRegistry.getInstrumentation().targetContext.getExternalFilesDir(null),"design-previews").apply{mkdirs()}
         File(directory,name).outputStream().use{bitmap.compress(Bitmap.CompressFormat.PNG,100,it)}
     }
-    private fun inertActions()=FieldGuardActions(onNavigate={},onNewChat={},onLoadChat={},onInputChange={},onSubmit={},onPreset={},onDownloadModel={},onContextTokens={},onResponseTokens={},onSaveSettings={},onStartAp={},onSelectMeter={},onStopAp={},onVoiceClick={},onVoiceLongClick={})
+    private fun inertActions(navigate: (AppDestination) -> Unit = {}, downloadModel: () -> Unit = {}) =
+        FieldGuardActions(onNavigate=navigate,onNewChat={},onLoadChat={},onInputChange={},onSubmit={},onPreset={},onDownloadModel=downloadModel,onContextTokens={},onResponseTokens={},onSaveSettings={},onStartAp={},onSelectMeter={},onStopAp={},onVoiceClick={},onVoiceLongClick={})
 }

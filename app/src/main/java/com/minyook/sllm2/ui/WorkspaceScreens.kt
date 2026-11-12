@@ -71,8 +71,16 @@ import java.util.Locale
     var scrollJob by remember(list) { mutableStateOf<Job?>(null) }
     DisposableEffect(list){onDispose{scrollJob?.cancel()}}
     var voiceSettings by remember{mutableStateOf(false)}
-    val incoming=if(state.activeChatId!=null||state.messages.size>1)state.messages else emptyList()
-    val messages=key(state.activeChatId) { incoming.map { message -> key(message.id) { rememberRevealedMessage(message) } } }
+    var showTranscript by rememberSaveable(voiceMode) { mutableStateOf(false) }
+    val conversation = if (state.activeChatId != null || state.messages.size > 1) state.messages else emptyList()
+    val incoming = if (voiceMode && !showTranscript) emptyList() else conversation
+    val messages = key(state.activeChatId) {
+        val latest = incoming.lastOrNull()
+        if (latest?.animateAnswer == true) {
+            val revealed = key(latest.id) { rememberRevealedMessage(latest) }
+            remember(incoming, revealed) { incoming.dropLast(1) + revealed }
+        } else incoming
+    }
     val timelineBuilder=remember{ChatTimelineBuilder()}
     val rows=remember(messages){timelineBuilder.build(messages)}
     val latestEndIndex by rememberUpdatedState(rows.size+1)
@@ -96,7 +104,8 @@ import java.util.Locale
     LaunchedEffect(imeVisible){if(imeVisible){follow=true;jumpRequest++}}
     // Nearby streamed text should move by its added height. Long jumps and
     // viewport changes can still anchor directly to the end.
-    LaunchedEffect(list, rows, viewportHeight, follow, jumpRequest, endAnchorHeight) {
+    val latestMessage = messages.lastOrNull()
+    LaunchedEffect(list, rows.size, latestMessage, viewportHeight, follow, jumpRequest, endAnchorHeight) {
         if(!follow){scrollJob?.cancel();autoScrolling=false;return@LaunchedEffect}
         if (follow && rows.isNotEmpty() && viewportHeight > 0) {
             val endIndex = rows.size + 1
@@ -135,14 +144,14 @@ import java.util.Locale
     Box(Modifier.fillMaxSize(),contentAlignment=Alignment.TopCenter){
         Column(Modifier.widthIn(max=1260.dp).fillMaxSize().padding(horizontal=workspacePadding()).padding(bottom=if(imeVisible)8.dp else 0.dp)){
             Box(Modifier.weight(1f)){
+            if (voiceMode && !showTranscript) {
+                VoiceSessionStatus(voice, Modifier.fillMaxSize())
+            } else {
             LazyColumn(state=list,modifier=Modifier.fillMaxSize().onSizeChanged{viewportHeight=it.height}.nestedScroll(scrollConnection).testTag("conversationList"),contentPadding=PaddingValues(top=if(imeVisible)12.dp else 26.dp,bottom=16.dp)){
                 item(key="heading"){
-                    Column(verticalArrangement=Arrangement.spacedBy(18.dp)){
-                        if(!imeVisible)WorkspaceHeading(if(voiceMode)"LOCAL VOICE CONVERSATION" else "LOCAL DOCUMENT ASSISTANT",if(voiceMode)"말로 질문하고, 근거를 확인해요" else "현장에서 궁금한 점을 물어보세요",if(voiceMode)"질문과 답변을 이 화면에서 이어 볼 수 있어요." else "문서에서 근거를 찾고, 같은 쪽의 원문까지 연결해요.",action={WorkspaceButton("새 대화",actions.onNewChat,primary=false,icon=WorkspaceSymbol.PLUS,enabled=!state.isAnswering&&!voice.conversationEnabled)})
-                        FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalArrangement=Arrangement.spacedBy(6.dp)){
-                            WorkspaceBadge("● 문서 ${state.documents.sumOf{it.chunkCount}}개 쪽",green=true)
-                            WorkspaceBadge(if(state.modelStatus.phase==ModelPhase.READY)"EXAONE 모델 저장됨" else "문서 원문 검색 모드")
-                            TextButton(onClick={actions.onNavigate(AppDestination.SETTINGS)}){Text("AI 설정 →",fontSize=11.sp,color=WorkspaceDesign.Blue)}
+                    if (!imeVisible && !voiceMode) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        TextButton(onClick = actions.onNewChat, enabled = !state.isAnswering && !voice.conversationEnabled) {
+                            Text("새 대화")
                         }
                     }
                 }
@@ -150,14 +159,18 @@ import java.util.Locale
                     Text("궁금한 내용을 입력해 주세요.",fontSize=14.sp,lineHeight=22.sp,color=Color(0xFF8B95A1),textAlign=TextAlign.Center,modifier=Modifier.fillMaxWidth().padding(vertical=16.dp).testTag("chatInputHint"))
                 }
                 if(messages.isEmpty()&&!imeVisible&&!voiceMode)item(key="empty"){
-                    Column(Modifier.fillMaxWidth().padding(vertical=24.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(15.dp)){
-                        Surface(color=WorkspaceDesign.BlueWeak,shape=RoundedCornerShape(22.dp)){Box(Modifier.size(66.dp),contentAlignment=Alignment.Center){WorkspaceIcon(WorkspaceSymbol.CHAT,Modifier.size(32.dp),WorkspaceDesign.Blue)}}
-                        Text("질문은 편하게,\n근거는 정확하게.",fontSize=26.sp,lineHeight=39.sp,fontWeight=FontWeight.Bold,textAlign=TextAlign.Center)
-                        Text("작업 절차, 측정방법, 점검 항목을 물어보세요.\n검색된 내용의 문서명과 쪽수를 함께 보여드려요.",fontSize=13.sp,lineHeight=22.sp,color=Color(0xFF8B95A1),textAlign=TextAlign.Center)
-                        FlowRow(modifier=Modifier.widthIn(max=650.dp).padding(top=10.dp),horizontalArrangement=Arrangement.spacedBy(8.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){
-                            workspaceQuestions.forEach{prompt->Surface(color=Color.White,shape=RoundedCornerShape(10.dp),border=BorderStroke(1.dp,Color(0xFFE1E9F4)),modifier=Modifier.clickable{actions.onPreset(prompt)}){
-                                Row(Modifier.padding(13.dp),horizontalArrangement=Arrangement.spacedBy(9.dp),verticalAlignment=Alignment.CenterVertically){Text(prompt,fontSize=11.sp,color=Color(0xFF71819A));WorkspaceIcon(WorkspaceSymbol.ARROW,Modifier.size(14.dp))}
-                            }}
+                    Column(Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
+                        Text("질문 예시", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                        workspaceQuestions.forEach { prompt ->
+                            Row(
+                                Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { actions.onPreset(prompt) }.padding(vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                Text(prompt, modifier = Modifier.weight(1f), fontSize = 13.sp)
+                                WorkspaceIcon(WorkspaceSymbol.CHEVRON, Modifier.size(14.dp))
+                            }
+                            HorizontalDivider(color = WorkspaceDesign.Border)
                         }
                     }
                 }
@@ -175,17 +188,26 @@ import java.util.Locale
             }
             if(showScrollLatest&&messages.isNotEmpty())FilledTonalButton(onClick={follow=true;jumpRequest++},modifier=Modifier.align(Alignment.BottomCenter).padding(bottom=8.dp).testTag("scrollLatest")){Text("최근 답변으로 이동 ↓",fontSize=12.sp)}
             }
+            }
             if(state.inputError!=null&&(!voiceMode||state.inputError!=voice.error))WorkspaceNotice(state.inputError,true)
-            if(voiceMode){
-                Column(Modifier.fillMaxWidth().padding(vertical=8.dp).testTag("voiceControls"),verticalArrangement=Arrangement.spacedBy(6.dp)){
-                    Text(voice.status,fontSize=12.sp,lineHeight=19.sp,color=WorkspaceDesign.Ink,modifier=Modifier.semantics{liveRegion=LiveRegionMode.Polite})
-                    voice.error?.let{Text(it,fontSize=11.sp,color=MaterialTheme.colorScheme.error)}
-                    Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)){
-                        WorkspaceButton(if(voice.conversationEnabled)"음성 대화 종료" else "음성 대화 시작",toggleVoice,enabled=voice.conversationEnabled||!state.isAnswering,modifier=Modifier.weight(1f).testTag("toggleVoiceConversation"))
-                        TextButton(onClick={voiceSettings=true},modifier=Modifier.testTag("voiceSettings")){Text("음성 설정")}
-                    }
-                    TextButton(onClick={actions.onStopVoice();actions.onNavigate(AppDestination.CHAT)},modifier=Modifier.align(Alignment.CenterHorizontally).testTag("returnToTextChat")){Text("텍스트 채팅으로 돌아가기",fontSize=12.sp)}
-                }
+            if (voiceMode) {
+                VoiceControls(
+                    voice = voice,
+                    canStart = !state.isAnswering,
+                    showTranscript = showTranscript,
+                    hasConversation = conversation.isNotEmpty(),
+                    onToggleTranscript = {
+                        showTranscript = !showTranscript
+                        follow = true
+                    },
+                    onToggleVoice = toggleVoice,
+                    onOpenSettings = { voiceSettings = true },
+                    onReturnToChat = {
+                        actions.onStopVoice()
+                        actions.onNavigate(AppDestination.CHAT)
+                    },
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                )
             }else{
             Surface(color=Color.White,shape=RoundedCornerShape(18.dp),border=BorderStroke(1.dp,Color(0xFFDCE5F1)),modifier=Modifier.fillMaxWidth().testTag("chatComposer")){
                 Row(Modifier.padding(start=20.dp,end=14.dp,top=12.dp,bottom=12.dp),horizontalArrangement=Arrangement.spacedBy(10.dp),verticalAlignment=Alignment.CenterVertically){
@@ -200,6 +222,115 @@ import java.util.Locale
     }
     if(voiceSettings)AlertDialog(onDismissRequest={voiceSettings=false},title={Text("음성 설정")},text={Column(Modifier.heightIn(max=440.dp).verticalScroll(rememberScrollState())){WorkspaceVoiceSettings(voice,actions)}},confirmButton={TextButton(onClick={voiceSettings=false}){Text("닫기")}})
 }
+
+@Composable
+private fun VoiceControls(
+    voice: VoiceUiState,
+    canStart: Boolean,
+    showTranscript: Boolean,
+    hasConversation: Boolean,
+    onToggleTranscript: () -> Unit,
+    onToggleVoice: () -> Unit,
+    onOpenSettings: () -> Unit,
+    onReturnToChat: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val active = voice.conversationEnabled
+    val shape = RoundedCornerShape(14.dp)
+    Column(
+        modifier.widthIn(max = 460.dp).fillMaxWidth().padding(vertical = 8.dp).testTag("voiceControls"),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (showTranscript) {
+            Text(
+                voice.status,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+            )
+            voice.error?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
+        }
+        if (hasConversation || showTranscript) {
+            TextButton(
+                onClick = onToggleTranscript,
+                modifier = Modifier.align(Alignment.CenterHorizontally).heightIn(min = 48.dp).testTag("toggleVoiceTranscript"),
+            ) { Text(if (showTranscript) "음성 상태 보기" else "대화 내용과 출처 보기") }
+        }
+        Button(
+            onClick = onToggleVoice,
+            enabled = active || canStart,
+            shape = shape,
+            colors = if (active) ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+            ) else ButtonDefaults.buttonColors(),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp).testTag("toggleVoiceConversation"),
+        ) {
+            Text(
+                if (active) "음성 대화 종료" else "음성 대화 시작",
+                style = MaterialTheme.typography.titleSmall,
+                textAlign = TextAlign.Center,
+            )
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                onClick = onReturnToChat,
+                shape = shape,
+                border = BorderStroke(1.dp, WorkspaceDesign.Border),
+                modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("returnToTextChat"),
+            ) { Text("텍스트 질문", color = WorkspaceDesign.Ink, textAlign = TextAlign.Center) }
+            OutlinedButton(
+                onClick = onOpenSettings,
+                shape = shape,
+                border = BorderStroke(1.dp, WorkspaceDesign.Border),
+                modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("voiceSettings"),
+            ) { Text("음성 설정", color = WorkspaceDesign.Ink, textAlign = TextAlign.Center) }
+        }
+    }
+}
+
+@Composable private fun VoiceSessionStatus(voice: VoiceUiState, modifier: Modifier = Modifier) {
+    val status = when {
+        voice.error != null -> "음성 대화 오류"
+        voice.speaking -> "답변 읽는 중"
+        voice.waitingForAnswer -> "답변 준비 중"
+        voice.listening -> "듣는 중"
+        voice.awaitingWakeWord -> "호출 대기"
+        voice.conversationEnabled -> "음성 대화 연결 중"
+        else -> "음성 대화 대기"
+    }
+    Box(modifier.testTag("voiceSessionStatus"), contentAlignment = Alignment.Center) {
+        Column(
+            Modifier.widthIn(max = 400.dp).padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Surface(
+                color = WorkspaceDesign.BlueWeak,
+                shape = RoundedCornerShape(50),
+            ) {
+                Box(Modifier.size(86.dp), contentAlignment = Alignment.Center) {
+                    WorkspaceIcon(WorkspaceSymbol.MIC, Modifier.size(34.dp), WorkspaceDesign.Blue)
+                }
+            }
+            Column(
+                Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Text(status, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
+                Text(
+                    voice.error ?: voice.status,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (voice.error != null) MaterialTheme.colorScheme.error else WorkspaceDesign.Muted,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            if (voice.lastHeard.isNotBlank()) {
+                Text(voice.lastHeard, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, maxLines = 3)
+            }
+        }
+    }
+}
 @Composable private fun WorkspaceQuestion(message:ChatMessageUi){
     Box(Modifier.padding(top=20.dp,bottom=12.dp)){
         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.End){Surface(color=Color(0xFFE8F2FF),shape=RoundedCornerShape(topStart=17.dp,topEnd=17.dp,bottomStart=17.dp,bottomEnd=4.dp),modifier=Modifier.widthIn(max=700.dp)){Text(message.text,fontSize=14.sp,lineHeight=24.sp,color=Color(0xFF316BB9),modifier=Modifier.padding(horizontal=19.dp,vertical=14.dp))}}
@@ -211,27 +342,24 @@ import java.util.Locale
     val origin=when{message.answerStatus?.startsWith("conversation-")==true||message.answerStatus=="no-more"->"대화 이어가기";GeneralKnowledgeAnswer.isGeneral(message.text)->"일반 지식 답변";GeneralKnowledgeAnswer.containsGeneral(message.text)->"문서 · 일반 지식 답변";message.sourceIds.isEmpty()&&message.text.isNotBlank()->"문서 검색 안내";else->"문서 근거 답변"}
         Row(Modifier.fillMaxWidth().padding(top=20.dp,bottom=12.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(9.dp)){
             if(message.pending)CircularProgressIndicator(Modifier.size(22.dp),strokeWidth=2.dp)
-            else Surface(color=WorkspaceDesign.Blue,shape=RoundedCornerShape(9.dp)){Text("O₂",color=Color.White,fontSize=14.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(6.dp))}
-            Text(if(message.pending){if(message.text.isBlank())"문서 근거를 확인하고 있어요" else "$origin · 작성 중"}else origin,fontSize=13.sp,fontWeight=FontWeight.SemiBold,modifier=Modifier.weight(1f).semantics{liveRegion=LiveRegionMode.Polite})
+            Text(if(message.pending){if(message.text.isBlank())"문서 검색 중" else "$origin · 작성 중"}else origin,fontSize=13.sp,fontWeight=FontWeight.SemiBold,modifier=Modifier.weight(1f).semantics{liveRegion=LiveRegionMode.Polite})
             if(!message.pending&&message.text.isNotBlank())TextButton(onClick={context.getSystemService(android.content.ClipboardManager::class.java).setPrimaryClip(android.content.ClipData.newPlainText("Field Guard 답변",message.text));copied=true},modifier=Modifier.testTag("copyAnswer:${message.id}").semantics{contentDescription="답변 복사"}){Text(if(copied)"복사됨" else "복사",fontSize=11.sp)}
         }
 }
-@OptIn(ExperimentalLayoutApi::class)
-@Composable private fun WorkspaceAnswerFooter(message:ChatMessageUi,actions:FieldGuardActions){
-    Column(Modifier.fillMaxWidth().padding(top=12.dp,bottom=12.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){
-        if(message.sourceIds.isNotEmpty()){
-            HorizontalDivider(color=WorkspaceDesign.Border)
-            Text("참조한 문서",fontSize=11.sp,color=WorkspaceDesign.Muted)
-            FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){
-                message.sourceIds.forEachIndexed{index,id->
-                    Surface(color=Color.White,shape=RoundedCornerShape(11.dp),border=BorderStroke(1.dp,Color(0xFFE2EAF5)),modifier=Modifier.clickable{actions.onOpenSource(id)}){
-                        Row(Modifier.padding(12.dp),horizontalArrangement=Arrangement.spacedBy(9.dp),verticalAlignment=Alignment.CenterVertically){WorkspaceBadge("${index+1}",blue=true);Text(message.sourceLabels[id]?:"근거 ${index+1} 원문 보기",fontSize=11.sp,color=Color(0xFF526D93));WorkspaceIcon(WorkspaceSymbol.CHEVRON,Modifier.size(14.dp))}
-                    }
+@Composable private fun WorkspaceAnswerFooter(message: ChatMessageUi, actions: FieldGuardActions) {
+    if (message.sourceIds.isEmpty()) return
+    Column(Modifier.padding(vertical = 12.dp)) {
+        WorkspaceListGroup("참조한 문서") {
+            message.sourceIds.forEachIndexed { index, id ->
+                if (index > 0) WorkspaceRowDivider()
+                WorkspaceActionRow(WorkspaceSymbol.BOOK, message.sourceLabels[id] ?: "근거 ${index + 1} 원문 보기") {
+                    actions.onOpenSource(id)
                 }
             }
         }
     }
 }
+
 @Composable internal fun WorkspaceHistoryRow(session:ChatHistoryStore.Session,actions:FieldGuardActions){
     Row(Modifier.fillMaxWidth().heightIn(min=84.dp).clickable{actions.onLoadChat(session.id)},horizontalArrangement=Arrangement.spacedBy(14.dp),verticalAlignment=Alignment.CenterVertically){
         WorkspaceTile(WorkspaceSymbol.CHAT)
@@ -244,47 +372,76 @@ import java.util.Locale
 }
 @Composable internal fun WorkspaceHistory(state:FieldGuardUiState,actions:FieldGuardActions){
     WorkspacePage{
-        WorkspaceHeading("SAVED ON THIS DEVICE","이전에 확인한 내용을 다시 봐요","대화 기록은 현재 기기에 저장돼요.",action={WorkspaceButton("새 대화",actions.onNewChat,icon=WorkspaceSymbol.PLUS)})
+        WorkspaceHeading("저장된 대화",action={WorkspaceButton("새 대화",actions.onNewChat,icon=WorkspaceSymbol.PLUS)})
         if(state.histories.isEmpty())WorkspaceEmpty(WorkspaceSymbol.HISTORY,"아직 저장된 대화가 없어요","문서에 질문하면 답변과 출처를 이곳에서 다시 볼 수 있어요."){WorkspaceButton("첫 질문하기",actions.onNewChat)}
         else WorkspaceCard{state.histories.forEachIndexed{index,session->WorkspaceHistoryRow(session,actions);if(index<state.histories.lastIndex)HorizontalDivider(color=WorkspaceDesign.Border)}}
     }
 }
 @OptIn(ExperimentalLayoutApi::class)
-@Composable internal fun WorkspaceLibrary(state:FieldGuardUiState,actions:FieldGuardActions){
-    var filter by remember{mutableStateOf<String?>(null)}
-    WorkspacePage{
-        WorkspaceHeading("DOCUMENT LIBRARY","필요한 근거를 바로 찾아요","같은 문서 ${state.documents.size}종, ${state.documents.sumOf{it.chunkCount}}개 페이지를 사용해요.")
-        WorkspaceSearch(state.libraryQuery,actions.onLibraryQuery)
-        FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){
-            WorkspaceFilter("전체 문서",filter==null){filter=null}
-            state.documents.forEach{document->WorkspaceFilter(if(document.id.contains("2022"))"안전작업 가이드" else "자율점검표",filter==document.id){filter=document.id}}
+@Composable internal fun WorkspaceLibrary(state: FieldGuardUiState, actions: FieldGuardActions) {
+    var filter by rememberSaveable { mutableStateOf<String?>(null) }
+    WorkspacePage {
+        WorkspaceStatusHeading("문서 보관함", state.documents.takeIf { it.isNotEmpty() }?.let { "오프라인 문서 ${it.size}종" })
+        WorkspaceSearch(state.libraryQuery, actions.onLibraryQuery)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            WorkspaceFilter("전체 문서", filter == null) { filter = null }
+            state.documents.forEach { document ->
+                WorkspaceFilter(if (document.id.contains("2022")) "안전작업 가이드" else "자율점검표", filter == document.id) {
+                    filter = document.id
+                }
+            }
         }
-        if(state.libraryQuery.isNotBlank()){
-            val results=state.libraryResults.filter{filter==null||it.documentId==filter}
-            Text("검색 결과 ${results.size}",fontSize=18.sp,fontWeight=FontWeight.Bold)
-            if(results.isEmpty())WorkspaceEmpty(WorkspaceSymbol.SEARCH,"일치하는 근거가 없어요","다른 용어로 검색하거나 문서를 직접 열어 주세요.")
-            results.forEach{source->WorkspaceCard(Modifier.clickable{actions.onOpenSource(source.id)}){
-                WorkspaceBadge("${source.documentTitle} · ${source.pageNumber}쪽",blue=true);Text(source.heading,fontSize=17.sp,fontWeight=FontWeight.Bold);Text(source.body.take(230),fontSize=13.sp,lineHeight=23.sp,color=WorkspaceDesign.Muted);Text("원문 확인 →",color=WorkspaceDesign.Blue,fontSize=12.sp)
-            }}
-        }else{
-            val documents=state.documents.withIndex().filter{filter==null||it.value.id==filter}
-            if(!workspaceMobile())documents.chunked(2).forEach{pair->Row(horizontalArrangement=Arrangement.spacedBy(22.dp)){pair.forEach{(index,document)->FieldWorkspaceDocument(document,index,actions,Modifier.weight(1f))};if(pair.size==1)Spacer(Modifier.weight(1f))}}
-            else documents.forEach{(index,document)->FieldWorkspaceDocument(document,index,actions)}
+        if (state.libraryQuery.isNotBlank()) {
+            val results = state.libraryResults.filter { filter == null || it.documentId == filter }
+            if (results.isEmpty()) {
+                WorkspaceEmpty(WorkspaceSymbol.SEARCH, "검색 결과 없음", "검색어를 바꾸거나 문서 목록에서 원문을 열어보세요.")
+                WorkspaceButton("문서 목록 보기", { filter = null; actions.onLibraryQuery("") }, primary = false)
+            } else WorkspaceListGroup("검색 결과 ${results.size}건") {
+                results.forEachIndexed { index, source ->
+                    if (index > 0) WorkspaceRowDivider()
+                    WorkspaceActionRow(WorkspaceSymbol.BOOK, source.heading, "${source.documentTitle} · ${source.pageNumber}쪽") {
+                        actions.onOpenSource(source.id)
+                    }
+                }
+            }
+        } else {
+            val documents = state.documents.filter { filter == null || it.id == filter }
+            if (documents.isEmpty()) WorkspaceEmpty(WorkspaceSymbol.BOOK, "문서 준비 중", state.knowledgeStatus)
+            else WorkspaceListGroup("오프라인 문서") {
+                documents.forEachIndexed { index, document ->
+                    if (index > 0) WorkspaceRowDivider()
+                    FieldWorkspaceDocument(document, actions)
+                }
+            }
         }
     }
 }
+
+@Composable internal fun WorkspaceLibraryAndSource(state: FieldGuardUiState, actions: FieldGuardActions, showSource: Boolean) {
+    Row(Modifier.fillMaxSize()) {
+        Box(Modifier.weight(.42f)) { WorkspaceLibrary(state, actions) }
+        VerticalDivider(color = WorkspaceDesign.Border)
+        Box(Modifier.weight(.58f).fillMaxHeight(), contentAlignment = Alignment.TopCenter) {
+            if (showSource) WorkspaceSource(state, actions, showBack = false)
+            else Box(Modifier.padding(32.dp)) {
+                WorkspaceEmpty(WorkspaceSymbol.BOOK, "원문 보기", "목록에서 문서나 검색 결과를 선택하세요.")
+            }
+        }
+    }
+}
+
 @Composable internal fun WorkspaceFilter(label:String,selected:Boolean,click:()->Unit){
     Surface(color=if(selected)WorkspaceDesign.BlueWeak else Color.White,shape=RoundedCornerShape(99.dp),border=BorderStroke(1.dp,if(selected)Color(0xFFCBDFFF) else WorkspaceDesign.Border),modifier=Modifier.clickable(onClick=click)){
         Text(label,fontSize=12.sp,color=if(selected)WorkspaceDesign.Blue else Color(0xFF8B95A1),modifier=Modifier.padding(horizontal=16.dp,vertical=13.dp))
     }
 }
 @OptIn(ExperimentalLayoutApi::class)
-@Composable internal fun WorkspaceSource(state:FieldGuardUiState,actions:FieldGuardActions){
+@Composable internal fun WorkspaceSource(state:FieldGuardUiState,actions:FieldGuardActions,showBack:Boolean=true){
     val source=state.selectedSource
     var mode by remember(source?.id){mutableStateOf("PDF 원본")}
     WorkspacePage{
-        TextButton(onClick={actions.onNavigate(state.sourceReturnDestination)}){Text("← 문서로 돌아가기",fontSize=12.sp,color=WorkspaceDesign.Muted)}
-        WorkspaceHeading("SOURCE DOCUMENT",source?.documentTitle?:"근거 문서",source?.let{"${it.pageNumber}쪽 · ${it.heading}"})
+        if (showBack) TextButton(onClick={actions.onNavigate(state.sourceReturnDestination)}){Text("← 문서로 돌아가기",fontSize=12.sp,color=WorkspaceDesign.Muted)}
+        WorkspaceHeading(source?.documentTitle?:"근거 문서",source?.let{"${it.pageNumber}쪽 · ${it.heading}"})
         if(source==null)WorkspaceNotice("열 문서를 찾지 못했어요.",true)
         else{
             FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){

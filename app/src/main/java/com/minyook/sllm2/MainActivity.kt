@@ -102,7 +102,6 @@ class MainActivity : ComponentActivity() {
                     onToggleChecklist = viewModel::toggleChecklist,
                     onSaveChecklist = viewModel::saveChecklist,
                     onClearChatHistory = viewModel::clearChatHistory,
-                    onSaveWorkServer = viewModel::saveWorkServer,
                 ),
             )
         }

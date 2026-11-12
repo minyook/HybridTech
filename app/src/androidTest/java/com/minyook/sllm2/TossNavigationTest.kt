@@ -68,7 +68,7 @@ class TossNavigationTest {
         }
 
         compose.onNodeWithText("시작하기").performClick()
-        compose.onNodeWithText("안전한 작업의 시작,\n근거부터 확인하세요.").assertIsDisplayed()
+        compose.onNodeWithText("밀폐공간 안전").assertIsDisplayed()
         navigateWorkspace(AppDestination.CHAT)
         compose.onNodeWithTag("chatInput").assertIsDisplayed()
         navigateWorkspace(AppDestination.SENSOR)
@@ -98,7 +98,7 @@ class TossNavigationTest {
         compose.onNodeWithContentDescription("음성 질문").assertIsDisplayed()
         compose.onNodeWithContentDescription("메시지 전송").assertIsDisplayed()
         compose.onNodeWithTag("sendMessage").performClick()
-        compose.onNodeWithText("문서 근거를 확인하고 있어요").assertIsDisplayed()
+        compose.onNodeWithText("문서 검색 중").assertIsDisplayed()
         compose.onNodeWithTag("chatInput").assertIsDisplayed()
     }
 
@@ -113,7 +113,7 @@ class TossNavigationTest {
         ))
         compose.setContent { TossFieldGuardApp(state, VoiceUiState(available = true), actions()) }
 
-        compose.onNodeWithText("문서 근거를 확인하고 있어요").assertIsDisplayed()
+        compose.onNodeWithText("문서 검색 중").assertIsDisplayed()
         compose.runOnIdle {
             state = state.copy(messages = listOf(ChatMessageUi(
                 id = answerId, text = "### 산소 농도\n20.9%입니다.", fromWorker = false, pending = true,
@@ -151,7 +151,7 @@ class TossNavigationTest {
             }
         }
         compose.onNodeWithTag("chatInputHint").assertIsDisplayed()
-        compose.onNodeWithText("질문은 편하게,\n근거는 정확하게.").assertDoesNotExist()
+        compose.onNodeWithText("질문 예시").assertDoesNotExist()
         compose.onNodeWithTag("chatInput").assertTextEquals("검증 질문")
         val composer=compose.onNodeWithTag("chatComposer").fetchSemanticsNode().boundsInRoot
         val list=compose.onNodeWithTag("conversationList").fetchSemanticsNode().boundsInRoot
@@ -160,7 +160,7 @@ class TossNavigationTest {
         org.junit.Assert.assertTrue(composer.bottom<=viewport.bottom)
         compose.runOnIdle{imeVisible=false}
         compose.onNodeWithTag("chatInputHint").assertDoesNotExist()
-        compose.onNodeWithText("질문은 편하게,\n근거는 정확하게.").assertExists()
+        compose.onNodeWithText("질문 예시").assertExists()
         compose.onNodeWithTag("chatInput").assertTextEquals("검증 질문")
     }
 

@@ -1,123 +1,362 @@
-/* 소스 안내
- * 작업 점검/감독관 인증만 같은 origin의 WebView로 연결한다. 업무 권한과 승인은 서버가 검증한다.
- * 연결 모듈: com.minyook.sllm2.BuildConfig, com.minyook.sllm2.model.ModelPhase.
- */
 package com.minyook.sllm2.ui
 
-import android.annotation.SuppressLint
-import android.graphics.Bitmap
-import android.webkit.CookieManager
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
-import android.webkit.WebSettings
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import com.minyook.sllm2.BuildConfig
 import com.minyook.sllm2.model.ModelPhase
+import org.json.JSONArray
+import org.json.JSONObject
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
-internal fun WorkServerSettings(state: FieldGuardUiState, actions: FieldGuardActions) {
-    var address by remember(state.workServerUrl) { mutableStateOf(state.workServerUrl) }
-    var error by remember { mutableStateOf("") }
-    TossScrollPage {
-        WorkspaceHeading("YOUR WORKSPACE", "현장 작업 서버 연결", "앱과 웹에서 같은 작업 요청·점검·승인 화면을 사용해요.")
-        TossPanel {
-            Text("작업 서버 주소", style = MaterialTheme.typography.titleMedium)
-            WorkspaceField("서버 기본 주소",address,{ address=it;error="" },"https://현장서버주소",Modifier.testTag("workServerUrl"))
-            Text("작업 기록과 감독관 인증은 입력한 서버에서 관리해요. 문서 질문과 가스 측정은 기존 앱 기능을 사용해요.", style = MaterialTheme.typography.bodySmall)
-            if (BuildConfig.DEBUG) Text("PC USB 테스트: http://localhost:4173 · USB 포트 연결을 유지해 주세요.", style = MaterialTheme.typography.bodySmall)
-            if (error.isNotEmpty()) Text(error, color = MaterialTheme.colorScheme.error)
-            TossPrimaryButton("서버 저장하고 점검 열기", {
-                runCatching { canonicalWorkServerUrl(address, BuildConfig.DEBUG) }
-                    .onSuccess(actions.onSaveWorkServer).onFailure { error = it.message ?: "서버 주소를 확인해 주세요." }
-            })
+internal fun NativeWorkPage(
+    state: FieldGuardUiState,
+    actions: FieldGuardActions,
+    work: WorkScenarioState,
+    step: ScenarioStep?,
+    openStep: (ScenarioStep?) -> Unit,
+) {
+    val order = work.currentOrder
+    WorkspacePage {
+        WorkspaceHeading(step?.title ?: "작업 진행", step?.instruction)
+        WorkspaceBadge("기기 내 시연 · 작업자", blue = true)
+        if (step == ScenarioStep.ALARM) {
+            WorkspaceButton("측정값·장비 경보 보기", { actions.onNavigate(AppDestination.SENSOR) }, icon = WorkspaceSymbol.WIFI)
         }
-        TossSecondaryButton("이전 기기 점검 기록 보기", { actions.onNavigate(AppDestination.LOCAL_CHECKLIST) })
+        work.actionError?.let { WorkspaceNotice(it, warning = true) }
+        if (step == ScenarioStep.REQUEST || work.requestOpen || (step == null && work.orders.isEmpty())) {
+            WorkRequestForm(work, onCreated = { openStep(null) })
+            if (work.orders.isNotEmpty()) TextButton(onClick = { openStep(null) }) { Text("요청 작성 닫기") }
+            return@WorkspacePage
+        }
+        val orders = work.orders
+        if (order != null) key(order.id) {
+            WorkspaceCard {
+                Text(order.status.label, style = MaterialTheme.typography.titleLarge)
+                Text("${order.site} · ${order.location}")
+                Text(order.task)
+                Text("작업자 ${order.worker}", style = MaterialTheme.typography.bodySmall, color = WorkspaceDesign.Muted)
+                if (order.reason.isNotBlank()) Text(order.reason)
+                if (order.exitLocation.isNotBlank()) Text("확인 위치  ${order.exitLocation}")
+                WorkerActions(order, state, work, actions, step, openStep)
+            }
+            val events = order.events
+            if (events.isNotEmpty()) WorkspaceListGroup("진행 기록") {
+                events.asReversed().forEach { (_, message) ->
+                    ListItem(headlineContent = { Text(message, style = MaterialTheme.typography.bodySmall) })
+                }
+            }
+        }
+        if (orders.isNotEmpty()) WorkspaceListGroup("작업 목록") {
+            orders.forEach { item ->
+                    WorkspaceActionRow(WorkspaceSymbol.CHECK, item.task, "${item.site} · ${item.status.label}") {
+                    work.selectedId = item.id
+                    work.requestOpen = false
+                }
+            }
+        } else {
+            Text("아직 시연 작업이 없어요. 작업자 화면에서 요청을 먼저 기록해 주세요.")
+        }
+        if (step == null || orders.isEmpty()) WorkspaceButton("새 작업 요청", {
+            work.openRequest(true)
+            openStep(ScenarioStep.REQUEST)
+        }, icon = WorkspaceSymbol.MIC)
     }
 }
 
-/**
- * 작업 전 점검/감독관 인증만 기존 서버 화면으로 연결하는 WebView 경계.
- * TossFieldGuardApp의 CHECKLIST/SUPERVISOR 목적지에서 호출하며 주소가 없으면 서버 설정을 표시한다.
- * 저장한 origin의 탐색만 허용하고 fieldguard://ask/settings 명령은 네이티브 화면 이동으로 바꾼다.
- * 세션·QR 교환·권한/승인 검사는 서버 API의 책임이다. WebView 메뉴 노출이 권한 근거가 아니다.
- * AndroidView 해제 시 로딩을 멈추고 WebView를 파괴한다. 앱의 문서/모델을 웹 AI로 다시 실행하지 않는다.
- */
-@SuppressLint("SetJavaScriptEnabled")
-@Composable
-internal fun NativeWorkPage(state: FieldGuardUiState, actions: FieldGuardActions) {
-    val origin = remember(state.workServerUrl) { runCatching { canonicalWorkServerUrl(state.workServerUrl, BuildConfig.DEBUG) }.getOrNull() }
-    if (origin == null) { WorkServerSettings(state, actions); return }
-    val start = if (state.destination == AppDestination.SUPERVISOR) "/supervisor-access" else "/checklist"
-    val nativeReady = state.modelStatus.phase == ModelPhase.READY
-    val url = "$origin/?embedded=android&nativeAiReady=$nativeReady#$start"
-    var loading by remember(url) { mutableStateOf(true) }
-    var error by remember(url) { mutableStateOf("") }
-    var webView by remember { mutableStateOf<WebView?>(null) }
-    DisposableEffect(Unit) { onDispose { webView?.stopLoading(); webView?.destroy(); webView = null } }
-    Column(Modifier.fillMaxSize()) {
-        if (loading) CircularProgressIndicator(Modifier.padding(20.dp))
-        if (error.isNotEmpty()) Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("작업 서버에 연결하지 못했어요", style = MaterialTheme.typography.titleLarge)
-            Text(error, style = MaterialTheme.typography.bodyMedium)
-            TossPrimaryButton("다시 연결", { error = ""; loading = true; webView?.reload() })
-            TossSecondaryButton("서버 주소 확인", { actions.onNavigate(AppDestination.WORK_SERVER) })
-        }
-        AndroidView(modifier = Modifier.fillMaxWidth().weight(1f).testTag("sharedWorkPage"), factory = { context ->
-            WebView(context).apply {
-                webView = this
-                settings.javaScriptEnabled = true
-                settings.domStorageEnabled = true
-                settings.allowFileAccess = false
-                settings.allowContentAccess = false
-                settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
-                settings.javaScriptCanOpenWindowsAutomatically = false
-                settings.safeBrowsingEnabled = true
-                CookieManager.getInstance().setAcceptThirdPartyCookies(this, false)
-                webViewClient = object : WebViewClient() {
-                    override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-                        val destination = request.url.toString()
-                        if (request.isForMainFrame && request.url.scheme == "fieldguard") {
-                            if (view.url?.let { sameWorkServerOrigin(origin, it) } != true) return true
-                            when (request.url.host) {
-                                "ask" -> actions.onNavigate(AppDestination.CHAT)
-                                "settings" -> actions.onNavigate(AppDestination.MODEL)
-                            }
-                            return true
-                        }
-                        return !sameWorkServerOrigin(origin, destination)
-                    }
-                    override fun onPageStarted(view: WebView, address: String, favicon: Bitmap?) { loading = true }
-                    override fun onPageFinished(view: WebView, address: String) { loading = false; CookieManager.getInstance().flush() }
-                    override fun onReceivedError(view: WebView, request: WebResourceRequest, failure: WebResourceError) {
-                        if (request.isForMainFrame) { loading = false; error = "서버 주소와 인터넷 연결을 확인해 주세요. PC 테스트 중이면 USB 포트 연결도 확인해 주세요." }
-                    }
-                }
-                loadUrl(url)
-            }
-        }, update = { view ->
-            if (view.url?.substringBefore('#') != url.substringBefore('#')) view.loadUrl(url)
-        })
-        TextButton(onClick = { actions.onNavigate(AppDestination.WORK_SERVER) }) { Text("작업 서버 설정") }
+private val ScenarioStep.instruction: String?
+    get() = when (this) {
+        ScenarioStep.REQUEST, ScenarioStep.MONITORING -> null
+        ScenarioStep.INSPECTION -> "요청된 시연 작업의 점검 항목 5개를 확인하고 저장해 주세요."
+        ScenarioStep.APPROVAL -> "감독관이 저장된 점검 내용을 확인한 뒤 투입 승인을 기록하는 단계입니다."
+        ScenarioStep.ENTRY -> "감독관 승인이 기록되면 작업자가 승인 내용을 읽고 투입을 확인할 수 있어요."
+        ScenarioStep.ASSISTANCE -> "현장 투입을 확인한 작업에서 음성 문서 지원을 열 수 있어요."
+        ScenarioStep.ALARM -> "장비가 보낸 경보를 확인하거나, 진행 중인 작업의 위험 상황을 직접 신고할 수 있어요."
+        ScenarioStep.EVACUATION -> "위험 신고 후 실제 탈출한 작업자가 집결 위치를 기록하고, 감독관이 종료를 확인합니다."
     }
+
+@Composable
+private fun WorkRequestForm(work: WorkScenarioState, onCreated: () -> Unit) {
+    var name by rememberSaveable { mutableStateOf("") }
+    var site by rememberSaveable { mutableStateOf("") }
+    var location by rememberSaveable { mutableStateOf("") }
+    var task by rememberSaveable { mutableStateOf("") }
+    WorkspaceCard {
+        Text("작업 점검 요청", style = MaterialTheme.typography.titleLarge)
+        Text("현장, 위치, 작업 내용을 말한 뒤 입력 내용을 확인해 주세요.")
+        Text("같은 기기의 감독관 앱에서 이 요청을 확인할 수 있어요.", style = MaterialTheme.typography.bodySmall)
+        WorkRequestVoice(work.startRequestMic, { work.startRequestMic = false }) { transcript ->
+            val draft = parseSpokenWorkDraft(transcript)
+            draft.site?.let { site = it.take(100) }
+            draft.location?.let { location = it.take(150) }
+            task = draft.task.take(2000)
+        }
+        WorkField("작업자 이름", name, 60, "workName") { name = it }
+        WorkField("현장", site, 100, "workSite") { site = it }
+        WorkField("작업 위치", location, 150, "workLocation") { location = it }
+        WorkField("작업 내용", task, 2000, "workTask", singleLine = false) { task = it }
+        WorkspaceButton(
+            "시연 요청 등록",
+            { work.create(name.trim(), site.trim(), location.trim(), task.trim(), onCreated) },
+            Modifier.fillMaxWidth().testTag("workSubmit"),
+            enabled = !work.busy && listOf(name, site, location, task).all(String::isNotBlank),
+        )
+    }
+}
+
+@Composable
+private fun WorkField(
+    label: String,
+    value: String,
+    maxLength: Int,
+    tag: String,
+    singleLine: Boolean = true,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    onChange: (String) -> Unit,
+) {
+    OutlinedTextField(
+        value, { onChange(it.take(maxLength)) },
+        modifier = Modifier.fillMaxWidth().testTag(tag),
+        label = { Text(label) },
+        singleLine = singleLine,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+    )
+}
+
+@Composable
+private fun WorkerActions(
+    order: ScenarioOrder,
+    state: FieldGuardUiState,
+    work: WorkScenarioState,
+    actions: FieldGuardActions,
+    step: ScenarioStep?,
+    openStep: (ScenarioStep?) -> Unit,
+) {
+    val view = WorkView.WORKER
+    when (order.status) {
+        WorkStatus.RETURNED -> if (step == null || step == ScenarioStep.ENTRY) WorkTextAction("보완 내용", "다시 요청", 2000) {
+            work.advance(view, order, "resubmit", JSONObject().put("note", it))
+        }
+        WorkStatus.APPROVED -> if (step == null || step == ScenarioStep.ENTRY) {
+            ApprovedInspection(order)
+            var acknowledged by rememberSaveable(order.revision) { mutableStateOf(false) }
+            WorkCheck("시연 승인 내용을 확인했습니다.", acknowledged) { acknowledged = it }
+            WorkspaceButton("현장 투입 확인", {
+                work.advance(view, order, "enter", JSONObject().put("acknowledged", true)) {
+                    if (step == ScenarioStep.ENTRY) openStep(ScenarioStep.ASSISTANCE)
+                }
+            }, Modifier.testTag("workEnter"), enabled = acknowledged)
+        }
+        WorkStatus.ENTERED, WorkStatus.SUPPORTING -> {
+            val aiReady = state.modelStatus.phase == ModelPhase.READY
+            val supporting = order.status == WorkStatus.SUPPORTING
+            val openVoice = {
+                work.voiceFromWork = true
+                actions.onNavigate(AppDestination.VOICE)
+            }
+            if (step == null || step == ScenarioStep.ASSISTANCE) {
+                WorkspaceButton("음성 문서 지원 열기", {
+                    if (supporting) openVoice() else work.advance(view, order, "start-ai", onSaved = openVoice)
+                }, Modifier.testTag("workOpenAssistance"))
+                if (!aiReady) TextButton(onClick = { actions.onNavigate(AppDestination.MODEL) }) { Text("EXAONE 모델 준비") }
+                WorkspaceButton("가스 측정 열기", { openStep(ScenarioStep.MONITORING) },
+                    Modifier.testTag("workOpenMonitoring"), icon = WorkspaceSymbol.WIFI)
+            }
+            if (step == null || step == ScenarioStep.ALARM) WorkTextAction("시연 위험 상황", "위험 신고", 1000) {
+                work.advance(view, order, "report-danger", JSONObject().put("reason", it)) {
+                    if (step == ScenarioStep.ALARM) openStep(ScenarioStep.EVACUATION)
+                }
+            }
+            if (step == null || step == ScenarioStep.EVACUATION) WorkTextAction("정상 퇴장 확인 위치", "퇴장 기록", 200) {
+                work.advance(view, order, "exit", JSONObject().put("location", it))
+            }
+        }
+        WorkStatus.ALARM -> if (step == null || step == ScenarioStep.EVACUATION) {
+            Text("시연에서 탈출을 마친 뒤 집결 위치를 기록해 주세요.")
+            WorkTextAction("집결 위치", "탈출 확인 기록", 200) {
+                work.advance(view, order, "evacuate", JSONObject().put("location", it))
+            }
+        } else if (step == ScenarioStep.ALARM) WorkspaceButton("탈출 확인 단계 열기", { openStep(ScenarioStep.EVACUATION) })
+        else -> Unit
+    }
+}
+
+@Composable
+internal fun SupervisorWorkspace(work: WorkScenarioState) {
+    val order = work.currentOrder
+    WorkspacePage {
+        WorkspaceHeading("감독관 작업 관리", "같은 기기에 있는 작업자의 요청을 확인하고 점검과 종료를 기록해요.")
+        WorkspaceBadge("기기 내 시연 · 감독관", blue = true)
+        if (work.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
+        work.actionError?.let { WorkspaceNotice(it, warning = true) }
+        WorkspaceButton("작업 목록 새로고침", work::refresh, primary = false, enabled = !work.busy)
+        if (work.orders.isNotEmpty()) WorkspaceListGroup("작업 목록") {
+            work.orders.forEach { item ->
+                WorkspaceActionRow(WorkspaceSymbol.CHECK, item.task, "${item.site} · ${item.status.label}") {
+                    work.clearError()
+                    work.selectedId = item.id
+                }
+            }
+        } else if (!work.busy && work.actionError == null) {
+            Text("아직 요청이 없어요. 작업자 앱에서 시연 요청을 먼저 등록해 주세요.")
+        }
+        if (order != null) key(order.id) {
+            WorkspaceCard {
+                Text(order.status.label, style = MaterialTheme.typography.titleLarge)
+                Text(order.task, style = MaterialTheme.typography.titleMedium)
+                Text("${order.site} · ${order.location} · ${order.worker}")
+                if (order.reason.isNotBlank()) Text(order.reason)
+                if (order.exitLocation.isNotBlank()) Text("확인 위치  ${order.exitLocation}")
+                SupervisorActions(order, work)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SupervisorActions(order: ScenarioOrder, work: WorkScenarioState) {
+    val view = WorkView.SUPERVISOR
+    when (order.status) {
+        WorkStatus.REQUESTED, WorkStatus.REVIEWING -> {
+            var dirty by rememberSaveable(order.revision) { mutableStateOf(false) }
+            key(order.revision) {
+                InspectionForm(order.inspection, { dirty = true }) {
+                    work.advance(view, order, "save-inspection", JSONObject().put("inspection", it))
+                }
+            }
+            if (order.status == WorkStatus.REVIEWING) WorkspaceButton("점검 완료 · 투입 승인 기록", {
+                work.advance(view, order, "approve")
+            }, Modifier.testTag("workApprove"), enabled = !dirty && !work.busy)
+            WorkTextAction("보완 사유", "보완 요청", 1000) {
+                work.advance(view, order, "return", JSONObject().put("reason", it))
+            }
+        }
+        WorkStatus.APPROVED -> {
+            ApprovedInspection(order)
+            order.inspection.optString("note").takeIf(String::isNotBlank)?.let { Text("점검 메모  $it") }
+            WorkTextAction("승인 취소 사유", "승인 취소", 1000) {
+                work.advance(view, order, "revoke", JSONObject().put("reason", it))
+            }
+        }
+        WorkStatus.ENTERED, WorkStatus.SUPPORTING -> WorkTextAction("시연 위험 상황", "위험 신고", 1000) {
+            work.advance(view, order, "report-danger", JSONObject().put("reason", it))
+        }
+        WorkStatus.EVACUATED, WorkStatus.EXITED -> WorkspaceButton("감독관 종료 확인", {
+            work.advance(view, order, "close", JSONObject().put("note", ""))
+        }, Modifier.testTag("workClose"))
+        else -> Unit
+    }
+}
+
+@Composable
+private fun ApprovedInspection(order: ScenarioOrder) {
+    val inspection = order.inspection
+    val gas = inspection.optJSONObject("gas")
+    val values = inspectionGases.mapNotNull { (key, label) ->
+        gas?.takeUnless { it.isNull(key) }?.optString(key)?.takeIf(String::isNotBlank)?.let { "$label $it" }
+    }
+    if (order.approvedBy.isNotBlank()) Text("승인 담당  ${order.approvedBy}")
+    Text("확인한 점검 항목 ${inspection.optJSONArray("checked")?.length() ?: 0}개")
+    if (values.isNotEmpty()) Text("측정값  ${values.joinToString(" · ")}")
+    inspection.optString("device").takeIf(String::isNotBlank)?.let { Text("측정 장비  $it") }
+    inspection.optString("measuredAt").takeIf(String::isNotBlank)?.let { Text("측정 시각  ${displayWorkTime(it)}") }
+    inspection.optString("validUntil").takeIf(String::isNotBlank)?.let { Text("시연 기록 유효기한  ${displayWorkTime(it)}") }
+    val contacts = listOf(inspection.optString("watcher"), inspection.optString("contact")).filter(String::isNotBlank)
+    if (contacts.isNotEmpty()) Text("감시인·연락 방법  ${contacts.joinToString(" · ")}")
+}
+
+private val inspectionGases = listOf("o2" to "O₂ (%)", "h2s" to "H₂S (ppm)", "co" to "CO (ppm)", "co2" to "CO₂ (%)")
+private val workTimeFormat = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm")
+
+@Composable
+private fun InspectionForm(initial: JSONObject, onEdit: () -> Unit, save: (JSONObject) -> Unit) {
+    val initialChecks = initial.optJSONArray("checked") ?: JSONArray()
+    val checks = remember { mutableStateListOf(*Array(initialChecks.length()) { initialChecks.getString(it) }) }
+    val gas = initial.optJSONObject("gas")
+    val readings = remember { mutableStateListOf(*inspectionGases.map { (key, _) ->
+        gas?.takeUnless { it.isNull(key) }?.optString(key).orEmpty()
+    }.toTypedArray()) }
+    var device by rememberSaveable { mutableStateOf(initial.optString("device")) }
+    var measured by rememberSaveable { mutableStateOf(displayWorkTime(initial.optString("measuredAt"))) }
+    var expires by rememberSaveable { mutableStateOf(displayWorkTime(initial.optString("validUntil"))) }
+    var watcher by rememberSaveable { mutableStateOf(initial.optString("watcher")) }
+    var contact by rememberSaveable { mutableStateOf(initial.optString("contact")) }
+    var note by rememberSaveable { mutableStateOf(initial.optString("note")) }
+    var timeError by remember { mutableStateOf(false) }
+    Text("감독관 시연 점검", style = MaterialTheme.typography.titleMedium)
+    scenarioInspectionItems.forEach { (key, label) ->
+        WorkCheck(label, key in checks) { if (it) checks.add(key) else checks.remove(key); onEdit() }
+    }
+    var showDetails by rememberSaveable { mutableStateOf(false) }
+    TextButton(onClick = { showDetails = !showDetails }) {
+        Text(if (showDetails) "측정·감시인 항목 접기" else "측정·감시인 정보 입력 (선택)")
+    }
+    if (showDetails) {
+    inspectionGases.forEachIndexed { index, (key, label) ->
+        WorkField(label, readings[index], 16, "inspection-$key", keyboardType = KeyboardType.Decimal) { readings[index] = it; onEdit() }
+    }
+    WorkField("측정 장비와 출처", device, 120, "inspection-device") { device = it; onEdit() }
+    WorkField("측정 시각 (YYYY-MM-DD HH:mm)", measured, 16, "inspection-measured") { measured = it; onEdit() }
+    TextButton(onClick = { measured = LocalDateTime.now().format(workTimeFormat); onEdit() }) { Text("현재 시각 입력") }
+    WorkField("시연 기록 유효기한 (YYYY-MM-DD HH:mm)", expires, 16, "inspection-expires") { expires = it; onEdit() }
+    WorkField("감시인 또는 현장 관리인", watcher, 100, "inspection-watcher") { watcher = it; onEdit() }
+    WorkField("연락 방법", contact, 120, "inspection-contact") { contact = it; onEdit() }
+    WorkField("점검 메모", note, 1000, "inspection-note") { note = it; onEdit() }
+    }
+    if (timeError) WorkspaceNotice("가스 측정값과 시각 입력 형식을 확인해 주세요.", warning = true)
+    WorkspaceButton("점검 내용 저장", {
+        val measuredIso = inputWorkTime(measured)
+        val expiresIso = inputWorkTime(expires)
+        val parsed = readings.map { it.trim().toDoubleOrNull()?.takeIf(Double::isFinite) }
+        timeError = measuredIso == null || expiresIso == null || readings.indices.any { readings[it].isNotBlank() && parsed[it] == null }
+        if (!timeError) {
+            val values = JSONObject()
+            inspectionGases.forEachIndexed { index, (key, _) -> values.put(key, parsed[index] ?: JSONObject.NULL) }
+            save(JSONObject().put("checked", JSONArray(checks.toList())).put("gas", values)
+                .put("device", device.trim()).put("measuredAt", measuredIso).put("validUntil", expiresIso)
+                .put("watcher", watcher.trim()).put("contact", contact.trim()).put("note", note.trim()))
+        }
+    }, Modifier.testTag("workSaveInspection"))
+}
+
+private fun displayWorkTime(value: String): String =
+    runCatching { ZonedDateTime.parse(value).withZoneSameInstant(ZoneId.systemDefault()).format(workTimeFormat) }.getOrDefault(value)
+
+private fun inputWorkTime(value: String): String? =
+    if (value.isBlank()) "" else runCatching {
+        LocalDateTime.parse(value.trim(), workTimeFormat.withResolverStyle(java.time.format.ResolverStyle.STRICT))
+            .atZone(ZoneId.systemDefault()).toInstant().toString()
+    }.getOrNull()
+
+@Composable
+private fun WorkCheck(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 48.dp).toggleable(checked, role = Role.Checkbox, onValueChange = onChange),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+    ) {
+        Checkbox(checked, onCheckedChange = null)
+        Text(label)
+    }
+}
+
+@Composable
+private fun WorkTextAction(label: String, button: String, limit: Int, action: (String) -> Unit) {
+    var text by rememberSaveable(label) { mutableStateOf("") }
+    WorkField(label, text, limit, "work-action-$button") { text = it }
+    WorkspaceButton(button, { action(text.trim()) }, primary = false, enabled = text.isNotBlank())
 }

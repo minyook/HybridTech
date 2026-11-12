@@ -278,12 +278,8 @@ class VoiceConversationController(
             }) else { candidate.triggerModelDownload(recognizerIntent(false)); complete("한국어 음성 데이터 준비를 요청했어요. 완료 후 앱을 다시 열어 확인해 주세요.") }
         }.onFailure { complete("현재 음성 서비스에서 다운로드를 시작하지 못했어요. 기기 음성 서비스 설정을 확인해 주세요.") }
     }
-    private fun recognizerIntent(wakeWord: Boolean) = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-        putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ko-KR"); putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
-        putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false); putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-        putExtra(RecognizerIntent.EXTRA_PROMPT, if (wakeWord) "오투야" else "질문을 말씀해 주세요")
-    }
+    private fun recognizerIntent(wakeWord: Boolean) =
+        koreanRecognizerIntent(if (wakeWord) "오투야" else "질문을 말씀해 주세요")
     private fun errorMessage(error: Int) = when (error) {
         SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED, SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE -> "로컬 한국어 음성 데이터가 없거나 지원되지 않아요. ‘한국어 음성 준비’ 또는 기기 음성 서비스 설정을 확인해 주세요."
         SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "로컬 음성 서비스가 네트워크 오류를 보고했어요. 인식을 중단했으며 원격 인식으로 전환하지 않아요."
@@ -298,7 +294,16 @@ class VoiceConversationController(
     }
 }
 
-private open class EmptyRecognitionListener : RecognitionListener {
+internal fun koreanRecognizerIntent(prompt: String) = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+    putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+    putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ko-KR")
+    putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+    putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false)
+    putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+    putExtra(RecognizerIntent.EXTRA_PROMPT, prompt)
+}
+
+internal open class EmptyRecognitionListener : RecognitionListener {
     override fun onReadyForSpeech(params: Bundle?) = Unit
     override fun onBeginningOfSpeech() = Unit
     override fun onRmsChanged(rmsdB: Float) = Unit

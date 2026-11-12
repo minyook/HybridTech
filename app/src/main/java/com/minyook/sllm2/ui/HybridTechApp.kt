@@ -123,7 +123,6 @@ data class FieldGuardActions(
     val onToggleChecklist: (Int) -> Unit = {},
     val onSaveChecklist: () -> Unit = {},
     val onClearChatHistory: () -> Unit = {},
-    val onSaveWorkServer: (String) -> Unit = {},
     val onDownloadWithToken: (String) -> Unit = {},
 )
 

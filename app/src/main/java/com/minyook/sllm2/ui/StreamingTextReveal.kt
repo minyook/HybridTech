@@ -113,9 +113,8 @@ internal class StreamingTextReveal(initial: String) {
         while (reveal.running) {
             withFrameNanos { frame ->
                 val milliseconds = frame / 1_000_000L
-                // At most ~30 text/layout updates a second, even on 120 Hz displays.
-                // Leave GPU time for local inference instead of laying out each single glyph.
-                if (milliseconds - lastPublishedFrame >= 32L) {
+                // Batch reveal updates so Markdown and the lazy list lay out less often.
+                if (milliseconds - lastPublishedFrame >= 64L) {
                     if (reveal.frame(milliseconds)) shown = reveal.visible
                     running = reveal.running
                     lastPublishedFrame = milliseconds
@@ -124,5 +123,6 @@ internal class StreamingTextReveal(initial: String) {
         }
     }
     if (shown == message.text && !running) return message
-    return message.copy(text = AnswerMarkdown.normalize(shown), pending = message.pending || running)
+    val formatted = remember(shown) { AnswerMarkdown.normalize(shown) }
+    return message.copy(text = formatted, pending = message.pending || running)
 }

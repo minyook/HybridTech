@@ -5,6 +5,7 @@
 package com.minyook.sllm2.ui
 
 import android.app.Application
+import android.app.ActivityManager
 import android.content.Context
 import android.os.SystemClock
 import androidx.lifecycle.AndroidViewModel
@@ -49,6 +50,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -61,7 +63,7 @@ import java.util.UUID
 
 enum class AppDestination {
     HOME, CHAT, HISTORY, SOURCE, VOICE, SENSOR, SENSOR_DISCONNECTED,
-    CHECKLIST, LIBRARY, MODEL, INFERENCE, DATA, SETTINGS, SYSTEM, LOCAL_CHECKLIST, WORK_SERVER, SUPERVISOR,
+    CHECKLIST, LIBRARY, MODEL, INFERENCE, DATA, SETTINGS, SYSTEM, LOCAL_CHECKLIST, SUPERVISOR,
 }
 
 data class SourceUi(
@@ -125,7 +127,6 @@ data class FieldGuardUiState(
     val checklistSaved: Boolean = false,
     val sensorConnectionLost: Boolean = false,
     val lastGasReading: GasReading = GasReading(),
-    val workServerUrl: String = "",
 )
 
 /**
@@ -145,6 +146,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     private val runtime = LocalModelRuntime(appContext, maximizeOutput = true)
     private var idlePreparation: Job? = null
     private var attemptedPreparation: Pair<InferenceBackend, Int>? = null
+    private var attemptedSearchPreparation = false
     @Volatile private var appForeground = true
     private val semanticEncoder = SemanticEncoder(appContext)
     private val questionSearchIndex by lazy { appContext.assets.open("knowledge/semantic-index-v1.json").bufferedReader().use { it.readText() } }
@@ -157,7 +159,6 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
             onboardingComplete = uiPreferences.getBoolean("onboarding_complete", false),
             checklistChecked = (0..4).filterTo(mutableSetOf()) { uiPreferences.getBoolean("check_$it", false) },
             checklistSaved = uiPreferences.getBoolean("checklist_saved", false),
-            workServerUrl = uiPreferences.getString("work_server_url", "") ?: "",
             modelStatus = modelPreferences.status(),
             deviceProfile = DeviceProfile.read(appContext),
             settings = inferencePreferences.load(),
@@ -200,24 +201,43 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     private fun prepareIdleModel() {
         val state = _uiState.value
         if (!appForeground || state.destination !in setOf(AppDestination.CHAT, AppDestination.VOICE) ||
-            state.isAnswering || state.modelStatus.phase != ModelPhase.READY || idlePreparation?.isActive == true) return
+            state.isAnswering || idlePreparation?.isActive == true) return
         val settings = inferencePreferences.load()
         val key = settings.backend to settings.contextTokens
-        if (attemptedPreparation == key) return
+        val prepareSearch = !attemptedSearchPreparation
+        val prepareGenerator = state.modelStatus.phase == ModelPhase.READY && attemptedPreparation != key
+        if (!prepareSearch && !prepareGenerator) return
         idlePreparation = viewModelScope.launch {
             delay(250) // 예시 질문을 바로 보냈다면 준비 작업보다 실제 검색을 먼저 처리한다.
             if (!appForeground || _uiState.value.isAnswering) return@launch
-            attemptedPreparation = key
+            if (prepareSearch) attemptedSearchPreparation = true
+            if (prepareGenerator) attemptedPreparation = key
             try {
                 withContext(Dispatchers.Default) {
-                    semanticEncoder.release()
-                    runtime.prepareForQuestion()
+                    if (prepareSearch) {
+                        runtime.prepareForSemanticSearch()
+                        semanticEncoder.prepare()
+                    }
+                    ensureActive()
+                    if (prepareGenerator && !_uiState.value.isAnswering && canKeepSearchSession()) {
+                        runtime.prepareForQuestion()
+                    }
                 }
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (error: Exception) {
                 android.util.Log.w("FieldGuardGenerationLatency", "Idle preparation skipped: ${error.javaClass.simpleName}")
             }
         }
+    }
+
+    private fun canKeepSearchSession(): Boolean {
+        val memory = ActivityManager.MemoryInfo()
+        val manager = appContext.getSystemService(ActivityManager::class.java) ?: return false
+        manager.getMemoryInfo(memory)
+        val profile = DeviceProfile.read(appContext)
+        return EngineReusePolicy.prepareWhileIdle(
+            profile.totalRamGb, memory.availMem, memory.lowMemory, profile.arm64,
+        )
     }
 
     init {
@@ -234,6 +254,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun navigate(destination: AppDestination) {
+        if (destination == AppDestination.SUPERVISOR) return
         if (_uiState.value.destination == AppDestination.INFERENCE && destination != AppDestination.INFERENCE) {
             persistSettings()
         }
@@ -244,12 +265,6 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     fun completeOnboarding() {
         uiPreferences.edit().putBoolean("onboarding_complete", true).apply()
         updateState { it.copy(onboardingComplete = true, destination = AppDestination.HOME) }
-    }
-
-    fun saveWorkServer(value: String) {
-        val address = canonicalWorkServerUrl(value, com.minyook.sllm2.BuildConfig.DEBUG)
-        uiPreferences.edit().putString("work_server_url", address).apply()
-        updateState { it.copy(workServerUrl = address, destination = AppDestination.CHECKLIST) }
     }
 
     fun newChat() {
@@ -402,17 +417,24 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
             fun recordFirstBody(origin:String){if(firstBodyRecorded.compareAndSet(false,true))android.util.Log.i("FieldGuardAnswerLatency","firstBodyStateMs=${SystemClock.elapsedRealtime()-pending.startedAtElapsedRealtime} origin=$origin")}
             history.append(chatId, ChatHistoryStore.Role.USER, asked, resolvedQuestion=resolved, topicQuestion=request.topic)
             val searchStarted=SystemClock.elapsedRealtime()
+            var embeddingWorkMs = 0L
             // 정확한 제목/대상은 빠른 경로를 사용한다. 의미 벡터가 필요할 때만 인코더와 추론 메모리를 조정한다.
             val resolution = repository.searchQuestion(request,questionSearchIndex){query->
                 semanticEncoder.cachedVector(query) ?: run {
                     // 이 동기 콜백은 IO에서 실행한다. 의미 벡터가 필요할 때만 native 준비 종료를
                     // 기다린다. 제목/직접 문서 응답은 모델 준비가 진행 중이어도 바로 반환한다.
-                    kotlinx.coroutines.runBlocking { idlePreparation?.cancelAndJoin() }
-                    runtime.prepareForSemanticSearch()
-                    semanticEncoder.encode(query)
+                    val embeddingStarted = SystemClock.elapsedRealtime()
+                    try {
+                        kotlinx.coroutines.runBlocking { idlePreparation?.cancelAndJoin() }
+                        runtime.prepareForSemanticSearch()
+                        semanticEncoder.encode(query)
+                    } finally {
+                        embeddingWorkMs += SystemClock.elapsedRealtime() - embeddingStarted
+                    }
                 }
             }
-            android.util.Log.i("FieldGuardAnswerLatency","searchMs=${SystemClock.elapsedRealtime()-searchStarted} method=${resolution.method} status=${resolution.status} complete=${resolution.searchComplete}")
+            val searchMs = SystemClock.elapsedRealtime() - searchStarted
+            android.util.Log.i("FieldGuardAnswerLatency","searchMs=$searchMs embeddingWorkMs=$embeddingWorkMs retrievalMs=${searchMs - embeddingWorkMs} method=${resolution.method} status=${resolution.status} complete=${resolution.searchComplete}")
             val sources = resolution.sources
             val basePlan = DocumentAnswerPlan.create(request.answerQuestion, resolution, repository.documentCount() > 0)
             val plan = if(sources.isEmpty()) basePlan.copy(body=resolution.message) else if(resolution.message.isNotBlank())basePlan.copy(body=basePlan.body+"\n\n"+resolution.message) else basePlan
@@ -422,7 +444,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
                 modelPreferences.status().phase == ModelPhase.READY
             ) {
                 try {
-                    semanticEncoder.release()
+                    if (!canKeepSearchSession()) semanticEncoder.release()
                     val raw = runtime.generate(
                         request.answerQuestion, basePlan.generationContext(), compactVoiceAnswer,
                         recentConversation = request.turns, latestUserQuestion = request.asked,
@@ -455,7 +477,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
                 var lastGeneralBody: String? = null
                 var outputLimitReached = false
                 try{
-                    semanticEncoder.release()
+                    if (!canKeepSearchSession()) semanticEncoder.release()
                     val raw = coroutineScope {
                         // Snapshots contain the entire prefix. A newer one can replace any
                         // waiting preview without losing tokens from the final answer.
@@ -578,6 +600,7 @@ class FieldGuardViewModel(application: Application) : AndroidViewModel(applicati
     fun releaseQuestionSearchMemory():kotlinx.coroutines.Job {
         appForeground = false
         attemptedPreparation = null
+        attemptedSearchPreparation = false
         val preparation = idlePreparation
         return viewModelScope.launch(Dispatchers.Default) {
             preparation?.cancelAndJoin()

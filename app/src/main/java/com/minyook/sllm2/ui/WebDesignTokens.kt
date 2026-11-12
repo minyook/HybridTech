@@ -41,4 +41,5 @@ internal enum class WorkspaceSymbol(val resource: Int) {
     TRASH(R.drawable.workspace_icon_trash),
     CLOSE(R.drawable.workspace_icon_close),
     WIFI(R.drawable.workspace_icon_wifi),
+    MIC(R.drawable.workspace_icon_mic),
 }

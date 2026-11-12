@@ -1,9 +1,11 @@
 /* 소스 안내
- * 질문만 ONNX CPU로 인코딩해 768차원 정규화 벡터를 반환한다. 세션/최근 질의를 재사용하고 생성 전 호출자가 해제한다.
+ * 질문만 ONNX CPU로 인코딩해 768차원 정규화 벡터를 반환한다. 호출자가 세션을 준비하고 메모리 상황에 따라 해제한다.
  */
 package com.minyook.sllm2.data
 
 import android.content.Context
+import android.os.SystemClock
+import android.util.Log
 import ai.onnxruntime.OnnxTensor
 import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
@@ -13,7 +15,7 @@ import kotlin.math.sqrt
 /**
  * 검색용 질문을 EmbeddingGemma ONNX CPU 세션으로 인코딩해 정규화된 768차원 벡터를 반환한다.
  * 문서 벡터는 번들 인덱스에 있으므로 휴대폰에서 다시 만들지 않는다. 질문별 임시 tensor/result는 use로 닫는다.
- * 최근 16개 질문 벡터와 세션을 재사용하며, ViewModel이 EXAONE 생성 전 또는 화면 이탈 시 release를 호출한다.
+ * 최근 16개 질문 벡터와 세션을 재사용하며, ViewModel이 메모리가 부족하거나 앱이 백그라운드로 갈 때 release를 호출한다.
  * 생성 모델(LocalModelRuntime)과 독립적인 자원이며 인코딩 실패는 Coordinator가 검색 오류로 처리한다.
  */
 class SemanticEncoder(private val context: Context) {
@@ -22,12 +24,31 @@ class SemanticEncoder(private val context: Context) {
     private var session:OrtSession?=null
     @Synchronized fun cachedVector(question:String):FloatArray?=vectors[question]?.copyOf()
     @Synchronized fun release(){session?.close();session=null}
+    @Synchronized fun prepare() {
+        val started = SystemClock.elapsedRealtime()
+        tokenizer
+        getOrOpenSession()
+        Log.i("FieldGuardSearchLatency", "onnxPrepareMs=${SystemClock.elapsedRealtime() - started}")
+    }
+
+    private fun getOrOpenSession(): OrtSession {
+        session?.let { return it }
+        val started = SystemClock.elapsedRealtime()
+        return openSession(OrtEnvironment.getEnvironment()).also {
+            session = it
+            Log.i("FieldGuardSearchLatency", "onnxSessionMs=${SystemClock.elapsedRealtime() - started}")
+        }
+    }
     @Synchronized
     fun encode(question: String): FloatArray {
         cachedVector(question)?.let{return it}
+        val started = SystemClock.elapsedRealtime()
         val ids = tokenizer.encode("task: search result | query: $question")
+        val tokenizationMs = SystemClock.elapsedRealtime() - started
         val env=OrtEnvironment.getEnvironment()
-        val active=session?:openSession(env).also{session=it}
+        val reusedSession = session != null
+        val active = getOrOpenSession()
+        val inferenceStarted = SystemClock.elapsedRealtime()
         try {
             OnnxTensor.createTensor(env,arrayOf(ids)).use{input->
                 OnnxTensor.createTensor(env,arrayOf(LongArray(ids.size){1L})).use{mask->
@@ -36,6 +57,7 @@ class SemanticEncoder(private val context: Context) {
                         val vector=(output.get("sentence_embedding").get().value as Array<FloatArray>)[0].copyOf()
                         val norm=sqrt(vector.sumOf{it.toDouble()*it}).toFloat()
                         require(norm>0&&vector.size==768&&vector.all{it.isFinite()})
+                        Log.i("FieldGuardSearchLatency", "tokenizeMs=$tokenizationMs embeddingMs=${SystemClock.elapsedRealtime() - inferenceStarted} reusedSession=$reusedSession")
                         return vector.map{it/norm}.toFloatArray().also{vectors[question]=it.copyOf()}
                     }
                 }

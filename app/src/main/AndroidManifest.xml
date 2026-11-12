@@ -18,8 +18,11 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <permission android:name="${applicationId}.permission.SUPERVISE_WORK" android:protectionLevel="signature" />
+    <uses-permission android:name="com.minyook.sllm2.permission.SUPERVISE_WORK" />
 
     <queries>
+        <provider android:authorities="com.minyook.sllm2.work" />
         <intent>
             <action android:name="android.speech.RecognitionService" />
         </intent>
@@ -30,7 +33,6 @@
 
     <application
         android:name=".SllmApplication"
-        android:networkSecurityConfig="@xml/work_network_security"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -62,6 +64,7 @@
         </receiver>
         <activity
             android:name=".MainActivity"
+            android:enabled="${workerEnabled}"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -70,6 +73,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".SupervisorActivity"
+            android:enabled="${supervisorEnabled}"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
+        <provider
+            android:name=".ui.SupervisorWorkProvider"
+            android:authorities="${applicationId}.work"
+            android:enabled="${workerEnabled}"
+            android:exported="true"
+            android:permission="com.minyook.sllm2.permission.SUPERVISE_WORK" />
     </application>
 
 </manifest>

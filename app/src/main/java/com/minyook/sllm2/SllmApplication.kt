@@ -15,6 +15,7 @@ import com.minyook.sllm2.model.ModelNotifications
 class SllmApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        if (BuildConfig.SUPERVISOR_APP) return
         ObjectBoxStore.init(this)
         ModelNotifications.createChannel(this)
     }

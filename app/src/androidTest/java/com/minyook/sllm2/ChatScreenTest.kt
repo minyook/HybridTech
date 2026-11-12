@@ -193,7 +193,7 @@ class ChatScreenTest {
             compose.runOnUiThread { message.value=message.value.copy(text=text) }
             val lengths=mutableSetOf<Int>()
             repeat(8) {
-                compose.mainClock.advanceTimeBy(32)
+                compose.mainClock.advanceTimeBy(48)
                 val shown=compose.onNodeWithTag("smoothText").fetchSemanticsNode().config[SemanticsProperties.Text].joinToString(""){it.text}
                 assertTrue(text.startsWith(shown));assertTrue(shown.length<text.length)
                 lengths+=shown.length

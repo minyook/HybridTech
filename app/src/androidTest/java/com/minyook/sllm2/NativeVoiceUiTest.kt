@@ -43,6 +43,8 @@ class NativeVoiceUiTest {
         compose.onNodeWithTag("voiceQuestion").performClick()
         compose.runOnIdle { org.junit.Assert.assertEquals(AppDestination.VOICE,state.value.destination);org.junit.Assert.assertEquals(1,starts) }
         compose.onNodeWithText("음성 대화 종료").assertIsDisplayed()
+        compose.onNodeWithTag("voiceSessionStatus").assertIsDisplayed()
+        compose.onNodeWithTag("bottom-SENSOR").assertDoesNotExist()
         compose.onNodeWithTag("chatInput").assertDoesNotExist()
         capture("android-native-voice-listening.png")
         compose.onNodeWithTag("returnToTextChat").performClick()
